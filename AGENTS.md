@@ -38,34 +38,59 @@ L'agent suit un plan de discussion structuré (topics avec statuts), l'adapte en
 ```
 client/
   main.tsx              # Point d'entrée React
+  app.tsx               # Composant racine
+  types.ts              # Types partagés côté client
   index.css             # Styles Tailwind
 server/
-  start.ts              # Point d'entrée CLI (boucle de conversation)
-  server.ts             # Point d'entrée HTTP — POST /chat (SSE) + DELETE /session
-  conversation-loop.ts  # runTurn(session, onChunk, onPlanUpdate) — stream + tool calls + récursion
-  types.ts              # Session, Topic, Plan, Message
+  main.ts               # Point d'entrée HTTP (lance le serveur Express)
+  server.ts             # Routes Express — GET /chat (SSE), GET/DELETE /session
+  assistant.ts          # Classe Assistant (EventEmitter) — stream LLM + tool calls
+  session.ts            # Classe Session (EventEmitter) — état messages + plan + events
+  cli.ts                # Point d'entrée CLI (boucle de conversation)
+  types.ts              # Message, Plan, Topic, TopicStatus, SessionEvent
+  utils.ts              # Utilitaires (assert, etc.)
   tools/
-    index.ts            # Définitions ChatCompletionTool[]
-    handlers.ts         # Exécution des tools + retour du plan mis à jour
+    tool.ts             # Type Tool<Param> — interface commune pour tous les tools
+    index.ts            # Export du tableau de tools
+    init-plan.ts        # Tool init_plan
+    update-topic.ts     # Tool update_topic
+    handlers.ts         # (legacy)
 index.html              # Point d'entrée HTML (Vite)
 instructions.md         # Prompt système de l'agent
 AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
 ```
 
-### Boucle de conversation (`runTurn`)
+### Classe `Assistant`
 
-- Prend une `Session` (messages + plan) en entrée, retourne une `Session` mise à jour
-- Stream OpenAI avec accumulation des chunks texte et tool calls
-- Callbacks : `onChunk(text)` et `onPlanUpdate(plan)`
-- Après le stream : exécution des tool calls → injection des résultats dans l'historique
-- **Récursion** si des tools ont été appelés, pour que le modèle reprenne la parole
-- Historique immutable (spread à chaque étape)
+- `EventEmitter<{ chunk: [text: string] }>` — émet les chunks de texte au fil du stream
+- `run(session)` — stream OpenAI, accumule texte + tool calls, récursion si tools appelés
+- Les tools sont définis comme objets `Tool<Param>` avec Zod pour la validation des args
+- Injecte l'état du plan sérialisé (✅/🔄/⬜) en fin de contexte à chaque appel
 
-### État du plan
+### Classe `Session`
 
-- Vit côté serveur
-- Injecté en tête de contexte à chaque tour (avec indicateurs de statut : ✅ done / 🔄 active / ⬜ pending)
-- L'UI le lira via SSE
+- `EventEmitter` typé sur `SessionEvent` — émet `plan_updated`, `topic_updated`, `message_added`
+- Méthodes : `addMessage()`, `updatePlan()`, `updateTopic()`, `serialize()`
+- Le serveur SSE s'abonne aux events pour les streamer au client
+
+### Routes HTTP
+
+| Méthode  | Route               | Description                                                                             |
+| -------- | ------------------- | --------------------------------------------------------------------------------------- |
+| `GET`    | `/session`          | Retourne l'état courant de la session                                                   |
+| `DELETE` | `/session`          | Réinitialise la session                                                                 |
+| `GET`    | `/chat?message=...` | Stream SSE — events : `chunk`, `plan_updated`, `topic_updated`, `message_added`, `done` |
+
+### Type `Tool<Param>`
+
+```ts
+type Tool<Param extends z.ZodType> = {
+  name: string;
+  description: string;
+  param: Param; // schéma Zod — utilisé pour la définition ET la validation
+  execute(session: Session, param: z.infer<Param>): string | Promise<string>;
+};
+```
 
 ---
 
