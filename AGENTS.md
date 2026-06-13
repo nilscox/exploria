@@ -4,6 +4,18 @@ Tu travailles sur un projet en cours de développement. Ce fichier est ton point
 
 ---
 
+## Instructions pour l'agent de dev (toi)
+
+- **Tiens ce fichier à jour** de manière autonome après chaque changement significatif : nouvelle étape cochée, nouvelle convention apprise, architecture modifiée.
+- **Mets à jour les "Prochaines étapes"** dès qu'une tâche est terminée, sans attendre qu'on te le demande.
+- **Enregistre les conventions de travail** apprises en cours de session. Exemple : si l'utilisateur te dit qu'une pratique n'est pas nécessaire, note-le ici pour ne pas la répéter.
+
+### Conventions de travail
+
+- Ne pas vérifier la compilation (`pnpm tsc --noEmit`) après chaque étape — l'utilisateur signalera les erreurs si besoin.
+
+---
+
 ## Concept
 
 Un agent IA pour structurer et challenger la réflexion, avec une UI dédiée. La valeur ajoutée vs un chatbot classique : des **tool calls** pour planifier et structurer la discussion en temps réel.
@@ -123,7 +135,7 @@ AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
 ## Prochaines étapes
 
 - [x] Boucle de conversation continue dans `main.ts`
-- [ ] Injection du plan dans le contexte à chaque tour (avec indicateurs de statut)
+- [x] Injection du plan dans le contexte à chaque tour (avec indicateurs de statut)
 - [ ] Point d'entrée HTTP avec SSE pour streamer vers le client
 - [ ] Gestion des actions utilisateur (édition du plan entre deux messages)
 - [ ] Implémenter `add_topic`

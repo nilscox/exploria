@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 
 import { tools } from './tools';
 import { handleToolCall } from './tools/handlers';
-import { Message, Plan } from './types';
+import { Message, Plan, Topic } from './types';
 
 const client = new OpenAI({
   apiKey: process.env.MAMMOUTH_API_KEY,
@@ -18,7 +18,10 @@ export async function runTurn(
   // Injecter l'état du plan dans le contexte
   const messagesWithContext: Message[] = [
     ...messages,
-    // optionnel : rappel du plan en fin de contexte
+    {
+      role: 'system',
+      content: serializePlan(plan),
+    },
   ];
 
   const stream = await client.chat.completions.create({
@@ -91,4 +94,20 @@ export async function runTurn(
   }
 
   return { messages, plan: currentPlan };
+}
+
+function serializePlan(plan: Plan): string {
+  if (plan.topics.length === 0) return '(aucun plan défini)';
+
+  const icons: Record<Topic['status'], string> = {
+    pending: '⬜',
+    active: '🔄',
+    done: '✅',
+  };
+
+  const lines = plan.topics.map((t) => {
+    return `${icons[t.status]} ${t.label}`;
+  });
+
+  return `## Plan de discussion\n\n${lines.join('\n')}`;
 }
