@@ -29,21 +29,25 @@ L'agent suit un plan de discussion structuré (topics avec statuts), l'adapte en
 - **TypeScript / Node.js**
 - **SDK OpenAI** avec `baseURL` → `https://api.mammouth.ai/v1`
 - **Express 5** pour le point d'entrée HTTP
-- UI dédiée à construire séparément (plan visible en parallèle de la conversation, mis à jour en temps réel via SSE)
+- **React 19 + Vite + Tailwind CSS v4** pour le client
 
 ---
 
 ## Architecture
 
 ```
-src/
-  main.ts               # Point d'entrée CLI (boucle de conversation)
+client/
+  main.tsx              # Point d'entrée React
+  index.css             # Styles Tailwind
+server/
+  start.ts              # Point d'entrée CLI (boucle de conversation)
   server.ts             # Point d'entrée HTTP — POST /chat (SSE) + DELETE /session
   conversation-loop.ts  # runTurn(session, onChunk, onPlanUpdate) — stream + tool calls + récursion
   types.ts              # Session, Topic, Plan, Message
   tools/
     index.ts            # Définitions ChatCompletionTool[]
     handlers.ts         # Exécution des tools + retour du plan mis à jour
+index.html              # Point d'entrée HTML (Vite)
 instructions.md         # Prompt système de l'agent
 AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
 ```

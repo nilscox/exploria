@@ -1,13 +1,14 @@
 import 'dotenv/config';
-import express, { ErrorRequestHandler } from 'express';
+import express, { type ErrorRequestHandler } from 'express';
 import fs from 'node:fs/promises';
 import z from 'zod';
 
 import { runTurn } from './conversation-loop';
-import { Session } from './types';
+
+import type { Session } from './types';
 
 const instructions = await fs.readFile('instructions.md').then(String);
-const app = express();
+export const app = express();
 
 app.use(express.json());
 
@@ -67,10 +68,3 @@ app.use(((err, _req, res, _next) => {
     res.end();
   }
 }) satisfies ErrorRequestHandler);
-
-const PORT = Number(process.env.PORT ?? 3000);
-const HOST = process.env.HOST ?? 'localhost';
-
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
-});

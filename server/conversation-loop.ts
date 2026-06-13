@@ -2,7 +2,8 @@ import OpenAI from 'openai';
 
 import { tools } from './tools';
 import { handleToolCall } from './tools/handlers';
-import { Message, Plan, Session, Topic } from './types';
+
+import type { Message, Plan, Session, Topic } from './types';
 
 const client = new OpenAI({
   apiKey: process.env.MAMMOUTH_API_KEY,

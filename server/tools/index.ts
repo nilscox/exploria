@@ -1,4 +1,4 @@
-import { ChatCompletionTool } from 'openai/resources';
+import type { ChatCompletionTool } from 'openai/resources';
 
 export const tools: ChatCompletionTool[] = [
   {

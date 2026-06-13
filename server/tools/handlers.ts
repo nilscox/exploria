@@ -1,4 +1,4 @@
-import { Plan, Topic } from '../types';
+import type { Plan, Topic } from '../types';
 
 export function handleToolCall(name: string, args: unknown, plan: Plan): { result: string; plan: Plan } {
   switch (name) {

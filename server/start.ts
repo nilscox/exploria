@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 import RL from 'node:readline/promises';
 
 import { runTurn } from './conversation-loop';
-import { Plan, Session } from './types';
+
+import type { Plan, Session } from './types';
 
 async function main() {
   const rl = RL.createInterface(process.stdin, process.stdout);

@@ -8,4 +8,7 @@ export default defineConfig({
   options: {
     typeAware: true,
   },
+  rules: {
+    'typescript/consistent-type-imports': 'warn',
+  },
 });
