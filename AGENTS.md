@@ -28,6 +28,7 @@ L'agent suit un plan de discussion structuré (topics avec statuts), l'adapte en
 
 - **TypeScript / Node.js**
 - **SDK OpenAI** avec `baseURL` → `https://api.mammouth.ai/v1`
+- **Express 5** pour le point d'entrée HTTP
 - UI dédiée à construire séparément (plan visible en parallèle de la conversation, mis à jour en temps réel via SSE)
 
 ---
@@ -37,8 +38,9 @@ L'agent suit un plan de discussion structuré (topics avec statuts), l'adapte en
 ```
 src/
   main.ts               # Point d'entrée CLI (boucle de conversation)
-  conversation-loop.ts  # runTurn() — stream + tool calls + récursion
-  types.ts              # Topic, Plan, Message
+  server.ts             # Point d'entrée HTTP — POST /chat (SSE) + DELETE /session
+  conversation-loop.ts  # runTurn(session, onChunk, onPlanUpdate) — stream + tool calls + récursion
+  types.ts              # Session, Topic, Plan, Message
   tools/
     index.ts            # Définitions ChatCompletionTool[]
     handlers.ts         # Exécution des tools + retour du plan mis à jour
@@ -48,6 +50,7 @@ AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
 
 ### Boucle de conversation (`runTurn`)
 
+- Prend une `Session` (messages + plan) en entrée, retourne une `Session` mise à jour
 - Stream OpenAI avec accumulation des chunks texte et tool calls
 - Callbacks : `onChunk(text)` et `onPlanUpdate(plan)`
 - Après le stream : exécution des tool calls → injection des résultats dans l'historique
@@ -136,7 +139,7 @@ AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
 
 - [x] Boucle de conversation continue dans `main.ts`
 - [x] Injection du plan dans le contexte à chaque tour (avec indicateurs de statut)
-- [ ] Point d'entrée HTTP avec SSE pour streamer vers le client
+- [x] Point d'entrée HTTP avec SSE pour streamer vers le client
 - [ ] Gestion des actions utilisateur (édition du plan entre deux messages)
 - [ ] Implémenter `add_topic`
 - [ ] UI dédiée avec plan visible en parallèle

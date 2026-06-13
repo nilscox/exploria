@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 
 import { tools } from './tools';
 import { handleToolCall } from './tools/handlers';
-import { Message, Plan, Topic } from './types';
+import { Message, Plan, Session, Topic } from './types';
 
 const client = new OpenAI({
   apiKey: process.env.MAMMOUTH_API_KEY,
@@ -10,8 +10,7 @@ const client = new OpenAI({
 });
 
 export async function runTurn(
-  messages: Message[],
-  plan: Plan,
+  { plan, messages }: Session,
   onChunk: (text: string) => void,
   onPlanUpdate: (plan: Plan) => void,
 ): Promise<{ messages: Message[]; plan: Plan }> {
@@ -90,7 +89,7 @@ export async function runTurn(
 
   // Si des tools ont été appelés → relancer le LLM pour qu'il réponde
   if (toolCalls.length > 0) {
-    return runTurn(messages, currentPlan, onChunk, onPlanUpdate);
+    return runTurn({ plan: currentPlan, messages }, onChunk, onPlanUpdate);
   }
 
   return { messages, plan: currentPlan };
