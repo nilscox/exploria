@@ -1,15 +1,23 @@
 import EventEmitter from 'node:events';
+import type OpenAI from 'openai';
 
-import type { Message, Plan, SessionEvent, Topic } from './types';
+import { sessionEventTypes, type Plan, type SessionEvent, type Topic } from './types';
 
-export class Session extends EventEmitter<{
-  [Type in SessionEvent['type']]: [Omit<Extract<SessionEvent, { type: Type }>, 'type'>];
-}> {
+type EventsToEmitterEventMap<T extends { type: string }> = {
+  [Type in T['type']]: [Omit<Extract<T, { type: Type }>, 'type'>];
+};
+
+export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>> {
   private _plan: Plan;
-  private _messages: Message[];
+  private _sessionEvents: SessionEvent[];
+  private _messages: OpenAI.ChatCompletionMessageParam[];
 
   get plan() {
     return this._plan;
+  }
+
+  get events() {
+    return this._sessionEvents;
   }
 
   get messages() {
@@ -20,7 +28,25 @@ export class Session extends EventEmitter<{
     super();
 
     this._plan = { topics: [] };
+    this._sessionEvents = [];
     this._messages = [{ role: 'system', content: instructions }];
+
+    for (const type of sessionEventTypes) {
+      this.addListener(type, (event) => {
+        console.log(type, event);
+        this._sessionEvents.push({ type, ...event } as SessionEvent);
+      });
+    }
+  }
+
+  static from(data: { plan: Plan; events: SessionEvent[]; messages: OpenAI.ChatCompletionMessageParam[] }) {
+    const session = new Session('');
+
+    session._plan = data.plan;
+    session._sessionEvents = data.events;
+    session._messages = data.messages;
+
+    return session;
   }
 
   updatePlan(plan: Plan) {
@@ -42,14 +68,22 @@ export class Session extends EventEmitter<{
     return topic;
   }
 
-  addMessage(message: Message) {
+  addMessage(message: OpenAI.ChatCompletionMessageParam) {
     this.messages.push(message);
-    this.emit('message_added', { message });
+
+    if (
+      (message.role === 'assistant' || message.role === 'user') &&
+      typeof message.content === 'string' &&
+      message.content !== ''
+    ) {
+      this.emit('message_added', { message: { role: message.role, content: message.content } });
+    }
   }
 
   serialize() {
     return {
       plan: this.plan,
+      events: this.events,
       messages: this.messages,
     };
   }

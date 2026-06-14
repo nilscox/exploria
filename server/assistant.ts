@@ -36,11 +36,11 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
 
   async run(session: Session) {
     const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
-    const { assistantText, toolCalls } = await this.handleStream(stream);
+    const { content, toolCalls } = await this.handleStream(stream);
 
     session.addMessage({
       role: 'assistant',
-      content: assistantText,
+      content,
       tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
     });
 
@@ -74,28 +74,28 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
       return '(aucun plan défini)';
     }
 
-    const icons: Record<TopicStatus, string> = {
-      pending: '⬜',
-      active: '🔄',
-      done: '✅',
+    const statusMap: Record<TopicStatus, string> = {
+      pending: 'à traiter',
+      active: 'en cours',
+      done: 'traité',
     };
 
     const lines = plan.topics.map((t) => {
-      return `${icons[t.status]} ${t.label}`;
+      return `${t.label} : ${statusMap[t.status]}`;
     });
 
     return `## Plan de discussion\n\n${lines.join('\n')}`;
   }
 
   private async handleStream(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
-    let assistantText = '';
+    let content = '';
     const toolCalls: Array<OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall> = [];
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta;
 
       if (delta?.content) {
-        assistantText += delta.content;
+        content += delta.content;
         this.emit('chunk', delta.content);
       }
 
@@ -117,7 +117,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     }
 
     return {
-      assistantText,
+      content,
       toolCalls,
     };
   }

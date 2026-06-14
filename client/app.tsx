@@ -1,16 +1,21 @@
 import clsx from 'clsx';
-import { produce } from 'immer';
+import { current, produce } from 'immer';
 import { ArrowRightIcon, CheckIcon } from 'lucide-react';
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef } from 'react';
 
-import { Details } from './details';
 import { Markdown } from './markdown';
+import {
+  isSessionEventType,
+  type GetSessionEvent,
+  type Message,
+  type Plan,
+  type Session,
+  type SessionEvent,
+} from './types';
 import { assert } from './utils';
 
-import type { Message, Plan, Session, SessionEvent } from './types';
-
 export function App() {
-  const [state, dispatch] = useReducer(reducer, { message: '' });
+  const [state, dispatch] = useReducer(reducer, {});
 
   useEffect(() => {
     fetch('/api/session')
@@ -19,14 +24,15 @@ export function App() {
       .catch(console.error);
   }, []);
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'instant' });
+  }, [state.stream, state.session?.events]);
+
   const call = useCallback((message: string) => {
     const source = new EventSource(`/api/chat?message=${encodeURIComponent(message)}`);
-
-    for (const type of ['message_added', 'plan_updated', 'topic_updated'] satisfies Array<SessionEvent['type']>) {
-      source.addEventListener(type, (event) => {
-        dispatch({ type, ...JSON.parse(event.data) });
-      });
-    }
 
     source.addEventListener('open', () => {
       dispatch({ type: 'open' });
@@ -45,10 +51,21 @@ export function App() {
       console.log('error', event);
       source.close();
     });
-  }, []);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+    for (const type of ['message_added', 'plan_updated', 'topic_updated'] satisfies Array<SessionEvent['type']>) {
+      source.addEventListener(type, (event) => {
+        dispatch({ type, ...JSON.parse(event.data) });
+      });
+    }
+
+    source.addEventListener('message_added', (event) => {
+      const data: GetSessionEvent<'message_added'> = JSON.parse(event.data);
+
+      if (data.message.role === 'user' && textareaRef.current) {
+        textareaRef.current.value = '';
+      }
+    });
+  }, []);
 
   const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
     (event) => {
@@ -58,16 +75,23 @@ export function App() {
       const message = data.get('message') as string;
 
       call(message);
-      textareaRef.current!.value = '';
     },
     [call],
   );
 
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+  const handleKeyDown = useCallback<React.KeyboardEventHandler<HTMLTextAreaElement>>((event) => {
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.currentTarget.form?.requestSubmit();
     }
-  }, [state.message]);
+  }, []);
+
+  const messages = useMemo(() => {
+    if (!state.session?.events) {
+      return [];
+    }
+
+    return state.session?.events.filter((event) => event.type === 'message_added').map((event) => event.message);
+  }, [state.session?.events]);
 
   if (!state.session) {
     return null;
@@ -76,12 +100,10 @@ export function App() {
   return (
     <div className="max-w-6xl mx-auto px-4 col h-full py-8">
       <div className="flex-1 row gap-8 overflow-hidden">
-        <div
-          ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto col gap-4 pb-8 px-2 scrollbar-thin scrollbar-thumb-zinc-600"
-        >
-          <Messages messages={state.session.messages} />
-          {state.message && <Message message={{ role: 'assistant', content: state.message }} />}
+        <div className="flex-1 overflow-y-auto col gap-4 pb-8 px-2 scrollbar-thin scrollbar-thumb-zinc-600">
+          <Messages messages={messages} />
+          {state.stream && <Message message={{ role: 'assistant', content: state.stream }} />}
+          <div ref={bottomRef} />
         </div>
         <div className="h-full">
           <Plan plan={state.session.plan} />
@@ -93,13 +115,10 @@ export function App() {
           ref={textareaRef}
           name="message"
           rows={6}
+          readOnly={state.loading}
+          onKeyDown={handleKeyDown}
           aria-label="Message"
-          className="border rounded-md block w-full p-2 bg-zinc-800"
-          onKeyDown={(event) => {
-            if (event.ctrlKey && event.key === 'Enter') {
-              event.currentTarget.form?.requestSubmit();
-            }
-          }}
+          className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"
         />
       </form>
     </div>
@@ -107,7 +126,7 @@ export function App() {
 }
 
 const reducer = produce(function (
-  state: { session?: Session; message: string },
+  state: { session?: Session; stream?: string; loading?: boolean },
   action:
     | { type: 'session'; session: Session }
     | { type: 'open' }
@@ -115,22 +134,35 @@ const reducer = produce(function (
     | { type: 'done' }
     | SessionEvent,
 ) {
+  console.groupCollapsed(action.type);
+  console.log('state\n', current(state));
+  console.log('action\n', action);
+
+  if (action.type === 'open') {
+    state.loading = true;
+    state.stream = '';
+  }
+
+  if (action.type === 'done') {
+    state.loading = false;
+  }
+
   if (action.type === 'session') {
     state.session = action.session;
   }
 
   if (action.type === 'chunk') {
-    assert(state.message !== undefined);
-    state.message = state.message + action.chunk;
+    assert(state.stream !== undefined);
+    state.stream = state.stream + action.chunk;
   }
 
-  if (action.type === 'message_added') {
+  if (isSessionEventType(action.type)) {
     assert(state.session);
-    state.session.messages.push(action.message);
+    state.session.events.push(action as SessionEvent);
+  }
 
-    if (action.message.role === 'assistant' && !action.message.tool_calls) {
-      state.message = '';
-    }
+  if (action.type === 'message_added' && action.message.role === 'assistant') {
+    delete state.stream;
   }
 
   if (action.type === 'plan_updated') {
@@ -148,6 +180,9 @@ const reducer = produce(function (
     if (action.label) topic.label = action.label;
     if (action.status) topic.status = action.status;
   }
+
+  console.log('state\n', current(state));
+  console.groupEnd();
 });
 
 function Plan({ plan }: { plan: Plan }) {
@@ -184,49 +219,10 @@ function Messages({ messages }: { messages: Message[] }) {
 }
 
 function Message({ message }: { message: Message }) {
-  const { role, content } = message;
-
-  if (role === 'system') {
-    return (
-      <Details summary={role}>
-        <div className="p-4 my-4 font-mono whitespace-pre-wrap bg-zinc-950 border rounded-md text-sm">
-          {content as string}
-        </div>
-      </Details>
-    );
-  }
-
-  if (role === 'tool') {
-    return (
-      <Details summary="Tool call result">
-        <Markdown markdown={content as string} className="p-4 my-4 bg-zinc-950 border rounded-md text-sm" />
-      </Details>
-    );
-  }
-
-  if (role === 'assistant') {
-    if (message.tool_calls) {
-      return message.tool_calls
-        .filter((call) => call.type === 'function')
-        .map((call) => (
-          <Details summary={`Tool call: ${call.function.name}`} key={call.id}>
-            <div className="whitespace-pre-wrap p-4 my-4 bg-zinc-950 border rounded-md text-sm font-mono">
-              ID: {call.id}
-              {'\n'}
-              Name: {call.function.name}
-              {'\n'}
-              Arguments: {JSON.stringify(JSON.parse(call.function.arguments), null, 2)}
-            </div>
-          </Details>
-        ));
-    }
-
-    return <Markdown markdown={content as string} />;
-  }
-
-  if (role === 'user') {
-    return <Markdown markdown={content as string} className="bg-zinc-800 px-4 py-2 rounded-md" />;
-  }
-
-  return null;
+  return (
+    <Markdown
+      markdown={message.content}
+      className={clsx(message.role === 'user' && 'bg-zinc-800 px-4 py-2 rounded-md')}
+    />
+  );
 }

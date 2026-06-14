@@ -6,8 +6,23 @@ import z from 'zod';
 
 import { Assistant } from './assistant';
 import { Session } from './session';
+import { sessionEventTypes, type SessionEventType } from './types';
 
-import type { SessionEvent } from './types';
+import type { AnyFunction } from './utils';
+
+const sessionFile = process.env.SESSION_FILE as string;
+
+async function loadSession() {
+  return fs
+    .readFile(sessionFile)
+    .then(String)
+    .then(JSON.parse)
+    .then((session) => Session.from(session));
+}
+
+async function saveSession(session: Session) {
+  await fs.writeFile(sessionFile, JSON.stringify(session.serialize(), null, 2));
+}
 
 const client = new OpenAI({
   baseURL: 'https://api.mammouth.ai/v1',
@@ -15,7 +30,7 @@ const client = new OpenAI({
 });
 
 const instructions = await fs.readFile('instructions.md').then(String);
-let session = new Session(instructions);
+let session = await loadSession();
 
 export const app = express();
 
@@ -25,9 +40,10 @@ app.get('/session', async (req, res) => {
   res.json(session.serialize());
 });
 
-app.delete('/session', (_req, res) => {
+app.delete('/session', async (_req, res) => {
   session = new Session(instructions);
 
+  await saveSession(session);
   res.status(204).end();
 });
 
@@ -42,25 +58,42 @@ app.get('/chat', async (req, res) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
-  for (const type of ['plan_updated', 'topic_updated', 'message_added'] satisfies Array<SessionEvent['type']>) {
-    session.addListener(type, (payload) => sendEvent(type, payload));
-  }
+  const listeners = new Map<SessionEventType, AnyFunction>();
 
-  session.addMessage({
-    role: 'user',
-    content: message,
+  sessionEventTypes.map((type) => {
+    const listener = (payload: unknown) => {
+      sendEvent(type, payload);
+    };
+
+    listeners.set(type, listener);
+    session.addListener(type, listener);
   });
 
-  const assistant = new Assistant(client, 'gpt-4.1-mini');
+  try {
+    const assistant = new Assistant(client, 'gpt-4.1-mini');
 
-  assistant.addListener('chunk', (text) => sendEvent('chunk', text));
+    assistant.addListener('chunk', (text) => {
+      sendEvent('chunk', text);
+    });
 
-  await assistant.run(session);
+    session.addMessage({
+      role: 'user',
+      content: message,
+    });
 
-  session.removeAllListeners();
+    await assistant.run(session);
 
-  sendEvent('done', {});
-  res.end();
+    sendEvent('done', {});
+    await saveSession(session);
+  } catch (error) {
+    sendEvent('error', error);
+  } finally {
+    listeners.forEach((listener, type) => {
+      session.removeListener(type, listener);
+    });
+
+    res.end();
+  }
 });
 
 app.use((req, res) => {

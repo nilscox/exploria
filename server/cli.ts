@@ -5,8 +5,7 @@ import OpenAI from 'openai';
 
 import { Assistant } from './assistant';
 import { Session } from './session';
-
-import type { SessionEvent } from './types';
+import { sessionEventTypes } from './types';
 
 async function main() {
   const rl = RL.createInterface(process.stdin, process.stdout);
@@ -27,7 +26,7 @@ async function main() {
     process.stdout.write(text);
   });
 
-  for (const type of ['plan_updated', 'topic_updated', 'message_added'] satisfies Array<SessionEvent['type']>) {
+  for (const type of sessionEventTypes) {
     session.addListener(type, (payload) => console.log(type, payload));
   }
 
