@@ -40,6 +40,9 @@ client/
   main.tsx              # Point d'entrée React
   app.tsx               # Composant racine
   types.ts              # Types partagés côté client
+  utils.ts              # Utilitaires côté client
+  details.tsx           # Composant Details
+  markdown.tsx          # Composant Markdown
   index.css             # Styles Tailwind
 server/
   main.ts               # Point d'entrée HTTP (lance le serveur Express)
@@ -48,13 +51,13 @@ server/
   session.ts            # Classe Session (EventEmitter) — état messages + plan + events
   cli.ts                # Point d'entrée CLI (boucle de conversation)
   types.ts              # Message, Plan, Topic, TopicStatus, SessionEvent
-  utils.ts              # Utilitaires (assert, etc.)
+  utils.ts              # Utilitaires (assert, createId, has, etc.)
   tools/
     tool.ts             # Type Tool<Param> — interface commune pour tous les tools
     index.ts            # Export du tableau de tools
     init-plan.ts        # Tool init_plan
+    add-topic.ts        # Tool add_topic
     update-topic.ts     # Tool update_topic
-    handlers.ts         # (legacy)
 index.html              # Point d'entrée HTML (Vite)
 instructions.md         # Prompt système de l'agent
 AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
@@ -65,21 +68,25 @@ AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
 - `EventEmitter<{ chunk: [text: string] }>` — émet les chunks de texte au fil du stream
 - `run(session)` — stream OpenAI, accumule texte + tool calls, récursion si tools appelés
 - Les tools sont définis comme objets `Tool<Param>` avec Zod pour la validation des args
-- Injecte l'état du plan sérialisé (✅/🔄/⬜) en fin de contexte à chaque appel
+- Injecte l'état du plan sérialisé en fin de contexte à chaque appel
+
+> `TopicStatus` : `pending` | `in_progress` | `done`
 
 ### Classe `Session`
 
-- `EventEmitter` typé sur `SessionEvent` — émet `plan_updated`, `topic_updated`, `message_added`
-- Méthodes : `addMessage()`, `updatePlan()`, `updateTopic()`, `serialize()`
+- `EventEmitter` typé sur `SessionEvent` — émet `plan_updated`, `topic_added`, `topic_updated`, `message_added`
+- Méthodes : `setPlan()`, `addTopic()`, `updateTopic()`, `setCurrentTopic()`, `addMessage()`, `serialize()`
+- `Session.from(data)` — factory pour restaurer une session depuis des données sérialisées
+- Accumule les events dans `_sessionEvents` (source de vérité pour l'UI)
 - Le serveur SSE s'abonne aux events pour les streamer au client
 
 ### Routes HTTP
 
-| Méthode  | Route               | Description                                                                             |
-| -------- | ------------------- | --------------------------------------------------------------------------------------- |
-| `GET`    | `/session`          | Retourne l'état courant de la session                                                   |
-| `DELETE` | `/session`          | Réinitialise la session                                                                 |
-| `GET`    | `/chat?message=...` | Stream SSE — events : `chunk`, `plan_updated`, `topic_updated`, `message_added`, `done` |
+| Méthode  | Route               | Description                           |
+| -------- | ------------------- | ------------------------------------- |
+| `GET`    | `/session`          | Retourne l'état courant de la session |
+| `DELETE` | `/session`          | Réinitialise la session               |
+| `GET`    | `/chat?message=...` | Stream SSE                            |
 
 ### Type `Tool<Param>`
 
@@ -96,18 +103,15 @@ type Tool<Param extends z.ZodType> = {
 
 ## Tools implémentés
 
-| Tool           | Description                                                     | Bloquant                       |
-| -------------- | --------------------------------------------------------------- | ------------------------------ |
-| `init_plan`    | Initialise le plan de discussion avec les grandes étapes        | Oui (confirmation utilisateur) |
-| `update_topic` | Met à jour le statut d'un topic (`pending` → `active` → `done`) | Non                            |
+| Tool           | Description                                              |
+| -------------- | -------------------------------------------------------- |
+| `init_plan`    | Initialise le plan de discussion avec les grandes étapes |
+| `add_topic`    | Ajoute un sujet au plan en cours de session              |
+| `update_topic` | Met à jour le statut d'un topic                          |
 
 ---
 
 ## Backlog des tools
-
-### Gestion du plan
-
-- `add_topic` — ajoute un sujet en cours de session
 
 ### Mémoire & contexte
 
@@ -170,5 +174,5 @@ type Tool<Param extends z.ZodType> = {
 - [x] Injection du plan dans le contexte à chaque tour (avec indicateurs de statut)
 - [x] Point d'entrée HTTP avec SSE pour streamer vers le client
 - [ ] Gestion des actions utilisateur (édition du plan entre deux messages)
-- [ ] Implémenter `add_topic`
+- [x] Implémenter `add_topic`
 - [ ] UI dédiée avec plan visible en parallèle

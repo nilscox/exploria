@@ -20,10 +20,6 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-
-    "paths": {
-      "src/*": ["./server/*"]
-    }
+    "noFallthroughCasesInSwitch": true
   }
 }

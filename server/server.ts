@@ -86,7 +86,11 @@ app.get('/chat', async (req, res) => {
     sendEvent('done', {});
     await saveSession(session);
   } catch (error) {
-    sendEvent('error', error);
+    console.error(error);
+
+    sendEvent('error', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
   } finally {
     listeners.forEach((listener, type) => {
       session.removeListener(type, listener);

@@ -187,6 +187,17 @@ const reducer = produce(function (
     if (action.status) topic.status = action.status;
   }
 
+  if (action.type === 'topic_updated') {
+    assert(state.session);
+
+    const topic = state.session.plan.topics.find((topic) => topic.id === action.id);
+
+    assert(topic);
+
+    if (action.label) topic.label = action.label;
+    if (action.status) topic.status = action.status;
+  }
+
   console.log('state\n', current(state));
   console.groupEnd();
 });
@@ -200,9 +211,9 @@ function Plan({ plan }: { plan: Plan }) {
         <ul className="col gap-2">
           {plan.topics.map((topic) => (
             <li key={topic.id}>
-              <div className={clsx('row gap-2 items-start', { 'text-dim': topic.status !== 'active' })}>
+              <div className={clsx('row gap-2 items-start', { 'text-dim': topic.status !== 'in_progress' })}>
                 <div className="border rounded-sm size-4 shrink-0 mt-1">
-                  {topic.status === 'active' && <ArrowRightIcon className="size-full" />}
+                  {topic.status === 'in_progress' && <ArrowRightIcon className="size-full" />}
                   {topic.status === 'done' && <CheckIcon className="size-full" />}
                 </div>
 

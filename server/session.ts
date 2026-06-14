@@ -2,6 +2,7 @@ import EventEmitter from 'node:events';
 import type OpenAI from 'openai';
 
 import { sessionEventTypes, type Plan, type SessionEvent, type Topic } from './types';
+import { has } from './utils';
 
 type EventsToEmitterEventMap<T extends { type: string }> = {
   [Type in T['type']]: [Omit<Extract<T, { type: Type }>, 'type'>];
@@ -58,14 +59,37 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
     this.emit('topic_added', { topic });
   }
 
-  updateTopic(id: string, updates: Partial<Omit<Topic, 'id'>>) {
+  private getTopic(id: string) {
     const topic = this.plan.topics.find((topic) => topic.id === id);
 
     if (!topic) {
-      throw new Error('Cannot find topic');
+      throw new Error(`Cannot find topic '${id}'`);
     }
 
-    Object.assign(topic, updates);
+    return topic;
+  }
+
+  setCurrentTopic(topicId: string) {
+    const topic = this.getTopic(topicId);
+
+    this.emit('topic_added', { topic });
+
+    return topic;
+  }
+
+  updateTopic(id: string, updates: Partial<Omit<Topic, 'id'>>) {
+    const topic = this.getTopic(id);
+
+    if (updates.status === 'in_progress') {
+      const inProgress = this.plan.topics.find(has('status', 'in_progress'));
+
+      if (inProgress) {
+        inProgress.status = 'done';
+      }
+    }
+
+    if (updates.label) topic.label = updates.label;
+    if (updates.status) topic.status = updates.status;
 
     this.emit('topic_updated', { id, ...updates });
 

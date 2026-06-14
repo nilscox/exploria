@@ -60,7 +60,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
         ...session.messages,
         {
           role: 'system',
-          content: this.serializePlan(session.plan),
+          content: Assistant.serializePlan(session.plan),
         },
       ],
       tools: toolsDefinitions,
@@ -69,22 +69,22 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     };
   }
 
-  private serializePlan(plan: Plan): string {
+  static serializePlan(plan: Plan): string {
     if (plan.topics.length === 0) {
-      return '(aucun plan défini)';
+      return 'Aucun plan défini.';
     }
 
     const statusMap: Record<TopicStatus, string> = {
       pending: 'à traiter',
-      active: 'en cours',
+      in_progress: 'en cours',
       done: 'traité',
     };
 
     const lines = plan.topics.map((t) => {
-      return `${t.label} : ${statusMap[t.status]}`;
+      return `${t.label} : ${statusMap[t.status]} (id: "${t.id}")`;
     });
 
-    return `## Plan de discussion\n\n${lines.join('\n')}`;
+    return `Plan de discussion\n\n${lines.join('\n')}`;
   }
 
   private async handleStream(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {

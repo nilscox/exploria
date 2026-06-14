@@ -51,7 +51,7 @@ export type Topic = {
   status: TopicStatus;
 };
 
-export type TopicStatus = 'pending' | 'active' | 'done';
+export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
 export type Message = {
   role: 'assistant' | 'user';
