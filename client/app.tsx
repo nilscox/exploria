@@ -6,6 +6,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef } 
 import { Markdown } from './markdown';
 import {
   isSessionEventType,
+  sessionEventTypes,
   type GetSessionEvent,
   type Message,
   type Plan,
@@ -52,7 +53,7 @@ export function App() {
       source.close();
     });
 
-    for (const type of ['message_added', 'plan_updated', 'topic_updated'] satisfies Array<SessionEvent['type']>) {
+    for (const type of sessionEventTypes) {
       source.addEventListener(type, (event) => {
         dispatch({ type, ...JSON.parse(event.data) });
       });
@@ -168,6 +169,11 @@ const reducer = produce(function (
   if (action.type === 'plan_updated') {
     assert(state.session);
     state.session.plan = action.plan;
+  }
+
+  if (action.type === 'topic_added') {
+    assert(state.session);
+    state.session.plan.topics.push(action.topic);
   }
 
   if (action.type === 'topic_updated') {

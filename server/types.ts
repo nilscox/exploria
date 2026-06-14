@@ -12,6 +12,10 @@ export type SessionEvent =
       plan: Plan;
     }
   | {
+      type: 'topic_added';
+      topic: Topic;
+    }
+  | {
       type: 'topic_updated';
       id: string;
       label?: string;
@@ -29,6 +33,7 @@ export type GetSessionEvent<Type extends SessionEventType> = Extract<SessionEven
 export const sessionEventTypes = [
   'message_added',
   'plan_updated',
+  'topic_added',
   'topic_updated',
 ] as const satisfies SessionEventType[];
 

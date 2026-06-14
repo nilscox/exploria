@@ -17,7 +17,7 @@ export const initPlan: Tool<typeof param> = {
   description: 'Initialise le plan de discussion avec les grandes étapes',
   param,
   execute(session, { topics }) {
-    session.updatePlan({ topics });
+    session.setPlan({ topics });
 
     return 'Plan initialisé.';
   },

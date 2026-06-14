@@ -33,7 +33,6 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
 
     for (const type of sessionEventTypes) {
       this.addListener(type, (event) => {
-        console.log(type, event);
         this._sessionEvents.push({ type, ...event } as SessionEvent);
       });
     }
@@ -49,9 +48,14 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
     return session;
   }
 
-  updatePlan(plan: Plan) {
+  setPlan(plan: Plan) {
     this._plan = plan;
     this.emit('plan_updated', { plan });
+  }
+
+  addTopic(topic: Topic) {
+    this._plan.topics.push(topic);
+    this.emit('topic_added', { topic });
   }
 
   updateTopic(id: string, updates: Partial<Omit<Topic, 'id'>>) {
