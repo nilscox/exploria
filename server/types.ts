@@ -3,6 +3,7 @@ import type OpenAI from 'openai';
 export type Session = {
   plan: Plan;
   events: SessionEvent[];
+  notes: Note[];
   messages: OpenAI.ChatCompletionMessageParam[];
 };
 
@@ -12,14 +13,8 @@ export type SessionEvent =
       plan: Plan;
     }
   | {
-      type: 'topic_added';
-      topic: Topic;
-    }
-  | {
-      type: 'topic_updated';
-      id: string;
-      label?: string;
-      status?: TopicStatus;
+      type: 'notes_updated';
+      notes: Note[];
     }
   | {
       type: 'message_added';
@@ -33,8 +28,7 @@ export type GetSessionEvent<Type extends SessionEventType> = Extract<SessionEven
 export const sessionEventTypes = [
   'message_added',
   'plan_updated',
-  'topic_added',
-  'topic_updated',
+  'notes_updated',
 ] as const satisfies SessionEventType[];
 
 export function isSessionEventType(value: string): value is SessionEventType {
@@ -49,6 +43,11 @@ export type Topic = {
   id: string;
   label: string;
   status: TopicStatus;
+};
+
+export type Note = {
+  id: string;
+  content: string;
 };
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';

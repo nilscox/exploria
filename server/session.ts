@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 import type OpenAI from 'openai';
 
-import { sessionEventTypes, type Plan, type SessionEvent, type Topic } from './types';
+import { sessionEventTypes, type Note, type Plan, type SessionEvent, type Topic } from './types';
 import { has } from './utils';
 
 type EventsToEmitterEventMap<T extends { type: string }> = {
@@ -11,6 +11,7 @@ type EventsToEmitterEventMap<T extends { type: string }> = {
 export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>> {
   private _plan: Plan;
   private _sessionEvents: SessionEvent[];
+  private _notes: Note[];
   private _messages: OpenAI.ChatCompletionMessageParam[];
 
   get plan() {
@@ -19,6 +20,10 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
 
   get events() {
     return this._sessionEvents;
+  }
+
+  get notes() {
+    return this._notes;
   }
 
   get messages() {
@@ -30,6 +35,7 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
 
     this._plan = { topics: [] };
     this._sessionEvents = [];
+    this._notes = [];
     this._messages = [{ role: 'system', content: instructions }];
 
     for (const type of sessionEventTypes) {
@@ -39,11 +45,17 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
     }
   }
 
-  static from(data: { plan: Plan; events: SessionEvent[]; messages: OpenAI.ChatCompletionMessageParam[] }) {
+  static from(data: {
+    plan: Plan;
+    events: SessionEvent[];
+    notes: Note[];
+    messages: OpenAI.ChatCompletionMessageParam[];
+  }) {
     const session = new Session('');
 
     session._plan = data.plan;
     session._sessionEvents = data.events;
+    session._notes = data.notes;
     session._messages = data.messages;
 
     return session;
@@ -72,7 +84,7 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
   setCurrentTopic(topicId: string) {
     const topic = this.getTopic(topicId);
 
-    this.emit('topic_added', { topic });
+    this.emit('plan_updated', { plan: this.plan });
 
     return topic;
   }
@@ -91,9 +103,14 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
     if (updates.label) topic.label = updates.label;
     if (updates.status) topic.status = updates.status;
 
-    this.emit('topic_updated', { id, ...updates });
+    this.emit('plan_updated', { plan: this.plan });
 
     return topic;
+  }
+
+  addNote(note: Note) {
+    this._notes.push(note);
+    this.emit('notes_updated', { notes: this.notes });
   }
 
   addMessage(message: OpenAI.ChatCompletionMessageParam) {
@@ -112,6 +129,7 @@ export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>>
     return {
       plan: this.plan,
       events: this.events,
+      notes: this.notes,
       messages: this.messages,
     };
   }

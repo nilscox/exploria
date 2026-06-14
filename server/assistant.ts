@@ -9,7 +9,7 @@ import { assert } from './utils';
 
 import type { Session } from './session';
 import type { Tool } from './tools/tool';
-import type { Plan, TopicStatus } from './types';
+import type { Note, Plan, TopicStatus } from './types';
 
 const toolsDefinitions = tools.map(
   (tool) =>
@@ -62,6 +62,10 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
           role: 'system',
           content: Assistant.serializePlan(session.plan),
         },
+        {
+          role: 'system',
+          content: Assistant.serializeNotes(session.notes),
+        },
       ],
       tools: toolsDefinitions,
       tool_choice: 'auto',
@@ -85,6 +89,14 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     });
 
     return `Plan de discussion\n\n${lines.join('\n')}`;
+  }
+
+  static serializeNotes(notes: Note[]): string {
+    if (notes.length === 0) {
+      return 'Aucun note sauvegardée.';
+    }
+
+    return `Notes sauvegardées :\n\n${notes.map((note) => note.content).join('\n\n---\n\n')}`;
   }
 
   private async handleStream(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {

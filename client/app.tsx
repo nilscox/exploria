@@ -9,7 +9,6 @@ import {
   sessionEventTypes,
   type GetSessionEvent,
   type Message,
-  type Plan,
   type Session,
   type SessionEvent,
 } from './types';
@@ -107,7 +106,7 @@ export function App() {
           <div ref={bottomRef} />
         </div>
         <div className="h-full">
-          <Plan plan={state.session.plan} />
+          <Info session={state.session} />
         </div>
       </div>
 
@@ -162,54 +161,32 @@ const reducer = produce(function (
     state.session.events.push(action as SessionEvent);
   }
 
-  if (action.type === 'message_added' && action.message.role === 'assistant') {
-    delete state.stream;
-  }
-
   if (action.type === 'plan_updated') {
     assert(state.session);
     state.session.plan = action.plan;
   }
 
-  if (action.type === 'topic_added') {
+  if (action.type === 'notes_updated') {
     assert(state.session);
-    state.session.plan.topics.push(action.topic);
+    state.session.notes = action.notes;
   }
 
-  if (action.type === 'topic_updated') {
-    assert(state.session);
-
-    const topic = state.session.plan.topics.find((topic) => topic.id === action.id);
-
-    assert(topic);
-
-    if (action.label) topic.label = action.label;
-    if (action.status) topic.status = action.status;
-  }
-
-  if (action.type === 'topic_updated') {
-    assert(state.session);
-
-    const topic = state.session.plan.topics.find((topic) => topic.id === action.id);
-
-    assert(topic);
-
-    if (action.label) topic.label = action.label;
-    if (action.status) topic.status = action.status;
+  if (action.type === 'message_added' && action.message.role === 'assistant') {
+    delete state.stream;
   }
 
   console.log('state\n', current(state));
   console.groupEnd();
 });
 
-function Plan({ plan }: { plan: Plan }) {
+function Info({ session }: { session: Session }) {
   return (
     <div className="sticky top-0 w-64">
       <section>
         <h2 className="my-4 text-2xl">Sujets</h2>
 
         <ul className="col gap-2">
-          {plan.topics.map((topic) => (
+          {session.plan.topics.map((topic) => (
             <li key={topic.id}>
               <div className={clsx('row gap-2 items-start', { 'text-dim': topic.status !== 'in_progress' })}>
                 <div className="border rounded-sm size-4 shrink-0 mt-1">
@@ -226,6 +203,14 @@ function Plan({ plan }: { plan: Plan }) {
 
       <section>
         <h2 className="my-4 text-2xl">Notes</h2>
+
+        <ul className="col gap-2">
+          {session.notes.map((note) => (
+            <li key={note.id} className="p-2 bg-zinc-800 rounded-md">
+              <Markdown markdown={note.content} title={note.content} className="line-clamp-2" />
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );

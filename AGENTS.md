@@ -58,6 +58,8 @@ server/
     init-plan.ts        # Tool init_plan
     add-topic.ts        # Tool add_topic
     update-topic.ts     # Tool update_topic
+    save-note.ts        # Tool save_note
+    get-saved-notes.ts  # Tool get_saved_notes
 index.html              # Point d'entrée HTML (Vite)
 instructions.md         # Prompt système de l'agent
 AGENTS.md               # Ce fichier — contexte projet injecté à l'agent
@@ -103,20 +105,17 @@ type Tool<Param extends z.ZodType> = {
 
 ## Tools implémentés
 
-| Tool           | Description                                              |
-| -------------- | -------------------------------------------------------- |
-| `init_plan`    | Initialise le plan de discussion avec les grandes étapes |
-| `add_topic`    | Ajoute un sujet au plan en cours de session              |
-| `update_topic` | Met à jour le statut d'un topic                          |
+| Tool              | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `init_plan`       | Initialise le plan de discussion avec les grandes étapes |
+| `add_topic`       | Ajoute un sujet au plan en cours de session              |
+| `update_topic`    | Met à jour le statut d'un topic                          |
+| `save_note`       | Ajoute une note pour se souvenir d'un point important    |
+| `get_saved_notes` | Liste les notes sauvegardées                             |
 
 ---
 
 ## Backlog des tools
-
-### Mémoire & contexte
-
-- `save_note` — sauvegarde un point clé ou une citation de l'utilisateur
-- `get_session_summary` — récupère les notes accumulées pour générer la synthèse
 
 ### Structuration
 
