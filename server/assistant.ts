@@ -1,3 +1,4 @@
+import { intervalToDuration } from 'date-fns';
 import EventEmitter from 'node:events';
 import type OpenAI from 'openai';
 import type { Stream } from 'openai/core/streaming.mjs';
@@ -7,16 +8,16 @@ import type z from 'zod';
 import { tools } from './tools';
 import { assert, createId } from './utils';
 
-import type { Message, Note, ToolCall, TopicStatus } from '../shared';
+import type { Message, ToolCall, TopicStatus } from '../shared';
 import type { Session } from './session';
-import type { Tool } from './tools/tool';
+import type { Tool } from './tools/create-tool';
 
-const toolsDefinitions = tools.map(
-  (tool) =>
+const toolsDefinitions = Object.entries(tools).map(
+  ([name, tool]) =>
     ({
       type: 'function',
       function: {
-        name: tool.name,
+        name,
         description: tool.description,
         parameters: tool.param.toJSONSchema(),
       },
@@ -62,7 +63,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
         {
           id: '',
           role: 'system' as const,
-          content: Assistant.serializeSessionInfo(session),
+          content: Assistant.formatSessionInfo(session),
         } satisfies Message,
       ].map(Assistant.messageToOpenAI),
       tools: toolsDefinitions,
@@ -71,7 +72,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     };
   }
 
-  static serializeSessionInfo(session: Session): string {
+  static formatSessionInfo(session: Session, now = () => new Date()): string {
     const lines = [];
 
     const topicStatusMap: Record<TopicStatus, string> = {
@@ -90,11 +91,14 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
       if (session.topics.filter((topic) => topic.status === 'in_progress').length !== 1) {
         lines.push('', 'Aucun sujet en cours. Faut-il en mettre un à jour ?');
       } else {
-        lines.push('', 'Est-ce que le plan est à jour ?');
+        lines.push('', 'Le plan est-il à jour par rapport à la discussion ?');
       }
     } else {
       lines.push('Aucun plan défini.');
     }
+
+    lines.push('', '# Gestion du temps', '');
+    lines.push(this.formatTimerInfo(session, now));
 
     if (session.notes.length > 0) {
       lines.push('', '# Notes', '');
@@ -105,17 +109,37 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
       }
     }
 
-    console.log(lines);
-
     return lines.join('\n');
   }
 
-  static serializeNotes(notes: Note[]): string {
-    if (notes.length === 0) {
-      return 'Aucun note sauvegardée.';
+  static formatTimerInfo(session: Session, now = () => new Date()) {
+    if (!session.timer) {
+      return 'Aucun chronomètre démarré';
     }
 
-    return `Notes sauvegardées :\n\n${notes.map((note) => note.content).join('\n\n---\n\n')}`;
+    const duration = intervalToDuration({
+      start: session.timer.startedAt,
+      end: session.timer.pausedAt ?? now(),
+    });
+
+    const elapsed = (duration.minutes ?? 0) + (duration.hours ?? 0) * 60;
+    const remaining = Math.max(0, session.timer.duration - (elapsed ?? 0));
+
+    const lines: string[] = [];
+
+    lines.push(`Temps de la session : ${session.timer.duration} minutes`);
+    lines.push(`Temps écoulé : ${elapsed} minutes`);
+    lines.push(`Temps restant : ${remaining} minutes`);
+
+    if (remaining === 0) {
+      lines.push('', 'Temps imparti écoulé, il est nécessaire de conclure');
+    }
+
+    if (session.timer.pausedAt) {
+      lines.push('', `Chronomètre en pause`);
+    }
+
+    return lines.join('\n');
   }
 
   private async handleStream(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
@@ -154,12 +178,15 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
   }
 
   private async handleToolCall(session: Session, { id, name, arguments: arguments_ }: ToolCall) {
-    const tool: Tool<z.ZodType> | undefined = tools.find((tool) => tool.name === name);
+    const tool: Tool<z.ZodType<any>> | undefined = tools[name as keyof typeof tools];
 
     assert(tool);
 
     const args = tool.param.parse(JSON.parse(arguments_));
-    const result = await tool.execute(session, args);
+
+    const result = await Promise.resolve()
+      .then(() => tool.execute(session, args))
+      .catch((error) => (error instanceof Error ? `Error: ${error.message}` : 'Unknown error'));
 
     session.addMessage({
       id: createId(),

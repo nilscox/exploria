@@ -1,5 +1,6 @@
+import { add } from 'date-fns';
 import assert from 'node:assert';
-import { beforeEach, describe, it } from 'node:test';
+import { beforeEach, describe, it, mock } from 'node:test';
 
 import { Session } from './session';
 
@@ -12,9 +13,11 @@ void describe('Session', () => {
   const listener = (event: SessionEvent) => events.push(event);
 
   const date = new Date('2020-01-01T00:00:00.000Z');
+  const getNow = mock.fn(() => date);
 
   beforeEach(() => {
-    session = new Session(() => date);
+    getNow.mock.restore();
+    session = new Session(getNow);
     events = [];
   });
 
@@ -213,14 +216,63 @@ void describe('Session', () => {
   void it('starts the timer', () => {
     session.addListener('timerStarted', listener);
 
-    session.startTimer();
+    session.startTimer(60);
 
-    assert.strictEqual(session.timerStartDate, date);
+    assert(session.timer);
+    assert.strictEqual(session.timer.duration, 60);
+    assert.strictEqual(session.timer.startedAt, date.toISOString());
 
     assert.deepStrictEqual(events, [
       {
         type: 'timerStarted',
+        duration: 60,
         date,
+      },
+    ]);
+  });
+
+  void it('fails to start the timer when there is one already', () => {
+    let error: unknown;
+
+    session.startTimer(60);
+
+    try {
+      session.startTimer(60);
+    } catch (err) {
+      error = err;
+    }
+
+    assert(error instanceof Error);
+    assert.strictEqual(error.message, 'Un chronomètre est déjà lancé');
+  });
+
+  void it('pauses and resumes the timer', () => {
+    session.addListener('timerPaused', listener);
+    session.addListener('timerResumed', listener);
+
+    session.startTimer(60);
+
+    getNow.mock.mockImplementation(() => add(date, { minutes: 5 }));
+    session.pauseTimer();
+
+    assert(session.timer);
+    assert.strictEqual(session.timer.pausedAt, add(date, { minutes: 5 }).toISOString());
+
+    getNow.mock.mockImplementation(() => add(date, { minutes: 10 }));
+    session.resumeTimer();
+
+    assert(session.timer);
+    assert.strictEqual(session.timer.startedAt, add(date, { minutes: 5 }).toISOString());
+    assert.strictEqual(session.timer.pausedAt, undefined);
+
+    assert.deepStrictEqual(events, [
+      {
+        type: 'timerPaused',
+        date: add(date, { minutes: 5 }),
+      },
+      {
+        type: 'timerResumed',
+        date: add(date, { minutes: 10 }),
       },
     ]);
   });

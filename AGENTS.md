@@ -122,11 +122,6 @@ type Tool<Param extends z.ZodType> = {
 - `create_mindmap` — génère une mind map à partir des éléments discutés
 - `generate_synthesis` — produit la synthèse finale structurée
 
-### Gestion du temps
-
-- `start_timer` — démarre un timer pour une section
-- `get_elapsed_time` — consulte le temps écoulé
-
 ### Enrichissement externe
 
 - `web_search` — recherche web pour ancrer la discussion dans des faits

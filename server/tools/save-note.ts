@@ -1,17 +1,13 @@
 import z from 'zod';
 
 import { createId } from '../utils';
+import { createTool } from './create-tool';
 
-import type { Tool } from './tool';
-
-const param = z.object({
-  note: z.string().min(1),
-});
-
-export const saveNote: Tool<typeof param> = {
-  name: 'save_note',
+export const saveNote = createTool({
   description: "Sauvegarde un élément important de la conversation (point clé, citation, insight de l'utilisateur)",
-  param,
+  param: z.object({
+    note: z.string().min(1),
+  }),
   execute(session, { note }) {
     session.addNote({
       id: createId(),
@@ -20,4 +16,4 @@ export const saveNote: Tool<typeof param> = {
 
     return `Note sauvegardée : "${note}"`;
   },
-};
+});

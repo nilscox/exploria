@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/geist-mono';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -7,6 +9,8 @@
   --color-background: var(--color-zinc-900);
   --color-border: var(--color-zinc-500);
   --color-text: var(--color-zinc-100);
+  --font-sans: 'Inter Variable', sans-serif;
+  --font-mono: 'Geist Mono Variable', monospace;
 }
 
 @layer base {
@@ -27,6 +31,10 @@
   body {
     background-color: var(--color-background);
     color: var(--color-text);
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
   }
 }
 

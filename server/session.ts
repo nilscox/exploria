@@ -1,9 +1,10 @@
+import { intervalToDuration, sub } from 'date-fns';
 import EventEmitter from 'node:events';
 
 import { sessionEventTypes } from '../shared';
 import { assert, hasId, type DistributiveOmit } from './utils';
 
-import type { DiscussionPath, GetSessionEvent, Message, Note, SessionEvent, Topic } from '../shared';
+import type { DiscussionPath, GetSessionEvent, Message, Note, SessionEvent, Timer, Topic } from '../shared';
 
 export class Session {
   private emitter = new EventEmitter();
@@ -31,10 +32,10 @@ export class Session {
     return this._notes;
   }
 
-  private _timerStartDate: Date | null = null;
+  private _timer: Timer | null = null;
 
-  get timerStartDate() {
-    return this._timerStartDate;
+  get timer() {
+    return this._timer;
   }
 
   private _messages: Message[] = [];
@@ -69,7 +70,8 @@ export class Session {
     subject: string;
     topics: Topic[];
     notes: Note[];
-    timerStartDate?: string;
+    duration?: number;
+    timer?: Timer;
     messages: Message[];
     discussionPaths: DiscussionPath[];
     events: Array<SessionEvent & { date: Date }>;
@@ -79,7 +81,7 @@ export class Session {
     session._subject = data.subject;
     session._topics = data.topics;
     session._notes = data.notes;
-    session._timerStartDate = data.timerStartDate ? new Date(data.timerStartDate) : null;
+    session._timer = data.timer ?? null;
     session._messages = data.messages;
     session._discussionPaths = data.discussionPaths;
     session._events = data.events;
@@ -149,11 +151,34 @@ export class Session {
     }
   }
 
-  startTimer() {
+  startTimer(duration: number) {
     const now = this.now();
 
-    this._timerStartDate = now;
-    this.emit({ type: 'timerStarted' });
+    assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
+
+    this._timer = { duration, startedAt: now.toISOString() };
+    this.emit({ type: 'timerStarted', duration });
+  }
+
+  pauseTimer() {
+    assert(this._timer);
+
+    this._timer.pausedAt = this.now().toISOString();
+    this.emit({ type: 'timerPaused' });
+  }
+
+  resumeTimer() {
+    assert(this._timer);
+    assert(this._timer.pausedAt);
+
+    const elapsed = intervalToDuration({
+      start: this._timer.startedAt,
+      end: this._timer.pausedAt,
+    });
+
+    this._timer.startedAt = sub(this.now(), elapsed).toISOString();
+    delete this._timer.pausedAt;
+    this.emit({ type: 'timerResumed' });
   }
 
   addMessage(message: Message) {

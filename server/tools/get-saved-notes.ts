@@ -1,13 +1,10 @@
 import z from 'zod';
 
-import type { Tool } from './tool';
+import { createTool } from './create-tool';
 
-const param = z.object({});
-
-export const getSavedNotes: Tool<typeof param> = {
-  name: 'get_saved_notes',
+export const getSavedNotes = createTool({
   description: 'Récupère toutes les notes sauvegardées au cours de la session',
-  param,
+  param: z.object({}),
   execute(session) {
     if (session.notes.length === 0) {
       return 'Aucune note sauvegardée.';
@@ -15,4 +12,4 @@ export const getSavedNotes: Tool<typeof param> = {
 
     return `Notes sauvegardées :\n${session.notes.map((note, i) => `${i + 1}. ${note.content}`).join('\n')}`;
   },
-};
+});
