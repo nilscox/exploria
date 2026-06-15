@@ -1,136 +1,195 @@
 import EventEmitter from 'node:events';
-import type OpenAI from 'openai';
 
-import { sessionEventTypes, type Note, type Plan, type SessionEvent, type Topic } from './types';
-import { has } from './utils';
+import { sessionEventTypes } from '../shared';
+import { assert, hasId, type DistributiveOmit } from './utils';
 
-type EventsToEmitterEventMap<T extends { type: string }> = {
-  [Type in T['type']]: [Omit<Extract<T, { type: Type }>, 'type'>];
-};
+import type { DiscussionPath, GetSessionEvent, Message, Note, SessionEvent, Topic } from '../shared';
 
-export class Session extends EventEmitter<EventsToEmitterEventMap<SessionEvent>> {
-  private _plan: Plan;
-  private _sessionEvents: SessionEvent[];
-  private _notes: Note[];
-  private _messages: OpenAI.ChatCompletionMessageParam[];
+export class Session {
+  private emitter = new EventEmitter();
 
-  get plan() {
-    return this._plan;
+  private _subject: string = '';
+
+  get subject(): string {
+    return this._subject;
   }
 
-  get events() {
-    return this._sessionEvents;
+  set subject(subject: string) {
+    this._subject = subject;
+    this.emit({ type: 'subjectChanged', subject });
   }
+
+  private _topics: Topic[] = [];
+
+  get topics() {
+    return this._topics;
+  }
+
+  private _notes: Note[] = [];
 
   get notes() {
     return this._notes;
   }
 
+  private _timerStartDate: Date | null = null;
+
+  get timerStartDate() {
+    return this._timerStartDate;
+  }
+
+  private _messages: Message[] = [];
+
   get messages() {
     return this._messages;
   }
 
-  constructor(instructions: string) {
-    super();
+  private _discussionPaths: DiscussionPath[] = [];
 
-    this._plan = { topics: [] };
-    this._sessionEvents = [];
-    this._notes = [];
-    this._messages = [{ role: 'system', content: instructions }];
+  get discussionPaths() {
+    return this._discussionPaths;
+  }
+
+  private _events: Array<SessionEvent> = [];
+
+  get events() {
+    return this._events;
+  }
+
+  private now: () => Date;
+
+  constructor(now: () => Date = () => new Date()) {
+    this.now = now;
 
     for (const type of sessionEventTypes) {
-      this.addListener(type, (event) => {
-        this._sessionEvents.push({ type, ...event } as SessionEvent);
-      });
+      this.addListener(type, (event) => this._events.push(event));
     }
   }
 
   static from(data: {
-    plan: Plan;
-    events: SessionEvent[];
+    subject: string;
+    topics: Topic[];
     notes: Note[];
-    messages: OpenAI.ChatCompletionMessageParam[];
+    timerStartDate?: string;
+    messages: Message[];
+    discussionPaths: DiscussionPath[];
+    events: Array<SessionEvent & { date: Date }>;
   }) {
-    const session = new Session('');
+    const session = new Session();
 
-    session._plan = data.plan;
-    session._sessionEvents = data.events;
+    session._subject = data.subject;
+    session._topics = data.topics;
     session._notes = data.notes;
+    session._timerStartDate = data.timerStartDate ? new Date(data.timerStartDate) : null;
     session._messages = data.messages;
+    session._discussionPaths = data.discussionPaths;
+    session._events = data.events;
 
     return session;
   }
-
-  setPlan(plan: Plan) {
-    this._plan = plan;
-    this.emit('plan_updated', { plan });
+  initializePlan(subject: string, topics: Array<Omit<Topic, 'status'>>) {
+    this._subject = subject;
+    this._topics = topics.map((topic) => ({ ...topic, status: 'pending' }));
+    this.emit({ type: 'planInitialized', subject: this.subject, topics: this._topics });
   }
 
-  addTopic(topic: Topic) {
-    this._plan.topics.push(topic);
-    this.emit('topic_added', { topic });
+  addTopic({ id, label }: Omit<Topic, 'status'>) {
+    const topic: Topic = { id, label, status: 'pending' };
+
+    this._topics.push(topic);
+    this.emit({ type: 'topicAdded', topic });
   }
 
-  private getTopic(id: string) {
-    const topic = this.plan.topics.find((topic) => topic.id === id);
+  removeTopic(id: string) {
+    const index = this._topics.findIndex(hasId(id));
 
-    if (!topic) {
-      throw new Error(`Cannot find topic '${id}'`);
+    if (index >= 0) {
+      this._topics.splice(index, 1);
+      this.emit({ type: 'topicRemoved', id });
+    }
+  }
+
+  updateTopic(id: string, { label, status }: Partial<Omit<Topic, 'id'>>) {
+    const topic = this._topics.find(hasId(id));
+
+    assert(topic, new Error(`Cannot find topic "${id}"`));
+
+    if (label) {
+      topic.label = label;
+      this.emit({ type: 'topicLabelChanged', id, label });
     }
 
-    return topic;
-  }
-
-  setCurrentTopic(topicId: string) {
-    const topic = this.getTopic(topicId);
-
-    this.emit('plan_updated', { plan: this.plan });
-
-    return topic;
-  }
-
-  updateTopic(id: string, updates: Partial<Omit<Topic, 'id'>>) {
-    const topic = this.getTopic(id);
-
-    if (updates.status === 'in_progress') {
-      const inProgress = this.plan.topics.find(has('status', 'in_progress'));
-
-      if (inProgress) {
-        inProgress.status = 'done';
-      }
+    if (status) {
+      topic.status = status;
+      this.emit({ type: 'topicStatusChanged', id, status });
     }
-
-    if (updates.label) topic.label = updates.label;
-    if (updates.status) topic.status = updates.status;
-
-    this.emit('plan_updated', { plan: this.plan });
-
-    return topic;
   }
 
   addNote(note: Note) {
     this._notes.push(note);
-    this.emit('notes_updated', { notes: this.notes });
+    this.emit({ type: 'noteAdded', note });
   }
 
-  addMessage(message: OpenAI.ChatCompletionMessageParam) {
-    this.messages.push(message);
+  removeNote(id: string) {
+    const index = this._notes.findIndex(hasId(id));
 
-    if (
-      (message.role === 'assistant' || message.role === 'user') &&
-      typeof message.content === 'string' &&
-      message.content !== ''
-    ) {
-      this.emit('message_added', { message: { role: message.role, content: message.content } });
+    if (index >= 0) {
+      this._notes.splice(index, 1);
+      this.emit({ type: 'noteRemoved', id });
     }
   }
 
-  serialize() {
-    return {
-      plan: this.plan,
-      events: this.events,
-      notes: this.notes,
-      messages: this.messages,
+  updateNote(id: string, { content }: Partial<Omit<Note, 'id'>>) {
+    const note = this._notes.find(hasId(id));
+
+    assert(note, new Error(`Cannot find note "${id}"`));
+
+    if (content) {
+      note.content = content;
+      this.emit({ type: 'noteContentChanged', id, content });
+    }
+  }
+
+  startTimer() {
+    const now = this.now();
+
+    this._timerStartDate = now;
+    this.emit({ type: 'timerStarted' });
+  }
+
+  addMessage(message: Message) {
+    if (message.role === 'assistant' && message.toolCalls?.length === 0) {
+      delete message.toolCalls;
+    }
+
+    this._messages.push(message);
+    this.emit({ type: 'messageAdded', message });
+  }
+
+  setDiscussionPath(paths: DiscussionPath[]) {
+    this._discussionPaths = paths;
+    this.emit({ type: 'discussionPathsSet', paths });
+  }
+
+  selectDiscussionPath(id: string) {
+    const path = this.discussionPaths.find(hasId(id));
+
+    assert(path, new Error(`Cannot find discussion path "${id}"`));
+
+    this.emit({ type: 'discussionPathSelected', id });
+  }
+
+  private emit({ type, ...event }: DistributiveOmit<SessionEvent, 'date'>) {
+    this.emitter.emit(type, { ...event, type, date: this.now() });
+  }
+
+  addListener<Event extends SessionEvent, Type extends Event['type']>(
+    type: Type,
+    listener: (event: GetSessionEvent<Type>) => void,
+  ) {
+    this.emitter.addListener(type, listener);
+
+    return () => {
+      this.emitter.removeListener(type, listener);
     };
   }
 }

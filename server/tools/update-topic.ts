@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { hasId } from '../utils';
+
 import type { Tool } from './tool';
 
 const param = z.object({
@@ -10,14 +12,16 @@ const param = z.object({
 
 export const updateTopic: Tool<typeof param> = {
   name: 'update_topic',
-  description: "Met à jour le statut d'un topic du plan",
+  description: "Met à jour le statut d'un sujet du plan",
   param,
   execute(session, { id, label, status }) {
-    const topic = session.updateTopic(id, {
+    session.updateTopic(id, {
       label,
       status,
     });
 
-    return `Topic mis à jour : ${topic.label} -> ${topic.status}.\n\n${JSON.stringify(session.plan, null, 2)}`;
+    const topic = session.topics.find(hasId(id));
+
+    return `Sujet "${topic?.label}" mis à jour.`;
   },
 };

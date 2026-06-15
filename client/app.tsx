@@ -1,18 +1,14 @@
 import clsx from 'clsx';
 import { current, produce } from 'immer';
 import { ArrowRightIcon, CheckIcon } from 'lucide-react';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 
+import { serverSentSessionEventTypes } from '../shared';
+import { Details } from './details';
 import { Markdown } from './markdown';
-import {
-  isSessionEventType,
-  sessionEventTypes,
-  type GetSessionEvent,
-  type Message,
-  type Session,
-  type SessionEvent,
-} from './types';
 import { assert } from './utils';
+
+import type { GetSessionEvent, Message, ServerSentSessionEvent, Session, SessionEvent } from '../shared';
 
 export function App() {
   const [state, dispatch] = useReducer(reducer, {});
@@ -20,7 +16,7 @@ export function App() {
   useEffect(() => {
     fetch('/api/session')
       .then((res) => res.json())
-      .then((session) => dispatch({ type: 'session', session }))
+      .then((session) => dispatch({ type: 'sessionFetched', session }))
       .catch(console.error);
   }, []);
 
@@ -38,33 +34,26 @@ export function App() {
       dispatch({ type: 'open' });
     });
 
-    source.addEventListener('chunk', (event) => {
-      dispatch({ type: 'chunk', chunk: JSON.parse(event.data) });
-    });
-
-    source.addEventListener('done', () => {
-      dispatch({ type: 'done' });
-      source.close();
-    });
-
     source.addEventListener('error', (event) => {
       console.log('error', event);
       source.close();
     });
 
-    for (const type of sessionEventTypes) {
-      source.addEventListener(type, (event) => {
-        dispatch({ type, ...JSON.parse(event.data) });
+    for (const type of serverSentSessionEventTypes) {
+      source.addEventListener(type, ({ data }) => {
+        const event: ServerSentSessionEvent = { type, ...JSON.parse(data) };
+
+        dispatch(event);
+
+        if (event.type === 'done') {
+          source.close();
+        }
+
+        if (event.type === 'messageAdded' && event.message.role === 'user' && textareaRef.current) {
+          textareaRef.current.value = '';
+        }
       });
     }
-
-    source.addEventListener('message_added', (event) => {
-      const data: GetSessionEvent<'message_added'> = JSON.parse(event.data);
-
-      if (data.message.role === 'user' && textareaRef.current) {
-        textareaRef.current.value = '';
-      }
-    });
   }, []);
 
   const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
@@ -85,54 +74,50 @@ export function App() {
     }
   }, []);
 
-  const messages = useMemo(() => {
-    if (!state.session?.events) {
-      return [];
-    }
-
-    return state.session?.events.filter((event) => event.type === 'message_added').map((event) => event.message);
-  }, [state.session?.events]);
-
   if (!state.session) {
     return null;
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 col h-full py-8">
+    <div className="max-w-6xl mx-auto px-4 col h-full py-4">
+      <header className="border-b py-4">
+        {state.session.subject && <h1 className="text-xl font-medium">{state.session.subject}</h1>}
+      </header>
+
       <div className="flex-1 row gap-8 overflow-hidden">
-        <div className="flex-1 overflow-y-auto col gap-4 pb-8 px-2 scrollbar-thin scrollbar-thumb-zinc-600">
-          <Messages messages={messages} />
-          {state.stream && <Message message={{ role: 'assistant', content: state.stream }} />}
-          <div ref={bottomRef} />
-        </div>
         <div className="h-full">
           <Info session={state.session} />
         </div>
+        <div className="col flex-1">
+          <div className="flex-1 overflow-y-auto col gap-4 py-8 px-2 scrollbar-thin scrollbar-thumb-zinc-600">
+            <Events events={state.session.events} />
+            {state.stream && <Message message={{ role: 'assistant', content: state.stream }} />}
+            <div ref={bottomRef} />
+          </div>
+          <form onSubmit={handleSubmit}>
+            <textarea
+              ref={textareaRef}
+              name="message"
+              rows={4}
+              readOnly={state.loading}
+              onKeyDown={handleKeyDown}
+              aria-label="Message"
+              className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"
+            />
+          </form>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit}>
-        <textarea
-          ref={textareaRef}
-          name="message"
-          rows={6}
-          readOnly={state.loading}
-          onKeyDown={handleKeyDown}
-          aria-label="Message"
-          className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"
-        />
-      </form>
     </div>
   );
 }
 
 const reducer = produce(function (
-  state: { session?: Session; stream?: string; loading?: boolean },
-  action:
-    | { type: 'session'; session: Session }
-    | { type: 'open' }
-    | { type: 'chunk'; chunk: string }
-    | { type: 'done' }
-    | SessionEvent,
+  state: {
+    session?: Session;
+    stream?: string;
+    loading?: boolean;
+  },
+  action: { type: 'sessionFetched'; session: Session } | { type: 'open' } | ServerSentSessionEvent,
 ) {
   console.groupCollapsed(action.type);
   console.log('state\n', current(state));
@@ -147,32 +132,47 @@ const reducer = produce(function (
     state.loading = false;
   }
 
-  if (action.type === 'session') {
+  if (action.type === 'sessionFetched') {
     state.session = action.session;
   }
 
   if (action.type === 'chunk') {
     assert(state.stream !== undefined);
-    state.stream = state.stream + action.chunk;
+    state.stream = state.stream + action.text;
   }
 
-  if (isSessionEventType(action.type)) {
+  if (action.type === 'subjectChanged') {
     assert(state.session);
-    state.session.events.push(action as SessionEvent);
+    state.session.subject = action.subject;
   }
 
-  if (action.type === 'plan_updated') {
+  if (action.type === 'topicsChanged') {
     assert(state.session);
-    state.session.plan = action.plan;
+    state.session.topics = action.topics;
   }
 
-  if (action.type === 'notes_updated') {
+  if (action.type === 'notesChanged') {
     assert(state.session);
     state.session.notes = action.notes;
   }
 
-  if (action.type === 'message_added' && action.message.role === 'assistant') {
-    delete state.stream;
+  if (action.type === 'timerStarted') {
+    assert(state.session);
+    state.session.timerStartDate = action.date;
+  }
+
+  if (action.type === 'messageAdded') {
+    assert(state.session);
+    state.session.messages.push(action.message);
+
+    if (action.message.role === 'assistant' && action.message.content) {
+      delete state.stream;
+    }
+  }
+
+  if (action.type === 'sessionEventEmitted') {
+    assert(state.session);
+    state.session.events.push(action.event);
   }
 
   console.log('state\n', current(state));
@@ -186,7 +186,7 @@ function Info({ session }: { session: Session }) {
         <h2 className="my-4 text-2xl">Sujets</h2>
 
         <ul className="col gap-2">
-          {session.plan.topics.map((topic) => (
+          {session.topics.map((topic) => (
             <li key={topic.id}>
               <div className={clsx('row gap-2 items-start', { 'text-dim': topic.status !== 'in_progress' })}>
                 <div className="border rounded-sm size-4 shrink-0 mt-1">
@@ -216,11 +216,54 @@ function Info({ session }: { session: Session }) {
   );
 }
 
-function Messages({ messages }: { messages: Message[] }) {
-  return messages.map((message, index) => <Message key={index} message={message} />);
+function TopicAddedEvent({ event }: { event: GetSessionEvent<'topicAdded'> }) {
+  return <div className="text-sm text-dim">Sujet ajouté : {event.topic.label}</div>;
 }
 
-function Message({ message }: { message: Message }) {
+function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }) {
+  const { message } = event;
+
+  if (message.role === 'tool') {
+    return <div className="text-dim text-sm">{message.content}</div>;
+  }
+
+  if (message.role === 'system') {
+    return (
+      <Details className="text-dim text-sm" summary="System prompt">
+        <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
+          {message.content}
+        </div>
+      </Details>
+    );
+  }
+
+  return <Message message={event.message} />;
+}
+
+const sessionEventMap: { [Event in SessionEvent as Event['type']]: React.ComponentType<{ event: Event }> } = {
+  planInitialized: () => null,
+  subjectChanged: () => null,
+  topicAdded: TopicAddedEvent,
+  topicRemoved: () => null,
+  topicLabelChanged: () => null,
+  topicStatusChanged: () => null,
+  noteAdded: () => null,
+  noteRemoved: () => null,
+  noteContentChanged: () => null,
+  timerStarted: () => null,
+  messageAdded: MessageAddedEvent,
+  discussionPathsSet: () => null,
+  discussionPathSelected: () => null,
+};
+
+function Events({ events }: { events: SessionEvent[] }) {
+  return events.map((event, index) => {
+    const Component = sessionEventMap[event.type] as React.ComponentType<{ event: SessionEvent }>;
+    return <Component key={index} event={event} />;
+  });
+}
+
+function Message({ message }: { message: Omit<Message, 'id'> }) {
   return (
     <Markdown
       markdown={message.content}

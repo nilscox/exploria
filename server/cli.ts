@@ -3,9 +3,10 @@ import fs from 'node:fs/promises';
 import RL from 'node:readline/promises';
 import OpenAI from 'openai';
 
+import { sessionEventTypes } from '../shared';
 import { Assistant } from './assistant';
 import { Session } from './session';
-import { sessionEventTypes } from './types';
+import { createId } from './utils';
 
 async function main() {
   const rl = RL.createInterface(process.stdin, process.stdout);
@@ -17,10 +18,16 @@ async function main() {
     apiKey: process.env.MAMMOUTH_API_KEY,
   });
 
+  const session = new Session();
+  const assistant = new Assistant(client, 'gpt-4.1-mini');
+
   const instructions = await fs.readFile('instructions.md').then(String);
 
-  const session = new Session(instructions);
-  const assistant = new Assistant(client, 'gpt-4.1-mini');
+  session.addMessage({
+    id: createId(),
+    role: 'system',
+    content: instructions,
+  });
 
   assistant.addListener('chunk', (text) => {
     process.stdout.write(text);
@@ -31,7 +38,8 @@ async function main() {
   }
 
   while (true) {
-    session.messages.push({
+    session.addMessage({
+      id: createId(),
       role: 'user',
       content: await rl.question('> '),
     });

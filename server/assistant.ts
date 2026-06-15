@@ -5,11 +5,11 @@ import type { ChatCompletionTool } from 'openai/resources/index.mjs';
 import type z from 'zod';
 
 import { tools } from './tools';
-import { assert } from './utils';
+import { assert, createId } from './utils';
 
+import type { Message, Note, ToolCall, TopicStatus } from '../shared';
 import type { Session } from './session';
 import type { Tool } from './tools/tool';
-import type { Note, Plan, TopicStatus } from './types';
 
 const toolsDefinitions = tools.map(
   (tool) =>
@@ -39,9 +39,10 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     const { content, toolCalls } = await this.handleStream(stream);
 
     session.addMessage({
+      id: createId(),
       role: 'assistant',
       content,
-      tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+      toolCalls,
     });
 
     for (const toolCall of toolCalls) {
@@ -59,36 +60,54 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
       messages: [
         ...session.messages,
         {
-          role: 'system',
-          content: Assistant.serializePlan(session.plan),
-        },
-        {
-          role: 'system',
-          content: Assistant.serializeNotes(session.notes),
-        },
-      ],
+          id: '',
+          role: 'system' as const,
+          content: Assistant.serializeSessionInfo(session),
+        } satisfies Message,
+      ].map(Assistant.messageToOpenAI),
       tools: toolsDefinitions,
       tool_choice: 'auto',
       stream: true,
     };
   }
 
-  static serializePlan(plan: Plan): string {
-    if (plan.topics.length === 0) {
-      return 'Aucun plan défini.';
-    }
+  static serializeSessionInfo(session: Session): string {
+    const lines = [];
 
-    const statusMap: Record<TopicStatus, string> = {
+    const topicStatusMap: Record<TopicStatus, string> = {
       pending: 'à traiter',
       in_progress: 'en cours',
       done: 'traité',
     };
 
-    const lines = plan.topics.map((t) => {
-      return `${t.label} : ${statusMap[t.status]} (id: "${t.id}")`;
-    });
+    lines.push('# Plan de discussion', '');
 
-    return `Plan de discussion\n\n${lines.join('\n')}`;
+    if (session.topics.length > 0) {
+      for (const { id, label, status } of session.topics) {
+        lines.push(`${label} (id: "${id}") : ${topicStatusMap[status]}`);
+      }
+
+      if (session.topics.filter((topic) => topic.status === 'in_progress').length !== 1) {
+        lines.push('', 'Aucun sujet en cours. Faut-il en mettre un à jour ?');
+      } else {
+        lines.push('', 'Est-ce que le plan est à jour ?');
+      }
+    } else {
+      lines.push('Aucun plan défini.');
+    }
+
+    if (session.notes.length > 0) {
+      lines.push('', '# Notes', '');
+
+      for (const { id, content } of session.notes) {
+        lines.push(`id: ${id}`);
+        lines.push(`note: ${content}`, '');
+      }
+    }
+
+    console.log(lines);
+
+    return lines.join('\n');
   }
 
   static serializeNotes(notes: Note[]): string {
@@ -101,7 +120,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
 
   private async handleStream(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
     let content = '';
-    const toolCalls: Array<OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall> = [];
+    const toolCalls: Array<ToolCall> = [];
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta;
@@ -115,15 +134,15 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
         for (const tc of delta.tool_calls) {
           toolCalls[tc.index] ??= {
             id: '',
-            type: 'function',
-            function: { name: '', arguments: '' },
+            name: '',
+            arguments: '',
           };
 
           const call = toolCalls[tc.index]!;
 
           if (tc.id) call.id = tc.id;
-          if (tc.function?.name) call.function.name += tc.function.name;
-          if (tc.function?.arguments) call.function.arguments += tc.function.arguments;
+          if (tc.function?.name) call.name += tc.function.name;
+          if (tc.function?.arguments) call.arguments += tc.function.arguments;
         }
       }
     }
@@ -134,21 +153,41 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     };
   }
 
-  private async handleToolCall(
-    session: Session,
-    { id, function: fn }: OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall,
-  ) {
-    const tool: Tool<z.ZodType> | undefined = tools.find((tool) => tool.name === fn.name);
+  private async handleToolCall(session: Session, { id, name, arguments: arguments_ }: ToolCall) {
+    const tool: Tool<z.ZodType> | undefined = tools.find((tool) => tool.name === name);
 
     assert(tool);
 
-    const args = tool.param.parse(JSON.parse(fn.arguments));
+    const args = tool.param.parse(JSON.parse(arguments_));
     const result = await tool.execute(session, args);
 
     session.addMessage({
+      id: createId(),
       role: 'tool',
-      tool_call_id: id,
+      toolCallId: id,
       content: result,
     });
+  }
+
+  private static messageToOpenAI(this: void, message: Message): OpenAI.Chat.Completions.ChatCompletionMessageParam {
+    const content = message.content;
+
+    if (message.role === 'system' || message.role === 'user') {
+      return { role: message.role, content };
+    }
+
+    if (message.role === 'tool') {
+      return { role: message.role, tool_call_id: message.toolCallId, content };
+    }
+
+    return {
+      role: message.role,
+      content: message.content,
+      tool_calls: message.toolCalls?.map(({ id, name, arguments: args }) => ({
+        id,
+        type: 'function' as const,
+        function: { name, arguments: JSON.stringify(args) },
+      })),
+    };
   }
 }

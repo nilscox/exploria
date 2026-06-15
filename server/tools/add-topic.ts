@@ -10,15 +10,14 @@ const param = z.object({
 
 export const addTopic: Tool<typeof param> = {
   name: 'add_topic',
-  description: "Met à jour le statut d'un topic du plan",
+  description: "Met à jour le statut d'un sujet du plan",
   param,
   execute(session, { label }) {
     session.addTopic({
       id: createId(),
       label,
-      status: 'pending',
     });
 
-    return `Topic ajouté : ${label}.\n\n${JSON.stringify(session.plan, null, 2)}`;
+    return `Sujet ajouté : ${label}.`;
   },
 };
