@@ -1,4 +1,3 @@
-import { serverSentMessageEventTypes, serverSentSessionEventTypes } from '@exploria/shared';
 import type {
   GetSessionEvent,
   Message,
@@ -8,6 +7,8 @@ import type {
   SessionEvent,
   Timer,
 } from '@exploria/shared';
+import { serverSentMessageEventTypes, serverSentSessionEventTypes } from '@exploria/shared';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { add, intervalToDuration } from 'date-fns';
 import { current, produce } from 'immer';
@@ -15,6 +16,7 @@ import { ArrowRightIcon, CheckIcon, Loader2Icon, PauseIcon, PlayIcon } from 'luc
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 
+import { api, ApiError } from './api';
 import { Details } from './details';
 import { useNow } from './hooks/use-now';
 import { Markdown } from './markdown';
@@ -112,30 +114,25 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
 
   const [state, dispatch] = useReducer(reducer, {});
 
-  const fetchSession = useCallback(
-    async (sessionId: string) => {
-      const res = await fetch(`/api/session/${sessionId}`);
-
-      if (!res.ok) {
-        if (res.status === 404) {
-          await navigate('/');
-          return;
-        }
-
-        throw new Error(await res.text());
-      }
-
-      dispatch({
-        type: 'session:fetched',
-        session: await res.json(),
-      });
-    },
-    [navigate],
-  );
+  const sessionQuery = useQuery({
+    queryKey: ['getSession', sessionId],
+    queryFn: () => api.sessions.get(sessionId),
+  });
 
   useEffect(() => {
-    fetchSession(sessionId).catch(console.error);
-  }, [fetchSession, sessionId]);
+    if (ApiError.is(sessionQuery.error) && sessionQuery.error.status === 404) {
+      void navigate('/');
+    }
+  }, [sessionQuery.error, navigate]);
+
+  useEffect(() => {
+    if (sessionQuery.isSuccess) {
+      dispatch({
+        type: 'session:fetched',
+        session: sessionQuery.data,
+      });
+    }
+  }, [sessionQuery.isSuccess, sessionQuery.data]);
 
   const hasSession = Boolean(state.session);
 
@@ -144,7 +141,7 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
       return;
     }
 
-    const source = new EventSource(`/api/session/${sessionId}/stream`);
+    const source = api.sessions.stream(sessionId);
 
     source.addEventListener('open', () => {
       dispatch({ type: 'session:open' });
@@ -176,7 +173,7 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
 
   const sendMessage = useCallback(
     (message: string) => {
-      const source = new EventSource(`/api/session/${sessionId}/message?message=${encodeURIComponent(message)}`);
+      const source = api.sessions.sendMessage(sessionId, message);
 
       source.addEventListener('open', () => {
         dispatch({ type: 'message:open' });
@@ -359,17 +356,21 @@ function Timer({ sessionId, timer }: { sessionId: string; timer: Timer }) {
   const now = useNow();
   const { hours = 0, minutes = 0, seconds = 0 } = getRemainingTime(timer, now);
 
-  const togglePauseResume = useCallback(() => {
-    const url = `/api/session/${sessionId}/timer/${timer.pausedAt ? 'resume' : 'pause'}`;
+  const pauseTimerMutation = useMutation({
+    mutationFn: () => api.sessions.pauseTimer(sessionId),
+  });
 
-    fetch(url, { method: 'PUT' }).catch(console.error);
-  }, [sessionId, timer]);
+  const resumeTimerMutation = useMutation({
+    mutationFn: () => api.sessions.resumeTimer(sessionId),
+  });
+
+  const toggleMutation = timer.pausedAt ? resumeTimerMutation : pauseTimerMutation;
 
   const Icon = timer.pausedAt ? PlayIcon : PauseIcon;
 
   return (
     <div className="font-mono inline-flex flex-row gap-4 items-center">
-      <button onClick={togglePauseResume} type="button">
+      <button onClick={() => toggleMutation.mutate()} type="button">
         <Icon className="size-4 fill-current" />
       </button>
       <span className="leading-none">

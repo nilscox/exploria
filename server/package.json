@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@exploria/shared": "workspace:*",
+    "cors": "^2.8.6",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "1.0.0-beta.22",
@@ -17,6 +18,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "1.0.0-beta.22",

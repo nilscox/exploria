@@ -1,35 +1,27 @@
-import { useCallback, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
+import { api } from './api';
+
 export function Home() {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
-    async (event) => {
-      event.preventDefault();
-
-      const data = new FormData(event.target);
-      const message = data.get('message') as string;
-
-      setLoading(true);
-
-      try {
-        const res = await fetch('/api/session', { method: 'POST' });
-
-        if (res.ok) {
-          const id = await res.text();
-          await navigate(`/session/${id}`, { state: { message } });
-        } else {
-          console.error(await res.text());
-          return;
-        }
-      } finally {
-        setLoading(false);
-      }
+  const createSessionMutation = useMutation({
+    mutationFn: (_message: string) => api.sessions.create(),
+    async onSuccess(sessionId, message) {
+      await navigate(`/session/${sessionId}`, { state: { message } });
     },
-    [navigate],
-  );
+  });
+
+  const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>((event) => {
+    event.preventDefault();
+
+    const data = new FormData(event.target);
+    const message = data.get('message') as string;
+
+    createSessionMutation.mutate(message);
+  }, []);
 
   const handleKeyDown = useCallback<React.KeyboardEventHandler<HTMLTextAreaElement>>((event) => {
     if (event.ctrlKey && event.key === 'Enter') {
@@ -49,7 +41,7 @@ export function Home() {
           name="message"
           rows={6}
           placeholder="Quel sujet souhaitez-vous aborder ?"
-          readOnly={loading}
+          readOnly={createSessionMutation.isPending}
           onKeyDown={handleKeyDown}
           aria-label="Message"
           className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"

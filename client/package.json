@@ -10,6 +10,7 @@
     "@exploria/shared": "workspace:*",
     "@fontsource-variable/geist-mono": "^5.2.8",
     "@fontsource-variable/inter": "^5.2.8",
+    "@tanstack/react-query": "^5.101.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "immer": "^11.1.8",

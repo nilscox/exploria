@@ -1,5 +1,6 @@
-import { sessionEventTypes, type ServerSentSessionEvent, type Session as SharedSession } from '@exploria/shared';
 import type { GetSessionEvent, ServerSentMessageEvent, SessionEvent } from '@exploria/shared';
+import { sessionEventTypes, type ServerSentSessionEvent, type Session as SharedSession } from '@exploria/shared';
+import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import fs from 'node:fs/promises';
@@ -60,6 +61,7 @@ const instructions = await fs.readFile('instructions.md').then(String);
 export const app = express();
 const session = express.Router();
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/session', session);
