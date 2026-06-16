@@ -1,29 +1,50 @@
-import { add } from 'date-fns';
-import assert from 'node:assert';
-import { beforeEach, describe, it, mock } from 'node:test';
+import { sub } from 'date-fns';
+import assert, { AssertionError } from 'node:assert';
+import { beforeEach, describe, it } from 'node:test';
 
+import { di, StubDateAdapter } from './di';
 import { Session } from './session';
 
-import type { SessionEvent } from '../shared';
+import type { GetSessionEvent, SessionEvent } from '../shared';
 
 void describe('Session', () => {
   let session: Session;
-  let events: SessionEvent[];
-
-  const listener = (event: SessionEvent) => events.push(event);
-
-  const date = new Date('2020-01-01T00:00:00.000Z');
-  const getNow = mock.fn(() => date);
+  let stubDate: StubDateAdapter;
 
   beforeEach(() => {
-    getNow.mock.restore();
-    session = new Session(getNow);
-    events = [];
+    stubDate = new StubDateAdapter();
+    di.bind('date', stubDate);
+
+    session = new Session('sessionId');
   });
 
-  void it('initializes a plan', () => {
-    session.addListener('planInitialized', listener);
+  const expectEvent = <Type extends SessionEvent['type']>(
+    type: Type,
+    expected: Omit<GetSessionEvent<Type>, 'id' | 'entityId' | 'type' | 'date'>,
+  ) => {
+    const events = session.peekDomainEvents();
 
+    const result = events.some((event) => {
+      try {
+        assert.strictEqual(event.type, type);
+        assert.partialDeepStrictEqual(event, expected);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    assert(
+      result,
+      new AssertionError({
+        message: 'Event not found',
+        actual: events,
+        expected,
+      }),
+    );
+  };
+
+  void it('initializes a plan', () => {
     session.initializePlan('Subject', [{ id: 'id', label: 'Topic' }]);
 
     assert.strictEqual(session.subject, 'Subject');
@@ -36,35 +57,23 @@ void describe('Session', () => {
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'planInitialized',
-        date,
-        subject: 'Subject',
-        topics: [{ id: 'id', label: 'Topic', status: 'pending' }],
-      },
-    ]);
+    expectEvent('planInitialized', {
+      subject: 'Subject',
+      topics: [{ id: 'id', label: 'Topic', status: 'pending' }],
+    });
   });
 
   void it('changes the subject', () => {
-    session.addListener('subjectChanged', listener);
-
-    session.subject = 'Subject';
+    session.setSubject('Subject');
 
     assert.strictEqual(session.subject, 'Subject');
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'subjectChanged',
-        date,
-        subject: 'Subject',
-      },
-    ]);
+    expectEvent('subjectChanged', {
+      subject: 'Subject',
+    });
   });
 
   void it('adds a topic', () => {
-    session.addListener('topicAdded', listener);
-
     session.addTopic({ id: 'id', label: 'Topic' });
 
     assert.deepStrictEqual(session.topics, [
@@ -75,35 +84,23 @@ void describe('Session', () => {
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'topicAdded',
-        date,
-        topic: { id: 'id', label: 'Topic', status: 'pending' },
-      },
-    ]);
+    expectEvent('topicAdded', {
+      topic: { id: 'id', label: 'Topic', status: 'pending' },
+    });
   });
 
   void it('removes a topic', () => {
-    session.addListener('topicRemoved', listener);
-
     session.addTopic({ id: 'id', label: 'Topic' });
     session.removeTopic('id');
 
     assert.deepStrictEqual(session.topics, []);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'topicRemoved',
-        date,
-        id: 'id',
-      },
-    ]);
+    expectEvent('topicRemoved', {
+      topicId: 'id',
+    });
   });
 
   void it("changes a topic's label", () => {
-    session.addListener('topicLabelChanged', listener);
-
     session.addTopic({ id: 'id', label: 'Initial' });
     session.updateTopic('id', { label: 'Changed' });
 
@@ -115,19 +112,13 @@ void describe('Session', () => {
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'topicLabelChanged',
-        date,
-        id: 'id',
-        label: 'Changed',
-      },
-    ]);
+    expectEvent('topicLabelChanged', {
+      topicId: 'id',
+      label: 'Changed',
+    });
   });
 
   void it("changes a topic's status", () => {
-    session.addListener('topicStatusChanged', listener);
-
     session.addTopic({ id: 'id', label: 'Topic' });
     session.updateTopic('id', { status: 'in_progress' });
 
@@ -139,19 +130,13 @@ void describe('Session', () => {
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'topicStatusChanged',
-        date,
-        id: 'id',
-        status: 'in_progress',
-      },
-    ]);
+    expectEvent('topicStatusChanged', {
+      topicId: 'id',
+      status: 'in_progress',
+    });
   });
 
   void it('adds a note', () => {
-    session.addListener('noteAdded', listener);
-
     session.addNote({ id: 'id', content: 'content' });
 
     assert.deepStrictEqual(session.notes, [
@@ -161,38 +146,26 @@ void describe('Session', () => {
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'noteAdded',
-        date,
-        note: {
-          id: 'id',
-          content: 'content',
-        },
+    expectEvent('noteAdded', {
+      note: {
+        id: 'id',
+        content: 'content',
       },
-    ]);
+    });
   });
 
   void it('removes a note', () => {
-    session.addListener('noteRemoved', listener);
-
     session.addNote({ id: 'id', content: 'content' });
     session.removeNote('id');
 
     assert.deepStrictEqual(session.notes, []);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'noteRemoved',
-        date,
-        id: 'id',
-      },
-    ]);
+    expectEvent('noteRemoved', {
+      noteId: 'id',
+    });
   });
 
   void it("changes a note's content", () => {
-    session.addListener('noteContentChanged', listener);
-
     session.addNote({ id: 'id', content: 'initial' });
     session.updateNote('id', { content: 'updated' });
 
@@ -203,32 +176,27 @@ void describe('Session', () => {
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'noteContentChanged',
-        date,
-        id: 'id',
-        content: 'updated',
-      },
-    ]);
+    expectEvent('noteContentChanged', {
+      noteId: 'id',
+      content: 'updated',
+    });
   });
 
-  void it('starts the timer', () => {
-    session.addListener('timerStarted', listener);
-
+  void it('starts and clears the timer', () => {
     session.startTimer(60);
 
     assert(session.timer);
     assert.strictEqual(session.timer.duration, 60);
-    assert.strictEqual(session.timer.startedAt, date.toISOString());
+    assert.strictEqual(session.timer.startedAt, stubDate.date.toISOString());
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'timerStarted',
-        duration: 60,
-        date,
-      },
-    ]);
+    expectEvent('timerStarted', {
+      duration: 60,
+    });
+
+    session.clearTimer();
+    assert(session.timer === null);
+
+    expectEvent('timerCleared', {});
   });
 
   void it('fails to start the timer when there is one already', () => {
@@ -247,85 +215,61 @@ void describe('Session', () => {
   });
 
   void it('pauses and resumes the timer', () => {
-    session.addListener('timerPaused', listener);
-    session.addListener('timerResumed', listener);
-
     session.startTimer(60);
 
-    getNow.mock.mockImplementation(() => add(date, { minutes: 5 }));
+    stubDate.advance({ minutes: 5 });
     session.pauseTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.pausedAt, add(date, { minutes: 5 }).toISOString());
+    assert.strictEqual(session.timer.pausedAt, stubDate.date.toISOString());
 
-    getNow.mock.mockImplementation(() => add(date, { minutes: 10 }));
+    expectEvent('timerPaused', {});
+
+    stubDate.advance({ minutes: 5 });
     session.resumeTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.startedAt, add(date, { minutes: 5 }).toISOString());
+    assert.strictEqual(session.timer.startedAt, sub(stubDate.date, { minutes: 5 }).toISOString());
     assert.strictEqual(session.timer.pausedAt, undefined);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'timerPaused',
-        date: add(date, { minutes: 5 }),
-      },
-      {
-        type: 'timerResumed',
-        date: add(date, { minutes: 10 }),
-      },
-    ]);
+    expectEvent('timerResumed', {});
   });
 
   void it('adds a message', () => {
-    session.addListener('messageAdded', listener);
+    const date = new Date(0).toISOString();
 
-    session.addMessage({ id: 'id', role: 'user', content: 'content' });
+    session.addMessage({ id: 'id', date, role: 'user', content: 'content' });
 
     assert.deepStrictEqual(session.messages, [
       {
         id: 'id',
+        date,
         role: 'user',
         content: 'content',
       },
     ]);
 
-    assert.deepStrictEqual(events, [
-      {
-        type: 'messageAdded',
+    expectEvent('messageAdded', {
+      message: {
+        id: 'id',
         date,
-        message: {
-          id: 'id',
-          role: 'user',
-          content: 'content',
-        },
+        role: 'user',
+        content: 'content',
       },
-    ]);
+    });
   });
 
   void it('removes empty tool calls', () => {
-    session.addMessage({ id: 'id', role: 'assistant', content: '', toolCalls: [] });
+    const date = new Date(0).toISOString();
+
+    session.addMessage({ id: 'id', date, role: 'assistant', content: '', toolCalls: [] });
 
     assert.deepStrictEqual(session.messages, [
       {
         id: 'id',
+        date,
         role: 'assistant',
         content: '',
-      },
-    ]);
-  });
-
-  void it('saves all events', () => {
-    session.addNote({ id: 'id', content: 'content' });
-
-    assert.deepStrictEqual(session.events, [
-      {
-        type: 'noteAdded',
-        date,
-        note: {
-          id: 'id',
-          content: 'content',
-        },
       },
     ]);
   });

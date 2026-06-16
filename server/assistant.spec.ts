@@ -1,22 +1,22 @@
-import { add } from 'date-fns';
 import assert from 'node:assert';
-import { describe, it, mock } from 'node:test';
+import { describe, it } from 'node:test';
 
 import { Assistant } from './assistant';
+import { di, StubDateAdapter } from './di';
 import { Session } from './session';
 
 void describe('Assistant', () => {
-  void it('formats the session info', () => {
-    const date = new Date('2000-01-01');
-    const getNow = mock.fn(() => date);
+  void it('formats the session info', async () => {
+    const stubDate = new StubDateAdapter();
+    di.bind('date', stubDate);
 
-    const session = new Session(getNow);
+    const session = new Session('');
 
     session.startTimer(60);
 
-    getNow.mock.mockImplementation(() => add(date, { minutes: 5 }));
+    stubDate.advance({ minutes: 5 });
 
-    let result = Assistant.formatSessionInfo(session, getNow);
+    let result = Assistant.formatSessionInfo(session);
 
     assert(result.includes('Temps de la session : 60 minutes'));
     assert(result.includes('Temps écoulé : 5 minutes'));
@@ -24,13 +24,13 @@ void describe('Assistant', () => {
 
     session.pauseTimer();
 
-    result = Assistant.formatSessionInfo(session, getNow);
+    result = Assistant.formatSessionInfo(session);
 
     assert(result.includes('Chronomètre en pause'));
 
-    getNow.mock.mockImplementation(() => add(date, { minutes: 65 }));
+    stubDate.advance({ minutes: 60 });
 
-    result = Assistant.formatSessionInfo(session, getNow);
+    result = Assistant.formatSessionInfo(session);
 
     assert(result.includes('Temps de la session : 60 minutes'));
     assert(result.includes('Temps écoulé : 65 minutes'));

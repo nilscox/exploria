@@ -18,33 +18,17 @@ export type Note = {
 };
 
 export type Message =
-  | {
-      id: string;
-      role: 'system';
-      content: string;
-    }
-  | {
-      id: string;
-      role: 'user';
-      content: string;
-    }
-  | {
-      id: string;
-      role: 'assistant';
-      content: string;
-      toolCalls?: ToolCall[];
-    }
-  | {
-      id: string;
-      role: 'tool';
-      toolCallId: string;
-      content: string;
-    };
+  | { id: string; date: string; role: 'system'; content: string }
+  | { id: string; date: string; role: 'user'; content: string }
+  | { id: string; date: string; role: 'assistant'; content: string; toolCalls?: ToolCall[] }
+  | { id: string; date: string; role: 'tool'; toolCallId: string; content: string };
 
 export type ToolCall = {
   id: string;
   name: string;
-  arguments: string;
+  arguments: unknown;
+  result?: unknown;
+  error?: unknown;
 };
 
 export type Timer = {
@@ -60,6 +44,7 @@ export type DiscussionPath = {
 };
 
 export type Session = {
+  id: string;
   subject: string;
   topics: Topic[];
   notes: Note[];
@@ -68,22 +53,30 @@ export type Session = {
   events: SessionEvent[];
 };
 
+export type DomainEvent<Type extends string = string, Payload = {}> = {
+  id: string;
+  entityId: string;
+  date: string;
+  type: Type;
+} & Payload;
+
 export type SessionEvent =
-  | { type: 'planInitialized'; date: string; subject: string; topics: Topic[] }
-  | { type: 'subjectChanged'; date: string; subject: string }
-  | { type: 'topicAdded'; date: string; topic: Topic }
-  | { type: 'topicRemoved'; date: string; id: string }
-  | { type: 'topicLabelChanged'; date: string; id: string; label: string }
-  | { type: 'topicStatusChanged'; date: string; id: string; status: TopicStatus }
-  | { type: 'noteAdded'; date: string; note: Note }
-  | { type: 'noteRemoved'; date: string; id: string }
-  | { type: 'noteContentChanged'; date: string; id: string; content: string }
-  | { type: 'timerStarted'; date: string; duration: number }
-  | { type: 'timerPaused'; date: string }
-  | { type: 'timerResumed'; date: string }
-  | { type: 'messageAdded'; date: string; message: Message }
-  | { type: 'discussionPathsSet'; date: string; paths: DiscussionPath[] }
-  | { type: 'discussionPathSelected'; date: string; id: string };
+  | DomainEvent<'planInitialized', { subject: string; topics: Topic[] }>
+  | DomainEvent<'subjectChanged', { subject: string }>
+  | DomainEvent<'topicAdded', { topic: Topic }>
+  | DomainEvent<'topicRemoved', { topicId: string }>
+  | DomainEvent<'topicLabelChanged', { topicId: string; label: string }>
+  | DomainEvent<'topicStatusChanged', { topicId: string; status: TopicStatus }>
+  | DomainEvent<'noteAdded', { note: Note }>
+  | DomainEvent<'noteRemoved', { noteId: string }>
+  | DomainEvent<'noteContentChanged', { noteId: string; content: string }>
+  | DomainEvent<'timerStarted', { duration: number }>
+  | DomainEvent<'timerCleared'>
+  | DomainEvent<'timerPaused'>
+  | DomainEvent<'timerResumed'>
+  | DomainEvent<'messageAdded', { message: Message }>
+  | DomainEvent<'discussionPathsSet', { paths: DiscussionPath[] }>
+  | DomainEvent<'discussionPathSelected', { discussionPathId: string }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -98,6 +91,7 @@ export const sessionEventTypes = exhaustiveArray<SessionEvent['type']>()([
   'noteRemoved',
   'noteContentChanged',
   'timerStarted',
+  'timerCleared',
   'timerPaused',
   'timerResumed',
   'messageAdded',

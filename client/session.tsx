@@ -1,8 +1,9 @@
 import clsx from 'clsx';
 import { add, intervalToDuration } from 'date-fns';
 import { current, produce } from 'immer';
-import { ArrowRightIcon, CheckIcon, PauseIcon, PlayIcon } from 'lucide-react';
+import { ArrowRightIcon, CheckIcon, Loader2Icon, PauseIcon, PlayIcon } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 
 import { serverSentMessageEventTypes, serverSentSessionEventTypes } from '../shared';
 import { Details } from './details';
@@ -20,15 +21,17 @@ import type {
   Timer,
 } from '../shared';
 
-export function App() {
-  const [state, dispatch] = useReducer(reducer, {});
+export function SessionPage() {
+  const params = useParams<'sessionId'>();
 
-  useEffect(() => {
-    fetch('/api/session')
-      .then((res) => res.json())
-      .then((session) => dispatch({ type: 'session:fetched', session }))
-      .catch(console.error);
-  }, []);
+  const [state, sendMessage] = useSession(
+    params.sessionId as string,
+    useCallback((event) => {
+      if (event.type === 'session:messageAdded' && event.message.role === 'user' && textareaRef.current) {
+        textareaRef.current.value = '';
+      }
+    }, []),
+  );
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -36,69 +39,6 @@ export function App() {
   useLayoutEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'instant' });
   }, [state.stream, state.session?.events]);
-
-  useEffect(() => {
-    const source = new EventSource(`/api/session/stream`);
-
-    source.addEventListener('error', (event) => {
-      console.error('Stream error', event);
-      dispatch({ type: 'error' });
-    });
-
-    for (const type of serverSentSessionEventTypes) {
-      source.addEventListener(type, ({ data }) => {
-        const event: ServerSentSessionEvent = { type, ...JSON.parse(data) };
-
-        dispatch(event);
-
-        if (event.type === 'session:error') {
-          console.error(event.message);
-        }
-
-        if (event.type === 'session:messageAdded' && event.message.role === 'user' && textareaRef.current) {
-          textareaRef.current.value = '';
-        }
-      });
-    }
-  }, []);
-
-  const sendMessage = useCallback((message: string) => {
-    const source = new EventSource(`/api/session/message?message=${encodeURIComponent(message)}`);
-
-    source.addEventListener('open', () => {
-      dispatch({ type: 'message:open' });
-    });
-
-    source.addEventListener('message', (event) => {
-      console.log('message', event);
-    });
-
-    source.addEventListener('error', (event) => {
-      console.error('Message error', event);
-      dispatch({ type: 'error' });
-      source.close();
-    });
-
-    for (const type of serverSentMessageEventTypes) {
-      source.addEventListener(type, ({ data }) => {
-        const event: ServerSentMessageEvent = { type, ...JSON.parse(data) };
-
-        dispatch(event);
-
-        if (event.type === 'message:error') {
-          console.error(event.message);
-          source.close();
-        }
-
-        if (event.type === 'message:done') {
-          source.close();
-        }
-      });
-    }
-
-    source.addEventListener('err', ({ data }) => dispatch({ type: 'stream:error', ...JSON.parse(data) }));
-    source.addEventListener('chunk', ({ data }) => dispatch({ type: 'stream:chunk', ...JSON.parse(data) }));
-  }, []);
 
   const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
     (event) => {
@@ -120,24 +60,8 @@ export function App() {
 
   if (!state.session) {
     return (
-      <div className="max-w-6xl mx-auto px-4 col h-full py-4 justify-center gap-16">
-        <header className="text-center">
-          <h1 className="my-4 text-4xl font-medium">Exploria</h1>
-          <div className="text-dim">L'IA au service de la réflexion.</div>
-        </header>
-
-        <form onSubmit={handleSubmit}>
-          <textarea
-            ref={textareaRef}
-            name="message"
-            rows={6}
-            placeholder="Quel sujet souhaitez-vous aborder ?"
-            readOnly={state.loading}
-            onKeyDown={handleKeyDown}
-            aria-label="Message"
-            className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"
-          />
-        </form>
+      <div className="h-full col items-center justify-center">
+        <Loader2Icon className="animate-spin size-8" />
       </div>
     );
   }
@@ -155,7 +79,15 @@ export function App() {
         <div className="col flex-1">
           <div className="flex-1 overflow-y-auto col gap-4 py-8 px-2 scrollbar-thin scrollbar-thumb-zinc-600">
             <Events events={state.session.events} />
-            {state.stream && <Message message={{ role: 'assistant', content: state.stream }} />}
+            {state.stream && (
+              <Message
+                message={{
+                  role: 'assistant',
+                  date: new Date().toISOString(),
+                  content: state.stream,
+                }}
+              />
+            )}
             <div ref={bottomRef} />
           </div>
           <form onSubmit={handleSubmit}>
@@ -175,17 +107,134 @@ export function App() {
   );
 }
 
+function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) => void) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [state, dispatch] = useReducer(reducer, {});
+
+  const fetchSession = useCallback(
+    async (sessionId: string) => {
+      const res = await fetch(`/api/session/${sessionId}`);
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          await navigate('/');
+          return;
+        }
+
+        throw new Error(await res.text());
+      }
+
+      dispatch({
+        type: 'session:fetched',
+        session: await res.json(),
+      });
+    },
+    [navigate],
+  );
+
+  useEffect(() => {
+    fetchSession(sessionId).catch(console.error);
+  }, [fetchSession, sessionId]);
+
+  const hasSession = Boolean(state.session);
+
+  useEffect(() => {
+    if (!hasSession) {
+      return;
+    }
+
+    const source = new EventSource(`/api/session/${sessionId}/stream`);
+
+    source.addEventListener('open', () => {
+      dispatch({ type: 'session:open' });
+    });
+
+    source.addEventListener('error', (event) => {
+      console.error('Stream error', event);
+      dispatch({ type: 'error' });
+    });
+
+    for (const type of serverSentSessionEventTypes) {
+      source.addEventListener(type, ({ data }) => {
+        const event: ServerSentSessionEvent = { type, ...JSON.parse(data) };
+
+        dispatch(event);
+
+        if (event.type === 'session:error') {
+          console.error(event.message);
+        }
+
+        onEvent(event);
+      });
+    }
+
+    return () => {
+      source.close();
+    };
+  }, [hasSession, sessionId, onEvent]);
+
+  const sendMessage = useCallback(
+    (message: string) => {
+      const source = new EventSource(`/api/session/${sessionId}/message?message=${encodeURIComponent(message)}`);
+
+      source.addEventListener('open', () => {
+        dispatch({ type: 'message:open' });
+      });
+
+      source.addEventListener('error', (event) => {
+        console.error('Message error', event);
+        dispatch({ type: 'error' });
+        source.close();
+      });
+
+      for (const type of serverSentMessageEventTypes) {
+        source.addEventListener(type, ({ data }) => {
+          const event: ServerSentMessageEvent = { type, ...JSON.parse(data) };
+
+          dispatch(event);
+
+          if (event.type === 'message:error') {
+            console.error(event.message);
+            source.close();
+          }
+
+          if (event.type === 'message:done') {
+            source.close();
+          }
+        });
+      }
+
+      source.addEventListener('err', ({ data }) => dispatch({ type: 'stream:error', ...JSON.parse(data) }));
+      source.addEventListener('chunk', ({ data }) => dispatch({ type: 'stream:chunk', ...JSON.parse(data) }));
+    },
+    [sessionId],
+  );
+
+  useEffect(() => {
+    if (typeof location.state?.message === 'string' && state.connected) {
+      sendMessage(location.state.message);
+      void navigate({}, { state: {}, replace: true });
+    }
+  }, [state.connected, location.state, sendMessage, navigate]);
+
+  return [state, sendMessage] as const;
+}
+
 const reducer = produce(function (
   state: {
     session?: Session;
     stream?: string;
     loading?: boolean;
+    connected?: boolean;
   },
   action:
     | { type: 'error' }
     | { type: 'message:open' }
     | ServerSentMessageEvent
     | { type: 'session:fetched'; session: Session }
+    | { type: 'session:open' }
     | ServerSentSessionEvent,
 ) {
   console.groupCollapsed(action.type);
@@ -213,6 +262,10 @@ const reducer = produce(function (
 
   if (action.type === 'session:fetched') {
     state.session = action.session;
+  }
+
+  if (action.type === 'session:open') {
+    state.connected = true;
   }
 
   if (action.type === 'session:subjectChanged') {
@@ -260,7 +313,7 @@ function Info({ session }: { session: Session }) {
         <section>
           <h2 className="my-4 text-lg font-semibold">Temps</h2>
           <div>
-            <Timer timer={session.timer} />
+            <Timer sessionId={session.id} timer={session.timer} />
           </div>
         </section>
       )}
@@ -303,17 +356,15 @@ function Info({ session }: { session: Session }) {
   );
 }
 
-function Timer({ timer }: { timer: Timer }) {
+function Timer({ sessionId, timer }: { sessionId: string; timer: Timer }) {
   const now = useNow();
   const { hours = 0, minutes = 0, seconds = 0 } = getRemainingTime(timer, now);
 
   const togglePauseResume = useCallback(() => {
-    if (!timer.pausedAt) {
-      fetch('/api/timer/pause').catch(console.error);
-    } else {
-      fetch('/api/timer/resume').catch(console.error);
-    }
-  }, [timer]);
+    const url = `/api/session/${sessionId}/timer/${timer.pausedAt ? 'resume' : 'pause'}`;
+
+    fetch(url, { method: 'PUT' }).catch(console.error);
+  }, [sessionId, timer]);
 
   const Icon = timer.pausedAt ? PlayIcon : PauseIcon;
 
@@ -345,6 +396,10 @@ function TopicAddedEvent({ event }: { event: GetSessionEvent<'topicAdded'> }) {
 
 function TimerStartedEvent({ event }: { event: GetSessionEvent<'timerStarted'> }) {
   return <div className="text-sm text-dim">Chronomètre démarré : {event.duration} minutes</div>;
+}
+
+function TimerClearedEvent() {
+  return <div className="text-sm text-dim">Chronomètre annulé</div>;
 }
 
 function TimerPausedEvent() {
@@ -389,7 +444,15 @@ function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }
             summary={`Tool call ${toolCall.name} (${toolCall.id})`}
           >
             <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
-              {toolCall.arguments}
+              {JSON.stringify(toolCall.arguments, null, 2)}
+            </div>
+
+            <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
+              {JSON.stringify(toolCall.result, null, 2)}
+            </div>
+
+            <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
+              {JSON.stringify(toolCall.error, null, 2)}
             </div>
           </Details>
         ))}
@@ -408,6 +471,7 @@ const sessionEventMap: { [Event in SessionEvent as Event['type']]: React.Compone
   noteRemoved: () => null,
   noteContentChanged: () => null,
   timerStarted: TimerStartedEvent,
+  timerCleared: TimerClearedEvent,
   timerPaused: TimerPausedEvent,
   timerResumed: TimerResumedEvent,
   messageAdded: MessageAddedEvent,

@@ -1,5 +1,12 @@
 {
-  "include": ["vite.config.ts", "oxfmt.config.ts", "oxlint.config.ts", "server/**/*", "shared/**/*"],
+  "include": [
+    "drizzle.config.ts",
+    "oxfmt.config.ts",
+    "oxlint.config.ts",
+    "vite.config.ts",
+    "server/**/*",
+    "shared/**/*"
+  ],
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "es2023",

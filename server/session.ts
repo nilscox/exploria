@@ -1,23 +1,20 @@
 import { intervalToDuration, sub } from 'date-fns';
-import EventEmitter from 'node:events';
 
-import { sessionEventTypes } from '../shared';
-import { assert, hasId, type DistributiveOmit } from './utils';
+import { AggregateRoot } from './aggregate-root';
+import { di } from './di';
+import { assert, hasId } from './utils';
 
-import type { DiscussionPath, GetSessionEvent, Message, Note, SessionEvent, Timer, Topic } from '../shared';
+import type { DiscussionPath, Message, Note, SessionEvent, Timer, Topic } from '../shared';
 
-export class Session {
-  private emitter = new EventEmitter();
+export class Session extends AggregateRoot<SessionEvent> {
+  get id(): string {
+    return this._id;
+  }
 
   private _subject: string = '';
 
   get subject(): string {
     return this._subject;
-  }
-
-  set subject(subject: string) {
-    this._subject = subject;
-    this.emit({ type: 'subjectChanged', subject });
   }
 
   private _topics: Topic[] = [];
@@ -50,104 +47,101 @@ export class Session {
     return this._discussionPaths;
   }
 
-  private _events: Array<SessionEvent> = [];
-
-  get events() {
-    return this._events;
-  }
-
-  private now: () => Date;
-
-  constructor(now: () => Date = () => new Date()) {
-    this.now = now;
-
-    for (const type of sessionEventTypes) {
-      this.addListener(type, (event) => this._events.push(event));
-    }
-  }
-
   static from(data: {
+    id: string;
     subject: string;
     topics: Topic[];
     notes: Note[];
-    duration?: number;
-    timer?: Timer;
+    timer: Timer | null;
     messages: Message[];
     discussionPaths: DiscussionPath[];
-    events: Array<SessionEvent & { date: Date }>;
   }) {
-    const session = new Session();
+    const session = new Session(data.id);
 
     session._subject = data.subject;
     session._topics = data.topics;
     session._notes = data.notes;
-    session._timer = data.timer ?? null;
+    session._timer = data.timer;
     session._messages = data.messages;
     session._discussionPaths = data.discussionPaths;
-    session._events = data.events;
 
     return session;
   }
+
   initializePlan(subject: string, topics: Array<Omit<Topic, 'status'>>) {
     this._subject = subject;
     this._topics = topics.map((topic) => ({ ...topic, status: 'pending' }));
+
     this.emit({ type: 'planInitialized', subject: this.subject, topics: this._topics });
+  }
+
+  setSubject(subject: string) {
+    this._subject = subject;
+
+    this.emit({ type: 'subjectChanged', subject });
   }
 
   addTopic({ id, label }: Omit<Topic, 'status'>) {
     const topic: Topic = { id, label, status: 'pending' };
 
     this._topics.push(topic);
+
     this.emit({ type: 'topicAdded', topic });
   }
 
-  removeTopic(id: string) {
-    const index = this._topics.findIndex(hasId(id));
+  removeTopic(topicId: string) {
+    const index = this._topics.findIndex(hasId(topicId));
 
     if (index >= 0) {
       this._topics.splice(index, 1);
-      this.emit({ type: 'topicRemoved', id });
+
+      this.emit({ type: 'topicRemoved', topicId });
     }
   }
 
-  updateTopic(id: string, { label, status }: Partial<Omit<Topic, 'id'>>) {
-    const topic = this._topics.find(hasId(id));
+  updateTopic(topicId: string, { label, status }: Partial<Omit<Topic, 'id'>>) {
+    const topic = this._topics.find(hasId(topicId));
 
-    assert(topic, new Error(`Cannot find topic "${id}"`));
+    assert(topic, new Error(`Cannot find topic "${topicId}"`));
 
     if (label) {
       topic.label = label;
-      this.emit({ type: 'topicLabelChanged', id, label });
+
+      this.emit({ type: 'topicLabelChanged', topicId, label });
     }
 
     if (status) {
       topic.status = status;
-      this.emit({ type: 'topicStatusChanged', id, status });
+
+      this.emit({ type: 'topicStatusChanged', topicId, status });
     }
   }
 
   addNote(note: Note) {
     this._notes.push(note);
+
     this.emit({ type: 'noteAdded', note });
   }
 
-  removeNote(id: string) {
-    const index = this._notes.findIndex(hasId(id));
+  removeNote(noteId: string) {
+    const index = this._notes.findIndex(hasId(noteId));
 
     if (index >= 0) {
       this._notes.splice(index, 1);
-      this.emit({ type: 'noteRemoved', id });
+
+      this.emit({ type: 'noteRemoved', noteId });
     }
   }
 
-  updateNote(id: string, { content }: Partial<Omit<Note, 'id'>>) {
-    const note = this._notes.find(hasId(id));
+  updateNote(noteId: string, { content }: Partial<Omit<Note, 'id'>>) {
+    const note = this._notes.find(hasId(noteId));
 
-    assert(note, new Error(`Cannot find note "${id}"`));
+    assert(note, new Error(`Cannot find note "${noteId}"`));
 
     if (content) {
       note.content = content;
-      this.emit({ type: 'noteContentChanged', id, content });
+
+      this.emit({ type: 'noteContentChanged', noteId, content });
     }
   }
 
@@ -157,13 +151,23 @@ export class Session {
     assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
 
     this._timer = { duration, startedAt: now.toISOString() };
+
     this.emit({ type: 'timerStarted', duration });
+  }
+
+  clearTimer() {
+    assert(this._timer, new Error("Le chronomètre n'est pas lancé"));
+
+    this._timer = null;
+
+    this.emit({ type: 'timerCleared' });
   }
 
   pauseTimer() {
     assert(this._timer);
 
     this._timer.pausedAt = this.now().toISOString();
+
     this.emit({ type: 'timerPaused' });
   }
 
@@ -178,6 +182,7 @@ export class Session {
 
     this._timer.startedAt = sub(this.now(), elapsed).toISOString();
     delete this._timer.pausedAt;
+
     this.emit({ type: 'timerResumed' });
   }
 
@@ -187,34 +192,25 @@ export class Session {
     }
 
     this._messages.push(message);
+
     this.emit({ type: 'messageAdded', message });
   }
 
   setDiscussionPath(paths: DiscussionPath[]) {
     this._discussionPaths = paths;
+
     this.emit({ type: 'discussionPathsSet', paths });
   }
 
-  selectDiscussionPath(id: string) {
-    const path = this.discussionPaths.find(hasId(id));
+  selectDiscussionPath(discussionPathId: string) {
+    const path = this.discussionPaths.find(hasId(discussionPathId));
 
-    assert(path, new Error(`Cannot find discussion path "${id}"`));
+    assert(path, new Error(`Cannot find discussion path "${discussionPathId}"`));
 
-    this.emit({ type: 'discussionPathSelected', id });
+    this.emit({ type: 'discussionPathSelected', discussionPathId });
   }
 
-  private emit({ type, ...event }: DistributiveOmit<SessionEvent, 'date'>) {
-    this.emitter.emit(type, { ...event, type, date: this.now() });
-  }
-
-  addListener<Event extends SessionEvent, Type extends Event['type']>(
-    type: Type,
-    listener: (event: GetSessionEvent<Type>) => void,
-  ) {
-    this.emitter.addListener(type, listener);
-
-    return () => {
-      this.emitter.removeListener(type, listener);
-    };
+  private now() {
+    return di.resolve('date').now();
   }
 }

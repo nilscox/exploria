@@ -33,3 +33,25 @@ export function has<T, K extends keyof T>(key: K, value: T[K]) {
 export function hasId<T extends { id: string }>(value: string) {
   return (obj: T) => obj.id === value;
 }
+
+export function hasKey<T extends object>(obj: T, key: string): key is Extract<keyof T, string> {
+  return Object.keys(obj).includes(key);
+}
+
+export class MapSet<K, V> extends Map<K, Set<V>> {
+  add(key: K, value: V) {
+    if (!this.has(key)) {
+      this.set(key, new Set());
+    }
+
+    this.get(key)?.add(value);
+  }
+
+  remove(key: K, value: V) {
+    this.get(key)?.delete(value);
+
+    if (this.get(key)?.size === 0) {
+      super.delete(key);
+    }
+  }
+}

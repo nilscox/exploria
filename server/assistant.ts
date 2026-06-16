@@ -5,8 +5,9 @@ import type { Stream } from 'openai/core/streaming.mjs';
 import type { ChatCompletionTool } from 'openai/resources/index.mjs';
 import type z from 'zod';
 
+import { di } from './di';
 import { tools } from './tools';
-import { assert, createId } from './utils';
+import { assert, createId, hasKey } from './utils';
 
 import type { Message, ToolCall, TopicStatus } from '../shared';
 import type { Session } from './session';
@@ -36,11 +37,13 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
   }
 
   async run(session: Session) {
+    const dateAdapter = di.resolve('date');
     const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
     const { content, toolCalls } = await this.handleStream(stream);
 
     session.addMessage({
       id: createId(),
+      date: dateAdapter.now().toISOString(),
       role: 'assistant',
       content,
       toolCalls,
@@ -56,12 +59,15 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
   }
 
   private createChatCompletionRequest(session: Session): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming {
+    const dateAdapter = di.resolve('date');
+
     return {
       model: this.model,
       messages: [
         ...session.messages,
         {
           id: '',
+          date: dateAdapter.now().toISOString(),
           role: 'system' as const,
           content: Assistant.formatSessionInfo(session),
         } satisfies Message,
@@ -72,7 +78,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     };
   }
 
-  static formatSessionInfo(session: Session, now = () => new Date()): string {
+  static formatSessionInfo(session: Session): string {
     const lines = [];
 
     const topicStatusMap: Record<TopicStatus, string> = {
@@ -98,7 +104,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     }
 
     lines.push('', '# Gestion du temps', '');
-    lines.push(this.formatTimerInfo(session, now));
+    lines.push(this.formatTimerInfo(session));
 
     if (session.notes.length > 0) {
       lines.push('', '# Notes', '');
@@ -112,14 +118,16 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     return lines.join('\n');
   }
 
-  static formatTimerInfo(session: Session, now = () => new Date()) {
+  static formatTimerInfo(session: Session) {
+    const dateAdapter = di.resolve('date');
+
     if (!session.timer) {
       return 'Aucun chronomètre démarré';
     }
 
     const duration = intervalToDuration({
       start: session.timer.startedAt,
-      end: session.timer.pausedAt ?? now(),
+      end: session.timer.pausedAt ?? dateAdapter.now(),
     });
 
     const elapsed = (duration.minutes ?? 0) + (duration.hours ?? 0) * 60;
@@ -177,22 +185,31 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     };
   }
 
-  private async handleToolCall(session: Session, { id, name, arguments: arguments_ }: ToolCall) {
-    const tool: Tool<z.ZodType<any>> | undefined = tools[name as keyof typeof tools];
+  private async handleToolCall(session: Session, toolCall: ToolCall) {
+    const dateAdapter = di.resolve('date');
 
-    assert(tool);
+    assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
+    assert(typeof toolCall.arguments === 'string');
 
-    const args = tool.param.parse(JSON.parse(arguments_));
+    const tool: Tool<z.ZodType<any>> = tools[toolCall.name];
+    const args = JSON.parse(toolCall.arguments);
+    let content: string;
 
-    const result = await Promise.resolve()
-      .then(() => tool.execute(session, args))
-      .catch((error) => (error instanceof Error ? `Error: ${error.message}` : 'Unknown error'));
+    try {
+      toolCall.arguments = tool.param.parse(args);
+      toolCall.result = await tool.execute(session, toolCall.arguments);
+      content = typeof toolCall.result === 'string' ? toolCall.result : JSON.stringify(toolCall.result);
+    } catch (error) {
+      toolCall.error = error;
+      content = error instanceof Error ? `Error: ${error.message}` : 'Unknown error';
+    }
 
     session.addMessage({
       id: createId(),
+      date: dateAdapter.now().toISOString(),
       role: 'tool',
-      toolCallId: id,
-      content: result,
+      toolCallId: toolCall.id,
+      content,
     });
   }
 
