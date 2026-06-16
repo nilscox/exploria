@@ -1,0 +1,5 @@
+{
+  "name": "@exploria/shared",
+  "type": "module",
+  "main": "index.ts"
+}

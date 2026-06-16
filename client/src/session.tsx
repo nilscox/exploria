@@ -1,16 +1,4 @@
-import clsx from 'clsx';
-import { add, intervalToDuration } from 'date-fns';
-import { current, produce } from 'immer';
-import { ArrowRightIcon, CheckIcon, Loader2Icon, PauseIcon, PlayIcon } from 'lucide-react';
-import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
-
-import { serverSentMessageEventTypes, serverSentSessionEventTypes } from '../shared';
-import { Details } from './details';
-import { useNow } from './hooks/use-now';
-import { Markdown } from './markdown';
-import { assert } from './utils';
-
+import { serverSentMessageEventTypes, serverSentSessionEventTypes } from '@exploria/shared';
 import type {
   GetSessionEvent,
   Message,
@@ -19,7 +7,18 @@ import type {
   Session,
   SessionEvent,
   Timer,
-} from '../shared';
+} from '@exploria/shared';
+import clsx from 'clsx';
+import { add, intervalToDuration } from 'date-fns';
+import { current, produce } from 'immer';
+import { ArrowRightIcon, CheckIcon, Loader2Icon, PauseIcon, PlayIcon } from 'lucide-react';
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
+
+import { Details } from './details';
+import { useNow } from './hooks/use-now';
+import { Markdown } from './markdown';
+import { assert } from './utils';
 
 export function SessionPage() {
   const params = useParams<'sessionId'>();

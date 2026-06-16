@@ -1,3 +1,4 @@
+import type { Message, ToolCall, TopicStatus } from '@exploria/shared';
 import { intervalToDuration } from 'date-fns';
 import EventEmitter from 'node:events';
 import type OpenAI from 'openai';
@@ -9,7 +10,6 @@ import { di } from './di';
 import { tools } from './tools';
 import { assert, createId, hasKey } from './utils';
 
-import type { Message, ToolCall, TopicStatus } from '../shared';
 import type { Session } from './session';
 import type { Tool } from './tools/create-tool';
 

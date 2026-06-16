@@ -1,6 +1,5 @@
+import type { DomainEvent } from '@exploria/shared';
 import { EventEmitter } from 'node:events';
-
-import type { DomainEvent } from '../shared';
 
 export class Events {
   private emitter = new EventEmitter();

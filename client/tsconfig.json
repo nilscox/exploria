@@ -1,18 +1,11 @@
 {
-  "include": [
-    "drizzle.config.ts",
-    "oxfmt.config.ts",
-    "oxlint.config.ts",
-    "vite.config.ts",
-    "server/**/*",
-    "shared/**/*"
-  ],
+  "include": ["src/**/*"],
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "es2023",
-    "lib": ["ES2023"],
+    "lib": ["ES2023", "DOM"],
     "module": "esnext",
-    "types": ["node"],
+    "types": ["vite/client"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -21,11 +14,11 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   }

@@ -1,7 +1,7 @@
+import type { DomainEvent } from '@exploria/shared';
+
 import { di } from './di';
 import { type DistributiveOmit, createId } from './utils';
-
-import type { DomainEvent } from '../shared';
 
 export class AggregateRoot<Event extends DomainEvent<string>> {
   protected _id: string;

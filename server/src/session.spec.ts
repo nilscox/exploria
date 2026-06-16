@@ -1,11 +1,10 @@
+import type { GetSessionEvent, SessionEvent } from '@exploria/shared';
 import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
 import { di, StubDateAdapter } from './di';
 import { Session } from './session';
-
-import type { GetSessionEvent, SessionEvent } from '../shared';
 
 void describe('Session', () => {
   let session: Session;

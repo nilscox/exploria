@@ -1,11 +1,11 @@
-import 'dotenv/config';
+import { sessionEventTypes, type ServerSentSessionEvent, type Session as SharedSession } from '@exploria/shared';
+import type { GetSessionEvent, ServerSentMessageEvent, SessionEvent } from '@exploria/shared';
 import express, { type ErrorRequestHandler } from 'express';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import fs from 'node:fs/promises';
 import OpenAI from 'openai';
 import z from 'zod';
 
-import { sessionEventTypes, type ServerSentSessionEvent, type Session as SharedSession } from '../shared';
 import { Assistant } from './assistant';
 import { drizzleDatabase } from './database';
 import { SessionRepository } from './database/session-repository';
@@ -14,8 +14,6 @@ import { Events } from './events';
 import { Session } from './session';
 import { TestAssistant } from './test-assistant';
 import { createId, defined, MapSet } from './utils';
-
-import type { GetSessionEvent, ServerSentMessageEvent, SessionEvent } from '../shared';
 
 di.bind('date', new NativeDateAdapter());
 di.bind('events', new Events());

@@ -1,7 +1,7 @@
+import type { SessionEvent } from '@exploria/shared';
 import { defineRelations } from 'drizzle-orm';
 import * as p from 'drizzle-orm/pg-core';
 
-import type { SessionEvent } from '../../shared';
 import type { DistributiveOmit } from '../utils';
 
 export const sessions = p.pgTable('sessions', {

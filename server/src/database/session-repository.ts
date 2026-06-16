@@ -1,3 +1,4 @@
+import type { Message, Note, SessionEvent, Timer, Topic } from '@exploria/shared';
 import { eq, inArray } from 'drizzle-orm';
 
 import { di } from '../di';
@@ -5,7 +6,6 @@ import { Session } from '../session';
 import { assert } from '../utils';
 import { messages, notes, sessionEvents, sessions, toolCalls, topics } from './schema';
 
-import type { Message, Note, SessionEvent, Timer, Topic } from '../../shared';
 import type {
   MessageSelect,
   NoteSelect,
@@ -53,7 +53,9 @@ export class SessionRepository {
         .where(eq(sessions.id, session.id));
     };
 
-    const handlers: Partial<{ [Event in SessionEvent as Event['type']]: (event: Event) => Promise<void> }> = {
+    const handlers: Partial<{
+      [Event in SessionEvent as Event['type']]: (event: Event) => Promise<void>;
+    }> = {
       planInitialized: async ({ subject, topics: topicsToInsert }) => {
         await db.update(sessions).set({ subject }).where(eq(sessions.id, session.id));
         await db.delete(topics).where(eq(topics.sessionId, session.id));
