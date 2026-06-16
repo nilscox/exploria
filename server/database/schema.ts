@@ -10,6 +10,7 @@ export const sessions = p.pgTable('sessions', {
   timerDuration: p.integer(),
   timerStartedAt: p.timestamp(),
   timerPausedAt: p.timestamp(),
+  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const topicStatus = p.pgEnum('topic_status', ['pending', 'in_progress', 'done']);
@@ -22,6 +23,7 @@ export const topics = p.pgTable('topics', {
     .references(() => sessions.id),
   label: p.varchar({ length: 32 }).notNull(),
   status: topicStatus().notNull(),
+  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const notes = p.pgTable('notes', {
@@ -31,6 +33,7 @@ export const notes = p.pgTable('notes', {
     .notNull()
     .references(() => sessions.id),
   content: p.text().notNull(),
+  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const role = p.pgEnum('role', ['system', 'assistant', 'user', 'tool']);
@@ -42,9 +45,9 @@ export const messages = p.pgTable('messages', {
     .varchar({ length: 16 })
     .notNull()
     .references(() => sessions.id),
-  date: p.timestamp({ precision: 4 }).notNull(),
   content: p.text().notNull(),
   toolCallId: p.varchar({ length: 32 }),
+  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const toolCalls = p.pgTable('tool_calls', {
@@ -57,6 +60,7 @@ export const toolCalls = p.pgTable('tool_calls', {
   arguments: p.jsonb().notNull(),
   result: p.jsonb(),
   error: p.jsonb(),
+  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const sessionEvents = p.pgTable('session_events', {
@@ -68,6 +72,7 @@ export const sessionEvents = p.pgTable('session_events', {
   date: p.timestamp().notNull(),
   type: p.varchar({ length: 32 }).$type<SessionEvent['type']>().notNull(),
   payload: p.json().$type<DistributiveOmit<SessionEvent, 'id' | 'type' | 'date'>>().notNull(),
+  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const relations = defineRelations({ sessions, topics, notes, messages, toolCalls, sessionEvents }, (r) => ({

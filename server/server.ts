@@ -88,6 +88,20 @@ app.use(((err, _req, res, _next) => {
 const sessionContext = new AsyncLocalStorage<Session>();
 const getSession = () => defined(sessionContext.getStore());
 
+session.get('/', async (req, res) => {
+  const sessionRepository = di.resolve('sessionRepository');
+
+  const sessions = await sessionRepository.findMany();
+
+  res.send(
+    sessions.map(({ id, subject, createdAt }) => ({
+      id,
+      subject,
+      date: createdAt.toISOString(),
+    })),
+  );
+});
+
 session.post('/', async (req, res) => {
   const dateAdapter = di.resolve('date');
   const sessionRepository = di.resolve('sessionRepository');

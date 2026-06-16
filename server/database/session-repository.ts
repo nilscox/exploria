@@ -101,8 +101,8 @@ export class SessionRepository {
         await db.insert(messages).values({
           ...message,
           sessionId: session.id,
-          date: new Date(message.date),
           toolCallId: message.role === 'tool' ? message.toolCallId : null,
+          createdAt: new Date(message.date),
         });
 
         if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
@@ -140,7 +140,7 @@ export class SessionRepository {
       with: {
         notes: true,
         topics: true,
-        messages: { with: { toolCalls: true }, orderBy: { date: 'asc' } },
+        messages: { with: { toolCalls: true }, orderBy: { createdAt: 'asc' } },
         events: true,
       },
     });
@@ -150,6 +150,10 @@ export class SessionRepository {
     }
 
     return Session.from(SessionRepository.mapSession(session));
+  }
+
+  async findMany() {
+    return this.db.query.sessions.findMany();
   }
 
   async delete(id: string) {
@@ -200,13 +204,13 @@ export class SessionRepository {
 
     const mapMessage = ({
       id,
-      date: dateObject,
       role,
       content,
       toolCalls,
       toolCallId,
+      createdAt,
     }: MessageSelect & { toolCalls: ToolCallSelect[] }): Message => {
-      const date = dateObject.toISOString();
+      const date = createdAt.toISOString();
 
       if (role === 'system' || role === 'user' || (role === 'assistant' && toolCalls.length === 0)) {
         return { id, date, role, content };
