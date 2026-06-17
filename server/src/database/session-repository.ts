@@ -151,7 +151,7 @@ export class SessionRepository {
       return null;
     }
 
-    return Session.from(SessionRepository.mapSession(session));
+    return SessionRepository.mapSession(session);
   }
 
   async findMany() {

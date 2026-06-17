@@ -1,22 +1,40 @@
 import { add, type Duration } from 'date-fns';
+import { customAlphabet } from 'nanoid';
 
 import { assert } from './utils';
 
 import type { Database } from './database';
 import type { SessionRepository } from './database/session-repository';
 import type { Events } from './events';
+import type { SessionStreams } from './session-streams';
+
+export interface Generator {
+  id(): string;
+}
+
+export class NanoIdGenerator implements Generator {
+  id = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 8);
+}
+
+export class StubGenerator implements Generator {
+  public nextId = '';
+
+  id(): string {
+    return this.nextId;
+  }
+}
 
 export interface DatePort {
   now(): Date;
 }
 
-export class NativeDateAdapter implements DatePort {
+export class NativeDate implements DatePort {
   now(): Date {
     return new Date();
   }
 }
 
-export class StubDateAdapter implements DatePort {
+export class StubDate implements DatePort {
   date = new Date(0);
 
   advance(duration: Duration) {
@@ -49,8 +67,10 @@ class Container<T> {
 }
 
 export const di = new Container<{
+  generator: Generator;
   date: DatePort;
   events: Events;
   database: Database;
   sessionRepository: SessionRepository;
+  sessionStreams: SessionStreams;
 }>();

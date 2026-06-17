@@ -1,4 +1,4 @@
-import type { DiscussionPath, Message, Note, SessionEvent, Timer, Topic } from '@exploria/shared';
+import type { DiscussionPath, Message, Note, Role, SessionEvent, Timer, ToolCall, Topic } from '@exploria/shared';
 import { intervalToDuration, sub } from 'date-fns';
 
 import { AggregateRoot } from './aggregate-root';
@@ -55,8 +55,9 @@ export class Session extends AggregateRoot<SessionEvent> {
     messages: Message[];
     discussionPaths: DiscussionPath[];
   }) {
-    const session = new Session(data.id);
+    const session = new Session();
 
+    session._id = data.id;
     session._subject = data.subject;
     session._topics = data.topics;
     session._notes = data.notes;
@@ -67,9 +68,11 @@ export class Session extends AggregateRoot<SessionEvent> {
     return session;
   }
 
-  initializePlan(subject: string, topics: Array<Omit<Topic, 'status'>>) {
+  initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
+    const generator = di.resolve('generator');
+
     this._subject = subject;
-    this._topics = topics.map((topic) => ({ ...topic, status: 'pending' }));
+    this._topics = topics.map((topic) => ({ ...topic, id: generator.id(), status: 'pending' }));
 
     this.emit({ type: 'planInitialized', subject: this.subject, topics: this._topics });
   }
@@ -80,8 +83,14 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit({ type: 'subjectChanged', subject });
   }
 
-  addTopic({ id, label }: Omit<Topic, 'status'>) {
-    const topic: Topic = { id, label, status: 'pending' };
+  addTopic({ label }: Omit<Topic, 'id' | 'status'>) {
+    const generator = di.resolve('generator');
+
+    const topic: Topic = {
+      id: generator.id(),
+      label,
+      status: 'pending',
+    };
 
     this._topics.push(topic);
 
@@ -116,7 +125,14 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
   }
 
-  addNote(note: Note) {
+  addNote({ content }: Omit<Note, 'id'>) {
+    const generator = di.resolve('generator');
+
+    const note = {
+      id: generator.id(),
+      content,
+    };
+
     this._notes.push(note);
 
     this.emit({ type: 'noteAdded', note });
@@ -185,10 +201,37 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit({ type: 'timerResumed' });
   }
 
-  addMessage(message: Message) {
-    if (message.role === 'assistant' && message.toolCalls?.length === 0) {
-      delete message.toolCalls;
+  addMessage(role: Exclude<Role, 'tool'>, content: string, toolCalls?: ToolCall[]) {
+    const generator = di.resolve('generator');
+    const dateAdapter = di.resolve('date');
+
+    const message: Message = {
+      id: generator.id(),
+      date: dateAdapter.now().toISOString(),
+      role,
+      content,
+    };
+
+    if (message.role === 'assistant' && toolCalls && toolCalls.length > 0) {
+      message.toolCalls = toolCalls;
     }
+
+    this._messages.push(message);
+
+    this.emit({ type: 'messageAdded', message });
+  }
+
+  addToolCallResult(toolCallId: string, result: string) {
+    const generator = di.resolve('generator');
+    const dateAdapter = di.resolve('date');
+
+    const message: Message = {
+      id: generator.id(),
+      date: dateAdapter.now().toISOString(),
+      role: 'tool',
+      toolCallId,
+      content: result,
+    };
 
     this._messages.push(message);
 

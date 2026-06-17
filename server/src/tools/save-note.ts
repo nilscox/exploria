@@ -1,6 +1,5 @@
 import z from 'zod';
 
-import { createId } from '../utils';
 import { createTool } from './create-tool';
 
 export const saveNote = createTool({
@@ -10,7 +9,6 @@ export const saveNote = createTool({
   }),
   execute(session, { note }) {
     session.addNote({
-      id: createId(),
       content: note,
     });
 

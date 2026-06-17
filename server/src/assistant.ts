@@ -1,6 +1,5 @@
 import type { Message, ToolCall, TopicStatus } from '@exploria/shared';
 import { intervalToDuration } from 'date-fns';
-import EventEmitter from 'node:events';
 import type OpenAI from 'openai';
 import type { Stream } from 'openai/core/streaming.mjs';
 import type { ChatCompletionTool } from 'openai/resources/index.mjs';
@@ -8,7 +7,7 @@ import type z from 'zod';
 
 import { di } from './di';
 import { tools } from './tools';
-import { assert, createId, hasKey } from './utils';
+import { assert, hasKey } from './utils';
 
 import type { Session } from './session';
 import type { Tool } from './tools/create-tool';
@@ -25,36 +24,31 @@ const toolsDefinitions = Object.entries(tools).map(
     }) satisfies ChatCompletionTool,
 );
 
-export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
+export class Assistant {
   private client: OpenAI;
   private model: string;
 
   constructor(client: OpenAI, model: string) {
-    super();
-
     this.client = client;
     this.model = model;
   }
 
-  async run(session: Session) {
-    const dateAdapter = di.resolve('date');
+  async run(session: Session, { message, onChunk }: { message?: string; onChunk: (text: string) => void }) {
     const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
-    const { content, toolCalls } = await this.handleStream(stream);
+    const { content, toolCalls } = await this.handleStream(stream, onChunk);
 
-    session.addMessage({
-      id: createId(),
-      date: dateAdapter.now().toISOString(),
-      role: 'assistant',
-      content,
-      toolCalls,
-    });
+    if (message) {
+      session.addMessage('user', message);
+    }
+
+    session.addMessage('assistant', content, toolCalls);
 
     for (const toolCall of toolCalls) {
       await this.handleToolCall(session, toolCall);
     }
 
     if (toolCalls.length > 0) {
-      await this.run(session);
+      await this.run(session, { onChunk });
     }
   }
 
@@ -150,7 +144,10 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
     return lines.join('\n');
   }
 
-  private async handleStream(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
+  private async handleStream(
+    stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>,
+    onChunk: (text: string) => void,
+  ) {
     let content = '';
     const toolCalls: Array<ToolCall> = [];
 
@@ -159,7 +156,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
 
       if (delta?.content) {
         content += delta.content;
-        this.emit('chunk', delta.content);
+        onChunk(delta.content);
       }
 
       if (delta?.tool_calls) {
@@ -186,8 +183,6 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
   }
 
   private async handleToolCall(session: Session, toolCall: ToolCall) {
-    const dateAdapter = di.resolve('date');
-
     assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
     assert(typeof toolCall.arguments === 'string');
 
@@ -204,13 +199,7 @@ export class Assistant extends EventEmitter<{ chunk: [text: string] }> {
       content = error instanceof Error ? `Error: ${error.message}` : 'Unknown error';
     }
 
-    session.addMessage({
-      id: createId(),
-      date: dateAdapter.now().toISOString(),
-      role: 'tool',
-      toolCallId: toolCall.id,
-      content,
-    });
+    session.addToolCallResult(toolCall.id, content);
   }
 
   private static messageToOpenAI(this: void, message: Message): OpenAI.Chat.Completions.ChatCompletionMessageParam {

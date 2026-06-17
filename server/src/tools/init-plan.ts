@@ -1,6 +1,5 @@
 import z from 'zod';
 
-import { createId } from '../utils';
 import { createTool } from './create-tool';
 
 export const initPlan = createTool({
@@ -12,7 +11,7 @@ export const initPlan = createTool({
   execute(session, { subject, topics }) {
     session.initializePlan(
       subject,
-      topics.map((label) => ({ id: createId(), label })),
+      topics.map((label) => ({ label })),
     );
 
     return `Plan initialisé.`;

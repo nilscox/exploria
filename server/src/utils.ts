@@ -22,10 +22,6 @@ export function defined<T>(value: T | null | undefined, error?: Error): T {
   return value;
 }
 
-export function createId() {
-  return Math.random().toString(36).slice(-8);
-}
-
 export function has<T, K extends keyof T>(key: K, value: T[K]) {
   return (obj: T) => obj[key] === value;
 }

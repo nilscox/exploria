@@ -3,18 +3,24 @@ import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { di, StubDateAdapter } from './di';
+import { di, StubDate, StubGenerator } from './di';
 import { Session } from './session';
 
 void describe('Session', () => {
   let session: Session;
-  let stubDate: StubDateAdapter;
+  let generator: StubGenerator;
+  let stubDate: StubDate;
 
   beforeEach(() => {
-    stubDate = new StubDateAdapter();
+    generator = new StubGenerator();
+    di.bind('generator', generator);
+
+    generator.nextId = 'id';
+
+    stubDate = new StubDate();
     di.bind('date', stubDate);
 
-    session = new Session('sessionId');
+    session = new Session();
   });
 
   const expectEvent = <Type extends SessionEvent['type']>(
@@ -44,7 +50,7 @@ void describe('Session', () => {
   };
 
   void it('initializes a plan', () => {
-    session.initializePlan('Subject', [{ id: 'id', label: 'Topic' }]);
+    session.initializePlan('Subject', [{ label: 'Topic' }]);
 
     assert.strictEqual(session.subject, 'Subject');
 
@@ -73,7 +79,7 @@ void describe('Session', () => {
   });
 
   void it('adds a topic', () => {
-    session.addTopic({ id: 'id', label: 'Topic' });
+    session.addTopic({ label: 'Topic' });
 
     assert.deepStrictEqual(session.topics, [
       {
@@ -89,7 +95,7 @@ void describe('Session', () => {
   });
 
   void it('removes a topic', () => {
-    session.addTopic({ id: 'id', label: 'Topic' });
+    session.addTopic({ label: 'Topic' });
     session.removeTopic('id');
 
     assert.deepStrictEqual(session.topics, []);
@@ -100,7 +106,7 @@ void describe('Session', () => {
   });
 
   void it("changes a topic's label", () => {
-    session.addTopic({ id: 'id', label: 'Initial' });
+    session.addTopic({ label: 'Initial' });
     session.updateTopic('id', { label: 'Changed' });
 
     assert.deepStrictEqual(session.topics, [
@@ -118,7 +124,7 @@ void describe('Session', () => {
   });
 
   void it("changes a topic's status", () => {
-    session.addTopic({ id: 'id', label: 'Topic' });
+    session.addTopic({ label: 'Topic' });
     session.updateTopic('id', { status: 'in_progress' });
 
     assert.deepStrictEqual(session.topics, [
@@ -136,7 +142,7 @@ void describe('Session', () => {
   });
 
   void it('adds a note', () => {
-    session.addNote({ id: 'id', content: 'content' });
+    session.addNote({ content: 'content' });
 
     assert.deepStrictEqual(session.notes, [
       {
@@ -154,7 +160,7 @@ void describe('Session', () => {
   });
 
   void it('removes a note', () => {
-    session.addNote({ id: 'id', content: 'content' });
+    session.addNote({ content: 'content' });
     session.removeNote('id');
 
     assert.deepStrictEqual(session.notes, []);
@@ -165,7 +171,7 @@ void describe('Session', () => {
   });
 
   void it("changes a note's content", () => {
-    session.addNote({ id: 'id', content: 'initial' });
+    session.addNote({ content: 'initial' });
     session.updateNote('id', { content: 'updated' });
 
     assert.deepStrictEqual(session.notes, [
@@ -237,7 +243,7 @@ void describe('Session', () => {
   void it('adds a message', () => {
     const date = new Date(0).toISOString();
 
-    session.addMessage({ id: 'id', date, role: 'user', content: 'content' });
+    session.addMessage('user', 'content');
 
     assert.deepStrictEqual(session.messages, [
       {
@@ -261,7 +267,7 @@ void describe('Session', () => {
   void it('removes empty tool calls', () => {
     const date = new Date(0).toISOString();
 
-    session.addMessage({ id: 'id', date, role: 'assistant', content: '', toolCalls: [] });
+    session.addMessage('assistant', '', []);
 
     assert.deepStrictEqual(session.messages, [
       {

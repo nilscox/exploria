@@ -233,9 +233,13 @@ const reducer = produce(function (
     | { type: 'session:open' }
     | ServerSentSessionEvent,
 ) {
-  console.groupCollapsed(action.type);
+  console.groupCollapsed(action.type + (action.type === 'session:eventEmitted' ? ' ' + action.event.type : ''));
   console.log('state\n', current(state));
   console.log('action\n', action);
+
+  if (action.type === 'session:eventEmitted') {
+    console.log('event\n', action.event);
+  }
 
   if (action.type === 'message:open') {
     state.loading = true;
@@ -413,16 +417,6 @@ function TimerResumedEvent() {
 function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }) {
   const { message } = event;
 
-  if (message.role === 'tool') {
-    return (
-      <Details className="text-dim text-sm" summary={`Tool call result ${message.toolCallId}`}>
-        <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
-          {message.content}
-        </div>
-      </Details>
-    );
-  }
-
   if (message.role === 'system') {
     return (
       <Details className="text-dim text-sm" summary="System prompt">
@@ -436,6 +430,7 @@ function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }
   return (
     <>
       <Message message={event.message} />
+
       {message.role === 'assistant' &&
         message.toolCalls?.map((toolCall) => (
           <Details
@@ -447,13 +442,17 @@ function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }
               {JSON.stringify(toolCall.arguments, null, 2)}
             </div>
 
-            <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
-              {JSON.stringify(toolCall.result, null, 2)}
-            </div>
+            {Boolean(toolCall.result) && (
+              <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
+                {JSON.stringify(toolCall.result, null, 2)}
+              </div>
+            )}
 
-            <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
-              {JSON.stringify(toolCall.error, null, 2)}
-            </div>
+            {Boolean(toolCall.error) && (
+              <div className="mt-2 whitespace-pre-wrap font-mono text-text text-sm p-4 bg-zinc-800 rounded-md">
+                {JSON.stringify(toolCall.error, null, 2)}
+              </div>
+            )}
           </Details>
         ))}
     </>

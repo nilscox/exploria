@@ -1,6 +1,5 @@
 import z from 'zod';
 
-import { createId } from '../utils';
 import { createTool } from './create-tool';
 
 export const addTopic = createTool({
@@ -10,7 +9,6 @@ export const addTopic = createTool({
   }),
   execute(session, { label }) {
     session.addTopic({
-      id: createId(),
       label,
     });
 

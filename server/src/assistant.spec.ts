@@ -2,15 +2,18 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
 import { Assistant } from './assistant';
-import { di, StubDateAdapter } from './di';
+import { di, StubDate, StubGenerator } from './di';
 import { Session } from './session';
 
 void describe('Assistant', () => {
   void it('formats the session info', async () => {
-    const stubDate = new StubDateAdapter();
+    const generator = new StubGenerator();
+    di.bind('generator', generator);
+
+    const stubDate = new StubDate();
     di.bind('date', stubDate);
 
-    const session = new Session('');
+    const session = new Session();
 
     session.startTimer(60);
 
@@ -28,6 +31,7 @@ void describe('Assistant', () => {
 
     assert(result.includes('Chronomètre en pause'));
 
+    session.resumeTimer();
     stubDate.advance({ minutes: 60 });
 
     result = Assistant.formatSessionInfo(session);

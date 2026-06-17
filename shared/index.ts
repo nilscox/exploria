@@ -23,6 +23,8 @@ export type Message =
   | { id: string; date: string; role: 'assistant'; content: string; toolCalls?: ToolCall[] }
   | { id: string; date: string; role: 'tool'; toolCallId: string; content: string };
 
+export type Role = Message['role'];
+
 export type ToolCall = {
   id: string;
   name: string;
