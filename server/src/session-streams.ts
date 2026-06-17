@@ -8,7 +8,7 @@ import {
 import { di } from './di';
 import { MapSet, defined } from './utils';
 
-import type { Session } from './session';
+import type { Session } from './domain/session';
 import type { ServerSentEvent } from './sse';
 
 export class SessionStreams {

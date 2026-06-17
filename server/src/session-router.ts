@@ -12,7 +12,7 @@ import z from 'zod';
 
 import { Assistant } from './assistant';
 import { di } from './di';
-import { Session } from './session';
+import { Session } from './domain/session';
 import { ServerSentEvent } from './sse';
 import { TestAssistant } from './test-assistant';
 import { defined } from './utils';

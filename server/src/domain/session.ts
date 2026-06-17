@@ -1,9 +1,9 @@
 import type { DiscussionPath, Message, Note, Role, SessionEvent, Timer, ToolCall, Topic } from '@exploria/shared';
 import { intervalToDuration, sub } from 'date-fns';
 
-import { AggregateRoot } from './aggregate-root';
-import { di } from './di';
-import { assert, hasId } from './utils';
+import { AggregateRoot } from '../aggregate-root';
+import { di } from '../di';
+import { assert, hasId } from '../utils';
 
 export class Session extends AggregateRoot<SessionEvent> {
   get id(): string {

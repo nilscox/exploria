@@ -4,7 +4,7 @@ import RL from 'node:readline/promises';
 import OpenAI from 'openai';
 
 import { Assistant } from './assistant';
-import { Session } from './session';
+import { Session } from './domain/session';
 
 async function main() {
   const rl = RL.createInterface(process.stdin, process.stdout);

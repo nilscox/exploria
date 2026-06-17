@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 
 import { Assistant } from './assistant';
 import { di, StubDate, StubGenerator } from './di';
-import { Session } from './session';
+import { Session } from './domain/session';
 
 void describe('Assistant', () => {
   void it('formats the session info', async () => {

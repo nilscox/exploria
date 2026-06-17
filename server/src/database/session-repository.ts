@@ -2,7 +2,7 @@ import type { Message, Note, SessionEvent, Timer, Topic } from '@exploria/shared
 import { eq, inArray } from 'drizzle-orm';
 
 import { di } from '../di';
-import { Session } from '../session';
+import { Session } from '../domain/session';
 import { assert } from '../utils';
 import { messages, notes, sessionEvents, sessions, toolCalls, topics } from './schema';
 

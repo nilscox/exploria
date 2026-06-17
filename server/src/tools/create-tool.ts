@@ -1,6 +1,6 @@
 import type z from 'zod';
 
-import type { Session } from '../session';
+import type { Session } from '../domain/session';
 
 export type Tool<Param extends z.ZodType = z.ZodType> = ReturnType<typeof createTool<Param>>;
 

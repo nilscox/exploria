@@ -2,7 +2,7 @@ import { tools } from './tools';
 import { assert } from './utils';
 
 import type { Assistant } from './assistant';
-import type { Session } from './session';
+import type { Session } from './domain/session';
 
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 

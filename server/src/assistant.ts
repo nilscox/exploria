@@ -9,7 +9,7 @@ import { di } from './di';
 import { tools } from './tools';
 import { assert, hasKey } from './utils';
 
-import type { Session } from './session';
+import type { Session } from './domain/session';
 import type { Tool } from './tools/create-tool';
 
 const toolsDefinitions = Object.entries(tools).map(

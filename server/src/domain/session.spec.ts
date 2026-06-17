@@ -3,7 +3,7 @@ import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { di, StubDate, StubGenerator } from './di';
+import { di, StubDate, StubGenerator } from '../di';
 import { Session } from './session';
 
 void describe('Session', () => {
