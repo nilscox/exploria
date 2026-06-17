@@ -5,10 +5,10 @@ import type { Stream } from 'openai/core/streaming.mjs';
 import type { ChatCompletionTool } from 'openai/resources/index.mjs';
 import type z from 'zod';
 
-import { di } from './di';
 import { tools } from './tools';
 import { assert, hasKey } from './utils';
 
+import type { Clock } from './di';
 import type { Session } from './domain/session';
 import type { Tool } from './tools/create-tool';
 
@@ -25,12 +25,12 @@ const toolsDefinitions = Object.entries(tools).map(
 );
 
 export class Assistant {
-  private client: OpenAI;
-  private model: string;
+  private readonly clock: Clock;
+  private readonly client: OpenAI;
 
-  constructor(client: OpenAI, model: string) {
-    this.client = client;
-    this.model = model;
+  constructor(clock: Clock, openAiClient: OpenAI) {
+    this.clock = clock;
+    this.client = openAiClient;
   }
 
   async run(session: Session, { message, onChunk }: { message?: string; onChunk: (text: string) => void }) {
@@ -53,17 +53,15 @@ export class Assistant {
   }
 
   private createChatCompletionRequest(session: Session): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming {
-    const dateAdapter = di.resolve('date');
-
     return {
-      model: this.model,
+      model: '',
       messages: [
         ...session.messages,
         {
           id: '',
-          date: dateAdapter.now().toISOString(),
+          date: this.clock.now().toISOString(),
           role: 'system' as const,
-          content: Assistant.formatSessionInfo(session),
+          content: Assistant.formatSessionInfo(this.clock, session),
         } satisfies Message,
       ].map(Assistant.messageToOpenAI),
       tools: toolsDefinitions,
@@ -72,7 +70,7 @@ export class Assistant {
     };
   }
 
-  static formatSessionInfo(session: Session): string {
+  static formatSessionInfo(clock: Clock, session: Session): string {
     const lines = [];
 
     const topicStatusMap: Record<TopicStatus, string> = {
@@ -98,7 +96,7 @@ export class Assistant {
     }
 
     lines.push('', '# Gestion du temps', '');
-    lines.push(this.formatTimerInfo(session));
+    lines.push(this.formatTimerInfo(clock, session));
 
     if (session.notes.length > 0) {
       lines.push('', '# Notes', '');
@@ -112,16 +110,14 @@ export class Assistant {
     return lines.join('\n');
   }
 
-  static formatTimerInfo(session: Session) {
-    const dateAdapter = di.resolve('date');
-
+  static formatTimerInfo(clock: Clock, session: Session) {
     if (!session.timer) {
       return 'Aucun chronomètre démarré';
     }
 
     const duration = intervalToDuration({
       start: session.timer.startedAt,
-      end: session.timer.pausedAt ?? dateAdapter.now(),
+      end: session.timer.pausedAt ?? clock.now(),
     });
 
     const elapsed = (duration.minutes ?? 0) + (duration.hours ?? 0) * 60;

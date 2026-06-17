@@ -2,8 +2,9 @@ import type { DiscussionPath, Message, Note, Role, SessionEvent, Timer, ToolCall
 import { intervalToDuration, sub } from 'date-fns';
 
 import { AggregateRoot } from '../aggregate-root';
-import { di } from '../di';
 import { assert, hasId } from '../utils';
+
+import type { Clock, Generator } from '../di';
 
 export class Session extends AggregateRoot<SessionEvent> {
   get id(): string {
@@ -46,16 +47,20 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._discussionPaths;
   }
 
-  static from(data: {
-    id: string;
-    subject: string;
-    topics: Topic[];
-    notes: Note[];
-    timer: Timer | null;
-    messages: Message[];
-    discussionPaths: DiscussionPath[];
-  }) {
-    const session = new Session();
+  static from(
+    generator: Generator,
+    clock: Clock,
+    data: {
+      id: string;
+      subject: string;
+      topics: Topic[];
+      notes: Note[];
+      timer: Timer | null;
+      messages: Message[];
+      discussionPaths: DiscussionPath[];
+    },
+  ) {
+    const session = new Session(generator, clock);
 
     session._id = data.id;
     session._subject = data.subject;
@@ -69,10 +74,8 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
-    const generator = di.resolve('generator');
-
     this._subject = subject;
-    this._topics = topics.map((topic) => ({ ...topic, id: generator.id(), status: 'pending' }));
+    this._topics = topics.map((topic) => ({ ...topic, id: this.generator.id(), status: 'pending' }));
 
     this.emit({ type: 'planInitialized', subject: this.subject, topics: this._topics });
   }
@@ -84,10 +87,8 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   addTopic({ label }: Omit<Topic, 'id' | 'status'>) {
-    const generator = di.resolve('generator');
-
     const topic: Topic = {
-      id: generator.id(),
+      id: this.generator.id(),
       label,
       status: 'pending',
     };
@@ -126,10 +127,8 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   addNote({ content }: Omit<Note, 'id'>) {
-    const generator = di.resolve('generator');
-
     const note = {
-      id: generator.id(),
+      id: this.generator.id(),
       content,
     };
 
@@ -161,7 +160,7 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   startTimer(duration: number) {
-    const now = this.now();
+    const now = this.clock.now();
 
     assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
 
@@ -181,7 +180,7 @@ export class Session extends AggregateRoot<SessionEvent> {
   pauseTimer() {
     assert(this._timer);
 
-    this._timer.pausedAt = this.now().toISOString();
+    this._timer.pausedAt = this.clock.now().toISOString();
 
     this.emit({ type: 'timerPaused' });
   }
@@ -195,19 +194,16 @@ export class Session extends AggregateRoot<SessionEvent> {
       end: this._timer.pausedAt,
     });
 
-    this._timer.startedAt = sub(this.now(), elapsed).toISOString();
+    this._timer.startedAt = sub(this.clock.now(), elapsed).toISOString();
     delete this._timer.pausedAt;
 
     this.emit({ type: 'timerResumed' });
   }
 
   addMessage(role: Exclude<Role, 'tool'>, content: string, toolCalls?: ToolCall[]) {
-    const generator = di.resolve('generator');
-    const dateAdapter = di.resolve('date');
-
     const message: Message = {
-      id: generator.id(),
-      date: dateAdapter.now().toISOString(),
+      id: this.generator.id(),
+      date: this.clock.now().toISOString(),
       role,
       content,
     };
@@ -222,12 +218,9 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   addToolCallResult(toolCallId: string, result: string) {
-    const generator = di.resolve('generator');
-    const dateAdapter = di.resolve('date');
-
     const message: Message = {
-      id: generator.id(),
-      date: dateAdapter.now().toISOString(),
+      id: this.generator.id(),
+      date: this.clock.now().toISOString(),
       role: 'tool',
       toolCallId,
       content: result,
@@ -250,9 +243,5 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(path, new Error(`Cannot find discussion path "${discussionPathId}"`));
 
     this.emit({ type: 'discussionPathSelected', discussionPathId });
-  }
-
-  private now() {
-    return di.resolve('date').now();
   }
 }

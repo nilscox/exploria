@@ -1,12 +1,14 @@
+import { asClass, asFunction, asValue, createContainer, InjectionMode } from 'awilix';
 import { add, type Duration } from 'date-fns';
 import { customAlphabet } from 'nanoid';
+import OpenAI from 'openai';
 
-import { assert } from './utils';
-
-import type { Database } from './database';
-import type { SessionRepository } from './database/session-repository';
-import type { Events } from './events';
-import type { SessionStreams } from './session-streams';
+import { Assistant } from './assistant';
+import { drizzleDatabase } from './database';
+import { SessionRepository } from './database/session-repository';
+import { Events } from './events';
+import { SessionController } from './session-controller';
+import { SessionStreams } from './session-streams';
 
 export interface Generator {
   id(): string;
@@ -24,53 +26,46 @@ export class StubGenerator implements Generator {
   }
 }
 
-export interface DatePort {
+export interface Clock {
   now(): Date;
 }
 
-export class NativeDate implements DatePort {
-  now(): Date {
+export class NativeDateClock implements Clock {
+  now() {
     return new Date();
   }
 }
 
-export class StubDate implements DatePort {
+export class StubClock implements Clock {
   date = new Date(0);
+
+  now() {
+    return this.date;
+  }
 
   advance(duration: Duration) {
     this.date = add(this.date, duration);
   }
-
-  now(): Date {
-    return this.date;
-  }
 }
 
-class Container<T> {
-  private instances: Partial<T> = {};
-
-  bind<K extends keyof T>(key: K, instance: T[K]) {
-    this.instances[key] = instance;
-  }
-
-  get<K extends keyof T>(key: K): T[K] | undefined {
-    return this.instances[key];
-  }
-
-  resolve<K extends keyof T>(key: K): T[K] {
-    const instance = this.get(key);
-
-    assert(instance);
-
-    return instance;
-  }
+function openAiClientFactory() {
+  return new OpenAI({
+    baseURL: process.env.OPEN_AI_BASE_URL,
+    apiKey: process.env.OPEN_AI_API_KEY,
+  });
 }
 
-export const di = new Container<{
-  generator: Generator;
-  date: DatePort;
-  events: Events;
-  database: Database;
-  sessionRepository: SessionRepository;
-  sessionStreams: SessionStreams;
-}>();
+export const container = createContainer({
+  injectionMode: InjectionMode.CLASSIC,
+  strict: true,
+}).register({
+  generator: asClass(NanoIdGenerator),
+  clock: asClass(NativeDateClock),
+  events: asClass(Events),
+  database: asValue(drizzleDatabase),
+  sessionController: asClass(SessionController),
+  sessionStreams: asClass(SessionStreams),
+  sessionRepository: asClass(SessionRepository),
+  openAiClient: asFunction(openAiClientFactory),
+  assistant: asClass(Assistant),
+});

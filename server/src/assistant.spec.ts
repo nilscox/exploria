@@ -1,25 +1,27 @@
 import assert from 'node:assert';
-import { describe, it } from 'node:test';
+import { beforeEach, describe, it } from 'node:test';
 
 import { Assistant } from './assistant';
-import { di, StubDate, StubGenerator } from './di';
+import { StubClock, StubGenerator } from './di';
 import { Session } from './domain/session';
 
 void describe('Assistant', () => {
+  let generator: StubGenerator;
+  let clock: StubClock;
+
+  beforeEach(() => {
+    generator = new StubGenerator();
+    clock = new StubClock();
+  });
+
   void it('formats the session info', async () => {
-    const generator = new StubGenerator();
-    di.bind('generator', generator);
-
-    const stubDate = new StubDate();
-    di.bind('date', stubDate);
-
-    const session = new Session();
+    const session = new Session(generator, clock);
 
     session.startTimer(60);
 
-    stubDate.advance({ minutes: 5 });
+    clock.advance({ minutes: 5 });
 
-    let result = Assistant.formatSessionInfo(session);
+    let result = Assistant.formatSessionInfo(clock, session);
 
     assert(result.includes('Temps de la session : 60 minutes'));
     assert(result.includes('Temps écoulé : 5 minutes'));
@@ -27,14 +29,14 @@ void describe('Assistant', () => {
 
     session.pauseTimer();
 
-    result = Assistant.formatSessionInfo(session);
+    result = Assistant.formatSessionInfo(clock, session);
 
     assert(result.includes('Chronomètre en pause'));
 
     session.resumeTimer();
-    stubDate.advance({ minutes: 60 });
+    clock.advance({ minutes: 60 });
 
-    result = Assistant.formatSessionInfo(session);
+    result = Assistant.formatSessionInfo(clock, session);
 
     assert(result.includes('Temps de la session : 60 minutes'));
     assert(result.includes('Temps écoulé : 65 minutes'));

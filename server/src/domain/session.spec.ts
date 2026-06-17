@@ -3,24 +3,20 @@ import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { di, StubDate, StubGenerator } from '../di';
+import { StubClock, StubGenerator } from '../di';
 import { Session } from './session';
 
 void describe('Session', () => {
-  let session: Session;
   let generator: StubGenerator;
-  let stubDate: StubDate;
+  let clock: StubClock;
+  let session: Session;
 
   beforeEach(() => {
     generator = new StubGenerator();
-    di.bind('generator', generator);
+    clock = new StubClock();
+    session = new Session(generator, clock);
 
     generator.nextId = 'id';
-
-    stubDate = new StubDate();
-    di.bind('date', stubDate);
-
-    session = new Session();
   });
 
   const expectEvent = <Type extends SessionEvent['type']>(
@@ -192,7 +188,7 @@ void describe('Session', () => {
 
     assert(session.timer);
     assert.strictEqual(session.timer.duration, 60);
-    assert.strictEqual(session.timer.startedAt, stubDate.date.toISOString());
+    assert.strictEqual(session.timer.startedAt, clock.date.toISOString());
 
     expectEvent('timerStarted', {
       duration: 60,
@@ -222,19 +218,19 @@ void describe('Session', () => {
   void it('pauses and resumes the timer', () => {
     session.startTimer(60);
 
-    stubDate.advance({ minutes: 5 });
+    clock.advance({ minutes: 5 });
     session.pauseTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.pausedAt, stubDate.date.toISOString());
+    assert.strictEqual(session.timer.pausedAt, clock.date.toISOString());
 
     expectEvent('timerPaused', {});
 
-    stubDate.advance({ minutes: 5 });
+    clock.advance({ minutes: 5 });
     session.resumeTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.startedAt, sub(stubDate.date, { minutes: 5 }).toISOString());
+    assert.strictEqual(session.timer.startedAt, sub(clock.date, { minutes: 5 }).toISOString());
     assert.strictEqual(session.timer.pausedAt, undefined);
 
     expectEvent('timerResumed', {});

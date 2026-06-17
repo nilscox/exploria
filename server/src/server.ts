@@ -2,14 +2,14 @@ import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import z from 'zod';
 
-import { router as sessionRouter } from './session-router';
+import { container } from './di';
 
 export const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.use('/session', sessionRouter);
+app.use('/session', container.resolve('sessionController').router);
 
 app.use((req, res) => {
   res.status(404).end();

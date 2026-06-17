@@ -1,11 +1,12 @@
 import type { Message, Note, SessionEvent, Timer, Topic } from '@exploria/shared';
 import { eq, inArray } from 'drizzle-orm';
 
-import { di } from '../di';
 import { Session } from '../domain/session';
 import { assert } from '../utils';
 import { messages, notes, sessionEvents, sessions, toolCalls, topics } from './schema';
 
+import type { drizzleDatabase } from '.';
+import type { Clock, Generator } from '../di';
 import type {
   MessageSelect,
   NoteSelect,
@@ -17,8 +18,14 @@ import type {
 } from './model';
 
 export class SessionRepository {
-  private get db() {
-    return di.resolve('database');
+  private generator: Generator;
+  private clock: Clock;
+  private db: typeof drizzleDatabase;
+
+  constructor(generator: Generator, clock: Clock, database: typeof drizzleDatabase) {
+    this.clock = clock;
+    this.generator = generator;
+    this.db = database;
   }
 
   async insert(session: Session) {
@@ -151,7 +158,7 @@ export class SessionRepository {
       return null;
     }
 
-    return SessionRepository.mapSession(session);
+    return this.mapSession(session);
   }
 
   async findMany() {
@@ -172,11 +179,18 @@ export class SessionRepository {
     await this.db.delete(sessions).where(eq(sessions.id, id));
   }
 
+  async findEvents(sessionId: string) {
+    return this.db.query.sessionEvents.findMany({
+      where: { sessionId },
+      orderBy: { date: 'asc' },
+    });
+  }
+
   private static date(value: string | undefined) {
     return value ? new Date(value) : null;
   }
 
-  private static mapSession(
+  private mapSession(
     model: SessionSelect & {
       topics: TopicSelect[];
       notes: NoteSelect[];
@@ -226,7 +240,7 @@ export class SessionRepository {
       return { id, role, date, content, toolCalls };
     };
 
-    return Session.from({
+    return Session.from(this.generator, this.clock, {
       id: model.id,
       subject: model.subject,
       topics: model.topics.map(mapTopic),
