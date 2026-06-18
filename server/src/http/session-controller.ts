@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
-import { type Clock, type Generator } from '../di';
+import { type Clock, type Config, type Generator } from '../di';
 import { Session } from '../domain/session';
 import { defined } from '../utils';
 import { ServerSentEvent, type SseUiNotifier } from './sse';
@@ -16,6 +16,7 @@ import type { EventBus } from '../event-bus';
 import type { Shared } from '../shared';
 
 export class SessionController {
+  private readonly config: Config;
   private readonly generator: Generator;
   private readonly clock: Clock;
   private readonly events: EventBus;
@@ -32,6 +33,7 @@ export class SessionController {
   }
 
   constructor(
+    config: Config,
     generator: Generator,
     clock: Clock,
     events: EventBus,
@@ -39,6 +41,7 @@ export class SessionController {
     assistant: Assistant,
     sessionRepository: SessionRepository,
   ) {
+    this.config = config;
     this.generator = generator;
     this.clock = clock;
     this.events = events;
@@ -114,7 +117,7 @@ export class SessionController {
     const session = new Session(this.generator, this.clock, this.uiNotifier);
     const instructions = await fs.readFile('instructions.md').then(String);
 
-    session.setModel(process.env.DEFAULT_MODEL as string);
+    session.setModel(this.config.defaultModel);
     session.addMessage('system', instructions);
 
     await this.sessionRepository.insert(session);

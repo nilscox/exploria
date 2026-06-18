@@ -1,9 +1,10 @@
 import 'dotenv/config';
+import { container } from './di';
 import { app } from './http/server';
 
-const PORT = Number(process.env.PORT ?? 3000);
-const HOST = process.env.HOST ?? 'localhost';
+const config = container.resolve('config');
+const { host, port } = config.server;
 
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
+app.listen(port, host, () => {
+  console.log(`Server running on http://${host}:${port}`);
 });

@@ -35,7 +35,7 @@ void describe('SessionController', () => {
 
   after(async () => {
     await test.after();
-    await container.resolve('database').$client.end();
+    await container.resolve('database').close();
   });
 
   void it('posts a message', async () => {

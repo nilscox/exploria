@@ -4,18 +4,18 @@ import { Session, type Message, type Note, type SessionEvent, type Timer, type T
 import { assert } from '../utils';
 import { domainEvents, messages, notes, sessions, toolCalls, topics } from './schema';
 
-import type { drizzleDatabase } from '.';
 import type { Clock, Generator } from '../di';
 import type { UiNotifier } from '../domain/ui-notifier';
+import type { Database } from './database';
 import type { MessageSelect, NoteSelect, SessionSelect, ToolCallInsert, ToolCallSelect, TopicSelect } from './model';
 
 export class SessionRepository {
   private generator: Generator;
   private clock: Clock;
   private uiNotifier: UiNotifier;
-  private db: typeof drizzleDatabase;
+  private db: Database;
 
-  constructor(generator: Generator, clock: Clock, uiNotifier: UiNotifier, database: typeof drizzleDatabase) {
+  constructor(generator: Generator, clock: Clock, uiNotifier: UiNotifier, database: Database) {
     this.clock = clock;
     this.uiNotifier = uiNotifier;
     this.generator = generator;
