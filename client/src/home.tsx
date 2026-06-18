@@ -1,27 +1,33 @@
-import { useMutation } from '@tanstack/react-query';
+import { mutationOptions, useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, type NavigateFunction } from 'react-router';
 
 import { api } from './api';
 
-export function Home() {
-  const navigate = useNavigate();
-
-  const createSessionMutation = useMutation({
+function createSessionOptions(navigate: NavigateFunction) {
+  return mutationOptions({
     mutationFn: (_message: string) => api.sessions.create(),
     async onSuccess(sessionId, message) {
       await navigate(`/session/${sessionId}`, { state: { message } });
     },
   });
+}
 
-  const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>((event) => {
-    event.preventDefault();
+export function Home() {
+  const navigate = useNavigate();
+  const { mutate: createSession, isPending } = useMutation(createSessionOptions(navigate));
 
-    const data = new FormData(event.target);
-    const message = data.get('message') as string;
+  const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
+    (event) => {
+      event.preventDefault();
 
-    createSessionMutation.mutate(message);
-  }, []);
+      const data = new FormData(event.target);
+      const message = data.get('message') as string;
+
+      createSession(message);
+    },
+    [createSession],
+  );
 
   const handleKeyDown = useCallback<React.KeyboardEventHandler<HTMLTextAreaElement>>((event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -41,7 +47,7 @@ export function Home() {
           name="message"
           rows={6}
           placeholder="Quel sujet souhaitez-vous aborder ?"
-          readOnly={createSessionMutation.isPending}
+          readOnly={isPending}
           onKeyDown={handleKeyDown}
           aria-label="Message"
           className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"

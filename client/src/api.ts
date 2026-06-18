@@ -1,10 +1,20 @@
 import type { Shared } from '@exploria/server/shared';
 
+import { type Assign } from './utils';
+
 const baseUrl = 'http://localhost:3000';
 
-async function fetchApi(endpoint: string, init?: RequestInit) {
+async function fetchApi(endpoint: string, init: Assign<RequestInit, { body?: unknown }> = {}) {
+  const headers = new Headers(init.headers);
+  let body: BodyInit | undefined = undefined;
+
+  if (typeof init.body === 'object' && init.body !== null) {
+    headers.set('Content-Type', 'application/json');
+    body = JSON.stringify(init.body);
+  }
+
   const url = new URL(endpoint, baseUrl);
-  const res = await fetch(url, init);
+  const res = await fetch(url, { ...init, headers, body });
 
   if (!res.ok) {
     throw await ApiError.from(res);
@@ -40,18 +50,23 @@ const sessions = {
     });
   },
 
+  async setModel(id: string, model: string): Promise<void> {
+    await fetchApi(`/session/${id}/model`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: { model },
+    });
+  },
+
   async postMessage(id: string, message: string): Promise<void> {
     await fetchApi(`/session/${id}/message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
+      body: { message },
     });
   },
 
   stream(id: string): EventSource {
-    const url = new URL(`/session/${id}/stream`, baseUrl);
-
-    return new EventSource(url);
+    return new EventSource(new URL(`/session/${id}/stream`, baseUrl));
   },
 
   async pauseTimer(id: string) {

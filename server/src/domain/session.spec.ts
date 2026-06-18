@@ -238,14 +238,12 @@ void describe('Session', () => {
   });
 
   void it('adds a message', () => {
-    const date = new Date(0).toISOString();
-
     session.addMessage('user', 'content');
 
     assert.deepStrictEqual(session.messages, [
       {
         id: 'id',
-        date,
+        date: clock.date.toISOString(),
         role: 'user',
         content: 'content',
       },
@@ -254,7 +252,7 @@ void describe('Session', () => {
     expectEvent('MessageAdded', {
       message: {
         id: 'id',
-        date,
+        date: clock.date.toISOString(),
         role: 'user',
         content: 'content',
       },
@@ -262,17 +260,22 @@ void describe('Session', () => {
   });
 
   void it('removes empty tool calls', () => {
-    const date = new Date(0).toISOString();
-
-    session.addMessage('assistant', '', []);
+    session.addMessage('assistant', '', { model: 'model', toolCalls: [] });
 
     assert.deepStrictEqual(session.messages, [
       {
         id: 'id',
-        date,
+        date: clock.date.toISOString(),
         role: 'assistant',
+        model: 'model',
         content: '',
       },
     ]);
+  });
+
+  void it('fails to add an assistant message without a model', () => {
+    assert.throws(() => {
+      session.addMessage('assistant', '', {});
+    });
   });
 });

@@ -17,6 +17,7 @@ export namespace Shared {
 
   export type Session = {
     id: string;
+    model: string;
     subject: string;
     topics: Topic[];
     notes: Note[];

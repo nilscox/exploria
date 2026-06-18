@@ -45,7 +45,10 @@ export class Assistant {
     const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
     const { content, toolCalls } = await this.handleStream(session, stream);
 
-    session.addMessage('assistant', content, toolCalls);
+    session.addMessage('assistant', content, {
+      model: session.model,
+      toolCalls,
+    });
 
     for (const toolCall of toolCalls) {
       await this.handleToolCall(session, toolCall);
@@ -58,7 +61,7 @@ export class Assistant {
 
   private createChatCompletionRequest(session: Session): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming {
     return {
-      model: '',
+      model: session.model,
       messages: [
         ...session.messages,
         {

@@ -1,14 +1,7 @@
 import { defineConfig } from 'oxlint';
 
+import baseConfig from '../oxlint.config.ts';
+
 export default defineConfig({
-  plugins: ['typescript', 'oxc', 'unicorn'],
-  categories: {
-    correctness: 'error',
-  },
-  options: {
-    typeAware: true,
-  },
-  rules: {
-    'typescript/consistent-type-imports': 'warn',
-  },
+  extends: [baseConfig],
 });

@@ -1,3 +1,5 @@
+export type Assign<A, B> = Omit<A, keyof B> & B;
+
 type Exact<T, U extends T> = [T] extends [U] ? U : never;
 
 export function assert(value: unknown): asserts value {

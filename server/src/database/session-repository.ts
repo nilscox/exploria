@@ -25,6 +25,7 @@ export class SessionRepository {
   async insert(session: Session) {
     await this.db.insert(sessions).values({
       id: session.id,
+      model: session.model,
       subject: session.subject,
       timerDuration: session.timer?.duration,
       timerStartedAt: SessionRepository.date(session.timer?.startedAt),
@@ -57,6 +58,10 @@ export class SessionRepository {
     const handlers: Partial<{
       [Event in SessionEvent as Event['type']]: (event: Event) => Promise<void>;
     }> = {
+      ModelChanged: async ({ model }) => {
+        await db.update(sessions).set({ model }).where(eq(sessions.id, session.id));
+      },
+
       PlanInitialized: async ({ subject, topics: topicsToInsert }) => {
         await db.update(sessions).set({ subject }).where(eq(sessions.id, session.id));
         await db.delete(topics).where(eq(topics.sessionId, session.id));
@@ -222,13 +227,14 @@ export class SessionRepository {
       id,
       role,
       content,
+      model,
       toolCalls,
       toolCallId,
       createdAt,
     }: MessageSelect & { toolCalls: ToolCallSelect[] }): Message => {
       const date = createdAt.toISOString();
 
-      if (role === 'system' || role === 'user' || (role === 'assistant' && toolCalls.length === 0)) {
+      if (role === 'system' || role === 'user') {
         return { id, date, role, content };
       }
 
@@ -237,11 +243,21 @@ export class SessionRepository {
         return { id, role, date, content, toolCallId };
       }
 
-      return { id, role, date, content, toolCalls };
+      assert(typeof model === 'string');
+
+      return {
+        id,
+        role,
+        date,
+        content,
+        model,
+        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+      };
     };
 
     return Session.from(this.generator, this.clock, this.uiNotifier, {
       id: model.id,
+      model: model.model,
       subject: model.subject,
       topics: model.topics.map(mapTopic),
       notes: model.notes.map(mapNote),

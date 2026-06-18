@@ -73,6 +73,12 @@ export class SessionController {
       res.status(204).end();
     });
 
+    this.router.put('/:id/model', async (req, res) => {
+      const { model } = z.object({ model: z.string().min(1) }).parse(req.body);
+      await this.setModel(model);
+      res.status(204).end();
+    });
+
     this.router.post('/:id/message', async (req, res) => {
       const { message } = z.object({ message: z.string().min(1) }).parse(req.body);
       await this.postMessage(message);
@@ -106,9 +112,9 @@ export class SessionController {
 
   private async createSession() {
     const session = new Session(this.generator, this.clock, this.uiNotifier);
-
     const instructions = await fs.readFile('instructions.md').then(String);
 
+    session.setModel(process.env.DEFAULT_MODEL as string);
     session.addMessage('system', instructions);
 
     await this.sessionRepository.insert(session);
@@ -135,6 +141,7 @@ export class SessionController {
 
     return {
       id: session.id,
+      model: session.model,
       subject: session.subject,
       topics: session.topics,
       notes: session.notes,
@@ -145,6 +152,15 @@ export class SessionController {
 
   private async deleteSession(sessionId: string) {
     await this.sessionRepository.delete(sessionId);
+  }
+
+  private async setModel(model: string) {
+    const session = this.getSessionInstance();
+
+    session.setModel(model);
+    await this.sessionRepository.save(session);
+
+    this.events.emit(...session.pullDomainEvents());
   }
 
   private async postMessage(message: string) {

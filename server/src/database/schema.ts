@@ -3,6 +3,7 @@ import * as p from 'drizzle-orm/pg-core';
 
 export const sessions = p.pgTable('sessions', {
   id: p.varchar({ length: 8 }).primaryKey(),
+  model: p.varchar({ length: 64 }).notNull(),
   subject: p.varchar({ length: 255 }).notNull(),
   timerDuration: p.integer(),
   timerStartedAt: p.timestamp(),
@@ -43,6 +44,7 @@ export const messages = p.pgTable('messages', {
     .notNull()
     .references(() => sessions.id),
   content: p.text().notNull(),
+  model: p.varchar({ length: 64 }),
   toolCallId: p.varchar({ length: 32 }),
   createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });

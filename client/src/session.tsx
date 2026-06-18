@@ -1,5 +1,5 @@
 import type { Shared } from '@exploria/server/shared';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { add, intervalToDuration } from 'date-fns';
 import { current, produce } from 'immer';
@@ -75,8 +75,9 @@ export function SessionPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 col h-full py-4">
-      <header className="border-b py-4">
-        {state.session.subject && <h1 className="text-xl font-medium">{state.session.subject}</h1>}
+      <header className="border-b py-4 row justify-between items-center">
+        <h1 className="text-xl font-medium">{state.session.subject ? state.session.subject : 'Sujet à définir'}</h1>
+        <ModelSelector session={state.session} />
       </header>
 
       <div className="flex-1 row gap-8 overflow-hidden">
@@ -116,6 +117,7 @@ export function SessionPage() {
 
 const sessionUiEventTypes = exhaustiveArray<AssistantUiEvent['type'] | SessionUiEvent['type']>()([
   'Chunk',
+  'ModelChanged',
   'SubjectChanged',
   'TopicsChanged',
   'NotesChanged',
@@ -123,22 +125,32 @@ const sessionUiEventTypes = exhaustiveArray<AssistantUiEvent['type'] | SessionUi
   'EventEmitted',
 ] as const);
 
+function getSessionOptions(sessionId: string) {
+  return queryOptions({
+    queryKey: ['getSession', sessionId],
+    queryFn: () => api.sessions.get(sessionId),
+  });
+}
+
+function postMessageOptions(
+  sessionId: string,
+  dispatch: React.ActionDispatch<[{ type: 'PostingMessage' | 'MessagePosted' }]>,
+) {
+  return mutationOptions({
+    mutationFn: (text: string) => api.sessions.postMessage(sessionId, text),
+    onMutate: () => dispatch({ type: 'PostingMessage' }),
+    onSettled: () => dispatch({ type: 'MessagePosted' }),
+  });
+}
+
 function useSession(sessionId: string, onEvent: (event: SessionUiEvent) => void) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [state, dispatch] = useReducer(reducer, {});
 
-  const sessionQuery = useQuery({
-    queryKey: ['getSession', sessionId],
-    queryFn: () => api.sessions.get(sessionId),
-  });
-
-  const postMessageMutation = useMutation({
-    mutationFn: (text: string) => api.sessions.postMessage(sessionId, text),
-    onMutate: () => dispatch({ type: 'PostingMessage' }),
-    onSettled: () => dispatch({ type: 'MessagePosted' }),
-  });
+  const sessionQuery = useQuery(getSessionOptions(sessionId));
+  const { mutate: postMessage } = useMutation(postMessageOptions(sessionId, dispatch));
 
   useEffect(() => {
     if (ApiError.is(sessionQuery.error) && sessionQuery.error.status === 404) {
@@ -189,12 +201,12 @@ function useSession(sessionId: string, onEvent: (event: SessionUiEvent) => void)
 
   useEffect(() => {
     if (typeof location.state?.message === 'string' && state.connected) {
-      postMessageMutation.mutate(location.state.message);
+      postMessage(location.state.message);
       void navigate({}, { state: {}, replace: true });
     }
-  }, [state.connected, location.state, postMessageMutation.mutate, navigate]);
+  }, [state.connected, location.state, postMessage, navigate]);
 
-  return [state, postMessageMutation.mutate] as const;
+  return [state, postMessage] as const;
 }
 
 const reducer = produce(function (
@@ -333,25 +345,95 @@ function Info({ session }: { session: Session }) {
   );
 }
 
+function listModelsOptions() {
+  return queryOptions({
+    queryKey: ['listModels'],
+    async queryFn(): Promise<{ data: Array<{ id: string; owned_by: string }> }> {
+      const res = await fetch('https://api.mammouth.ai/public/models');
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      return res.json();
+    },
+  });
+}
+
+function setModelOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: (model: string) => api.sessions.setModel(sessionId, model),
+  });
+}
+
+function ModelSelector({ session }: { session: Session }) {
+  const modelsQuery = useQuery(listModelsOptions());
+  const { mutate: setModel, isPending } = useMutation(setModelOptions(session.id));
+
+  const handleSubmit = useCallback<React.SubmitEventHandler>(
+    (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const model = formData.get('model') as string;
+
+      setModel(model);
+    },
+    [setModel],
+  );
+
+  if (modelsQuery.isPending) {
+    return null;
+  }
+
+  if (modelsQuery.isError) {
+    return <>Error</>;
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <select
+        name="model"
+        defaultValue={session.model}
+        onChange={(event) => event.target.form?.requestSubmit()}
+        disabled={isPending}
+        className="border rounded-md px-4 py-2"
+      >
+        {modelsQuery.data.data.map((model) => (
+          <option key={model.id} value={model.id} className="bg-background text-text">
+            {model.id} ({model.owned_by})
+          </option>
+        ))}
+      </select>
+    </form>
+  );
+}
+
+function pauseTimerOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: () => api.sessions.pauseTimer(sessionId),
+  });
+}
+
+function resumeTimerOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: () => api.sessions.resumeTimer(sessionId),
+  });
+}
+
 function Timer({ sessionId, timer }: { sessionId: string; timer: Timer }) {
   const now = useNow();
   const { hours = 0, minutes = 0, seconds = 0 } = getRemainingTime(timer, now);
 
-  const pauseTimerMutation = useMutation({
-    mutationFn: () => api.sessions.pauseTimer(sessionId),
-  });
-
-  const resumeTimerMutation = useMutation({
-    mutationFn: () => api.sessions.resumeTimer(sessionId),
-  });
-
-  const toggleMutation = timer.pausedAt ? resumeTimerMutation : pauseTimerMutation;
+  const pauseTimerMutation = useMutation(pauseTimerOptions(sessionId));
+  const resumeTimerMutation = useMutation(resumeTimerOptions(sessionId));
+  const { mutate: toggle } = timer.pausedAt ? resumeTimerMutation : pauseTimerMutation;
 
   const Icon = timer.pausedAt ? PlayIcon : PauseIcon;
 
   return (
     <div className="font-mono inline-flex flex-row gap-4 items-center">
-      <button onClick={() => toggleMutation.mutate()} type="button">
+      <button onClick={() => toggle()} type="button">
         <Icon className="size-4 fill-current" />
       </button>
       <span className="leading-none">
@@ -437,6 +519,7 @@ function MessageAddedEvent({ event }: { event: GetSessionEvent<'MessageAdded'> }
 }
 
 const sessionEventMap: { [Event in SessionEvent as Event['type']]: React.ComponentType<{ event: Event }> } = {
+  ModelChanged: () => null,
   PlanInitialized: () => null,
   SubjectChanged: () => null,
   TopicAdded: TopicAddedEvent,

@@ -22,7 +22,7 @@ export type Note = {
 export type Message =
   | { id: string; date: string; role: 'system'; content: string }
   | { id: string; date: string; role: 'user'; content: string }
-  | { id: string; date: string; role: 'assistant'; content: string; toolCalls?: ToolCall[] }
+  | { id: string; date: string; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] }
   | { id: string; date: string; role: 'tool'; toolCallId: string; content: string };
 
 export type Role = Message['role'];
@@ -50,6 +50,7 @@ export type DiscussionPath = {
 type SessionDomainEvent<Type extends string, Payload = {}> = DomainEvent<'Session', Type> & Payload;
 
 export type SessionEvent =
+  | SessionDomainEvent<'ModelChanged', { model: string }>
   | SessionDomainEvent<'PlanInitialized', { subject: string; topics: Topic[] }>
   | SessionDomainEvent<'SubjectChanged', { subject: string }>
   | SessionDomainEvent<'TopicAdded', { topic: Topic }>
@@ -68,6 +69,7 @@ export type SessionEvent =
   | SessionDomainEvent<'DiscussionPathSelected', { discussionPathId: string }>;
 
 export type SessionUiEvent =
+  | UiEvent<'ModelChanged', { sessionId: string; model: string }>
   | UiEvent<'SubjectChanged', { sessionId: string; subject: string }>
   | UiEvent<'TopicsChanged', { sessionId: string; topics: Topic[] }>
   | UiEvent<'NotesChanged', { sessionId: string; notes: Note[] }>
@@ -79,6 +81,12 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get id(): string {
     return this._id;
+  }
+
+  private _model: string = '';
+
+  get model(): string {
+    return this._model;
   }
 
   private _subject: string = '';
@@ -128,6 +136,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     uiNotifier: UiNotifier,
     data: {
       id: string;
+      model: string;
       subject: string;
       topics: Topic[];
       notes: Note[];
@@ -139,6 +148,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     const session = new Session(generator, clock, uiNotifier);
 
     session._id = data.id;
+    session._model = data.model;
     session._subject = data.subject;
     session._topics = data.topics;
     session._notes = data.notes;
@@ -147,6 +157,12 @@ export class Session extends AggregateRoot<SessionEvent> {
     session._discussionPaths = data.discussionPaths;
 
     return session;
+  }
+
+  setModel(model: string) {
+    this._model = model;
+    this.emit('ModelChanged', { model: this.model });
+    this.emitUiEvent('ModelChanged', { model: this.model });
   }
 
   initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
@@ -290,16 +306,25 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emitUiEvent('TimerChanged', { timer: this.timer });
   }
 
-  addMessage(role: Exclude<Role, 'tool'>, content: string, toolCalls?: ToolCall[]) {
-    const message: Message = {
-      id: this.generator.id(),
-      date: this.clock.now().toISOString(),
-      role,
-      content,
-    };
+  addMessage(
+    role: Exclude<Role, 'tool'>,
+    content: string,
+    { model, toolCalls }: { model?: string; toolCalls?: ToolCall[] } = {},
+  ) {
+    const id = this.generator.id();
+    const date = this.clock.now().toISOString();
+    let message: Message;
 
-    if (message.role === 'assistant' && toolCalls && toolCalls.length > 0) {
-      message.toolCalls = toolCalls;
+    if (role === 'assistant') {
+      assert(model);
+
+      message = { id, date, role, model, content };
+
+      if (toolCalls && toolCalls.length > 0) {
+        message.toolCalls = toolCalls;
+      }
+    } else {
+      message = { id, date, role, content };
     }
 
     this._messages.push(message);
