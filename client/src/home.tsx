@@ -24,7 +24,7 @@ export function Home() {
   }, []);
 
   const handleKeyDown = useCallback<React.KeyboardEventHandler<HTMLTextAreaElement>>((event) => {
-    if (event.ctrlKey && event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.currentTarget.form?.requestSubmit();
     }
   }, []);

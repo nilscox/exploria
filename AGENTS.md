@@ -170,3 +170,4 @@ type Tool<Param extends z.ZodType> = {
 - [ ] Gestion des actions utilisateur (édition du plan entre deux messages)
 - [x] Implémenter `add_topic`
 - [ ] UI dédiée avec plan visible en parallèle
+- [ ] Gestion d'erreur

@@ -1,9 +1,0 @@
-{
-  "name": "@exploria/shared",
-  "type": "module",
-  "main": "index.ts",
-  "scripts": {
-    "lint": "oxlint",
-    "fmt": "oxfmt"
-  }
-}

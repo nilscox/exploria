@@ -2,20 +2,22 @@ import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
 import { Assistant } from './assistant';
-import { StubClock, StubGenerator } from './di';
+import { StubClock, StubGenerator, StubUiNotifier } from './di';
 import { Session } from './domain/session';
 
 void describe('Assistant', () => {
   let generator: StubGenerator;
   let clock: StubClock;
+  let uiNotifier: StubUiNotifier;
 
   beforeEach(() => {
     generator = new StubGenerator();
     clock = new StubClock();
+    uiNotifier = new StubUiNotifier();
   });
 
   void it('formats the session info', async () => {
-    const session = new Session(generator, clock);
+    const session = new Session(generator, clock, uiNotifier);
 
     session.startTimer(60);
 

@@ -1,26 +1,25 @@
-import type { ServerSentMessageEvent, ServerSentSessionEvent, Session as SharedSession } from '@exploria/shared';
 import express from 'express';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import fs from 'node:fs/promises';
 import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
-import { type Clock, type Generator } from './di';
-import { Session } from './domain/session';
-import { ServerSentEvent } from './sse';
-import { defined } from './utils';
+import { type Clock, type Generator } from '../di';
+import { Session } from '../domain/session';
+import { defined } from '../utils';
+import { ServerSentEvent, type SseUiNotifier } from './sse';
 
-import type { Assistant } from './assistant';
-import type { SessionEventSelect } from './database/model';
-import type { SessionRepository } from './database/session-repository';
-import type { Events } from './events';
-import type { SessionStreams } from './session-streams';
+import type { Assistant } from '../assistant';
+import type { DomainEventSelect } from '../database/model';
+import type { SessionRepository } from '../database/session-repository';
+import type { EventBus } from '../event-bus';
+import type { Shared } from '../shared';
 
 export class SessionController {
   private readonly generator: Generator;
   private readonly clock: Clock;
-  private readonly events: Events;
-  private readonly streams: SessionStreams;
+  private readonly events: EventBus;
+  private readonly uiNotifier: SseUiNotifier;
   private readonly sessionRepository: SessionRepository;
   private readonly assistant: Assistant;
 
@@ -35,15 +34,15 @@ export class SessionController {
   constructor(
     generator: Generator,
     clock: Clock,
-    events: Events,
-    sessionStreams: SessionStreams,
+    events: EventBus,
+    uiNotifier: SseUiNotifier,
     assistant: Assistant,
     sessionRepository: SessionRepository,
   ) {
     this.generator = generator;
     this.clock = clock;
     this.events = events;
-    this.streams = sessionStreams;
+    this.uiNotifier = uiNotifier;
     this.sessionRepository = sessionRepository;
     this.assistant = assistant;
 
@@ -74,22 +73,23 @@ export class SessionController {
       res.status(204).end();
     });
 
-    this.router.get('/:id/message', async (req, res) => {
-      const { message } = z.object({ message: z.string().min(1) }).parse(req.query);
-      await this.postMessage(res, message);
+    this.router.post('/:id/message', async (req, res) => {
+      const { message } = z.object({ message: z.string().min(1) }).parse(req.body);
+      await this.postMessage(message);
+      res.status(204).end();
     });
 
-    this.router.get('/:id/stream', async (req, res) => {
-      await this.stream(res);
+    this.router.get('/:id/stream', (req, res) => {
+      this.stream(res);
     });
 
     this.router.put('/:id/timer/pause', async (req, res) => {
-      this.pauseTimer();
+      await this.pauseTimer();
       res.status(204).end();
     });
 
     this.router.put('/:id/timer/resume', async (req, res) => {
-      this.resumeTimer();
+      await this.resumeTimer();
       res.status(204).end();
     });
   }
@@ -105,7 +105,7 @@ export class SessionController {
   }
 
   private async createSession() {
-    const session = new Session(this.generator, this.clock);
+    const session = new Session(this.generator, this.clock, this.uiNotifier);
 
     const instructions = await fs.readFile('instructions.md').then(String);
 
@@ -123,23 +123,23 @@ export class SessionController {
     return this.serializeSession(this.getSessionInstance(), events);
   }
 
-  private serializeSession(session: Session, events: SessionEventSelect[]): SharedSession {
+  private serializeSession(session: Session, events: DomainEventSelect[]): Shared.Session {
+    const serializeSessionEvent = ({ id, type, occurredAt, payload }: DomainEventSelect) => {
+      return {
+        id,
+        type,
+        date: occurredAt.toISOString(),
+        ...payload,
+      } as Shared.SessionEvent;
+    };
+
     return {
       id: session.id,
       subject: session.subject,
       topics: session.topics,
       notes: session.notes,
-      messages: session.messages,
-      timer: session.timer ?? undefined,
-      events: events.map(
-        ({ id, type, date, payload }) =>
-          ({
-            id,
-            type,
-            date: date.toISOString(),
-            ...payload,
-          }) as SharedSession['events'][number],
-      ),
+      timer: session.timer,
+      events: events.map(serializeSessionEvent),
     };
   }
 
@@ -147,41 +147,23 @@ export class SessionController {
     await this.sessionRepository.delete(sessionId);
   }
 
-  private async postMessage(res: OutgoingMessage, message: string) {
+  private async postMessage(message: string) {
     const session = this.getSessionInstance();
-    const sse = new ServerSentEvent<ServerSentMessageEvent>(res);
 
-    try {
-      await this.assistant.run(session, {
-        message,
-        onChunk: (text) => sse.send({ type: 'message:chunk', text }),
-      });
+    await this.assistant.run(session, message);
+    await this.sessionRepository.save(session);
 
-      await this.sessionRepository.save(session);
-
-      this.events.emit(...session.pullDomainEvents());
-
-      sse.send({ type: 'message:done' });
-    } catch (error) {
-      console.error(error);
-
-      sse.send({
-        type: 'message:error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
-    } finally {
-      res.end();
-    }
+    this.events.emit(...session.pullDomainEvents());
   }
 
   private stream(res: OutgoingMessage) {
     const session = this.getSessionInstance();
-    const sse = new ServerSentEvent<ServerSentSessionEvent>(res);
+    const sse = new ServerSentEvent(res);
 
-    this.streams.add(session.id, sse);
+    this.uiNotifier.add(session.id, sse);
 
     res.on('close', () => {
-      this.streams.remove(session.id, sse);
+      this.uiNotifier.remove(session.id, sse);
       res.end();
     });
   }

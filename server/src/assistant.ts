@@ -1,4 +1,3 @@
-import type { Message, ToolCall, TopicStatus } from '@exploria/shared';
 import { intervalToDuration } from 'date-fns';
 import type OpenAI from 'openai';
 import type { Stream } from 'openai/core/streaming.mjs';
@@ -9,7 +8,8 @@ import { tools } from './tools';
 import { assert, hasKey } from './utils';
 
 import type { Clock } from './di';
-import type { Session } from './domain/session';
+import type { Message, Session, ToolCall, TopicStatus } from './domain/session';
+import type { UiEvent, UiNotifier } from './domain/ui-notifier';
 import type { Tool } from './tools/create-tool';
 
 const toolsDefinitions = Object.entries(tools).map(
@@ -24,22 +24,26 @@ const toolsDefinitions = Object.entries(tools).map(
     }) satisfies ChatCompletionTool,
 );
 
+export type AssistantUiEvent = UiEvent<'Chunk', { text: string }>;
+
 export class Assistant {
   private readonly clock: Clock;
+  private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
   private readonly client: OpenAI;
 
-  constructor(clock: Clock, openAiClient: OpenAI) {
+  constructor(clock: Clock, uiNotifier: UiNotifier, openAiClient: OpenAI) {
     this.clock = clock;
+    this.uiNotifier = uiNotifier;
     this.client = openAiClient;
   }
 
-  async run(session: Session, { message, onChunk }: { message?: string; onChunk: (text: string) => void }) {
-    const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
-    const { content, toolCalls } = await this.handleStream(stream, onChunk);
-
+  async run(session: Session, message?: string) {
     if (message) {
       session.addMessage('user', message);
     }
+
+    const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
+    const { content, toolCalls } = await this.handleStream(session, stream);
 
     session.addMessage('assistant', content, toolCalls);
 
@@ -48,7 +52,7 @@ export class Assistant {
     }
 
     if (toolCalls.length > 0) {
-      await this.run(session, { onChunk });
+      await this.run(session);
     }
   }
 
@@ -140,10 +144,7 @@ export class Assistant {
     return lines.join('\n');
   }
 
-  private async handleStream(
-    stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>,
-    onChunk: (text: string) => void,
-  ) {
+  private async handleStream(session: Session, stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
     let content = '';
     const toolCalls: Array<ToolCall> = [];
 
@@ -152,7 +153,7 @@ export class Assistant {
 
       if (delta?.content) {
         content += delta.content;
-        onChunk(delta.content);
+        this.uiNotifier.notify(session.id, { type: 'Chunk', text: delta.content });
       }
 
       if (delta?.tool_calls) {

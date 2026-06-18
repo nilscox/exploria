@@ -1,29 +1,23 @@
-import type { Message, Note, SessionEvent, Timer, Topic } from '@exploria/shared';
 import { eq, inArray } from 'drizzle-orm';
 
-import { Session } from '../domain/session';
+import { Session, type Message, type Note, type SessionEvent, type Timer, type Topic } from '../domain/session';
 import { assert } from '../utils';
-import { messages, notes, sessionEvents, sessions, toolCalls, topics } from './schema';
+import { domainEvents, messages, notes, sessions, toolCalls, topics } from './schema';
 
 import type { drizzleDatabase } from '.';
 import type { Clock, Generator } from '../di';
-import type {
-  MessageSelect,
-  NoteSelect,
-  SessionEventSelect,
-  SessionSelect,
-  ToolCallInsert,
-  ToolCallSelect,
-  TopicSelect,
-} from './model';
+import type { UiNotifier } from '../domain/ui-notifier';
+import type { MessageSelect, NoteSelect, SessionSelect, ToolCallInsert, ToolCallSelect, TopicSelect } from './model';
 
 export class SessionRepository {
   private generator: Generator;
   private clock: Clock;
+  private uiNotifier: UiNotifier;
   private db: typeof drizzleDatabase;
 
-  constructor(generator: Generator, clock: Clock, database: typeof drizzleDatabase) {
+  constructor(generator: Generator, clock: Clock, uiNotifier: UiNotifier, database: typeof drizzleDatabase) {
     this.clock = clock;
+    this.uiNotifier = uiNotifier;
     this.generator = generator;
     this.db = database;
   }
@@ -63,50 +57,50 @@ export class SessionRepository {
     const handlers: Partial<{
       [Event in SessionEvent as Event['type']]: (event: Event) => Promise<void>;
     }> = {
-      planInitialized: async ({ subject, topics: topicsToInsert }) => {
+      PlanInitialized: async ({ subject, topics: topicsToInsert }) => {
         await db.update(sessions).set({ subject }).where(eq(sessions.id, session.id));
         await db.delete(topics).where(eq(topics.sessionId, session.id));
         await insertTopics(topicsToInsert);
       },
 
-      subjectChanged: async ({ subject }) => {
+      SubjectChanged: async ({ subject }) => {
         await db.update(sessions).set({ subject }).where(eq(sessions.id, session.id));
       },
 
-      topicAdded: async ({ topic }) => {
+      TopicAdded: async ({ topic }) => {
         await insertTopics([topic]);
       },
 
-      topicRemoved: async ({ topicId }) => {
+      TopicRemoved: async ({ topicId }) => {
         await db.delete(topics).where(eq(topics.id, topicId));
       },
 
-      topicLabelChanged: async ({ topicId, label }) => {
+      TopicLabelChanged: async ({ topicId, label }) => {
         await db.update(topics).set({ label }).where(eq(topics.id, topicId));
       },
 
-      topicStatusChanged: async ({ topicId, status }) => {
+      TopicStatusChanged: async ({ topicId, status }) => {
         await db.update(topics).set({ status }).where(eq(topics.id, topicId));
       },
 
-      noteAdded: async ({ note }) => {
+      NoteAdded: async ({ note }) => {
         await insertNotes([note]);
       },
 
-      noteRemoved: async ({ noteId }) => {
+      NoteRemoved: async ({ noteId }) => {
         await db.delete(notes).where(eq(topics.id, noteId));
       },
 
-      noteContentChanged: async ({ noteId, content }) => {
+      NoteContentChanged: async ({ noteId, content }) => {
         await db.update(notes).set({ content }).where(eq(topics.id, noteId));
       },
 
-      timerStarted: updateTimer,
-      timerCleared: updateTimer,
-      timerPaused: updateTimer,
-      timerResumed: updateTimer,
+      TimerStarted: updateTimer,
+      TimerCleared: updateTimer,
+      TimerPaused: updateTimer,
+      TimerResumed: updateTimer,
 
-      messageAdded: async ({ message }) => {
+      MessageAdded: async ({ message }) => {
         await db.insert(messages).values({
           ...message,
           sessionId: session.id,
@@ -136,9 +130,16 @@ export class SessionRepository {
           await handler(event);
         }
 
-        const { id, type, date, ...payload } = event;
+        const { aggregateId, aggregateType, occurredAt, type, ...payload } = event;
 
-        await db.insert(sessionEvents).values({ id, sessionId: session.id, type, date: new Date(date), payload });
+        await db.insert(domainEvents).values({
+          id: this.generator.id(),
+          aggregateId,
+          aggregateType,
+          occurredAt,
+          type,
+          payload,
+        });
       }),
     );
   }
@@ -150,7 +151,6 @@ export class SessionRepository {
         notes: true,
         topics: true,
         messages: { with: { toolCalls: true }, orderBy: { createdAt: 'asc' } },
-        events: true,
       },
     });
 
@@ -172,17 +172,18 @@ export class SessionRepository {
         inArray(toolCalls.id, this.db.select({ id: messages.id }).from(messages).where(eq(messages.sessionId, id))),
       );
 
-    await Promise.all(
-      [topics, notes, messages, sessionEvents].map((table) => this.db.delete(table).where(eq(table.sessionId, id))),
-    );
+    await Promise.all([
+      ...[topics, notes, messages].map((table) => this.db.delete(table).where(eq(table.sessionId, id))),
+      this.db.delete(domainEvents).where(eq(domainEvents.aggregateId, id)),
+    ]);
 
     await this.db.delete(sessions).where(eq(sessions.id, id));
   }
 
   async findEvents(sessionId: string) {
-    return this.db.query.sessionEvents.findMany({
-      where: { sessionId },
-      orderBy: { date: 'asc' },
+    return this.db.query.domainEvents.findMany({
+      where: { aggregateType: 'Session', aggregateId: sessionId },
+      orderBy: { occurredAt: 'asc' },
     });
   }
 
@@ -195,7 +196,6 @@ export class SessionRepository {
       topics: TopicSelect[];
       notes: NoteSelect[];
       messages: Array<MessageSelect & { toolCalls: ToolCallSelect[] }>;
-      events: SessionEventSelect[];
     },
   ): Session {
     const mapTopic = ({ id, label, status }: TopicSelect): Topic => {
@@ -240,7 +240,7 @@ export class SessionRepository {
       return { id, role, date, content, toolCalls };
     };
 
-    return Session.from(this.generator, this.clock, {
+    return Session.from(this.generator, this.clock, this.uiNotifier, {
       id: model.id,
       subject: model.subject,
       topics: model.topics.map(mapTopic),

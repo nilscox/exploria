@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import z from 'zod';
 
-import { container } from './di';
+import { container } from '../di';
 
 export const app = express();
 

@@ -1,11 +1,8 @@
-import type { SessionEvent } from '@exploria/shared';
 import { defineRelations } from 'drizzle-orm';
 import * as p from 'drizzle-orm/pg-core';
 
-import type { DistributiveOmit } from '../utils';
-
 export const sessions = p.pgTable('sessions', {
-  id: p.varchar({ length: 16 }).primaryKey(),
+  id: p.varchar({ length: 8 }).primaryKey(),
   subject: p.varchar({ length: 255 }).notNull(),
   timerDuration: p.integer(),
   timerStartedAt: p.timestamp(),
@@ -16,20 +13,20 @@ export const sessions = p.pgTable('sessions', {
 export const topicStatus = p.pgEnum('topic_status', ['pending', 'in_progress', 'done']);
 
 export const topics = p.pgTable('topics', {
-  id: p.varchar({ length: 16 }).primaryKey(),
+  id: p.varchar({ length: 8 }).primaryKey(),
   sessionId: p
-    .varchar({ length: 16 })
+    .varchar({ length: 8 })
     .notNull()
     .references(() => sessions.id),
-  label: p.varchar({ length: 32 }).notNull(),
+  label: p.varchar({ length: 64 }).notNull(),
   status: topicStatus().notNull(),
   createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
 export const notes = p.pgTable('notes', {
-  id: p.varchar({ length: 16 }).primaryKey(),
+  id: p.varchar({ length: 8 }).primaryKey(),
   sessionId: p
-    .varchar({ length: 16 })
+    .varchar({ length: 8 })
     .notNull()
     .references(() => sessions.id),
   content: p.text().notNull(),
@@ -39,10 +36,10 @@ export const notes = p.pgTable('notes', {
 export const role = p.pgEnum('role', ['system', 'assistant', 'user', 'tool']);
 
 export const messages = p.pgTable('messages', {
-  id: p.varchar({ length: 16 }).primaryKey(),
+  id: p.varchar({ length: 8 }).primaryKey(),
   role: role().notNull(),
   sessionId: p
-    .varchar({ length: 16 })
+    .varchar({ length: 8 })
     .notNull()
     .references(() => sessions.id),
   content: p.text().notNull(),
@@ -53,7 +50,7 @@ export const messages = p.pgTable('messages', {
 export const toolCalls = p.pgTable('tool_calls', {
   id: p.varchar({ length: 32 }).primaryKey(),
   messageId: p
-    .varchar({ length: 16 })
+    .varchar({ length: 8 })
     .notNull()
     .references(() => messages.id),
   name: p.varchar({ length: 32 }).notNull(),
@@ -63,24 +60,20 @@ export const toolCalls = p.pgTable('tool_calls', {
   createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
 
-export const sessionEvents = p.pgTable('session_events', {
-  id: p.varchar({ length: 16 }).primaryKey(),
-  sessionId: p
-    .varchar({ length: 16 })
-    .notNull()
-    .references(() => sessions.id),
-  date: p.timestamp().notNull(),
-  type: p.varchar({ length: 32 }).$type<SessionEvent['type']>().notNull(),
-  payload: p.json().$type<DistributiveOmit<SessionEvent, 'id' | 'type' | 'date'>>().notNull(),
-  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
+export const domainEvents = p.pgTable('domain_events', {
+  id: p.varchar({ length: 8 }).primaryKey(),
+  aggregateType: p.varchar({ length: 32 }).notNull(),
+  aggregateId: p.varchar({ length: 8 }).notNull(),
+  occurredAt: p.timestamp({ precision: 6 }).notNull(),
+  type: p.varchar({ length: 32 }).notNull(),
+  payload: p.jsonb().$type<object>().notNull(),
 });
 
-export const relations = defineRelations({ sessions, topics, notes, messages, toolCalls, sessionEvents }, (r) => ({
+export const relations = defineRelations({ sessions, topics, notes, messages, toolCalls, domainEvents }, (r) => ({
   sessions: {
     topics: r.many.topics(),
     notes: r.many.notes(),
     messages: r.many.messages(),
-    events: r.many.sessionEvents(),
   },
 
   topics: {
@@ -112,14 +105,6 @@ export const relations = defineRelations({ sessions, topics, notes, messages, to
     message: r.one.messages({
       from: r.toolCalls.messageId,
       to: r.messages.id,
-      optional: false,
-    }),
-  },
-
-  sessionEvents: {
-    session: r.one.sessions({
-      from: r.sessionEvents.sessionId,
-      to: r.sessions.id,
       optional: false,
     }),
   },

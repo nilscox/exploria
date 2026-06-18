@@ -1,9 +1,13 @@
-import type { DomainEvent } from '@exploria/shared';
-
 import { type Clock, type Generator } from './di';
-import { type DistributiveOmit } from './utils';
 
-export class AggregateRoot<Event extends DomainEvent<string>> {
+export type DomainEvent<Aggregate extends string = string, Type extends string = string> = {
+  aggregateType: Aggregate;
+  aggregateId: string;
+  occurredAt: Date;
+  type: Type;
+};
+
+export abstract class AggregateRoot<Event extends DomainEvent> {
   protected readonly generator: Generator;
   protected readonly clock: Clock;
 
@@ -17,15 +21,21 @@ export class AggregateRoot<Event extends DomainEvent<string>> {
     this._id = generator.id();
   }
 
-  protected emit(event: DistributiveOmit<Event, 'id' | 'entityId' | 'date'>) {
-    const date = this.clock.now().toISOString();
+  protected emit<Type extends Event['type']>(
+    type: Type,
+    payload: Omit<Extract<Event, { type: Type }>, 'occurredAt' | 'aggregateType' | 'aggregateId' | 'type'>,
+  ) {
+    const event = {
+      aggregateType: this.constructor.name,
+      aggregateId: this._id,
+      occurredAt: this.clock.now(),
+      type,
+      ...payload,
+    } as Extract<Event, { type: Type }>;
 
-    this._domainEvents.push({
-      id: this.generator.id(),
-      entityId: this._id,
-      date,
-      ...event,
-    } as Event);
+    this._domainEvents.push(event);
+
+    return event;
   }
 
   pullDomainEvents() {

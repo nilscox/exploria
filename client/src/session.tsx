@@ -1,13 +1,4 @@
-import type {
-  GetSessionEvent,
-  Message,
-  ServerSentMessageEvent,
-  ServerSentSessionEvent,
-  Session,
-  SessionEvent,
-  Timer,
-} from '@exploria/shared';
-import { serverSentMessageEventTypes, serverSentSessionEventTypes } from '@exploria/shared';
+import type { Shared } from '@exploria/server/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { add, intervalToDuration } from 'date-fns';
@@ -20,15 +11,29 @@ import { api, ApiError } from './api';
 import { Details } from './details';
 import { useNow } from './hooks/use-now';
 import { Markdown } from './markdown';
-import { assert } from './utils';
+import { assert, exhaustiveArray } from './utils';
+
+type AssistantUiEvent = Shared.AssistantUiEvent;
+
+type Session = Shared.Session;
+type Timer = Shared.Timer;
+type Message = Shared.Message;
+type SessionEvent = Shared.SessionEvent;
+type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
+type SessionUiEvent = Shared.SessionUiEvent;
 
 export function SessionPage() {
   const params = useParams<'sessionId'>();
 
-  const [state, sendMessage] = useSession(
+  const [state, postMessage] = useSession(
     params.sessionId as string,
     useCallback((event) => {
-      if (event.type === 'session:messageAdded' && event.message.role === 'user' && textareaRef.current) {
+      if (
+        event.type === 'EventEmitted' &&
+        event.event.type === 'MessageAdded' &&
+        event.event.message.role === 'user' &&
+        textareaRef.current
+      ) {
         textareaRef.current.value = '';
       }
     }, []),
@@ -48,13 +53,14 @@ export function SessionPage() {
       const data = new FormData(event.target);
       const message = data.get('message') as string;
 
-      sendMessage(message);
+      postMessage(message);
     },
-    [sendMessage],
+    [postMessage],
   );
 
   const handleKeyDown = useCallback<React.KeyboardEventHandler<HTMLTextAreaElement>>((event) => {
-    if (event.ctrlKey && event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       event.currentTarget.form?.requestSubmit();
     }
   }, []);
@@ -108,7 +114,16 @@ export function SessionPage() {
   );
 }
 
-function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) => void) {
+const sessionUiEventTypes = exhaustiveArray<AssistantUiEvent['type'] | SessionUiEvent['type']>()([
+  'Chunk',
+  'SubjectChanged',
+  'TopicsChanged',
+  'NotesChanged',
+  'TimerChanged',
+  'EventEmitted',
+] as const);
+
+function useSession(sessionId: string, onEvent: (event: SessionUiEvent) => void) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -117,6 +132,12 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
   const sessionQuery = useQuery({
     queryKey: ['getSession', sessionId],
     queryFn: () => api.sessions.get(sessionId),
+  });
+
+  const postMessageMutation = useMutation({
+    mutationFn: (text: string) => api.sessions.postMessage(sessionId, text),
+    onMutate: () => dispatch({ type: 'PostingMessage' }),
+    onSettled: () => dispatch({ type: 'MessagePosted' }),
   });
 
   useEffect(() => {
@@ -128,7 +149,7 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
   useEffect(() => {
     if (sessionQuery.isSuccess) {
       dispatch({
-        type: 'session:fetched',
+        type: 'SessionFetched',
         session: sessionQuery.data,
       });
     }
@@ -144,7 +165,7 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
     const source = api.sessions.stream(sessionId);
 
     source.addEventListener('open', () => {
-      dispatch({ type: 'session:open' });
+      dispatch({ type: 'StreamOpened' });
     });
 
     source.addEventListener('error', (event) => {
@@ -152,16 +173,11 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
       dispatch({ type: 'error' });
     });
 
-    for (const type of serverSentSessionEventTypes) {
+    for (const type of sessionUiEventTypes) {
       source.addEventListener(type, ({ data }) => {
-        const event: ServerSentSessionEvent = { type, ...JSON.parse(data) };
+        const event: SessionUiEvent = { type, ...JSON.parse(data) };
 
         dispatch(event);
-
-        if (event.type === 'session:error') {
-          console.error(event.message);
-        }
-
         onEvent(event);
       });
     }
@@ -171,51 +187,14 @@ function useSession(sessionId: string, onEvent: (event: ServerSentSessionEvent) 
     };
   }, [hasSession, sessionId, onEvent]);
 
-  const sendMessage = useCallback(
-    (message: string) => {
-      const source = api.sessions.sendMessage(sessionId, message);
-
-      source.addEventListener('open', () => {
-        dispatch({ type: 'message:open' });
-      });
-
-      source.addEventListener('error', (event) => {
-        console.error('Message error', event);
-        dispatch({ type: 'error' });
-        source.close();
-      });
-
-      for (const type of serverSentMessageEventTypes) {
-        source.addEventListener(type, ({ data }) => {
-          const event: ServerSentMessageEvent = { type, ...JSON.parse(data) };
-
-          dispatch(event);
-
-          if (event.type === 'message:error') {
-            console.error(event.message);
-            source.close();
-          }
-
-          if (event.type === 'message:done') {
-            source.close();
-          }
-        });
-      }
-
-      source.addEventListener('err', ({ data }) => dispatch({ type: 'stream:error', ...JSON.parse(data) }));
-      source.addEventListener('chunk', ({ data }) => dispatch({ type: 'stream:chunk', ...JSON.parse(data) }));
-    },
-    [sessionId],
-  );
-
   useEffect(() => {
     if (typeof location.state?.message === 'string' && state.connected) {
-      sendMessage(location.state.message);
+      postMessageMutation.mutate(location.state.message);
       void navigate({}, { state: {}, replace: true });
     }
-  }, [state.connected, location.state, sendMessage, navigate]);
+  }, [state.connected, location.state, postMessageMutation.mutate, navigate]);
 
-  return [state, sendMessage] as const;
+  return [state, postMessageMutation.mutate] as const;
 }
 
 const reducer = produce(function (
@@ -227,79 +206,77 @@ const reducer = produce(function (
   },
   action:
     | { type: 'error' }
-    | { type: 'message:open' }
-    | ServerSentMessageEvent
-    | { type: 'session:fetched'; session: Session }
-    | { type: 'session:open' }
-    | ServerSentSessionEvent,
+    | { type: 'SessionFetched'; session: Session }
+    | { type: 'StreamOpened' }
+    | { type: 'PostingMessage' }
+    | { type: 'MessagePosted' }
+    | SessionUiEvent
+    | AssistantUiEvent,
 ) {
-  console.groupCollapsed(action.type + (action.type === 'session:eventEmitted' ? ' ' + action.event.type : ''));
+  console.groupCollapsed(action.type + (action.type === 'EventEmitted' ? ' ' + action.event.type : ''));
   console.log('state\n', current(state));
   console.log('action\n', action);
 
-  if (action.type === 'session:eventEmitted') {
+  if (action.type === 'EventEmitted') {
     console.log('event\n', action.event);
   }
 
-  if (action.type === 'message:open') {
-    state.loading = true;
-    state.stream = '';
-  }
-
-  if (action.type === 'message:error') {
+  if (action.type === 'error') {
     state.loading = false;
     delete state.stream;
   }
 
-  if (action.type === 'message:done') {
+  if (action.type === 'SessionFetched') {
+    state.session = action.session;
+  }
+
+  if (action.type === 'StreamOpened') {
+    state.connected = true;
+  }
+
+  if (action.type === 'PostingMessage') {
+    state.loading = true;
+    state.stream = '';
+  }
+
+  if (action.type === 'MessagePosted') {
     state.loading = false;
   }
 
-  if (action.type === 'message:chunk') {
+  if (action.type === 'Chunk') {
     assert(state.stream !== undefined);
     state.stream = state.stream + action.text;
   }
 
-  if (action.type === 'session:fetched') {
-    state.session = action.session;
-  }
-
-  if (action.type === 'session:open') {
-    state.connected = true;
-  }
-
-  if (action.type === 'session:subjectChanged') {
+  if (action.type === 'SubjectChanged') {
     assert(state.session);
     state.session.subject = action.subject;
   }
 
-  if (action.type === 'session:topicsChanged') {
+  if (action.type === 'TopicsChanged') {
     assert(state.session);
     state.session.topics = action.topics;
   }
 
-  if (action.type === 'session:notesChanged') {
+  if (action.type === 'NotesChanged') {
     assert(state.session);
     state.session.notes = action.notes;
   }
 
-  if (action.type === 'session:timerChanged') {
+  if (action.type === 'TimerChanged') {
     assert(state.session);
     state.session.timer = action.timer;
   }
 
-  if (action.type === 'session:messageAdded') {
-    assert(state.session);
-    state.session.messages.push(action.message);
-
-    if (action.message.role === 'assistant' && action.message.content) {
-      delete state.stream;
-    }
-  }
-
-  if (action.type === 'session:eventEmitted') {
+  if (action.type === 'EventEmitted') {
     assert(state.session);
     state.session.events.push(action.event);
+
+    const event = action.event;
+
+    if (event.type === 'MessageAdded' && event.message.role === 'assistant' && event.message.content) {
+      delete state.stream;
+    }
   }
 
   console.log('state\n', current(state));
@@ -394,11 +371,11 @@ function getRemainingTime(timer: Timer, now: Date) {
   });
 }
 
-function TopicAddedEvent({ event }: { event: GetSessionEvent<'topicAdded'> }) {
+function TopicAddedEvent({ event }: { event: GetSessionEvent<'TopicAdded'> }) {
   return <div className="text-sm text-dim">Sujet ajouté : {event.topic.label}</div>;
 }
 
-function TimerStartedEvent({ event }: { event: GetSessionEvent<'timerStarted'> }) {
+function TimerStartedEvent({ event }: { event: GetSessionEvent<'TimerStarted'> }) {
   return <div className="text-sm text-dim">Chronomètre démarré : {event.duration} minutes</div>;
 }
 
@@ -414,7 +391,7 @@ function TimerResumedEvent() {
   return <div className="text-sm text-dim">Chronomètre redémarré</div>;
 }
 
-function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }) {
+function MessageAddedEvent({ event }: { event: GetSessionEvent<'MessageAdded'> }) {
   const { message } = event;
 
   if (message.role === 'system') {
@@ -460,22 +437,22 @@ function MessageAddedEvent({ event }: { event: GetSessionEvent<'messageAdded'> }
 }
 
 const sessionEventMap: { [Event in SessionEvent as Event['type']]: React.ComponentType<{ event: Event }> } = {
-  planInitialized: () => null,
-  subjectChanged: () => null,
-  topicAdded: TopicAddedEvent,
-  topicRemoved: () => null,
-  topicLabelChanged: () => null,
-  topicStatusChanged: () => null,
-  noteAdded: () => null,
-  noteRemoved: () => null,
-  noteContentChanged: () => null,
-  timerStarted: TimerStartedEvent,
-  timerCleared: TimerClearedEvent,
-  timerPaused: TimerPausedEvent,
-  timerResumed: TimerResumedEvent,
-  messageAdded: MessageAddedEvent,
-  discussionPathsSet: () => null,
-  discussionPathSelected: () => null,
+  PlanInitialized: () => null,
+  SubjectChanged: () => null,
+  TopicAdded: TopicAddedEvent,
+  TopicRemoved: () => null,
+  TopicLabelChanged: () => null,
+  TopicStatusChanged: () => null,
+  NoteAdded: () => null,
+  NoteRemoved: () => null,
+  NoteContentChanged: () => null,
+  TimerStarted: TimerStartedEvent,
+  TimerCleared: TimerClearedEvent,
+  TimerPaused: TimerPausedEvent,
+  TimerResumed: TimerResumedEvent,
+  MessageAdded: MessageAddedEvent,
+  DiscussionPathsSet: () => null,
+  DiscussionPathSelected: () => null,
 };
 
 function Events({ events }: { events: SessionEvent[] }) {

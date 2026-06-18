@@ -8,6 +8,9 @@ import { SessionPage } from './session';
 
 const client = new QueryClient({
   defaultOptions: {
+    queries: {
+      retry: false,
+    },
     mutations: {
       onError(error) {
         console.log(error);

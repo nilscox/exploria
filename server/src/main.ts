@@ -1,8 +1,5 @@
 import 'dotenv/config';
-import { container } from './di';
-import { app } from './server';
-
-container.resolve('sessionStreams').bindEvents();
+import { app } from './http/server';
 
 const PORT = Number(process.env.PORT ?? 3000);
 const HOST = process.env.HOST ?? 'localhost';

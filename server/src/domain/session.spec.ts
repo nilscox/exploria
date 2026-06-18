@@ -1,27 +1,28 @@
-import type { GetSessionEvent, SessionEvent } from '@exploria/shared';
 import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { StubClock, StubGenerator } from '../di';
-import { Session } from './session';
+import { StubClock, StubGenerator, StubUiNotifier } from '../di';
+import { Session, type SessionEvent } from './session';
 
 void describe('Session', () => {
   let generator: StubGenerator;
   let clock: StubClock;
+  let uiNotifier: StubUiNotifier;
   let session: Session;
 
   beforeEach(() => {
     generator = new StubGenerator();
     clock = new StubClock();
-    session = new Session(generator, clock);
+    uiNotifier = new StubUiNotifier();
+    session = new Session(generator, clock, uiNotifier);
 
     generator.nextId = 'id';
   });
 
   const expectEvent = <Type extends SessionEvent['type']>(
     type: Type,
-    expected: Omit<GetSessionEvent<Type>, 'id' | 'entityId' | 'type' | 'date'>,
+    expected: Omit<Extract<SessionEvent, { type: Type }>, 'occurredAt' | 'aggregateType' | 'aggregateId' | 'type'>,
   ) => {
     const events = session.peekDomainEvents();
 
@@ -58,7 +59,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('planInitialized', {
+    expectEvent('PlanInitialized', {
       subject: 'Subject',
       topics: [{ id: 'id', label: 'Topic', status: 'pending' }],
     });
@@ -69,7 +70,7 @@ void describe('Session', () => {
 
     assert.strictEqual(session.subject, 'Subject');
 
-    expectEvent('subjectChanged', {
+    expectEvent('SubjectChanged', {
       subject: 'Subject',
     });
   });
@@ -85,7 +86,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('topicAdded', {
+    expectEvent('TopicAdded', {
       topic: { id: 'id', label: 'Topic', status: 'pending' },
     });
   });
@@ -96,7 +97,7 @@ void describe('Session', () => {
 
     assert.deepStrictEqual(session.topics, []);
 
-    expectEvent('topicRemoved', {
+    expectEvent('TopicRemoved', {
       topicId: 'id',
     });
   });
@@ -113,7 +114,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('topicLabelChanged', {
+    expectEvent('TopicLabelChanged', {
       topicId: 'id',
       label: 'Changed',
     });
@@ -131,7 +132,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('topicStatusChanged', {
+    expectEvent('TopicStatusChanged', {
       topicId: 'id',
       status: 'in_progress',
     });
@@ -147,7 +148,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('noteAdded', {
+    expectEvent('NoteAdded', {
       note: {
         id: 'id',
         content: 'content',
@@ -161,7 +162,7 @@ void describe('Session', () => {
 
     assert.deepStrictEqual(session.notes, []);
 
-    expectEvent('noteRemoved', {
+    expectEvent('NoteRemoved', {
       noteId: 'id',
     });
   });
@@ -177,7 +178,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('noteContentChanged', {
+    expectEvent('NoteContentChanged', {
       noteId: 'id',
       content: 'updated',
     });
@@ -190,14 +191,14 @@ void describe('Session', () => {
     assert.strictEqual(session.timer.duration, 60);
     assert.strictEqual(session.timer.startedAt, clock.date.toISOString());
 
-    expectEvent('timerStarted', {
+    expectEvent('TimerStarted', {
       duration: 60,
     });
 
     session.clearTimer();
     assert(session.timer === null);
 
-    expectEvent('timerCleared', {});
+    expectEvent('TimerCleared', {});
   });
 
   void it('fails to start the timer when there is one already', () => {
@@ -224,7 +225,7 @@ void describe('Session', () => {
     assert(session.timer);
     assert.strictEqual(session.timer.pausedAt, clock.date.toISOString());
 
-    expectEvent('timerPaused', {});
+    expectEvent('TimerPaused', {});
 
     clock.advance({ minutes: 5 });
     session.resumeTimer();
@@ -233,7 +234,7 @@ void describe('Session', () => {
     assert.strictEqual(session.timer.startedAt, sub(clock.date, { minutes: 5 }).toISOString());
     assert.strictEqual(session.timer.pausedAt, undefined);
 
-    expectEvent('timerResumed', {});
+    expectEvent('TimerResumed', {});
   });
 
   void it('adds a message', () => {
@@ -250,7 +251,7 @@ void describe('Session', () => {
       },
     ]);
 
-    expectEvent('messageAdded', {
+    expectEvent('MessageAdded', {
       message: {
         id: 'id',
         date,

@@ -1,7 +1,9 @@
-import type { Session } from '@exploria/shared';
+import type { Shared } from '@exploria/server/shared';
+
+const baseUrl = 'http://localhost:3000';
 
 async function fetchApi(endpoint: string, init?: RequestInit) {
-  const url = new URL(endpoint, 'http://localhost:3000');
+  const url = new URL(endpoint, baseUrl);
   const res = await fetch(url, init);
 
   if (!res.ok) {
@@ -26,7 +28,7 @@ const sessions = {
     return res.text();
   },
 
-  async get(id: string): Promise<Session> {
+  async get(id: string): Promise<Shared.Session> {
     const res = await fetchApi(`/session/${id}`);
 
     return res.json();
@@ -38,14 +40,16 @@ const sessions = {
     });
   },
 
-  sendMessage(id: string, message: string): EventSource {
-    const url = new URL(`/session/${id}/message?message=${encodeURIComponent(message)}`, 'http://localhost:3000');
-
-    return new EventSource(url);
+  async postMessage(id: string, message: string): Promise<void> {
+    await fetchApi(`/session/${id}/message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
   },
 
   stream(id: string): EventSource {
-    const url = new URL(`/session/${id}/stream`, 'http://localhost:3000');
+    const url = new URL(`/session/${id}/stream`, baseUrl);
 
     return new EventSource(url);
   },

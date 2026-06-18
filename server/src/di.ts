@@ -6,9 +6,12 @@ import OpenAI from 'openai';
 import { Assistant } from './assistant';
 import { drizzleDatabase } from './database';
 import { SessionRepository } from './database/session-repository';
-import { Events } from './events';
-import { SessionController } from './session-controller';
-import { SessionStreams } from './session-streams';
+import { EventBus } from './event-bus';
+import { SessionController } from './http/session-controller';
+import { SseUiNotifier } from './http/sse';
+import { TestAssistant } from './test-assistant';
+
+import type { UiNotifier } from './domain/ui-notifier';
 
 export interface Generator {
   id(): string;
@@ -48,6 +51,14 @@ export class StubClock implements Clock {
   }
 }
 
+export interface Logger {
+  log(...args: unknown[]): void;
+}
+
+export class StubUiNotifier {
+  notify() {}
+}
+
 function openAiClientFactory() {
   return new OpenAI({
     baseURL: process.env.OPEN_AI_BASE_URL,
@@ -59,13 +70,14 @@ export const container = createContainer({
   injectionMode: InjectionMode.CLASSIC,
   strict: true,
 }).register({
-  generator: asClass(NanoIdGenerator),
-  clock: asClass(NativeDateClock),
-  events: asClass(Events),
+  generator: asClass<Generator>(NanoIdGenerator),
+  clock: asClass<Clock>(NativeDateClock),
+  logger: asValue<Logger>(console),
+  events: asClass(EventBus),
+  uiNotifier: asClass<UiNotifier>(SseUiNotifier).singleton(),
   database: asValue(drizzleDatabase),
   sessionController: asClass(SessionController),
-  sessionStreams: asClass(SessionStreams),
   sessionRepository: asClass(SessionRepository),
   openAiClient: asFunction(openAiClientFactory),
-  assistant: asClass(Assistant),
+  assistant: process.env.TEST === 'true' ? asClass(TestAssistant) : asClass(Assistant),
 });
