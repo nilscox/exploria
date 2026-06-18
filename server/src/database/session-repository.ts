@@ -4,7 +4,8 @@ import { Session, type Message, type Note, type SessionEvent, type Timer, type T
 import { assert } from '../utils';
 import { domainEvents, messages, notes, sessions, toolCalls, topics } from './schema';
 
-import type { Clock, Generator } from '../di';
+import type { Clock } from '../adapters/clock';
+import type { Generator } from '../adapters/generator';
 import type { UiNotifier } from '../domain/ui-notifier';
 import type { Database } from './database';
 import type { MessageSelect, NoteSelect, SessionSelect, ToolCallInsert, ToolCallSelect, TopicSelect } from './model';

@@ -3,7 +3,8 @@ import { intervalToDuration, sub } from 'date-fns';
 import { AggregateRoot, type DomainEvent } from '../aggregate-root';
 import { assert, hasId } from '../utils';
 
-import type { Clock, Generator } from '../di';
+import type { Clock } from '../adapters/clock';
+import type { Generator } from '../adapters/generator';
 import type { UiEvent, UiNotifier } from './ui-notifier';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';

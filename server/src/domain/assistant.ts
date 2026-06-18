@@ -4,13 +4,13 @@ import type { Stream } from 'openai/core/streaming.mjs';
 import type { ChatCompletionTool } from 'openai/resources/index.mjs';
 import type z from 'zod';
 
+import { assert, hasKey } from '../utils';
 import { tools } from './tools';
-import { assert, hasKey } from './utils';
 
-import type { Clock } from './di';
-import type { Message, Session, ToolCall, TopicStatus } from './domain/session';
-import type { UiEvent, UiNotifier } from './domain/ui-notifier';
+import type { Clock } from '../adapters/clock';
+import type { Message, Session, ToolCall, TopicStatus } from './session';
 import type { Tool } from './tools/create-tool';
+import type { UiEvent, UiNotifier } from './ui-notifier';
 
 const toolsDefinitions = Object.entries(tools).map(
   ([name, tool]) =>

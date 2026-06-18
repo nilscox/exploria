@@ -2,7 +2,9 @@ import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { StubClock, StubGenerator, StubUiNotifier } from '../di';
+import { StubClock } from '../adapters/clock';
+import { StubGenerator } from '../adapters/generator';
+import { StubUiNotifier } from '../adapters/logger';
 import { Session, type SessionEvent } from './session';
 
 void describe('Session', () => {
@@ -12,12 +14,10 @@ void describe('Session', () => {
   let session: Session;
 
   beforeEach(() => {
-    generator = new StubGenerator();
+    generator = new StubGenerator(['id', 'id']);
     clock = new StubClock();
     uiNotifier = new StubUiNotifier();
     session = new Session(generator, clock, uiNotifier);
-
-    generator.nextId = 'id';
   });
 
   const expectEvent = <Type extends SessionEvent['type']>(

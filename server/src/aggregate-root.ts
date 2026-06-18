@@ -1,4 +1,5 @@
-import { type Clock, type Generator } from './di';
+import type { Clock } from './adapters/clock';
+import type { Generator } from './adapters/generator';
 
 export type DomainEvent<Aggregate extends string = string, Type extends string = string> = {
   aggregateType: Aggregate;

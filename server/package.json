@@ -23,6 +23,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.3",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/pg": "^8.20.0",

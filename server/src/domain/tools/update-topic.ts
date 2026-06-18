@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { hasId } from '../utils';
+import { hasId } from '../../utils';
 import { createTool } from './create-tool';
 
 export const updateTopic = createTool({

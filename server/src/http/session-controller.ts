@@ -4,14 +4,16 @@ import fs from 'node:fs/promises';
 import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
-import { type Clock, type Config, type Generator } from '../di';
 import { Session } from '../domain/session';
 import { defined } from '../utils';
 import { ServerSentEvent, type SseUiNotifier } from './sse';
 
-import type { Assistant } from '../assistant';
+import type { Clock } from '../adapters/clock';
+import type { Config } from '../adapters/config';
+import type { Generator } from '../adapters/generator';
 import type { DomainEventSelect } from '../database/model';
 import type { SessionRepository } from '../database/session-repository';
+import type { Assistant } from '../domain/assistant';
 import type { EventBus } from '../event-bus';
 import type { Shared } from '../shared';
 

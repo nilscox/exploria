@@ -1,6 +1,6 @@
 import type { OutgoingMessage } from 'node:http';
 
-import type { Logger } from '../di';
+import type { Logger } from '../adapters/logger';
 import type { UiEvent, UiNotifier } from '../domain/ui-notifier';
 
 export class SseUiNotifier<Event extends UiEvent = UiEvent> implements UiNotifier<Event> {

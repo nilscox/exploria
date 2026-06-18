@@ -1,9 +1,11 @@
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
+import { StubClock } from '../adapters/clock';
+import { StubGenerator } from '../adapters/generator';
+import { StubUiNotifier } from '../adapters/logger';
 import { Assistant } from './assistant';
-import { StubClock, StubGenerator, StubUiNotifier } from './di';
-import { Session } from './domain/session';
+import { Session } from './session';
 
 void describe('Assistant', () => {
   let generator: StubGenerator;
@@ -11,7 +13,7 @@ void describe('Assistant', () => {
   let uiNotifier: StubUiNotifier;
 
   beforeEach(() => {
-    generator = new StubGenerator();
+    generator = new StubGenerator(['id']);
     clock = new StubClock();
     uiNotifier = new StubUiNotifier();
   });

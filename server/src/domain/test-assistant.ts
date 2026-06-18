@@ -1,8 +1,8 @@
+import { assert } from '../utils';
 import { tools } from './tools';
-import { assert } from './utils';
 
 import type { Assistant, AssistantUiEvent } from './assistant';
-import type { UiNotifier } from './domain/ui-notifier';
+import type { UiNotifier } from './ui-notifier';
 
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 

@@ -1,4 +1,4 @@
-import type * as assistant from './assistant';
+import type * as assistant from './domain/assistant';
 import type * as session from './domain/session';
 import type { DistributiveOmit } from './utils';
 

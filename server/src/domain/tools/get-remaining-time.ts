@@ -1,7 +1,7 @@
 import z from 'zod';
 
+import { container } from '../../di';
 import { Assistant } from '../assistant';
-import { container } from '../di';
 import { createTool } from './create-tool';
 
 export const getRemainingTime = createTool({
