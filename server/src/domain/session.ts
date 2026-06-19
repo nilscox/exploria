@@ -5,6 +5,7 @@ import { assert, hasId } from '../utils';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
+import type { Shared } from '../shared';
 import type { UiEvent, UiNotifier } from './ui-notifier';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
@@ -70,11 +71,7 @@ export type SessionEvent =
   | SessionDomainEvent<'DiscussionPathSelected', { discussionPathId: string }>;
 
 export type SessionUiEvent =
-  | UiEvent<'ModelChanged', { sessionId: string; model: string }>
-  | UiEvent<'SubjectChanged', { sessionId: string; subject: string }>
-  | UiEvent<'TopicsChanged', { sessionId: string; topics: Topic[] }>
-  | UiEvent<'NotesChanged', { sessionId: string; notes: Note[] }>
-  | UiEvent<'TimerChanged', { sessionId: string; timer: Timer | null }>
+  | UiEvent<'SessionChanged', { sessionId: string; changes: Partial<Shared.Session> }>
   | UiEvent<'EventEmitted', { sessionId: string; event: SessionEvent }>;
 
 export class Session extends AggregateRoot<SessionEvent> {
@@ -163,7 +160,7 @@ export class Session extends AggregateRoot<SessionEvent> {
   setModel(model: string) {
     this._model = model;
     this.emit('ModelChanged', { model: this.model });
-    this.emitUiEvent('ModelChanged', { model: this.model });
+    this.emitUiEvent('SessionChanged', { changes: { model: this.model } });
   }
 
   initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
@@ -171,15 +168,14 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._topics = topics.map((topic) => ({ ...topic, id: this.generator.id(), status: 'pending' }));
 
     this.emit('PlanInitialized', { subject: this.subject, topics: this.topics });
-    this.emitUiEvent('SubjectChanged', { subject: this.subject });
-    this.emitUiEvent('TopicsChanged', { topics: this.topics });
+    this.emitUiEvent('SessionChanged', { changes: { subject: this.subject, topics: this.topics } });
   }
 
   setSubject(subject: string) {
     this._subject = subject;
 
     this.emit('SubjectChanged', { subject });
-    this.emitUiEvent('SubjectChanged', { subject: this.subject });
+    this.emitUiEvent('SessionChanged', { changes: { subject: this.subject } });
   }
 
   addTopic({ label }: Omit<Topic, 'id' | 'status'>) {
@@ -192,7 +188,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._topics.push(topic);
 
     this.emit('TopicAdded', { topic });
-    this.emitUiEvent('TopicsChanged', { topics: this.topics });
+    this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
   }
 
   removeTopic(topicId: string) {
@@ -202,7 +198,7 @@ export class Session extends AggregateRoot<SessionEvent> {
       this._topics.splice(index, 1);
 
       this.emit('TopicRemoved', { topicId });
-      this.emitUiEvent('TopicsChanged', { topics: this.topics });
+      this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
     }
   }
 
@@ -222,7 +218,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
 
     if (label || status) {
-      this.emitUiEvent('TopicsChanged', { topics: this.topics });
+      this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
     }
   }
 
@@ -235,7 +231,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._notes.push(note);
 
     this.emit('NoteAdded', { note });
-    this.emitUiEvent('NotesChanged', { notes: this.notes });
+    this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
   }
 
   removeNote(noteId: string) {
@@ -245,7 +241,7 @@ export class Session extends AggregateRoot<SessionEvent> {
       this._notes.splice(index, 1);
 
       this.emit('NoteRemoved', { noteId });
-      this.emitUiEvent('NotesChanged', { notes: this.notes });
+      this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
     }
   }
 
@@ -258,7 +254,7 @@ export class Session extends AggregateRoot<SessionEvent> {
       note.content = content;
 
       this.emit('NoteContentChanged', { noteId, content });
-      this.emitUiEvent('NotesChanged', { notes: this.notes });
+      this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
     }
   }
 
@@ -270,7 +266,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._timer = { duration, startedAt: now.toISOString() };
 
     this.emit('TimerStarted', { duration });
-    this.emitUiEvent('TimerChanged', { timer: this.timer });
+    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   clearTimer() {
@@ -279,7 +275,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._timer = null;
 
     this.emit('TimerCleared', {});
-    this.emitUiEvent('TimerChanged', { timer: this.timer });
+    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   pauseTimer() {
@@ -288,7 +284,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._timer.pausedAt = this.clock.now().toISOString();
 
     this.emit('TimerPaused', {});
-    this.emitUiEvent('TimerChanged', { timer: this.timer });
+    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   resumeTimer() {
@@ -304,7 +300,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     delete this._timer.pausedAt;
 
     this.emit('TimerResumed', {});
-    this.emitUiEvent('TimerChanged', { timer: this.timer });
+    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   addMessage(

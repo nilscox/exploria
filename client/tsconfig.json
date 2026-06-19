@@ -20,6 +20,10 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "src/*": ["./src/*"]
+    }
   }
 }

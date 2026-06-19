@@ -1,21 +1,25 @@
 @import 'tailwindcss';
-@plugin "@tailwindcss/typography";
+@plugin '@tailwindcss/typography';
 @import '@fontsource-variable/inter';
-@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/jetbrains-mono';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --color-neutral: var(--color-white);
+  --color-inverted: var(--color-black);
   --color-background: var(--color-slate-100);
   --color-foreground: var(--color-slate-950);
-  --color-accent: var(--color-white);
+  --color-accent: var(--color-slate-200);
   --color-accent-foreground: var(--color-slate-950);
   --color-border: var(--color-slate-300);
   --font-sans: 'Inter Variable', sans-serif;
-  --font-mono: 'Geist Mono Variable', monospace;
+  --font-mono: 'JetBrains Mono Variable', monospace;
 }
 
 :root.dark {
+  --color-neutral: var(--color-black);
+  --color-inverted: var(--color-white);
   --color-background: var(--color-mist-950);
   --color-foreground: var(--color-mist-100);
   --color-accent: var(--color-teal-950);
@@ -49,7 +53,7 @@
 }
 
 @utility text-dim {
-  color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
+  color: color-mix(in srgb, var(--color-foreground) 60%, transparent);
 }
 
 @utility col {

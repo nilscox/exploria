@@ -1,0 +1,123 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-06-19 09:55+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: fr\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/session/topics-list.tsx:89
+msgid "Add"
+msgstr "Ajouter"
+
+#: src/session/timer.tsx:57
+msgid "Clear the timer?"
+msgstr "Annuler le minuteur ?"
+
+#: src/home.tsx:56
+msgid "Deep thoughts with AI."
+msgstr "L'IA au service de la réflexion."
+
+#: src/session/timer.tsx:81
+msgid "Duration (minutes):"
+msgstr "Durée de la session (minutes) :"
+
+#: src/session/session.tsx:237
+msgid "End session"
+msgstr "Terminer la session"
+
+#: src/session/session.tsx:404
+msgid "Enter to send • Shift+Enter for new line"
+msgstr "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne"
+
+#: src/home.tsx:53
+msgid "Exploria"
+msgstr "Exploria"
+
+#: src/session/timer.tsx:72
+msgid "Invalid input."
+msgstr "Entréé invalide."
+
+#: src/home.tsx:77
+msgid "Load demo"
+msgstr "Voir une démo"
+
+#: src/session/session.tsx:390
+msgid "Message"
+msgstr "Message"
+
+#: src/session/session.tsx:286
+msgid "Model"
+msgstr "Modèle"
+
+#: src/session/topics-list.tsx:25
+msgid "No topic yet."
+msgstr "Aucun sujet."
+
+#: src/session/timer.tsx:40
+msgid "Pause"
+msgstr "Pause"
+
+#: src/home.tsx:101
+msgid "Previous sessions"
+msgstr "Sessions précédentes"
+
+#: src/session/timer.tsx:39
+msgid "Resume"
+msgstr "Reprendre"
+
+#: src/home.tsx:63
+msgid "Session subject"
+msgstr "Sujet de la session"
+
+#: src/session/timer.tsx:43
+#: src/session/timer.tsx:79
+msgid "Session timer"
+msgstr "Minuteur de session"
+
+#: src/home.tsx:80
+msgid "Start session"
+msgstr "Démarrer la session"
+
+#: src/session/timer.tsx:82
+msgid "Start timer"
+msgstr "Démarrer un minuteur"
+
+#: src/home.tsx:68
+msgid "Subject"
+msgstr "Sujet"
+
+#: src/session/session.tsx:235
+msgid "Subject to be define"
+msgstr "Sujet à définir"
+
+#: src/home.tsx:108
+msgid "Sujet à définir"
+msgstr "Sujet à définir"
+
+#: src/session/topics-list.tsx:87
+msgid "Topic label"
+msgstr "Sujet ajouté"
+
+#: src/session/topics-list.tsx:16
+msgid "Topics"
+msgstr "Sujets"
+
+#: src/session/session.tsx:391
+msgid "Type a message..."
+msgstr "Entrez un message..."
+
+#: src/session/model-selector.tsx:21
+msgid "Unknown provider"
+msgstr "Provider inconnu"
+
+#: src/home.tsx:67
+msgid "What subject do you want to address?"
+msgstr "Quel sujet souhaitez-vous explorer ?"

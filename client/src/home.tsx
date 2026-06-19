@@ -1,8 +1,12 @@
-import { mutationOptions, useMutation } from '@tanstack/react-query';
-import { useCallback } from 'react';
-import { useNavigate, type NavigateFunction } from 'react-router';
+import { Trans, useLingui } from '@lingui/react/macro';
+import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { ArrowRightIcon } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
+import { Link, useNavigate, type NavigateFunction } from 'react-router';
 
 import { api } from './api';
+import { Button } from './components/button';
+import { Field, FieldLabel, fieldProps } from './components/field';
 
 function createSessionOptions(navigate: NavigateFunction) {
   return mutationOptions({
@@ -13,9 +17,19 @@ function createSessionOptions(navigate: NavigateFunction) {
   });
 }
 
+function listSessionsOptions() {
+  return queryOptions({
+    queryKey: ['listSessions'],
+    queryFn: () => api.sessions.list(),
+  });
+}
+
 export function Home() {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const { mutate: createSession, isPending } = useMutation(createSessionOptions(navigate));
+
+  const listSessionsQuery = useQuery(listSessionsOptions());
 
   const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
     (event) => {
@@ -29,30 +43,74 @@ export function Home() {
     [createSession],
   );
 
-  const handleKeyDown = useCallback<React.KeyboardEventHandler<HTMLTextAreaElement>>((event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.currentTarget.form?.requestSubmit();
-    }
-  }, []);
+  return (
+    <div className="row h-full">
+      {listSessionsQuery.isSuccess && <SessionsList sessions={listSessionsQuery.data} />}
+
+      <div className="col h-full flex-1 items-center justify-center gap-16">
+        <header className="text-center">
+          <h1 className="my-4 text-4xl font-medium">
+            <Trans>Exploria</Trans>
+          </h1>
+          <div className="text-dim">
+            <Trans>Deep thoughts with AI.</Trans>
+          </div>
+        </header>
+
+        <form onSubmit={handleSubmit} className="col w-full max-w-lg gap-4 rounded-md border p-4">
+          <Field>
+            <FieldLabel>
+              <Trans>Session subject</Trans>
+            </FieldLabel>
+            <input
+              name="message"
+              placeholder={t`What subject do you want to address?`}
+              aria-label={t`Subject`}
+              readOnly={isPending}
+              className="read-only:text-dim bg-neutral rounded-md border px-4 py-2"
+              {...fieldProps()}
+            />
+          </Field>
+
+          <div className="row gap-2">
+            <Button type="submit" variant="outlined" size="large" className="flex-1">
+              <Trans>Load demo</Trans>
+            </Button>
+            <Button type="submit" size="large" className="flex-1">
+              <Trans>Start session</Trans>
+              <ArrowRightIcon className="size-4" />
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string; subject: string }> }) {
+  const { i18n } = useLingui();
+  const dateFormatter = useMemo(() => new Intl.DateTimeFormat(i18n.locale), [i18n.locale]);
+
+  if (sessions.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 col h-full py-4 justify-center gap-16">
-      <header className="text-center">
-        <h1 className="my-4 text-4xl font-medium">Exploria</h1>
-        <div className="text-dim">L'IA au service de la réflexion.</div>
-      </header>
+    <section className="w-92 overflow-y-auto border-r p-2">
+      <h2 className="text-dim my-4 text-sm font-medium uppercase">
+        <Trans>Previous sessions</Trans>
+      </h2>
 
-      <form onSubmit={handleSubmit}>
-        <textarea
-          name="message"
-          rows={6}
-          placeholder="Quel sujet souhaitez-vous aborder ?"
-          readOnly={isPending}
-          onKeyDown={handleKeyDown}
-          aria-label="Message"
-          className="border rounded-md block w-full p-2 bg-zinc-800 read-only:text-dim"
-        />
-      </form>
-    </div>
+      <ul className="col gap-2">
+        {sessions.map((session) => (
+          <li key={session.id}>
+            <Link to={`/session/${session.id}`} className="bg-neutral col block gap-1 rounded-md border p-2">
+              <div>{session.subject || <Trans>Sujet à définir</Trans>}</div>
+              <div className="text-dim text-xs">{dateFormatter.format(new Date(session.date))}</div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
