@@ -6,11 +6,21 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-background: var(--color-zinc-900);
-  --color-border: var(--color-zinc-500);
-  --color-text: var(--color-zinc-100);
+  --color-background: var(--color-slate-100);
+  --color-foreground: var(--color-slate-950);
+  --color-accent: var(--color-white);
+  --color-accent-foreground: var(--color-slate-950);
+  --color-border: var(--color-slate-300);
   --font-sans: 'Inter Variable', sans-serif;
   --font-mono: 'Geist Mono Variable', monospace;
+}
+
+:root.dark {
+  --color-background: var(--color-mist-950);
+  --color-foreground: var(--color-mist-100);
+  --color-accent: var(--color-teal-950);
+  --color-accent-foreground: var(--color-teal-300);
+  --color-border: var(--color-mist-500);
 }
 
 @layer base {
@@ -30,7 +40,7 @@
 
   body {
     background-color: var(--color-background);
-    color: var(--color-text);
+    color: var(--color-foreground);
   }
 
   button:not(:disabled) {
@@ -39,7 +49,7 @@
 }
 
 @utility text-dim {
-  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
 }
 
 @utility col {
