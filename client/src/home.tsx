@@ -7,6 +7,7 @@ import { Link, useNavigate, type NavigateFunction } from 'react-router';
 import { api } from './api';
 import { Button } from './components/button';
 import { Field, FieldLabel, fieldProps } from './components/field';
+import { Settings } from './components/settings';
 
 function createSessionOptions(navigate: NavigateFunction) {
   return mutationOptions({
@@ -44,27 +45,29 @@ export function Home() {
   );
 
   return (
-    <div className="row h-full">
-      {listSessionsQuery.isSuccess && <SessionsList sessions={listSessionsQuery.data} />}
+    <div className="col h-full flex-1 gap-4 p-4">
+      <header className="row w-full justify-end">
+        <Settings />
+      </header>
 
-      <div className="col h-full flex-1 items-center justify-center gap-16">
-        <header className="text-center">
-          <h1 className="my-4 text-4xl font-medium">
+      <div className="col mx-auto w-full max-w-lg flex-1 justify-center gap-8">
+        <div className="text-center">
+          <h1 className="my-2 text-2xl font-medium">
             <Trans>Exploria</Trans>
           </h1>
           <div className="text-dim">
             <Trans>Deep thoughts with AI.</Trans>
           </div>
-        </header>
+        </div>
 
-        <form onSubmit={handleSubmit} className="col w-full max-w-lg gap-4 rounded-md border p-4">
+        <form onSubmit={handleSubmit} className="col bg-neutral gap-4 rounded-md border p-4">
           <Field>
             <FieldLabel>
               <Trans>Session subject</Trans>
             </FieldLabel>
             <input
               name="message"
-              placeholder={t`What subject do you want to address?`}
+              placeholder={t`What do you need to think about?`}
               aria-label={t`Subject`}
               readOnly={isPending}
               className="read-only:text-dim bg-neutral rounded-md border px-4 py-2"
@@ -82,6 +85,12 @@ export function Home() {
             </Button>
           </div>
         </form>
+
+        {listSessionsQuery.isSuccess && (
+          <div>
+            <SessionsList sessions={listSessionsQuery.data} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -96,7 +105,7 @@ function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string
   }
 
   return (
-    <section className="w-92 overflow-y-auto border-r p-2">
+    <section>
       <h2 className="text-dim my-4 text-sm font-medium uppercase">
         <Trans>Previous sessions</Trans>
       </h2>
@@ -104,7 +113,10 @@ function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string
       <ul className="col gap-2">
         {sessions.map((session) => (
           <li key={session.id}>
-            <Link to={`/session/${session.id}`} className="bg-neutral col block gap-1 rounded-md border p-2">
+            <Link
+              to={`/session/${session.id}`}
+              className="hover:bg-accent col block gap-1 rounded-md border p-2 transition-colors"
+            >
               <div>{session.subject || <Trans>Sujet à définir</Trans>}</div>
               <div className="text-dim text-xs">{dateFormatter.format(new Date(session.date))}</div>
             </Link>

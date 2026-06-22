@@ -3,13 +3,14 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { current, produce } from 'immer';
-import { Loader2Icon, SendIcon } from 'lucide-react';
+import { ArrowLeftIcon, Loader2Icon, SendIcon } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 
 import { api, ApiError } from 'src/api';
-import { Button } from 'src/components/button';
+import { Button, LinkButton } from 'src/components/button';
 import { Field, FieldLabel } from 'src/components/field';
+import { Settings } from 'src/components/settings';
 import { Details } from 'src/details';
 import { Markdown } from 'src/markdown';
 import { assert, exhaustiveArray } from 'src/utils';
@@ -231,11 +232,23 @@ const reducer = produce(function (
 
 function Header({ session }: { session: Session }) {
   return (
-    <header className="row items-center justify-between border-b p-4">
-      <h1 className="text-xl font-medium">{session.subject ? session.subject : <Trans>Subject to be define</Trans>}</h1>
-      <Button variant="ghost">
-        <Trans>End session</Trans>
-      </Button>
+    <header className="row items-center justify-between border-b px-4 py-2">
+      <div className="row items-center gap-2">
+        <LinkButton to="/" variant="ghost" size="icon">
+          <ArrowLeftIcon className="size-4" />
+        </LinkButton>
+
+        <h1 className="text-xl font-medium">
+          {session.subject ? session.subject : <Trans>Subject to be define</Trans>}
+        </h1>
+      </div>
+
+      <div className="row items-center gap-2">
+        <Button variant="ghost">
+          <Trans>End session</Trans>
+        </Button>
+        <Settings />
+      </div>
     </header>
   );
 }
@@ -247,8 +260,8 @@ function Sidebar({ session }: { session: Session }) {
   return (
     <aside className="col sticky top-0 w-64 gap-6 p-2 lg:w-92">
       <Timer timer={session.timer} onStart={() => {}} onPause={onPause} onResume={onResume} onClear={() => {}} />
-      <TopicsList topics={session.topics} onAdd={() => {}} />
       <ModelSelectorSection session={session} />
+      <TopicsList topics={session.topics} onAdd={() => {}} />
 
       {session.notes.length > 0 && (
         <section>
@@ -271,12 +284,8 @@ function ModelSelectorSection({ session }: { session: Session }) {
   const modelsQuery = useQuery(listModelsOptions());
   const { mutate: setModel } = useMutation(setModelOptions(session.id));
 
-  if (modelsQuery.isPending) {
-    return null;
-  }
-
   if (modelsQuery.isError) {
-    return <>Error</>;
+    return <>Error while loading models: {modelsQuery.error.message}</>;
   }
 
   return (
@@ -285,7 +294,7 @@ function ModelSelectorSection({ session }: { session: Session }) {
         <FieldLabel className="text-dim text-xs font-medium uppercase">
           <Trans>Model</Trans>
         </FieldLabel>
-        <ModelSelector models={modelsQuery.data} value={session.model} onChange={setModel} />
+        <ModelSelector models={modelsQuery.data ?? []} value={session.model} onChange={setModel} />
       </Field>
     </section>
   );
@@ -295,7 +304,12 @@ function listModelsOptions() {
   return queryOptions({
     queryKey: ['listModels'],
     async queryFn(): Promise<string[]> {
-      // return ['gpt-5', 'mistral-small-3.2-24b-instruct'];
+      const mock = false;
+
+      if (mock) {
+        return ['gpt-5', 'mistral-small-3.2-24b-instruct'];
+      }
+
       const res = await fetch('https://api.mammouth.ai/public/models');
 
       if (!res.ok) {

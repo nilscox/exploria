@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/session/topics-list.tsx:89
+#: src/session/topics-list.tsx:93
 msgid "Add"
 msgstr "Ajouter"
 
@@ -21,7 +21,15 @@ msgstr "Ajouter"
 msgid "Clear the timer?"
 msgstr "Annuler le minuteur ?"
 
-#: src/home.tsx:56
+#: src/components/settings.tsx:31
+msgid "Close"
+msgstr "Fermer"
+
+#: src/components/settings.tsx:82
+msgid "Dark"
+msgstr "Sombre"
+
+#: src/home.tsx:59
 msgid "Deep thoughts with AI."
 msgstr "L'IA au service de la réflexion."
 
@@ -29,15 +37,15 @@ msgstr "L'IA au service de la réflexion."
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
-#: src/session/session.tsx:237
+#: src/session/session.tsx:248
 msgid "End session"
 msgstr "Terminer la session"
 
-#: src/session/session.tsx:404
+#: src/session/session.tsx:418
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne"
 
-#: src/home.tsx:53
+#: src/home.tsx:56
 msgid "Exploria"
 msgstr "Exploria"
 
@@ -45,15 +53,23 @@ msgstr "Exploria"
 msgid "Invalid input."
 msgstr "Entréé invalide."
 
-#: src/home.tsx:77
+#: src/components/settings.tsx:49
+msgid "Language"
+msgstr "Langue"
+
+#: src/components/settings.tsx:78
+msgid "Light"
+msgstr "Clair"
+
+#: src/home.tsx:80
 msgid "Load demo"
 msgstr "Voir une démo"
 
-#: src/session/session.tsx:390
+#: src/session/session.tsx:404
 msgid "Message"
 msgstr "Message"
 
-#: src/session/session.tsx:286
+#: src/session/session.tsx:295
 msgid "Model"
 msgstr "Modèle"
 
@@ -65,7 +81,7 @@ msgstr "Aucun sujet."
 msgid "Pause"
 msgstr "Pause"
 
-#: src/home.tsx:101
+#: src/home.tsx:110
 msgid "Previous sessions"
 msgstr "Sessions précédentes"
 
@@ -73,7 +89,7 @@ msgstr "Sessions précédentes"
 msgid "Resume"
 msgstr "Reprendre"
 
-#: src/home.tsx:63
+#: src/home.tsx:66
 msgid "Session subject"
 msgstr "Sujet de la session"
 
@@ -82,7 +98,11 @@ msgstr "Sujet de la session"
 msgid "Session timer"
 msgstr "Minuteur de session"
 
-#: src/home.tsx:80
+#: src/components/settings.tsx:23
+msgid "Settings"
+msgstr "Paramètres"
+
+#: src/home.tsx:83
 msgid "Start session"
 msgstr "Démarrer la session"
 
@@ -90,19 +110,23 @@ msgstr "Démarrer la session"
 msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
-#: src/home.tsx:68
+#: src/home.tsx:71
 msgid "Subject"
 msgstr "Sujet"
 
-#: src/session/session.tsx:235
+#: src/session/session.tsx:242
 msgid "Subject to be define"
 msgstr "Sujet à définir"
 
-#: src/home.tsx:108
+#: src/home.tsx:120
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
-#: src/session/topics-list.tsx:87
+#: src/components/settings.tsx:72
+msgid "Theme"
+msgstr "Thème"
+
+#: src/session/topics-list.tsx:89
 msgid "Topic label"
 msgstr "Sujet ajouté"
 
@@ -110,7 +134,7 @@ msgstr "Sujet ajouté"
 msgid "Topics"
 msgstr "Sujets"
 
-#: src/session/session.tsx:391
+#: src/session/session.tsx:405
 msgid "Type a message..."
 msgstr "Entrez un message..."
 
@@ -118,6 +142,6 @@ msgstr "Entrez un message..."
 msgid "Unknown provider"
 msgstr "Provider inconnu"
 
-#: src/home.tsx:67
-msgid "What subject do you want to address?"
-msgstr "Quel sujet souhaitez-vous explorer ?"
+#: src/home.tsx:70
+msgid "What do you need to think about?"
+msgstr "A quel sujet devez-vous réfléchir ?"

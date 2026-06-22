@@ -15,7 +15,7 @@ export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (
         <h2 className="text-dim text-xs font-medium uppercase">
           <Trans>Topics</Trans>
         </h2>
-        <Button variant="ghost" className="px-2!" onClick={() => setShowAddTopic(!showAddTopic)}>
+        <Button variant="ghost" size="icon" onClick={() => setShowAddTopic(!showAddTopic)}>
           <PlusIcon className="size-4" />
         </Button>
       </div>
@@ -84,7 +84,11 @@ function AddTopicForm({ onSubmit, onCancel }: { onSubmit: (label: string) => voi
 
   return (
     <form onSubmit={handleSubmit} className="row items-center gap-2">
-      <input name="label" aria-label={t`Topic label`} className="bg-neutral min-w-0 rounded-md border px-2 py-1" />
+      <input
+        name="label"
+        aria-label={t`Topic label`}
+        className="bg-neutral w-full min-w-0 rounded-md border px-2 py-1"
+      />
       <Button type="submit">
         <Trans>Add</Trans>
       </Button>

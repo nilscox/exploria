@@ -8,11 +8,11 @@
 @theme {
   --color-neutral: var(--color-white);
   --color-inverted: var(--color-black);
-  --color-background: var(--color-slate-100);
-  --color-foreground: var(--color-slate-950);
-  --color-accent: var(--color-slate-200);
-  --color-accent-foreground: var(--color-slate-950);
-  --color-border: var(--color-slate-300);
+  --color-background: var(--color-slate-50);
+  --color-foreground: var(--color-mauve-800);
+  --color-accent: var(--color-mauve-300);
+  --color-accent-foreground: var(--color-mauve-950);
+  --color-border: var(--color-mauve-300);
   --font-sans: 'Inter Variable', sans-serif;
   --font-mono: 'JetBrains Mono Variable', monospace;
 }
@@ -22,9 +22,9 @@
   --color-inverted: var(--color-white);
   --color-background: var(--color-mist-950);
   --color-foreground: var(--color-mist-100);
-  --color-accent: var(--color-teal-950);
-  --color-accent-foreground: var(--color-teal-300);
-  --color-border: var(--color-mist-500);
+  --color-accent: var(--color-stone-800);
+  --color-accent-foreground: var(--color-stone-200);
+  --color-border: var(--color-stone-700);
 }
 
 @layer base {
@@ -45,6 +45,11 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    @apply scrollbar-thumb-accent-foreground/50 scrollbar-track-accent;
+  }
+
+  [popover] {
+    color: inherit;
   }
 
   button:not(:disabled) {

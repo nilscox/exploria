@@ -20,12 +20,14 @@ import { fieldProps } from './field';
 
 export function Select({
   ref,
+  container,
   placeholder,
   renderValue,
   children,
   ...props
 }: {
   ref?: React.Ref<HTMLButtonElement>;
+  container?: HTMLElement | null;
   placeholder?: React.ReactNode;
   renderValue?: () => React.ReactNode;
   children: React.ReactNode;
@@ -44,11 +46,11 @@ export function Select({
           <ChevronDownIcon className="size-4 group-data-[state=open]:-scale-y-100" />
         </Icon>
       </Trigger>
-      <Portal>
+      <Portal container={container ?? document.getElementById('root')}>
         <Content
           position="popper"
           sideOffset={8}
-          className="bg-neutral max-h-(--radix-select-content-available-height) w-(--radix-select-trigger-width) rounded-md shadow-md"
+          className="bg-neutral max-h-(--radix-select-content-available-height) w-(--radix-select-trigger-width) overflow-hidden rounded-md shadow-md"
         >
           <ScrollUpButton className="row items-center justify-center py-1">
             <ChevronUpIcon className="size-4" />
@@ -71,7 +73,7 @@ export function SelectItem({
   return (
     <Item
       ref={ref}
-      className="row data-highlighted:bg-accent cursor-pointer items-center justify-between px-3 py-1 text-sm outline-none"
+      className="row data-highlighted:bg-accent cursor-pointer items-center justify-between px-3 py-2 text-sm outline-none"
       {...props}
     >
       <ItemText>{children}</ItemText>

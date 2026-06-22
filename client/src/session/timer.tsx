@@ -54,7 +54,7 @@ export function Timer({
           {label}
         </Button>
 
-        <Button variant="outlined" onClick={withConfirm(t`Clear the timer?`, onClear)} className="px-2!">
+        <Button variant="outlined" size="icon" onClick={withConfirm(t`Clear the timer?`, onClear)}>
           <Trash2Icon className="size-4" />
         </Button>
       </div>
@@ -77,7 +77,7 @@ function StartTimer({ onStart }: { onStart: (duration: number) => void }) {
 
   return (
     <Section title={<Trans>Session timer</Trans>}>
-      <div className="col items-center py-6 text-center font-mono text-2xl font-medium">
+      <div className="col items-center py-6 text-center">
         <Button onClick={withPrompt(t`Duration (minutes):`, handleStart)}>
           <Trans>Start timer</Trans>
         </Button>
