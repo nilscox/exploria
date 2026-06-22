@@ -1,11 +1,12 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
-import { ArrowLeftIcon, Loader2Icon } from 'lucide-react';
+import { ArrowLeftIcon } from 'lucide-react';
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import { useParams } from 'react-router';
 
 import { Button, LinkButton } from 'src/components/button';
 import { Settings } from 'src/components/settings';
+import { Spinner } from 'src/components/spinner';
 import { Markdown } from 'src/markdown';
 import { assert } from 'src/utils';
 
@@ -32,7 +33,7 @@ export function SessionPage() {
   if (!state.session) {
     return (
       <div className="col h-full items-center justify-center">
-        <Loader2Icon className="size-8 animate-spin" />
+        <Spinner className="size-8" />
       </div>
     );
   }

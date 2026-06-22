@@ -59,6 +59,38 @@ export class Assistant {
     }
   }
 
+  async generateDemo(session: Session) {
+    for (let i = 0; i <= 3; ++i) {
+      const message = await this.client.chat.completions.create({
+        model: session.model,
+        messages: [
+          {
+            role: 'system',
+            content: [
+              "Tu cherches à réfléchir à un sujet de manière guidée. Ce n'est pas toi qui guide la discussion, tu te laisses guider.",
+              'Tu joue le role "user" et non pas "assistant", dans le but de créer un exemple de conversation.',
+              ...(i === 0
+                ? [
+                    'Invente un sujet de réflexion complexe : par exemple, un choix de vie, une décision technique ou une question philosophie. Ne propose pas plusieurs options, énonce simplement le sujet choisi en quelques mots.',
+                  ]
+                : [
+                    'Voici le début de la conversation.',
+                    ...session.messages
+                      .filter((message) => message.content !== '')
+                      .filter((message) => ['user', 'assistant'].includes(message.role))
+                      .map((message) => `${message.role}: ${message.content}`),
+                    'user: ',
+                    'Génère un message court pour continuer la discussion.',
+                  ]),
+            ].join('\n\n'),
+          },
+        ],
+      });
+
+      await this.run(session, message.choices[0]!.message.content!);
+    }
+  }
+
   private createChatCompletionRequest(session: Session): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming {
     return {
       model: session.model,

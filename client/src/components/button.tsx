@@ -1,13 +1,22 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Link } from 'react-router';
 
+import { Spinner } from './spinner';
+
 export function Button({
   variant,
   size,
+  loading,
   className,
+  children,
   ...props
-}: React.ComponentProps<'button'> & VariantProps<typeof variants>) {
-  return <button type="button" className={variants({ variant, size, className })} {...props} />;
+}: React.ComponentProps<'button'> & VariantProps<typeof variants> & { loading?: boolean }) {
+  return (
+    <button type="button" className={variants({ variant, size, className })} {...props}>
+      {loading && <Spinner className="size-4" />}
+      {children}
+    </button>
+  );
 }
 
 export function LinkButton({

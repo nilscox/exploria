@@ -1,5 +1,3 @@
-import assert from 'assert';
-
 import type { Shared } from '@exploria/server/shared';
 import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { current, produce } from 'immer';
@@ -7,7 +5,7 @@ import { useEffect, useReducer } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { ApiError, api } from 'src/api';
-import { exhaustiveArray } from 'src/utils';
+import { assert, exhaustiveArray } from 'src/utils';
 
 const sessionUiEventTypes = exhaustiveArray<Shared.AssistantUiEvent['type'] | Shared.SessionUiEvent['type']>()([
   'Chunk',
@@ -142,7 +140,7 @@ const reducer = produce(function (
   }
 
   if (action.type === 'Chunk') {
-    assert(state.stream !== undefined);
+    state.stream ??= '';
     state.stream = state.stream + action.text;
   }
 

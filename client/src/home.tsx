@@ -1,18 +1,22 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { ArrowRightIcon } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, type NavigateFunction } from 'react-router';
 
+import { defined } from '../../server/src/utils';
 import { api } from './api';
 import { Button } from './components/button';
 import { Field, FieldLabel, fieldProps } from './components/field';
 import { Settings } from './components/settings';
+import { ModelSelector } from './session/model-selector';
 
 function createSessionOptions(navigate: NavigateFunction) {
   return mutationOptions({
-    mutationFn: (_message: string) => api.sessions.create(),
-    async onSuccess(sessionId, message) {
+    async mutationFn({ model, demo }: { model: string; demo?: boolean; message?: string }) {
+      return api.sessions.create({ model, demo });
+    },
+    async onSuccess(sessionId, { message }) {
       await navigate(`/session/${sessionId}`, { state: { message } });
     },
   });
@@ -21,28 +25,42 @@ function createSessionOptions(navigate: NavigateFunction) {
 function listSessionsOptions() {
   return queryOptions({
     queryKey: ['listSessions'],
-    queryFn: () => api.sessions.list(),
+    async queryFn() {
+      return api.sessions.list();
+    },
   });
 }
 
 export function Home() {
   const { t } = useLingui();
   const navigate = useNavigate();
-  const { mutate: createSession, isPending } = useMutation(createSessionOptions(navigate));
+  const { mutate: createSession, isPending: creatingSession, variables } = useMutation(createSessionOptions(navigate));
 
   const listSessionsQuery = useQuery(listSessionsOptions());
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
     (event) => {
       event.preventDefault();
 
       const data = new FormData(event.target);
+      const model = data.get('model') as string;
       const message = data.get('message') as string;
 
-      createSession(message);
+      createSession({ model, message });
     },
     [createSession],
   );
+
+  const loadDemo = useCallback(() => {
+    const data = new FormData(defined(formRef.current));
+    const model = data.get('model') as string;
+
+    createSession({ model, demo: true });
+  }, [createSession]);
+
+  const [model, setModel] = useState('mistral-small-3.2-24b-instruct');
 
   return (
     <div className="col h-full flex-1 gap-4 p-4">
@@ -60,7 +78,7 @@ export function Home() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="col bg-neutral gap-4 rounded-md border p-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="col bg-neutral gap-4 rounded-md border p-4">
           <Field>
             <FieldLabel>
               <Trans>Session subject</Trans>
@@ -69,17 +87,30 @@ export function Home() {
               name="message"
               placeholder={t`What do you need to think about?`}
               aria-label={t`Subject`}
-              readOnly={isPending}
+              readOnly={creatingSession}
               className="read-only:text-dim bg-neutral rounded-md border px-4 py-2"
               {...fieldProps()}
             />
           </Field>
 
-          <div className="row gap-2">
-            <Button type="submit" variant="outlined" size="large" className="flex-1">
+          <Field>
+            <FieldLabel>
+              <Trans>Model</Trans>
+            </FieldLabel>
+            <ModelSelector name="model" value={model} onChange={setModel} />
+          </Field>
+
+          <div className="col sm:row gap-2">
+            <Button
+              variant="outlined"
+              size="large"
+              loading={creatingSession && variables.demo}
+              onClick={loadDemo}
+              className="flex-1"
+            >
               <Trans>Load demo</Trans>
             </Button>
-            <Button type="submit" size="large" className="flex-1">
+            <Button type="submit" size="large" loading={creatingSession && !variables.demo} className="flex-1">
               <Trans>Start session</Trans>
               <ArrowRightIcon className="size-4" />
             </Button>

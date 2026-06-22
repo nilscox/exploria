@@ -15,7 +15,6 @@ export interface Config {
   };
 
   assistant: 'test' | undefined;
-  defaultModel: string;
 }
 
 export class EnvConfig implements Config {
@@ -50,10 +49,6 @@ export class EnvConfig implements Config {
       url: this.env('DATABASE_URL'),
       debug: this.env('DATABASE_URL', 'false', (value) => value === 'true'),
     };
-  }
-
-  get defaultModel() {
-    return this.env('DEFAULT_MODEL');
   }
 
   get assistant() {

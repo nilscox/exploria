@@ -1,10 +1,13 @@
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Component } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import toast, { Toaster } from 'react-hot-toast';
 
 import './index.css';
+
+import { BrowserRouter, Route, Routes } from 'react-router';
 
 import { DebugProvider } from './debug-context';
 import { Home } from './home';
@@ -24,32 +27,61 @@ const client = new QueryClient({
     },
     mutations: {
       onError(error) {
-        console.log(error);
+        console.error(error);
+        toast.error(error.message);
       },
     },
   },
   queryCache: new QueryCache({
     onError(error) {
-      console.log(error.message);
+      console.error(error.message);
+      toast.error(error.message);
     },
   }),
 });
 
+class ErrorBoundary extends Component<{ children: React.ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('💥 Error caught:', error);
+    console.error('📍 Component stack:', info.componentStack);
+  }
+
+  render() {
+    if (this.state.error) {
+      return <pre className="mt-2 text-sm whitespace-pre-wrap">{this.state.error.stack}</pre>;
+    }
+
+    return this.props.children;
+  }
+}
+
 function App() {
   return (
-    <I18nProvider i18n={i18n}>
-      <QueryClientProvider client={client}>
-        <DebugProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/session/:sessionId" element={<SessionPage />} />
-            </Routes>
-          </BrowserRouter>
-        </DebugProvider>
-      </QueryClientProvider>
-    </I18nProvider>
+    <ErrorBoundary>
+      <I18nProvider i18n={i18n}>
+        <QueryClientProvider client={client}>
+          <DebugProvider>
+            <Toaster position="top-right" />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/session/:sessionId" element={<SessionPage />} />
+              </Routes>
+            </BrowserRouter>
+          </DebugProvider>
+        </QueryClientProvider>
+      </I18nProvider>
+    </ErrorBoundary>
   );
 }
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!, {
+  onCaughtError: console.error,
+  onUncaughtError: console.error,
+}).render(<App />);

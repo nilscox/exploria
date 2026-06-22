@@ -30,9 +30,10 @@ const sessions = {
     return res.json();
   },
 
-  async create(): Promise<string> {
+  async create({ model, demo }: { model: string; demo?: boolean }): Promise<string> {
     const res = await fetchApi('/session', {
       method: 'POST',
+      body: { model, demo },
     });
 
     return res.text();
@@ -104,11 +105,11 @@ export class ApiError extends Error {
     const contentType = res.headers.get('Content-Type');
     const body = await (contentType === 'application/json' ? res.json() : res.text());
 
-    return new ApiError(this.getMessage(body), res.status, body);
+    return new ApiError(this.getMessage(res, body), res.status, body);
   }
 
-  private static getMessage(body: unknown) {
-    if (typeof body === 'string') {
+  private static getMessage(res: Response, body: unknown) {
+    if (typeof body === 'string' && body !== '') {
       return body;
     }
 
@@ -116,6 +117,6 @@ export class ApiError extends Error {
       return body.message;
     }
 
-    return 'Unknown API error';
+    return [res.status, res.statusText].join(': ');
   }
 }

@@ -1,19 +1,26 @@
 import { Trans } from '@lingui/react/macro';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { Select, SelectItem } from 'src/components/select';
 
 export function ModelSelector({
-  models,
+  name,
   value,
   onChange,
 }: {
-  models: string[];
-  value: string;
-  onChange: (value: string) => void;
+  name?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
+  const modelsQuery = useQuery(listModelsOptions());
+
+  if (modelsQuery.isError) {
+    return <Trans>Error while loading models: {modelsQuery.error.message}</Trans>;
+  }
+
   return (
-    <Select value={value} onValueChange={onChange} renderValue={() => value}>
-      {models.map((model) => (
+    <Select name={name} value={value} onValueChange={onChange} renderValue={() => value}>
+      {modelsQuery.data?.map((model) => (
         <SelectItem key={model} value={model}>
           <div className="col gap-0.5">
             <span>{model}</span>
@@ -25,6 +32,29 @@ export function ModelSelector({
       ))}
     </Select>
   );
+}
+
+function listModelsOptions() {
+  return queryOptions({
+    queryKey: ['listModels'],
+    async queryFn(): Promise<string[]> {
+      const mock = true;
+
+      if (mock) {
+        return ['gpt-5', 'mistral-small-3.2-24b-instruct'];
+      }
+
+      const res = await fetch('https://api.mammouth.ai/public/models');
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const { data }: { data: Array<{ id: string }> } = await res.json();
+
+      return data.map(({ id }) => id);
+    },
+  });
 }
 
 // Thanks!

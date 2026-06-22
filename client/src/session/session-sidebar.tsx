@@ -1,6 +1,6 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
-import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { mutationOptions, useMutation } from '@tanstack/react-query';
 
 import { api } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
@@ -47,12 +47,7 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
 }
 
 function ModelSelectorSection({ session }: { session: Shared.Session }) {
-  const modelsQuery = useQuery(listModelsOptions());
   const { mutate: setModel } = useMutation(setModelOptions(session.id));
-
-  if (modelsQuery.isError) {
-    return <Trans>Error while loading models: {modelsQuery.error.message}</Trans>;
-  }
 
   return (
     <section>
@@ -60,33 +55,10 @@ function ModelSelectorSection({ session }: { session: Shared.Session }) {
         <FieldLabel className="text-dim text-xs font-medium uppercase">
           <Trans>Model</Trans>
         </FieldLabel>
-        <ModelSelector models={modelsQuery.data ?? []} value={session.model} onChange={setModel} />
+        <ModelSelector value={session.model} onChange={setModel} />
       </Field>
     </section>
   );
-}
-
-function listModelsOptions() {
-  return queryOptions({
-    queryKey: ['listModels'],
-    async queryFn(): Promise<string[]> {
-      const mock = true;
-
-      if (mock) {
-        return ['gpt-5', 'mistral-small-3.2-24b-instruct'];
-      }
-
-      const res = await fetch('https://api.mammouth.ai/public/models');
-
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
-
-      const { data }: { data: Array<{ id: string }> } = await res.json();
-
-      return data.map(({ id }) => id);
-    },
-  });
 }
 
 function setModelOptions(sessionId: string) {

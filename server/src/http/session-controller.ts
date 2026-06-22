@@ -48,8 +48,8 @@ export class SessionController {
     this.clock = clock;
     this.events = events;
     this.uiNotifier = uiNotifier;
-    this.sessionRepository = sessionRepository;
     this.assistant = assistant;
+    this.sessionRepository = sessionRepository;
 
     this.router.param('id', async (req, res, next, id: string) => {
       const session = await this.sessionRepository.find(id);
@@ -66,7 +66,14 @@ export class SessionController {
     });
 
     this.router.post('/', async (req, res) => {
-      res.status(201).send(await this.createSession());
+      const { model, demo } = z
+        .object({
+          model: z.string().min(1),
+          demo: z.boolean().optional(),
+        })
+        .parse(req.body);
+
+      res.status(201).send(await this.createSession({ model, demo }));
     });
 
     this.router.get('/:id', async (req, res) => {
@@ -115,17 +122,32 @@ export class SessionController {
     }));
   }
 
-  private async createSession() {
+  private async createSession({ model, demo }: { model: string; demo?: boolean }) {
     const session = new Session(this.generator, this.clock, this.uiNotifier);
     const instructions = await fs.readFile('instructions.md').then(String);
 
-    session.setModel(this.config.defaultModel);
+    session.setModel(model);
     session.addMessage('system', instructions);
 
     await this.sessionRepository.insert(session);
     await this.sessionRepository.save(session);
+    this.events.emit(...session.pullDomainEvents());
+
+    if (demo) {
+      void this.generateDemo(session);
+    }
 
     return session.id;
+  }
+
+  private async generateDemo(session: Session) {
+    try {
+      await this.assistant.generateDemo(session);
+      await this.sessionRepository.save(session);
+      this.events.emit(...session.pullDomainEvents());
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async getSession(sessionId: string) {

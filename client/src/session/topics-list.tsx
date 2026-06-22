@@ -54,7 +54,7 @@ function TopicItem({ topic }: { topic: Shared.Topic }) {
     <button
       type="button"
       className={clsx(
-        'row gap-2 items-center font-medium px-2 py-1 w-full transition-colors',
+        'row gap-2 items-center text-start font-medium px-2 py-1 w-full transition-colors',
         topic.status === 'in_progress' && 'rounded-md border bg-accent',
         topic.status === 'done' && 'opacity-50',
       )}
