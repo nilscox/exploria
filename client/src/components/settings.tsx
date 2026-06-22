@@ -2,9 +2,11 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
+import { debug, useSetDebug } from 'src/debug-context';
 import { setLanguage, type Language } from 'src/i18n/i18n';
 
 import { Button } from './button';
+import { Checkbox } from './checkbox';
 import { Dialog } from './dialog';
 import { Field, FieldLabel } from './field';
 import { Select, SelectItem } from './select';
@@ -25,6 +27,7 @@ export function Settings() {
 
         <LanguageSelector dialog={dialog} />
         <ThemeModeSelector dialog={dialog} />
+        <DebugMode />
 
         <div className="row justify-end gap-2">
           <Button variant="ghost" popoverTarget="settings-dialog" popoverTargetAction="hide">
@@ -113,4 +116,14 @@ function useTheme() {
       localStorage.setItem('theme', theme);
     }, []),
   ] as const;
+}
+
+function DebugMode() {
+  const setDebug = useSetDebug();
+
+  return (
+    <Field>
+      <Checkbox defaultChecked={debug()} onCheckedChange={setDebug} label={<Trans>Debug</Trans>} />
+    </Field>
+  );
 }

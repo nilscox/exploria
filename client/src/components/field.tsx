@@ -27,10 +27,21 @@ export function fieldProps() {
   };
 }
 
-export function FieldLabel({ className, ...props }: React.ComponentProps<'label'>) {
+export function labelProps() {
   const id = use(fieldContext);
 
-  return <label id={`${id}-label`} htmlFor={id} className={clsx(className, 'text-dim max-w-fit text-sm')} {...props} />;
+  if (!id) {
+    return {};
+  }
+
+  return {
+    id: `${id}-label`,
+    htmlFor: id,
+  };
+}
+
+export function FieldLabel({ className, ...props }: React.ComponentProps<'label'>) {
+  return <label className={clsx(className, 'text-dim max-w-fit text-sm')} {...labelProps()} {...props} />;
 }
 
 export function FieldError({ className, ...props }: React.ComponentProps<'div'>) {

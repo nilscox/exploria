@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes } from 'react-router';
 
 import './index.css';
 
+import { DebugProvider } from './debug-context';
 import { Home } from './home';
 import { messages } from './i18n/en/messages';
 import { getPreferredLanguage, setLanguage } from './i18n/i18n';
@@ -38,12 +39,14 @@ function App() {
   return (
     <I18nProvider i18n={i18n}>
       <QueryClientProvider client={client}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/session/:sessionId" element={<SessionPage />} />
-          </Routes>
-        </BrowserRouter>
+        <DebugProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/session/:sessionId" element={<SessionPage />} />
+            </Routes>
+          </BrowserRouter>
+        </DebugProvider>
       </QueryClientProvider>
     </I18nProvider>
   );

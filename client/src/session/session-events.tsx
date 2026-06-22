@@ -1,10 +1,10 @@
 import type { Shared } from '@exploria/server/shared';
 import clsx from 'clsx';
 
+import { debug } from 'src/debug-context';
 import { Details } from 'src/details';
 import { Markdown } from 'src/markdown';
 
-type Message = Shared.Message;
 type SessionEvent = Shared.SessionEvent;
 type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -58,7 +58,15 @@ function TimerResumedEvent() {
 function MessageAddedEvent({ event }: { event: GetSessionEvent<'MessageAdded'> }) {
   const { message } = event;
 
+  if (message.role === 'tool') {
+    return null;
+  }
+
   if (message.role === 'system') {
+    if (!debug()) {
+      return null;
+    }
+
     return (
       <Details className="text-dim text-sm" summary="System prompt">
         <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
@@ -70,41 +78,36 @@ function MessageAddedEvent({ event }: { event: GetSessionEvent<'MessageAdded'> }
 
   return (
     <>
-      <Message message={event.message} />
+      {event.message.content !== '' && (
+        <Markdown
+          markdown={event.message.content}
+          className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
+        />
+      )}
 
-      {message.role === 'assistant' &&
-        message.toolCalls?.map((toolCall) => (
-          <Details
-            key={toolCall.id}
-            className="text-dim text-sm"
-            summary={`Tool call ${toolCall.name} (${toolCall.id})`}
-          >
-            <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
-              {JSON.stringify(toolCall.arguments, null, 2)}
-            </div>
-
-            {Boolean(toolCall.result) && (
-              <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
-                {JSON.stringify(toolCall.result, null, 2)}
-              </div>
-            )}
-
-            {Boolean(toolCall.error) && (
-              <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
-                {JSON.stringify(toolCall.error, null, 2)}
-              </div>
-            )}
-          </Details>
-        ))}
+      {message.role === 'assistant' && debug() && <ToolCalls toolCalls={message.toolCalls} />}
     </>
   );
 }
 
-function Message({ message }: { message: Omit<Message, 'id'> }) {
-  return (
-    <Markdown
-      markdown={message.content}
-      className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
-    />
-  );
+function ToolCalls({ toolCalls }: { toolCalls?: Shared.ToolCall[] }) {
+  return toolCalls?.map((toolCall) => (
+    <Details key={toolCall.id} className="text-dim text-sm" summary={`Tool call ${toolCall.name} (${toolCall.id})`}>
+      <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
+        {JSON.stringify(toolCall.arguments, null, 2)}
+      </div>
+
+      {Boolean(toolCall.result) && (
+        <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
+          {JSON.stringify(toolCall.result, null, 2)}
+        </div>
+      )}
+
+      {Boolean(toolCall.error) && (
+        <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
+          {JSON.stringify(toolCall.error, null, 2)}
+        </div>
+      )}
+    </Details>
+  ));
 }

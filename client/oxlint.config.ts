@@ -9,6 +9,7 @@ export default defineConfig({
   jsPlugins: ['@tanstack/eslint-plugin-query'],
   rules: {
     'typescript/consistent-type-imports': 'warn',
+    'jsx-a11y/label-has-associated-control': 'off',
     ...tanstackQueryPlugin.configs.recommendedStrict.rules,
   },
 });

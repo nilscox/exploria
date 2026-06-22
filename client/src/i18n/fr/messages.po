@@ -144,4 +144,4 @@ msgstr "Provider inconnu"
 
 #: src/home.tsx:70
 msgid "What do you need to think about?"
-msgstr "A quel sujet devez-vous réfléchir ?"
+msgstr "A quel sujet souhaitez-vous réfléchir ?"

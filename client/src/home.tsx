@@ -115,7 +115,7 @@ function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string
           <li key={session.id}>
             <Link
               to={`/session/${session.id}`}
-              className="hover:bg-accent col block gap-1 rounded-md border p-2 transition-colors"
+              className="hover:bg-accent/50 col block gap-1 rounded-md border p-2 transition-colors"
             >
               <div>{session.subject || <Trans>Sujet à définir</Trans>}</div>
               <div className="text-dim text-xs">{dateFormatter.format(new Date(session.date))}</div>
