@@ -54,8 +54,14 @@ const sessions = {
   async setModel(id: string, model: string): Promise<void> {
     await fetchApi(`/session/${id}/model`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: { model },
+    });
+  },
+
+  async addTopic(id: string, topic: string): Promise<void> {
+    await fetchApi(`/session/${id}/topic`, {
+      method: 'POST',
+      body: { topic },
     });
   },
 
@@ -70,16 +76,31 @@ const sessions = {
     return new EventSource(new URL(`/session/${id}/stream`, baseUrl));
   },
 
-  async pauseTimer(id: string) {
-    await fetchApi(`/session/${id}/timer/pause`, {
-      method: 'PUT',
-    });
-  },
+  timer: {
+    async start(id: string, duration: number) {
+      await fetchApi(`/session/${id}/timer`, {
+        method: 'POST',
+        body: { duration },
+      });
+    },
 
-  async resumeTimer(id: string) {
-    await fetchApi(`/session/${id}/timer/resume`, {
-      method: 'PUT',
-    });
+    async clear(id: string) {
+      await fetchApi(`/session/${id}/timer`, {
+        method: 'delete',
+      });
+    },
+
+    async pause(id: string) {
+      await fetchApi(`/session/${id}/timer/pause`, {
+        method: 'PUT',
+      });
+    },
+
+    async resume(id: string) {
+      await fetchApi(`/session/${id}/timer/resume`, {
+        method: 'PUT',
+      });
+    },
   },
 };
 

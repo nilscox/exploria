@@ -11,21 +11,24 @@ import { Timer } from './timer';
 import { TopicsList } from './topics-list';
 
 export function SessionSidebar({ session }: { session: Shared.Session }) {
-  const { mutate: onPause } = useMutation(pauseTimerOptions(session.id));
-  const { mutate: onResume } = useMutation(resumeTimerOptions(session.id));
+  const { mutate: addTopic } = useMutation(addTopicOptions(session.id));
+  const { mutate: startTimer } = useMutation(startTimerOptions(session.id));
+  const { mutate: clearTimer } = useMutation(clearTimerOptions(session.id));
+  const { mutate: pauseTimer } = useMutation(pauseTimerOptions(session.id));
+  const { mutate: resumeTimer } = useMutation(resumeTimerOptions(session.id));
 
   return (
-    <aside className="col sticky top-0 w-64 gap-6 p-2 lg:w-92">
+    <aside className="col sticky top-0 max-h-full w-64 scrollbar-thin gap-6 overflow-y-auto p-2 lg:w-92">
       <Timer
         timer={session.timer}
-        onStart={() => {}}
-        onPause={() => onPause()}
-        onResume={() => onResume()}
-        onClear={() => {}}
+        onStart={startTimer}
+        onPause={pauseTimer}
+        onResume={resumeTimer}
+        onClear={clearTimer}
       />
 
       <ModelSelectorSection session={session} />
-      <TopicsList topics={session.topics} onAdd={() => {}} />
+      <TopicsList topics={session.topics} onAdd={addTopic} />
 
       {session.notes.length > 0 && (
         <section>
@@ -67,14 +70,32 @@ function setModelOptions(sessionId: string) {
   });
 }
 
+function addTopicOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: (label: string) => api.sessions.addTopic(sessionId, label),
+  });
+}
+
+function startTimerOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: (duration: number) => api.sessions.timer.start(sessionId, duration),
+  });
+}
+
+function clearTimerOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: () => api.sessions.timer.clear(sessionId),
+  });
+}
+
 function pauseTimerOptions(sessionId: string) {
   return mutationOptions({
-    mutationFn: () => api.sessions.pauseTimer(sessionId),
+    mutationFn: () => api.sessions.timer.pause(sessionId),
   });
 }
 
 function resumeTimerOptions(sessionId: string) {
   return mutationOptions({
-    mutationFn: () => api.sessions.resumeTimer(sessionId),
+    mutationFn: () => api.sessions.timer.resume(sessionId),
   });
 }

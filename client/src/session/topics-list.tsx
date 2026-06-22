@@ -51,8 +51,7 @@ export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (
 
 function TopicItem({ topic }: { topic: Shared.Topic }) {
   return (
-    <button
-      type="button"
+    <div
       className={clsx(
         'row gap-2 items-center text-start font-medium px-2 py-1 w-full transition-colors',
         topic.status === 'in_progress' && 'rounded-md border bg-accent',
@@ -62,7 +61,7 @@ function TopicItem({ topic }: { topic: Shared.Topic }) {
       <span>&bull;</span>
       <span className={clsx(topic.status === 'done' && 'line-through text-dim')}>{topic.label}</span>
       {topic.status === 'done' && <CheckIcon className="ms-auto size-3" />}
-    </button>
+    </div>
   );
 }
 

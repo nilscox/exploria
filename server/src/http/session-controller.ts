@@ -87,18 +87,50 @@ export class SessionController {
 
     this.router.put('/:id/model', async (req, res) => {
       const { model } = z.object({ model: z.string().min(1) }).parse(req.body);
+
       await this.setModel(model);
+
+      res.status(204).end();
+    });
+
+    this.router.post('/:id/topic', async (req, res) => {
+      const { topic } = z.object({ topic: z.string().min(1).max(64) }).parse(req.body);
+
+      await this.addTopic(topic);
+
       res.status(204).end();
     });
 
     this.router.post('/:id/message', async (req, res) => {
       const { message } = z.object({ message: z.string().min(1) }).parse(req.body);
+
       await this.postMessage(message);
+
       res.status(204).end();
     });
 
     this.router.get('/:id/stream', (req, res) => {
       this.stream(res);
+    });
+
+    this.router.post('/:id/timer', async (req, res) => {
+      const { duration } = z
+        .object({
+          duration: z
+            .number()
+            .min(5)
+            .max(4 * 60),
+        })
+        .parse(req.body);
+
+      await this.startTimer(duration);
+
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/timer', async (req, res) => {
+      await this.clearTimer();
+      res.status(204).end();
     });
 
     this.router.put('/:id/timer/pause', async (req, res) => {
@@ -185,8 +217,17 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     session.setModel(model);
-    await this.sessionRepository.save(session);
 
+    await this.sessionRepository.save(session);
+    this.events.emit(...session.pullDomainEvents());
+  }
+
+  private async addTopic(label: string) {
+    const session = this.getSessionInstance();
+
+    session.addTopic({ label });
+
+    await this.sessionRepository.save(session);
     this.events.emit(...session.pullDomainEvents());
   }
 
@@ -194,8 +235,8 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     await this.assistant.run(session, message);
-    await this.sessionRepository.save(session);
 
+    await this.sessionRepository.save(session);
     this.events.emit(...session.pullDomainEvents());
   }
 
@@ -209,6 +250,24 @@ export class SessionController {
       this.uiNotifier.remove(session.id, sse);
       res.end();
     });
+  }
+
+  private async startTimer(duration: number) {
+    const session = this.getSessionInstance();
+
+    session.startTimer(duration);
+
+    await this.sessionRepository.save(session);
+    this.events.emit(...session.pullDomainEvents());
+  }
+
+  private async clearTimer() {
+    const session = this.getSessionInstance();
+
+    session.clearTimer();
+
+    await this.sessionRepository.save(session);
+    this.events.emit(...session.pullDomainEvents());
   }
 
   private async pauseTimer() {
