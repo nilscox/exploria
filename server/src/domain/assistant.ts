@@ -1,40 +1,26 @@
 import { intervalToDuration } from 'date-fns';
-import type OpenAI from 'openai';
-import type { Stream } from 'openai/core/streaming.mjs';
-import type { ChatCompletionTool } from 'openai/resources/index.mjs';
 import type z from 'zod';
 
 import { assert, hasKey } from '../utils';
 import { tools } from './tools';
 
+import type { AiClient, AiClientMessage } from '../adapters/ai-client';
 import type { Clock } from '../adapters/clock';
-import type { Message, Session, ToolCall, TopicStatus } from './session';
+import type { GetSessionEvent, Session, ToolCall, TopicStatus } from './session';
 import type { Tool } from './tools/create-tool';
 import type { UiEvent, UiNotifier } from './ui-notifier';
-
-const toolsDefinitions = Object.entries(tools).map(
-  ([name, tool]) =>
-    ({
-      type: 'function',
-      function: {
-        name,
-        description: tool.description,
-        parameters: tool.param.toJSONSchema(),
-      },
-    }) satisfies ChatCompletionTool,
-);
 
 export type AssistantUiEvent = UiEvent<'Chunk', { text: string }>;
 
 export class Assistant {
   private readonly clock: Clock;
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
-  private readonly client: OpenAI;
+  private readonly aiClient: AiClient;
 
-  constructor(clock: Clock, uiNotifier: UiNotifier, openAiClient: OpenAI) {
+  constructor(clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient) {
     this.clock = clock;
     this.uiNotifier = uiNotifier;
-    this.client = openAiClient;
+    this.aiClient = aiClient;
   }
 
   async run(session: Session, message?: string) {
@@ -42,8 +28,30 @@ export class Assistant {
       session.addMessage('user', message);
     }
 
-    const stream = await this.client.chat.completions.create(this.createChatCompletionRequest(session));
-    const { content, toolCalls } = await this.handleStream(session, stream);
+    const { content, toolCalls } = await this.aiClient.createCompletionStreaming({
+      model: session.model,
+      tools,
+      messages: [
+        ...[...session.events, ...session.peekDomainEvents()]
+          .filter((event) => event.type === 'MessageAdded' || event.type === 'ToolCallResultAdded')
+          .map((event) => {
+            if (event.type === 'ToolCallResultAdded') {
+              return Assistant.mapToolCallMessage(event);
+            } else {
+              return Assistant.mapMessage(event);
+            }
+          }),
+        {
+          role: 'system',
+          content: Assistant.formatSessionInfo(this.clock, session),
+        },
+      ],
+      onChunk: (text) => this.uiNotifier.notify(session.id, { type: 'Chunk', text }),
+    });
+
+    if (content === '' && toolCalls.length === 0) {
+      return;
+    }
 
     session.addMessage('assistant', content, {
       model: session.model,
@@ -59,9 +67,21 @@ export class Assistant {
     }
   }
 
+  private static mapMessage = ({ message }: GetSessionEvent<'MessageAdded'>): AiClientMessage => ({
+    role: message.role,
+    content: message.content,
+    toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
+  });
+
+  private static mapToolCallMessage = ({ result }: GetSessionEvent<'ToolCallResultAdded'>): AiClientMessage => ({
+    role: 'tool',
+    toolCallId: result.id,
+    content: result.error ? { error: result.error } : result.result,
+  });
+
   async generateDemo(session: Session) {
     for (let i = 0; i <= 3; ++i) {
-      const message = await this.client.chat.completions.create({
+      const { content } = await this.aiClient.createCompletion({
         model: session.model,
         messages: [
           {
@@ -75,10 +95,11 @@ export class Assistant {
                   ]
                 : [
                     'Voici le début de la conversation.',
-                    ...session.messages
-                      .filter((message) => message.content !== '')
-                      .filter((message) => ['user', 'assistant'].includes(message.role))
-                      .map((message) => `${message.role}: ${message.content}`),
+                    ...session.events
+                      .filter((event) => event.type === 'MessageAdded')
+                      .filter(({ message }) => message.content !== '')
+                      .filter(({ message }) => ['user', 'assistant'].includes(message.role))
+                      .map(({ message }) => `${message.role}: ${message.content}`),
                     'user: ',
                     'Génère un message court pour continuer la discussion.',
                   ]),
@@ -87,26 +108,8 @@ export class Assistant {
         ],
       });
 
-      await this.run(session, message.choices[0]!.message.content!);
+      await this.run(session, content);
     }
-  }
-
-  private createChatCompletionRequest(session: Session): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming {
-    return {
-      model: session.model,
-      messages: [
-        ...session.messages,
-        {
-          id: '',
-          date: this.clock.now().toISOString(),
-          role: 'system' as const,
-          content: Assistant.formatSessionInfo(this.clock, session),
-        } satisfies Message,
-      ].map(Assistant.messageToOpenAI),
-      tools: toolsDefinitions,
-      tool_choice: 'auto',
-      stream: true,
-    };
   }
 
   static formatSessionInfo(clock: Clock, session: Session): string {
@@ -179,80 +182,19 @@ export class Assistant {
     return lines.join('\n');
   }
 
-  private async handleStream(session: Session, stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
-    let content = '';
-    const toolCalls: Array<ToolCall> = [];
-
-    for await (const chunk of stream) {
-      const delta = chunk.choices[0]?.delta;
-
-      if (delta?.content) {
-        content += delta.content;
-        this.uiNotifier.notify(session.id, { type: 'Chunk', text: delta.content });
-      }
-
-      if (delta?.tool_calls) {
-        for (const tc of delta.tool_calls) {
-          toolCalls[tc.index] ??= {
-            id: '',
-            name: '',
-            arguments: '',
-          };
-
-          const call = toolCalls[tc.index]!;
-
-          if (tc.id) call.id = tc.id;
-          if (tc.function?.name) call.name += tc.function.name;
-          if (tc.function?.arguments) call.arguments += tc.function.arguments;
-        }
-      }
-    }
-
-    return {
-      content,
-      toolCalls,
-    };
-  }
-
   private async handleToolCall(session: Session, toolCall: ToolCall) {
     assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
-    assert(typeof toolCall.arguments === 'string');
-
-    const tool: Tool<z.ZodType<any>> = tools[toolCall.name];
-    const args = JSON.parse(toolCall.arguments);
-    let content: string;
 
     try {
-      toolCall.arguments = tool.param.parse(args);
-      toolCall.result = await tool.execute(session, toolCall.arguments);
-      content = typeof toolCall.result === 'string' ? toolCall.result : JSON.stringify(toolCall.result);
+      const tool: Tool<z.ZodType<any>> = tools[toolCall.name];
+
+      toolCall.arguments = tool.param.parse(toolCall.arguments);
+
+      session.addToolCallResult(toolCall.id, {
+        result: await tool.execute(session, toolCall.arguments),
+      });
     } catch (error) {
-      toolCall.error = error;
-      content = error instanceof Error ? `Error: ${error.message}` : 'Unknown error';
+      session.addToolCallResult(toolCall.id, { error });
     }
-
-    session.addToolCallResult(toolCall.id, content);
-  }
-
-  private static messageToOpenAI(this: void, message: Message): OpenAI.Chat.Completions.ChatCompletionMessageParam {
-    const content = message.content;
-
-    if (message.role === 'system' || message.role === 'user') {
-      return { role: message.role, content };
-    }
-
-    if (message.role === 'tool') {
-      return { role: message.role, tool_call_id: message.toolCallId, content };
-    }
-
-    return {
-      role: message.role,
-      content: message.content,
-      tool_calls: message.toolCalls?.map(({ id, name, arguments: args }) => ({
-        id,
-        type: 'function' as const,
-        function: { name, arguments: JSON.stringify(args) },
-      })),
-    };
   }
 }

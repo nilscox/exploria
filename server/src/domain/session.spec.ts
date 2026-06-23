@@ -189,7 +189,7 @@ void describe('Session', () => {
 
     assert(session.timer);
     assert.strictEqual(session.timer.duration, 60);
-    assert.strictEqual(session.timer.startedAt, clock.date.toISOString());
+    assert.strictEqual(session.timer.startedAt, clock.date);
 
     expectEvent('TimerStarted', {
       duration: 60,
@@ -223,7 +223,7 @@ void describe('Session', () => {
     session.pauseTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.pausedAt, clock.date.toISOString());
+    assert.strictEqual(session.timer.pausedAt, clock.date);
 
     expectEvent('TimerPaused', {});
 
@@ -231,7 +231,7 @@ void describe('Session', () => {
     session.resumeTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.startedAt, sub(clock.date, { minutes: 5 }).toISOString());
+    assert.deepEqual(session.timer.startedAt, sub(clock.date, { minutes: 5 }));
     assert.strictEqual(session.timer.pausedAt, undefined);
 
     expectEvent('TimerResumed', {});
@@ -240,42 +240,32 @@ void describe('Session', () => {
   void it('adds a message', () => {
     session.addMessage('user', 'content');
 
-    assert.deepStrictEqual(session.messages, [
-      {
-        id: 'id',
-        date: clock.date.toISOString(),
-        role: 'user',
-        content: 'content',
-      },
-    ]);
-
     expectEvent('MessageAdded', {
       message: {
-        id: 'id',
-        date: clock.date.toISOString(),
+        date: clock.date,
         role: 'user',
         content: 'content',
       },
     });
   });
 
-  void it('removes empty tool calls', () => {
-    session.addMessage('assistant', '', { model: 'model', toolCalls: [] });
+  void it('adds an assistant message', () => {
+    session.addMessage('assistant', 'content', { model: 'model', toolCalls: [] });
 
-    assert.deepStrictEqual(session.messages, [
-      {
-        id: 'id',
-        date: clock.date.toISOString(),
+    expectEvent('MessageAdded', {
+      message: {
+        date: clock.date,
         role: 'assistant',
+        content: 'content',
         model: 'model',
-        content: '',
       },
-    ]);
+    });
   });
 
-  void it('fails to add an assistant message without a model', () => {
+  void it('fails to add an assistant message without params', () => {
     assert.throws(() => {
-      session.addMessage('assistant', '', {});
+      // @ts-expect-error
+      session.addMessage('assistant', '');
     });
   });
 });

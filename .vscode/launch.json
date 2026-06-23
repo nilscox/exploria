@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Start server",
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}/server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode } from 'awilix';
-import OpenAI from 'openai';
 
+import { OpenAiClient, type AiClient } from './adapters/ai-client';
 import { NativeDateClock } from './adapters/clock';
 import { EnvConfig, type Config } from './adapters/config';
 import { NanoIdGenerator, type Generator } from './adapters/generator';
@@ -15,19 +15,12 @@ import type { Clock } from './adapters/clock';
 import type { Logger } from './adapters/logger';
 import type { UiNotifier } from './domain/ui-notifier';
 
-function openAiClientFactory(config: Config) {
-  return new OpenAI({
-    baseURL: config.openAi.baseUrl,
-    apiKey: config.openAi.apiKey,
-  });
-}
-
-function assistantFactory(config: Config, clock: Clock, uiNotifier: UiNotifier, openAiClient: OpenAI) {
+function assistantFactory(config: Config, clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient) {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
   }
 
-  return new Assistant(clock, uiNotifier, openAiClient);
+  return new Assistant(clock, uiNotifier, aiClient);
 }
 
 export const container = createContainer({
@@ -43,6 +36,6 @@ export const container = createContainer({
   database: asFunction(createDatabase),
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
-  openAiClient: asFunction(openAiClientFactory),
+  aiClient: asClass<AiClient>(OpenAiClient),
   assistant: asFunction(assistantFactory),
 });

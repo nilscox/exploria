@@ -1,9 +1,9 @@
 import type { Shared } from '@exploria/server/shared';
 import clsx from 'clsx';
 
+import { Markdown } from 'src/components/markdown';
 import { debug } from 'src/debug-context';
 import { Details } from 'src/details';
-import { Markdown } from 'src/markdown';
 
 type SessionEvent = Shared.SessionEvent;
 type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
@@ -31,6 +31,7 @@ const eventMap: { [Event in SessionEvent as Event['type']]: React.ComponentType<
   TimerPaused: TimerPausedEvent,
   TimerResumed: TimerResumedEvent,
   MessageAdded: MessageAddedEvent,
+  ToolCallResultAdded: () => null,
   DiscussionPathsSet: () => null,
   DiscussionPathSelected: () => null,
 };
@@ -57,10 +58,6 @@ function TimerResumedEvent() {
 
 function MessageAddedEvent({ event }: { event: GetSessionEvent<'MessageAdded'> }) {
   const { message } = event;
-
-  if (message.role === 'tool') {
-    return null;
-  }
 
   if (message.role === 'system') {
     if (!debug()) {
@@ -97,7 +94,7 @@ function ToolCalls({ toolCalls }: { toolCalls?: Shared.ToolCall[] }) {
         {JSON.stringify(toolCall.arguments, null, 2)}
       </div>
 
-      {Boolean(toolCall.result) && (
+      {/* {Boolean(toolCall.result) && (
         <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
           {JSON.stringify(toolCall.result, null, 2)}
         </div>
@@ -107,7 +104,7 @@ function ToolCalls({ toolCalls }: { toolCalls?: Shared.ToolCall[] }) {
         <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
           {JSON.stringify(toolCall.error, null, 2)}
         </div>
-      )}
+      )} */}
     </Details>
   ));
 }

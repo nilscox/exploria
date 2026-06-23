@@ -22,8 +22,8 @@ export default {
   ],
 } satisfies Meta<typeof Timer>;
 
-const startedAt = sub(new Date(), { minutes: 17 }).toISOString();
-const pausedAt = sub(new Date(), { minutes: 4, seconds: 25 }).toISOString();
+const startedAt = sub(new Date(), { minutes: 17 });
+const pausedAt = sub(new Date(), { minutes: 4, seconds: 25 });
 
 export const noTimer: StoryObj<typeof Timer> = {
   args: {},

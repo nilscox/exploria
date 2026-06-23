@@ -5,9 +5,9 @@ import { useCallback, useLayoutEffect, useRef } from 'react';
 import { useParams } from 'react-router';
 
 import { Button, LinkButton } from 'src/components/button';
+import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
-import { Markdown } from 'src/markdown';
 import { assert } from 'src/utils';
 
 import { MessageForm } from './message-form';

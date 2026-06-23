@@ -22,10 +22,9 @@ export type Note = {
 };
 
 export type Message =
-  | { id: string; date: string; role: 'system'; content: string }
-  | { id: string; date: string; role: 'user'; content: string }
-  | { id: string; date: string; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] }
-  | { id: string; date: string; role: 'tool'; toolCallId: string; content: string };
+  | { date: Date; role: 'system'; content: string }
+  | { date: Date; role: 'user'; content: string }
+  | { date: Date; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] };
 
 export type Role = Message['role'];
 
@@ -33,14 +32,19 @@ export type ToolCall = {
   id: string;
   name: string;
   arguments: unknown;
+};
+
+export type ToolCallResult = {
+  id: string;
+  date: Date;
   result?: unknown;
   error?: unknown;
 };
 
 export type Timer = {
   duration: number;
-  startedAt: string;
-  pausedAt?: string;
+  startedAt: Date;
+  pausedAt?: Date;
 };
 
 export type DiscussionPath = {
@@ -67,8 +71,11 @@ export type SessionEvent =
   | SessionDomainEvent<'TimerPaused'>
   | SessionDomainEvent<'TimerResumed'>
   | SessionDomainEvent<'MessageAdded', { message: Message }>
+  | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
   | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
   | SessionDomainEvent<'DiscussionPathSelected', { discussionPathId: string }>;
+
+export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
 export type SessionUiEvent =
   | UiEvent<'SessionChanged', { sessionId: string; changes: Partial<Shared.Session> }>
@@ -111,16 +118,16 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._timer;
   }
 
-  private _messages: Message[] = [];
-
-  get messages() {
-    return this._messages;
-  }
-
   private _discussionPaths: DiscussionPath[] = [];
 
   get discussionPaths() {
     return this._discussionPaths;
+  }
+
+  private _events: SessionEvent[] = [];
+
+  get events() {
+    return this._events;
   }
 
   constructor(generator: Generator, clock: Clock, uiNotifier: UiNotifier) {
@@ -139,8 +146,8 @@ export class Session extends AggregateRoot<SessionEvent> {
       topics: Topic[];
       notes: Note[];
       timer: Timer | null;
-      messages: Message[];
       discussionPaths: DiscussionPath[];
+      events: SessionEvent[];
     },
   ) {
     const session = new Session(generator, clock, uiNotifier);
@@ -151,8 +158,8 @@ export class Session extends AggregateRoot<SessionEvent> {
     session._topics = data.topics;
     session._notes = data.notes;
     session._timer = data.timer;
-    session._messages = data.messages;
     session._discussionPaths = data.discussionPaths;
+    session._events = data.events;
 
     return session;
   }
@@ -263,7 +270,7 @@ export class Session extends AggregateRoot<SessionEvent> {
 
     assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
 
-    this._timer = { duration, startedAt: now.toISOString() };
+    this._timer = { duration, startedAt: now };
 
     this.emit('TimerStarted', { duration });
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
@@ -281,7 +288,7 @@ export class Session extends AggregateRoot<SessionEvent> {
   pauseTimer() {
     assert(this._timer);
 
-    this._timer.pausedAt = this.clock.now().toISOString();
+    this._timer.pausedAt = this.clock.now();
 
     this.emit('TimerPaused', {});
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
@@ -296,51 +303,44 @@ export class Session extends AggregateRoot<SessionEvent> {
       end: this._timer.pausedAt,
     });
 
-    this._timer.startedAt = sub(this.clock.now(), elapsed).toISOString();
+    this._timer.startedAt = sub(this.clock.now(), elapsed);
     delete this._timer.pausedAt;
 
     this.emit('TimerResumed', {});
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
-  addMessage(
-    role: Exclude<Role, 'tool'>,
-    content: string,
-    { model, toolCalls }: { model?: string; toolCalls?: ToolCall[] } = {},
-  ) {
-    const id = this.generator.id();
-    const date = this.clock.now().toISOString();
+  addMessage(role: Exclude<Role, 'assistant'>, content: string): void;
+  addMessage(role: Extract<Role, 'assistant'>, content: string, params: { model: string; toolCalls: ToolCall[] }): void;
+
+  addMessage(role: Role, content: string, params?: { model: string; toolCalls: ToolCall[] }) {
+    const date = this.clock.now();
     let message: Message;
 
     if (role === 'assistant') {
-      assert(model);
+      assert(params);
 
-      message = { id, date, role, model, content };
+      message = { date, role, content, model: params.model };
 
-      if (toolCalls && toolCalls.length > 0) {
-        message.toolCalls = toolCalls;
+      if (params.toolCalls.length > 0) {
+        message.toolCalls = params.toolCalls;
       }
     } else {
-      message = { id, date, role, content };
+      message = { date, role, content };
     }
-
-    this._messages.push(message);
 
     this.emit('MessageAdded', { message });
   }
 
-  addToolCallResult(toolCallId: string, result: string) {
-    const message: Message = {
-      id: this.generator.id(),
-      date: this.clock.now().toISOString(),
-      role: 'tool',
-      toolCallId,
-      content: result,
-    };
-
-    this._messages.push(message);
-
-    this.emit('MessageAdded', { message });
+  addToolCallResult(toolCallId: string, param: { error: unknown } | { result: unknown }) {
+    this.emit('ToolCallResultAdded', {
+      result: {
+        id: toolCallId,
+        date: this.clock.now(),
+        error: 'error' in param ? param.error : null,
+        result: 'result' in param ? param.result : null,
+      },
+    });
   }
 
   setDiscussionPath(paths: DiscussionPath[]) {

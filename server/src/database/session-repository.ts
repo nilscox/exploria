@@ -1,14 +1,13 @@
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
-import { Session, type Message, type Note, type SessionEvent, type Timer, type Topic } from '../domain/session';
-import { assert } from '../utils';
-import { domainEvents, messages, notes, sessions, toolCalls, topics } from './schema';
+import { Session, type Note, type SessionEvent, type Timer, type Topic } from '../domain/session';
+import { domainEvents, notes, sessions, topics } from './schema';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
 import type { UiNotifier } from '../domain/ui-notifier';
 import type { Database } from './database';
-import type { MessageSelect, NoteSelect, SessionSelect, ToolCallInsert, ToolCallSelect, TopicSelect } from './model';
+import type { DomainEventSelect, NoteSelect, SessionSelect, TopicSelect } from './model';
 
 export class SessionRepository {
   private generator: Generator;
@@ -28,9 +27,9 @@ export class SessionRepository {
       id: session.id,
       model: session.model,
       subject: session.subject,
-      timerDuration: session.timer?.duration,
-      timerStartedAt: SessionRepository.date(session.timer?.startedAt),
-      timerPausedAt: SessionRepository.date(session.timer?.pausedAt),
+      timerDuration: session.timer?.duration ?? null,
+      timerStartedAt: session.timer?.startedAt ?? null,
+      timerPausedAt: session.timer?.pausedAt ?? null,
     });
   }
 
@@ -50,8 +49,8 @@ export class SessionRepository {
         .update(sessions)
         .set({
           timerDuration: session.timer?.duration ?? null,
-          timerStartedAt: SessionRepository.date(session.timer?.startedAt),
-          timerPausedAt: SessionRepository.date(session.timer?.pausedAt),
+          timerStartedAt: session.timer?.startedAt ?? null,
+          timerPausedAt: session.timer?.pausedAt ?? null,
         })
         .where(eq(sessions.id, session.id));
     };
@@ -105,26 +104,6 @@ export class SessionRepository {
       TimerCleared: updateTimer,
       TimerPaused: updateTimer,
       TimerResumed: updateTimer,
-
-      MessageAdded: async ({ message }) => {
-        await db.insert(messages).values({
-          ...message,
-          sessionId: session.id,
-          toolCallId: message.role === 'tool' ? message.toolCallId : null,
-          createdAt: new Date(message.date),
-        });
-
-        if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
-          await db.insert(toolCalls).values(
-            message.toolCalls.map(
-              (toolCall): ToolCallInsert => ({
-                ...toolCall,
-                messageId: message.id,
-              }),
-            ),
-          );
-        }
-      },
     };
 
     const events = session.peekDomainEvents();
@@ -156,7 +135,7 @@ export class SessionRepository {
       with: {
         notes: true,
         topics: true,
-        messages: { with: { toolCalls: true }, orderBy: { createdAt: 'asc' } },
+        events: { orderBy: { occurredAt: 'asc' } },
       },
     });
 
@@ -176,14 +155,8 @@ export class SessionRepository {
   }
 
   async delete(id: string) {
-    await this.db
-      .delete(toolCalls)
-      .where(
-        inArray(toolCalls.id, this.db.select({ id: messages.id }).from(messages).where(eq(messages.sessionId, id))),
-      );
-
     await Promise.all([
-      ...[topics, notes, messages].map((table) => this.db.delete(table).where(eq(table.sessionId, id))),
+      ...[topics, notes].map((table) => this.db.delete(table).where(eq(table.sessionId, id))),
       this.db.delete(domainEvents).where(eq(domainEvents.aggregateId, id)),
     ]);
 
@@ -197,15 +170,11 @@ export class SessionRepository {
     });
   }
 
-  private static date(value: string | undefined) {
-    return value ? new Date(value) : null;
-  }
-
   private mapSession(
     model: SessionSelect & {
       topics: TopicSelect[];
       notes: NoteSelect[];
-      messages: Array<MessageSelect & { toolCalls: ToolCallSelect[] }>;
+      events: DomainEventSelect[];
     },
   ): Session {
     const mapTopic = ({ id, label, status }: TopicSelect): Topic => {
@@ -223,41 +192,19 @@ export class SessionRepository {
 
       return {
         duration: timerDuration,
-        startedAt: timerStartedAt.toISOString(),
-        pausedAt: timerPausedAt?.toISOString(),
+        startedAt: timerStartedAt,
+        pausedAt: timerPausedAt ?? undefined,
       };
     };
 
-    const mapMessage = ({
-      id,
-      role,
-      content,
-      model,
-      toolCalls,
-      toolCallId,
-      createdAt,
-    }: MessageSelect & { toolCalls: ToolCallSelect[] }): Message => {
-      const date = createdAt.toISOString();
-
-      if (role === 'system' || role === 'user') {
-        return { id, date, role, content };
-      }
-
-      if (role === 'tool') {
-        assert(typeof toolCallId === 'string');
-        return { id, role, date, content, toolCallId };
-      }
-
-      assert(typeof model === 'string');
-
+    const mapEvent = (event: DomainEventSelect): SessionEvent => {
       return {
-        id,
-        role,
-        date,
-        content,
-        model,
-        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-      };
+        aggregateType: event.aggregateType as 'Session',
+        aggregateId: event.aggregateId,
+        occurredAt: event.occurredAt,
+        type: event.type as SessionEvent['type'],
+        ...event.payload,
+      } as SessionEvent;
     };
 
     return Session.from(this.generator, this.clock, this.uiNotifier, {
@@ -267,7 +214,7 @@ export class SessionRepository {
       topics: model.topics.map(mapTopic),
       notes: model.notes.map(mapNote),
       timer: getTimer(model),
-      messages: model.messages.map(mapMessage),
+      events: model.events.map(mapEvent),
       discussionPaths: [],
     });
   }

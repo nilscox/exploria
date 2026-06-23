@@ -66,7 +66,7 @@ export function Home() {
     createSession({ model, demo: true });
   }, [createSession]);
 
-  const [model, setModel] = useState('claude-opus-4-8');
+  const [model, setModel] = useState(import.meta.env.VITE_DEFAULT_MODEL);
 
   return (
     <div className="col min-h-full flex-1 gap-4 p-4">
@@ -104,17 +104,11 @@ export function Home() {
             <ModelSelector name="model" value={model} onChange={setModel} />
           </Field>
 
-          <div className="col sm:row gap-2">
-            <Button
-              variant="outlined"
-              size="large"
-              loading={creatingSession && variables.demo}
-              onClick={loadDemo}
-              className="flex-1"
-            >
+          <div className="col sm:row gap-2 sm:[&>button]:flex-1">
+            <Button variant="outlined" size="large" loading={creatingSession && variables.demo} onClick={loadDemo}>
               <Trans>Load demo</Trans>
             </Button>
-            <Button type="submit" size="large" loading={creatingSession && !variables.demo} className="flex-1">
+            <Button type="submit" size="large" loading={creatingSession && !variables.demo}>
               <Trans>Start session</Trans>
               <ArrowRightIcon className="size-4" />
             </Button>
@@ -123,6 +117,8 @@ export function Home() {
 
         <SessionsList />
       </div>
+
+      <footer className="h-32" />
     </div>
   );
 }

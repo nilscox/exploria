@@ -4,7 +4,7 @@ import { mutationOptions, useMutation } from '@tanstack/react-query';
 
 import { api } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
-import { Markdown } from 'src/markdown';
+import { Markdown } from 'src/components/markdown';
 
 import { ModelSelector } from './model-selector';
 import { Timer } from './timer';

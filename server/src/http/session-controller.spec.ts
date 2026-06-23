@@ -4,8 +4,9 @@ import { EventSource } from 'eventsource';
 import assert from 'node:assert';
 import { after, before, describe, it, mock } from 'node:test';
 
+import { StubAiClient } from '../adapters/ai-client';
 import { container } from '../di';
-import { Session, type SessionEvent } from '../domain/session';
+import { Session, type SessionUiEvent } from '../domain/session';
 import { createTestDatabase, ExpressFetcher, waitFor, type TestDatabase } from '../test-utils';
 import { defined } from '../utils';
 
@@ -14,15 +15,17 @@ import type { SessionRepository } from '../database/session-repository';
 void describe('SessionController', () => {
   let db: TestDatabase;
   let app: ExpressFetcher;
+  let aiClient: StubAiClient;
 
   let repository: SessionRepository;
 
   before(async () => {
     db = await createTestDatabase();
+    aiClient = new StubAiClient();
 
     container.register({
       logger: asValue({ log: () => {} }),
-      openAiClient: asValue(null),
+      aiClient: asValue(aiClient),
       database: asValue(db),
     });
 
@@ -38,13 +41,14 @@ void describe('SessionController', () => {
   });
 
   void it('posts a message', async () => {
-    let session: Session = new Session(
-      container.resolve('generator'),
-      container.resolve('clock'),
-      container.resolve('uiNotifier'),
-    );
+    let session = container.build(Session);
 
     await repository.insert(session);
+
+    aiClient.results.push({
+      content: '',
+      toolCalls: [],
+    });
 
     const res = await app.fetch(`/${session.id}/message`, {
       method: 'POST',
@@ -52,45 +56,46 @@ void describe('SessionController', () => {
       body: JSON.stringify({ message: '42;' }),
     });
 
-    assert(res.ok);
+    assert(res.ok, await res.text());
 
     session = defined(await repository.find(session.id));
 
-    assert(session.messages.length === 1);
-    assert(session.messages[0]?.role, 'user');
-    assert(session.messages[0]?.content, '42;');
+    assert(session.events.length === 1);
+    assert(session.events[0]?.type === 'MessageAdded');
+    assert(session.events[0].message.role, 'user');
+    assert(session.events[0].message.content, '42;');
   });
 
   void it('forwards UI events', async () => {
-    let session: Session = new Session(
-      container.resolve('generator'),
-      container.resolve('clock'),
-      container.resolve('uiNotifier'),
-    );
+    let session = container.build(Session);
 
     await repository.insert(session);
 
     const sse = new EventSource(new URL(`/${session.id}/stream`, app.baseUrl));
-    const open = mock.fn();
-    const subjectChanged = mock.fn();
 
     try {
-      sse.addEventListener('open', open);
-      await waitFor(() => assert.strictEqual(open.mock.callCount(), 1));
+      const open = mock.fn();
+      const sessionChanged = mock.fn();
 
-      sse.addEventListener('SubjectChanged', subjectChanged);
+      sse.addEventListener('open', open);
+      sse.addEventListener('SessionChanged' satisfies SessionUiEvent['type'], sessionChanged);
+
+      await waitFor(() => assert.strictEqual(open.mock.callCount(), 1));
 
       const repository = container.resolve('sessionRepository');
       session = defined(await repository.find(session.id));
 
       session.setSubject('subject');
 
-      await waitFor(() => assert.strictEqual(subjectChanged.mock.callCount(), 1));
+      await waitFor(() => assert.strictEqual(sessionChanged.mock.callCount(), 1));
 
-      const event: MessageEvent = subjectChanged.mock.calls[0]?.arguments[0];
-      const data: Extract<SessionEvent, { type: 'SubjectChanged' }> = JSON.parse(event.data);
+      const event: MessageEvent = sessionChanged.mock.calls[0]?.arguments[0];
+      const data: Extract<SessionUiEvent, { type: 'SessionChanged' }> = JSON.parse(event.data);
 
-      assert.deepEqual(data, { sessionId: session.id, subject: 'subject' });
+      assert.deepEqual(data, {
+        sessionId: session.id,
+        changes: { subject: 'subject' },
+      } satisfies Omit<typeof data, 'type'>);
     } finally {
       sse.close();
     }

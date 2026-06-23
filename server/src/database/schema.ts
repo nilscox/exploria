@@ -36,32 +36,6 @@ export const notes = p.pgTable('notes', {
 
 export const role = p.pgEnum('role', ['system', 'assistant', 'user', 'tool']);
 
-export const messages = p.pgTable('messages', {
-  id: p.varchar({ length: 8 }).primaryKey(),
-  role: role().notNull(),
-  sessionId: p
-    .varchar({ length: 8 })
-    .notNull()
-    .references(() => sessions.id),
-  content: p.text().notNull(),
-  model: p.varchar({ length: 64 }),
-  toolCallId: p.varchar({ length: 32 }),
-  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
-});
-
-export const toolCalls = p.pgTable('tool_calls', {
-  id: p.varchar({ length: 32 }).primaryKey(),
-  messageId: p
-    .varchar({ length: 8 })
-    .notNull()
-    .references(() => messages.id),
-  name: p.varchar({ length: 32 }).notNull(),
-  arguments: p.jsonb().notNull(),
-  result: p.jsonb(),
-  error: p.jsonb(),
-  createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
-});
-
 export const domainEvents = p.pgTable('domain_events', {
   id: p.varchar({ length: 8 }).primaryKey(),
   aggregateType: p.varchar({ length: 32 }).notNull(),
@@ -71,11 +45,17 @@ export const domainEvents = p.pgTable('domain_events', {
   payload: p.jsonb().$type<object>().notNull(),
 });
 
-export const relations = defineRelations({ sessions, topics, notes, messages, toolCalls, domainEvents }, (r) => ({
+export const relations = defineRelations({ sessions, topics, notes, domainEvents }, (r) => ({
   sessions: {
     topics: r.many.topics(),
     notes: r.many.notes(),
-    messages: r.many.messages(),
+    events: r.many.domainEvents({
+      from: r.sessions.id,
+      to: r.domainEvents.aggregateId,
+      where: {
+        aggregateType: 'Session',
+      },
+    }),
   },
 
   topics: {
@@ -90,23 +70,6 @@ export const relations = defineRelations({ sessions, topics, notes, messages, to
     session: r.one.sessions({
       from: r.notes.sessionId,
       to: r.sessions.id,
-      optional: false,
-    }),
-  },
-
-  messages: {
-    session: r.one.sessions({
-      from: r.messages.sessionId,
-      to: r.sessions.id,
-      optional: false,
-    }),
-    toolCalls: r.many.toolCalls(),
-  },
-
-  toolCalls: {
-    message: r.one.messages({
-      from: r.toolCalls.messageId,
-      to: r.messages.id,
       optional: false,
     }),
   },
