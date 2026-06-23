@@ -8,6 +8,7 @@ import { createDatabase, SessionRepository } from './database';
 import { Assistant } from './domain/assistant';
 import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
+import { Server } from './http/server';
 import { SessionController } from './http/session-controller';
 import { SseUiNotifier } from './http/sse';
 
@@ -38,4 +39,5 @@ export const container = createContainer({
   sessionRepository: asClass(SessionRepository),
   aiClient: asClass<AiClient>(OpenAiClient),
   assistant: asFunction(assistantFactory),
+  server: asClass(Server),
 });
