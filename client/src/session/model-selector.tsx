@@ -38,7 +38,7 @@ function listModelsOptions() {
   return queryOptions({
     queryKey: ['listModels'],
     async queryFn(): Promise<string[]> {
-      const mock = true;
+      const mock = false;
 
       if (mock) {
         return ['gpt-5', 'mistral-small-3.2-24b-instruct'];

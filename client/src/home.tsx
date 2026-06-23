@@ -1,13 +1,14 @@
 import { Trans, useLingui } from '@lingui/react/macro';
-import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowRightIcon } from 'lucide-react';
+import { infiniteQueryOptions, mutationOptions, useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { ArrowDownIcon, ArrowRightIcon } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, type NavigateFunction } from 'react-router';
 
 import { defined } from '../../server/src/utils';
 import { api } from './api';
 import { Button } from './components/button';
-import { Field, FieldLabel, fieldProps } from './components/field';
+import { Field, FieldLabel } from './components/field';
+import { Input } from './components/input';
 import { Settings } from './components/settings';
 import { ModelSelector } from './session/model-selector';
 
@@ -23,10 +24,17 @@ function createSessionOptions(navigate: NavigateFunction) {
 }
 
 function listSessionsOptions() {
-  return queryOptions({
+  return infiniteQueryOptions({
     queryKey: ['listSessions'],
-    async queryFn() {
-      return api.sessions.list();
+    async queryFn({ pageParam }) {
+      return api.sessions.list({ page: pageParam, limit: 4 });
+    },
+    initialPageParam: 1,
+    getNextPageParam({ nextPage }) {
+      return nextPage;
+    },
+    select({ pages }) {
+      return pages.flatMap((page) => page.items);
     },
   });
 }
@@ -35,8 +43,6 @@ export function Home() {
   const { t } = useLingui();
   const navigate = useNavigate();
   const { mutate: createSession, isPending: creatingSession, variables } = useMutation(createSessionOptions(navigate));
-
-  const listSessionsQuery = useQuery(listSessionsOptions());
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -60,10 +66,10 @@ export function Home() {
     createSession({ model, demo: true });
   }, [createSession]);
 
-  const [model, setModel] = useState('mistral-small-3.2-24b-instruct');
+  const [model, setModel] = useState('claude-opus-4-8');
 
   return (
-    <div className="col h-full flex-1 gap-4 p-4">
+    <div className="col min-h-full flex-1 gap-4 p-4">
       <header className="row w-full justify-end">
         <Settings />
       </header>
@@ -83,13 +89,11 @@ export function Home() {
             <FieldLabel>
               <Trans>Session subject</Trans>
             </FieldLabel>
-            <input
+            <Input
+              required
               name="message"
               placeholder={t`What do you need to think about?`}
-              aria-label={t`Subject`}
               readOnly={creatingSession}
-              className="read-only:text-dim bg-neutral rounded-md border px-4 py-2"
-              {...fieldProps()}
             />
           </Field>
 
@@ -117,21 +121,18 @@ export function Home() {
           </div>
         </form>
 
-        {listSessionsQuery.isSuccess && (
-          <div>
-            <SessionsList sessions={listSessionsQuery.data} />
-          </div>
-        )}
+        <SessionsList />
       </div>
     </div>
   );
 }
 
-function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string; subject: string }> }) {
+function SessionsList() {
+  const listSessionsQuery = useInfiniteQuery(listSessionsOptions());
   const { i18n } = useLingui();
   const dateFormatter = useMemo(() => new Intl.DateTimeFormat(i18n.locale), [i18n.locale]);
 
-  if (sessions.length === 0) {
+  if (!listSessionsQuery.isSuccess || listSessionsQuery.data.length === 0) {
     return null;
   }
 
@@ -142,7 +143,7 @@ function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string
       </h2>
 
       <ul className="col gap-2">
-        {sessions.map((session) => (
+        {listSessionsQuery.data.map((session) => (
           <li key={session.id}>
             <Link
               to={`/session/${session.id}`}
@@ -154,6 +155,17 @@ function SessionsList({ sessions }: { sessions: Array<{ id: string; date: string
           </li>
         ))}
       </ul>
+
+      {listSessionsQuery.hasNextPage && (
+        <button
+          type="button"
+          className="text-dim row mt-1 items-center gap-1 text-xs"
+          onClick={() => listSessionsQuery.fetchNextPage()}
+        >
+          <Trans>More</Trans>
+          <ArrowDownIcon className="size-3 shrink-0" />
+        </button>
+      )}
     </section>
   );
 }

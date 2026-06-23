@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/session/topics-list.tsx:93
+#: src/session/topics-list.tsx:89
 msgid "Add"
 msgstr "Ajouter"
 
@@ -21,15 +21,19 @@ msgstr "Ajouter"
 msgid "Clear the timer?"
 msgstr "Annuler le minuteur ?"
 
-#: src/components/settings.tsx:31
+#: src/components/settings.tsx:34
 msgid "Close"
 msgstr "Fermer"
 
-#: src/components/settings.tsx:82
+#: src/components/settings.tsx:85
 msgid "Dark"
 msgstr "Sombre"
 
-#: src/home.tsx:59
+#: src/components/settings.tsx:126
+msgid "Debug"
+msgstr "Debug"
+
+#: src/home.tsx:83
 msgid "Deep thoughts with AI."
 msgstr "L'IA au service de la réflexion."
 
@@ -37,15 +41,20 @@ msgstr "L'IA au service de la réflexion."
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
-#: src/session/session.tsx:248
+#: src/session/session.tsx:74
 msgid "End session"
 msgstr "Terminer la session"
 
-#: src/session/session.tsx:418
+#: src/session/message-form.tsx:60
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne"
 
-#: src/home.tsx:56
+#. placeholder {0}: modelsQuery.error.message
+#: src/session/model-selector.tsx:18
+msgid "Error while loading models: {0}"
+msgstr "Erreur lors du chargement des modèles"
+
+#: src/home.tsx:80
 msgid "Exploria"
 msgstr "Exploria"
 
@@ -53,35 +62,44 @@ msgstr "Exploria"
 msgid "Invalid input."
 msgstr "Entréé invalide."
 
-#: src/components/settings.tsx:49
+#: src/components/settings.tsx:52
 msgid "Language"
 msgstr "Langue"
 
-#: src/components/settings.tsx:78
+#: src/components/settings.tsx:81
 msgid "Light"
 msgstr "Clair"
 
-#: src/home.tsx:80
+#: src/home.tsx:115
 msgid "Load demo"
 msgstr "Voir une démo"
 
-#: src/session/session.tsx:404
+#: src/session/message-form.tsx:46
 msgid "Message"
 msgstr "Message"
 
-#: src/session/session.tsx:295
+#: src/home.tsx:102
+#: src/session/session-sidebar.tsx:59
 msgid "Model"
 msgstr "Modèle"
 
-#: src/session/topics-list.tsx:25
+#: src/home.tsx:165
+msgid "More"
+msgstr "Plus"
+
+#: src/session/topics-list.tsx:26
 msgid "No topic yet."
 msgstr "Aucun sujet."
+
+#: src/session/session-sidebar.tsx:36
+msgid "Notes"
+msgstr "Notes"
 
 #: src/session/timer.tsx:40
 msgid "Pause"
 msgstr "Pause"
 
-#: src/home.tsx:110
+#: src/home.tsx:142
 msgid "Previous sessions"
 msgstr "Sessions précédentes"
 
@@ -89,7 +107,7 @@ msgstr "Sessions précédentes"
 msgid "Resume"
 msgstr "Reprendre"
 
-#: src/home.tsx:66
+#: src/home.tsx:90
 msgid "Session subject"
 msgstr "Sujet de la session"
 
@@ -98,11 +116,11 @@ msgstr "Sujet de la session"
 msgid "Session timer"
 msgstr "Minuteur de session"
 
-#: src/components/settings.tsx:23
+#: src/components/settings.tsx:25
 msgid "Settings"
 msgstr "Paramètres"
 
-#: src/home.tsx:83
+#: src/home.tsx:118
 msgid "Start session"
 msgstr "Démarrer la session"
 
@@ -110,38 +128,34 @@ msgstr "Démarrer la session"
 msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
-#: src/home.tsx:71
-msgid "Subject"
-msgstr "Sujet"
-
-#: src/session/session.tsx:242
+#: src/session/session.tsx:68
 msgid "Subject to be define"
 msgstr "Sujet à définir"
 
-#: src/home.tsx:120
+#: src/home.tsx:152
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
-#: src/components/settings.tsx:72
+#: src/components/settings.tsx:75
 msgid "Theme"
 msgstr "Thème"
 
-#: src/session/topics-list.tsx:89
+#: src/session/topics-list.tsx:87
 msgid "Topic label"
 msgstr "Sujet ajouté"
 
-#: src/session/topics-list.tsx:16
+#: src/session/topics-list.tsx:17
 msgid "Topics"
 msgstr "Sujets"
 
-#: src/session/session.tsx:405
+#: src/session/message-form.tsx:47
 msgid "Type a message..."
 msgstr "Entrez un message..."
 
-#: src/session/model-selector.tsx:21
+#: src/session/model-selector.tsx:28
 msgid "Unknown provider"
 msgstr "Provider inconnu"
 
-#: src/home.tsx:70
+#: src/home.tsx:95
 msgid "What do you need to think about?"
 msgstr "A quel sujet souhaitez-vous réfléchir ?"

@@ -5,6 +5,7 @@ import { CheckIcon, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from 'src/components/button';
+import { Input } from 'src/components/input';
 
 export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (label: string) => void }) {
   const [showAddTopic, setShowAddTopic] = useState(false);
@@ -83,11 +84,7 @@ function AddTopicForm({ onSubmit, onCancel }: { onSubmit: (label: string) => voi
 
   return (
     <form onSubmit={handleSubmit} className="row items-center gap-2">
-      <input
-        name="label"
-        aria-label={t`Topic label`}
-        className="bg-neutral w-full min-w-0 rounded-md border px-2 py-1"
-      />
+      <Input name="label" aria-label={t`Topic label`} />
       <Button type="submit">
         <Trans>Add</Trans>
       </Button>

@@ -6,7 +6,7 @@ import { container } from '../di';
 
 export const app = express();
 
-app.use(cors());
+app.use(cors({ exposedHeaders: ['X-Page', 'X-Total-Pages'] }));
 app.use(express.json());
 
 app.use('/session', container.resolve('sessionController').router);

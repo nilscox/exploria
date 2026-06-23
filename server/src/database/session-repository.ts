@@ -167,8 +167,12 @@ export class SessionRepository {
     return this.mapSession(session);
   }
 
-  async findMany() {
-    return this.db.query.sessions.findMany();
+  async findMany({ offset, limit }: { offset: number; limit: number }) {
+    return this.db.query.sessions.findMany({ offset, limit });
+  }
+
+  async count() {
+    return this.db.$count(sessions);
   }
 
   async delete(id: string) {

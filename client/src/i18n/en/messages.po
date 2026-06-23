@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/session/topics-list.tsx:93
+#: src/session/topics-list.tsx:89
 msgid "Add"
 msgstr "Add"
 
@@ -21,15 +21,19 @@ msgstr "Add"
 msgid "Clear the timer?"
 msgstr "Clear the timer?"
 
-#: src/components/settings.tsx:31
+#: src/components/settings.tsx:34
 msgid "Close"
 msgstr "Close"
 
-#: src/components/settings.tsx:82
+#: src/components/settings.tsx:85
 msgid "Dark"
 msgstr "Dark"
 
-#: src/home.tsx:59
+#: src/components/settings.tsx:126
+msgid "Debug"
+msgstr "Debug"
+
+#: src/home.tsx:83
 msgid "Deep thoughts with AI."
 msgstr "Deep thoughts with AI."
 
@@ -37,15 +41,20 @@ msgstr "Deep thoughts with AI."
 msgid "Duration (minutes):"
 msgstr "Duration (minutes):"
 
-#: src/session/session.tsx:248
+#: src/session/session.tsx:74
 msgid "End session"
 msgstr "End session"
 
-#: src/session/session.tsx:418
+#: src/session/message-form.tsx:60
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Enter to send • Shift+Enter for new line"
 
-#: src/home.tsx:56
+#. placeholder {0}: modelsQuery.error.message
+#: src/session/model-selector.tsx:18
+msgid "Error while loading models: {0}"
+msgstr "Error while loading models: {0}"
+
+#: src/home.tsx:80
 msgid "Exploria"
 msgstr "Exploria"
 
@@ -53,35 +62,44 @@ msgstr "Exploria"
 msgid "Invalid input."
 msgstr "Invalid input."
 
-#: src/components/settings.tsx:49
+#: src/components/settings.tsx:52
 msgid "Language"
 msgstr "Language"
 
-#: src/components/settings.tsx:78
+#: src/components/settings.tsx:81
 msgid "Light"
 msgstr "Light"
 
-#: src/home.tsx:80
+#: src/home.tsx:115
 msgid "Load demo"
 msgstr "Load demo"
 
-#: src/session/session.tsx:404
+#: src/session/message-form.tsx:46
 msgid "Message"
 msgstr "Message"
 
-#: src/session/session.tsx:295
+#: src/home.tsx:102
+#: src/session/session-sidebar.tsx:59
 msgid "Model"
 msgstr "Model"
 
-#: src/session/topics-list.tsx:25
+#: src/home.tsx:165
+msgid "More"
+msgstr "More"
+
+#: src/session/topics-list.tsx:26
 msgid "No topic yet."
 msgstr "No topic yet."
+
+#: src/session/session-sidebar.tsx:36
+msgid "Notes"
+msgstr "Notes"
 
 #: src/session/timer.tsx:40
 msgid "Pause"
 msgstr "Pause"
 
-#: src/home.tsx:110
+#: src/home.tsx:142
 msgid "Previous sessions"
 msgstr "Previous sessions"
 
@@ -89,7 +107,7 @@ msgstr "Previous sessions"
 msgid "Resume"
 msgstr "Resume"
 
-#: src/home.tsx:66
+#: src/home.tsx:90
 msgid "Session subject"
 msgstr "Session subject"
 
@@ -98,11 +116,11 @@ msgstr "Session subject"
 msgid "Session timer"
 msgstr "Session timer"
 
-#: src/components/settings.tsx:23
+#: src/components/settings.tsx:25
 msgid "Settings"
 msgstr "Settings"
 
-#: src/home.tsx:83
+#: src/home.tsx:118
 msgid "Start session"
 msgstr "Start session"
 
@@ -110,38 +128,34 @@ msgstr "Start session"
 msgid "Start timer"
 msgstr "Start timer"
 
-#: src/home.tsx:71
-msgid "Subject"
-msgstr "Subject"
-
-#: src/session/session.tsx:242
+#: src/session/session.tsx:68
 msgid "Subject to be define"
 msgstr "Subject to be define"
 
-#: src/home.tsx:120
+#: src/home.tsx:152
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
-#: src/components/settings.tsx:72
+#: src/components/settings.tsx:75
 msgid "Theme"
 msgstr "Theme"
 
-#: src/session/topics-list.tsx:89
+#: src/session/topics-list.tsx:87
 msgid "Topic label"
 msgstr "Topic label"
 
-#: src/session/topics-list.tsx:16
+#: src/session/topics-list.tsx:17
 msgid "Topics"
 msgstr "Topics"
 
-#: src/session/session.tsx:405
+#: src/session/message-form.tsx:47
 msgid "Type a message..."
 msgstr "Type a message..."
 
-#: src/session/model-selector.tsx:21
+#: src/session/model-selector.tsx:28
 msgid "Unknown provider"
 msgstr "Unknown provider"
 
-#: src/home.tsx:70
+#: src/home.tsx:95
 msgid "What do you need to think about?"
 msgstr "What do you need to think about?"

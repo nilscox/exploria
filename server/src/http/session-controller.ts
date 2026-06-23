@@ -6,10 +6,10 @@ import z from 'zod';
 
 import { Session } from '../domain/session';
 import { defined } from '../utils';
+import { parsePagination } from './pagination';
 import { ServerSentEvent, type SseUiNotifier } from './sse';
 
 import type { Clock } from '../adapters/clock';
-import type { Config } from '../adapters/config';
 import type { Generator } from '../adapters/generator';
 import type { DomainEventSelect } from '../database/model';
 import type { SessionRepository } from '../database/session-repository';
@@ -18,7 +18,6 @@ import type { EventBus } from '../event-bus';
 import type { Shared } from '../shared';
 
 export class SessionController {
-  private readonly config: Config;
   private readonly generator: Generator;
   private readonly clock: Clock;
   private readonly events: EventBus;
@@ -35,7 +34,6 @@ export class SessionController {
   }
 
   constructor(
-    config: Config,
     generator: Generator,
     clock: Clock,
     events: EventBus,
@@ -43,7 +41,6 @@ export class SessionController {
     assistant: Assistant,
     sessionRepository: SessionRepository,
   ) {
-    this.config = config;
     this.generator = generator;
     this.clock = clock;
     this.events = events;
@@ -62,7 +59,12 @@ export class SessionController {
     });
 
     this.router.get('/', async (req, res) => {
-      res.json(await this.listSessions());
+      const { page, limit, offset } = parsePagination(req.query);
+      const [total, sessions] = await this.listSessions({ offset, limit });
+
+      res.setHeader('X-Page', page);
+      res.setHeader('X-Total-Pages', Math.ceil(total / limit));
+      res.json(sessions);
     });
 
     this.router.post('/', async (req, res) => {
@@ -144,14 +146,18 @@ export class SessionController {
     });
   }
 
-  private async listSessions() {
-    const sessions = await this.sessionRepository.findMany();
+  private async listSessions({ offset, limit }: { offset: number; limit: number }) {
+    const total = await this.sessionRepository.count();
+    const sessions = await this.sessionRepository.findMany({ offset, limit });
 
-    return sessions.map(({ id, subject, createdAt }) => ({
-      id,
-      subject,
-      date: createdAt.toISOString(),
-    }));
+    return [
+      total,
+      sessions.map(({ id, subject, createdAt }) => ({
+        id,
+        subject,
+        date: createdAt.toISOString(),
+      })),
+    ] as const;
   }
 
   private async createSession({ model, demo }: { model: string; demo?: boolean }) {
