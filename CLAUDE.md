@@ -165,3 +165,4 @@ pnpm storybook      # Storybook on :6006
 - Zod schemas colocated with the types they validate
 - Tests use stub adapters (`StubAiClient`, `StubClock`, `StubGenerator`, `StubUiNotifier`)
 - IDs are 8-character nanoid strings, not UUIDs
+- **Each component has one clear responsibility**: when a piece of JSX represents a distinct concept, extract it into a named component defined just below in the same file, regardless of its size.

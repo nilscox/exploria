@@ -115,6 +115,11 @@ export class SessionController {
       this.stream(res);
     });
 
+    this.router.post('/:id/discussion-path/:pathId', async (req, res) => {
+      await this.selectDiscussionPath(req.params.pathId);
+      res.status(204).end();
+    });
+
     this.router.post('/:id/timer', async (req, res) => {
       const { duration } = z
         .object({
@@ -211,6 +216,7 @@ export class SessionController {
       topics: session.topics,
       notes: session.notes,
       timer: session.timer,
+      discussionPaths: session.discussionPaths,
       events: events.map(serializeSessionEvent),
     };
   }
@@ -241,6 +247,16 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     await this.assistant.run(session, message);
+
+    await this.sessionRepository.save(session);
+    this.events.emit(...session.pullDomainEvents());
+  }
+
+  private async selectDiscussionPath(pathId: string) {
+    const session = this.getSessionInstance();
+
+    session.selectDiscussionPath(pathId);
+    await this.assistant.run(session);
 
     await this.sessionRepository.save(session);
     this.events.emit(...session.pullDomainEvents());

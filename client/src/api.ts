@@ -113,6 +113,12 @@ const sessions = {
     });
   },
 
+  async selectDiscussionPath(id: string, pathId: string): Promise<void> {
+    await fetchApi(`/session/${id}/discussion-path/${pathId}`, {
+      method: 'POST',
+    });
+  },
+
   stream(id: string): EventSource {
     return new EventSource(new URL(`/session/${id}/stream`, baseUrl));
   },

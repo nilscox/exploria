@@ -21,6 +21,7 @@ export function useSession(sessionId: string, onEvent: (event: Shared.SessionUiE
 
   const sessionQuery = useQuery(getSessionOptions(sessionId));
   const { mutate: postMessage } = useMutation(postMessageOptions(sessionId, dispatch));
+  const { mutate: selectPath } = useMutation(selectPathOptions(sessionId, dispatch));
 
   useEffect(() => {
     if (ApiError.is(sessionQuery.error) && sessionQuery.error.status === 404) {
@@ -76,7 +77,7 @@ export function useSession(sessionId: string, onEvent: (event: Shared.SessionUiE
     }
   }, [state.connected, location.state, postMessage, navigate]);
 
-  return [state, postMessage] as const;
+  return [state, postMessage, selectPath] as const;
 }
 
 function getSessionOptions(sessionId: string) {
@@ -92,6 +93,17 @@ function postMessageOptions(
 ) {
   return mutationOptions({
     mutationFn: (text: string) => api.sessions.postMessage(sessionId, text),
+    onMutate: () => dispatch({ type: 'PostingMessage' }),
+    onSettled: () => dispatch({ type: 'MessagePosted' }),
+  });
+}
+
+function selectPathOptions(
+  sessionId: string,
+  dispatch: React.ActionDispatch<[{ type: 'PostingMessage' | 'MessagePosted' }]>,
+) {
+  return mutationOptions({
+    mutationFn: (pathId: string) => api.sessions.selectDiscussionPath(sessionId, pathId),
     onMutate: () => dispatch({ type: 'PostingMessage' }),
     onSettled: () => dispatch({ type: 'MessagePosted' }),
   });

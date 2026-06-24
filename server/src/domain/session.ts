@@ -343,10 +343,11 @@ export class Session extends AggregateRoot<SessionEvent> {
     });
   }
 
-  setDiscussionPath(paths: DiscussionPath[]) {
-    this._discussionPaths = paths;
+  setDiscussionPath(paths: Array<Omit<DiscussionPath, 'id'>>) {
+    this._discussionPaths = paths.map((path) => ({ ...path, id: this.generator.id() }));
 
-    this.emit('DiscussionPathsSet', { paths });
+    this.emit('DiscussionPathsSet', { paths: this._discussionPaths });
+    this.emitUiEvent('SessionChanged', { changes: { discussionPaths: this._discussionPaths } });
   }
 
   selectDiscussionPath(discussionPathId: string) {
@@ -354,7 +355,10 @@ export class Session extends AggregateRoot<SessionEvent> {
 
     assert(path, new Error(`Cannot find discussion path "${discussionPathId}"`));
 
+    this._discussionPaths = [];
+
     this.emit('DiscussionPathSelected', { discussionPathId });
+    this.emitUiEvent('SessionChanged', { changes: { discussionPaths: [] } });
   }
 
   protected override emit<Type extends SessionEvent['type']>(

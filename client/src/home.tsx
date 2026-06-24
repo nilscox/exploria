@@ -93,6 +93,7 @@ export function Home() {
               required
               name="message"
               placeholder={t`What do you need to think about?`}
+              autoComplete="off"
               readOnly={creatingSession}
             />
           </Field>

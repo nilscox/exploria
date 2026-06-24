@@ -32,7 +32,7 @@ const eventMap: { [Event in SessionEvent as Event['type']]: React.ComponentType<
   TimerResumed: TimerResumedEvent,
   MessageAdded: MessageAddedEvent,
   ToolCallResultAdded: () => null,
-  DiscussionPathsSet: () => null,
+  DiscussionPathsSet: () => null, // handled before eventMap in Events
   DiscussionPathSelected: () => null,
 };
 

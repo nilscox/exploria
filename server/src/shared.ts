@@ -12,6 +12,7 @@ export namespace Shared {
   export type Message = session.Message;
   export type Role = session.Role;
   export type ToolCall = session.ToolCall;
+  export type DiscussionPath = session.DiscussionPath;
   export type SessionEvent = DistributiveOmit<session.SessionEvent, 'aggregateType' | 'aggregateId' | 'occurredAt'>;
   export type SessionUiEvent = session.SessionUiEvent;
 
@@ -22,6 +23,7 @@ export namespace Shared {
     topics: Topic[];
     notes: Note[];
     timer: Timer | null;
+    discussionPaths: DiscussionPath[];
     events: SessionEvent[];
   };
 }

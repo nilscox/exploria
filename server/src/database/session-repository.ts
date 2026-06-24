@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 
-import { Session, type Note, type SessionEvent, type Timer, type Topic } from '../domain/session';
+import { Session, type DiscussionPath, type Note, type SessionEvent, type Timer, type Topic } from '../domain/session';
 import { domainEvents, notes, sessions, topics } from './schema';
 
 import type { Clock } from '../adapters/clock';
@@ -207,6 +207,14 @@ export class SessionRepository {
       } as SessionEvent;
     };
 
+    const events = model.events.map(mapEvent);
+
+    const discussionPaths = events.reduce<DiscussionPath[]>((acc, event) => {
+      if (event.type === 'DiscussionPathsSet') return event.paths;
+      if (event.type === 'DiscussionPathSelected') return [];
+      return acc;
+    }, []);
+
     return Session.from(this.generator, this.clock, this.uiNotifier, {
       id: model.id,
       model: model.model,
@@ -214,8 +222,8 @@ export class SessionRepository {
       topics: model.topics.map(mapTopic),
       notes: model.notes.map(mapNote),
       timer: getTimer(model),
-      events: model.events.map(mapEvent),
-      discussionPaths: [],
+      events,
+      discussionPaths,
     });
   }
 }
