@@ -2,11 +2,12 @@ import { intervalToDuration } from 'date-fns';
 import type z from 'zod';
 
 import { assert, hasKey } from '../utils';
+import { toChatMessages } from './projections/chat-context';
 import { tools } from './tools';
 
-import type { AiClient, AiClientMessage } from '../adapters/ai-client';
+import type { AiClient } from '../adapters/ai-client';
 import type { Clock } from '../adapters/clock';
-import type { GetSessionEvent, Session, ToolCall, TopicStatus } from './session';
+import type { Session, ToolCall, TopicStatus } from './session';
 import type { Tool } from './tools/create-tool';
 import type { UiEvent, UiNotifier } from './ui-notifier';
 
@@ -32,15 +33,7 @@ export class Assistant {
       model: session.model,
       tools,
       messages: [
-        ...[...session.events, ...session.peekDomainEvents()]
-          .filter((event) => event.type === 'MessageAdded' || event.type === 'ToolCallResultAdded')
-          .map((event) => {
-            if (event.type === 'ToolCallResultAdded') {
-              return Assistant.mapToolCallMessage(event);
-            } else {
-              return Assistant.mapMessage(event);
-            }
-          }),
+        ...toChatMessages([...session.events, ...session.peekDomainEvents()]),
         {
           role: 'system',
           content: Assistant.formatSessionInfo(this.clock, session),
@@ -66,18 +59,6 @@ export class Assistant {
       await this.run(session);
     }
   }
-
-  private static mapMessage = ({ message }: GetSessionEvent<'MessageAdded'>): AiClientMessage => ({
-    role: message.role,
-    content: message.content,
-    toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
-  });
-
-  private static mapToolCallMessage = ({ result }: GetSessionEvent<'ToolCallResultAdded'>): AiClientMessage => ({
-    role: 'tool',
-    toolCallId: result.id,
-    content: result.error ? { error: result.error } : result.result,
-  });
 
   async generateDemo(session: Session) {
     for (let i = 0; i <= 3; ++i) {
