@@ -16,6 +16,16 @@ export namespace Shared {
   export type SessionEvent = DistributiveOmit<session.SessionEvent, 'aggregateType' | 'aggregateId' | 'occurredAt'>;
   export type SessionUiEvent = session.SessionUiEvent;
 
+  export type SelectablePath = DiscussionPath & { selected: boolean };
+
+  export type TimelineItem =
+    | { kind: 'message'; role: Role; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }
+    | { kind: 'topic-added'; label: string }
+    | { kind: 'timer-started'; duration: number }
+    | { kind: 'timer-cleared' }
+    | { kind: 'timer-paused' }
+    | { kind: 'timer-resumed' };
+
   export type Session = {
     id: string;
     model: string;
@@ -24,6 +34,7 @@ export namespace Shared {
     notes: Note[];
     timer: Timer | null;
     discussionPaths: DiscussionPath[];
+    timeline: TimelineItem[];
     events: SessionEvent[];
   };
 }

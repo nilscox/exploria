@@ -97,8 +97,67 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     notes,
     timer,
     discussionPaths,
+    timeline: toTimeline(events),
     events: events.map(toSharedEvent),
   };
+}
+
+export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
+  const items: Shared.TimelineItem[] = [];
+
+  const lastMessage = () => {
+    return items.findLast((item) => item.kind === 'message');
+  };
+
+  for (const event of events) {
+    switch (event.type) {
+      case 'MessageAdded': {
+        const { message } = event;
+
+        items.push({
+          kind: 'message',
+          role: message.role,
+          content: message.content,
+          toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
+        });
+        break;
+      }
+      case 'TopicAdded':
+        items.push({ kind: 'topic-added', label: event.topic.label });
+        break;
+      case 'TimerStarted':
+        items.push({ kind: 'timer-started', duration: event.duration });
+        break;
+      case 'TimerCleared':
+        items.push({ kind: 'timer-cleared' });
+        break;
+      case 'TimerPaused':
+        items.push({ kind: 'timer-paused' });
+        break;
+      case 'TimerResumed':
+        items.push({ kind: 'timer-resumed' });
+        break;
+      case 'DiscussionPathsSet': {
+        const message = lastMessage();
+
+        if (message?.kind === 'message') {
+          message.paths = event.paths.map((path) => ({ ...path, selected: false }));
+        }
+        break;
+      }
+      case 'DiscussionPathSelected':
+        for (const item of items) {
+          if (item.kind === 'message' && item.paths?.some(hasId(event.pathId))) {
+            for (const path of item.paths) {
+              path.selected = path.id === event.pathId;
+            }
+          }
+        }
+        break;
+    }
+  }
+
+  return items;
 }
 
 function toSharedEvent({
