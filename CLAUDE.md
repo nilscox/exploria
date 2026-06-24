@@ -4,32 +4,6 @@
 
 **Exploria** is a full-stack web application for guided deep-thinking and reflection sessions powered by an AI assistant. The assistant acts as a thinking facilitator — it poses questions, challenges reasoning, and identifies cognitive biases — rather than providing direct answers. The system prompt is in French (`server/src/domain/instructions.md`).
 
-## Use cases
-
-**Professional**
-
-- Negotiation preparation (salary, contract)
-- Personal retrospective (what happened, why)
-- Clarifying a product vision
-
-**Intellectual**
-
-- Structured philosophical debate
-- Analyzing a text or thesis
-- Formulating an opinion on a complex topic
-
-**Personal**
-
-- Decision-making under emotional stress
-- Clarifying personal values
-- Guided, in-depth journaling
-
-**Creative**
-
-- Brainstorming with progressive constraints
-- World-building
-- Constructive critique of a creative project
-
 ## Monorepo Structure
 
 ```
@@ -87,9 +61,9 @@ server/src/
 
 ### Key Patterns
 
-- **Event Sourcing**: all session state changes are captured as immutable domain events stored in `domain_events` table
+- **Event Sourcing**: all session state changes are captured as immutable domain events stored in `domain_events` table; some state (topics, notes, timer) is also denormalized into dedicated columns for easier querying — this is a known inconsistency, a full event-replay approach is planned
 - **Aggregate Root**: `Session` owns all business logic; mutated only via domain events
-- **Repository Pattern**: `SessionRepository` handles persistence; replay events to reconstruct state
+- **Repository Pattern**: `SessionRepository` handles persistence; loads state from denormalized columns + domain events table
 - **Adapter Pattern**: `AiClient`, `Clock`, `Generator` have stub implementations for testing
 - **Dependency Injection**: Awilix container in `di.ts`; all dependencies injected, never imported directly in domain
 
