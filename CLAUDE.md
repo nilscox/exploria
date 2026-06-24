@@ -140,3 +140,7 @@ pnpm storybook      # Storybook on :6006
 - Tests use stub adapters (`StubAiClient`, `StubClock`, `StubGenerator`, `StubUiNotifier`)
 - IDs are 8-character nanoid strings, not UUIDs
 - **Each component has one clear responsibility**: when a piece of JSX represents a distinct concept, extract it into a named component defined just below in the same file, regardless of its size.
+- **Always use braces** for `if` blocks, even single-line returns: `if (x) { return; }` not `if (x) return;`
+- **Blank line between `const` declarations and surrounding instructions**: separate declaration blocks from imperative statements with an empty line above and below.
+- **Private static helpers** on a class (e.g. `private static mapEvent`) are preferred over module-level functions when the helper is only used by that class. Add `this: void` to the signature when passing it as a callback (e.g. `.map(MyClass.helper)`) to satisfy the linter.
+- **Commit messages**: one short imperative line, no bullet list, no `Co-Authored-By` trailer.

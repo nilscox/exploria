@@ -1,7 +1,5 @@
 import { customAlphabet } from 'nanoid';
 
-import { defined } from '../utils';
-
 export interface Generator {
   id(): string;
 }
@@ -11,13 +9,9 @@ export class NanoIdGenerator implements Generator {
 }
 
 export class StubGenerator implements Generator {
-  public ids: string[] = [];
-
-  constructor(ids: string[] = []) {
-    this.ids = ids;
-  }
+  private count = 0;
 
   id(): string {
-    return defined(this.ids.pop(), new Error('StubGenerator: No next id'));
+    return `id-${++this.count}`;
   }
 }

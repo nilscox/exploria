@@ -20,7 +20,7 @@ void describe('Assistant', () => {
   let aiClient: StubAiClient;
 
   beforeEach(() => {
-    generator = new StubGenerator(['id']);
+    generator = new StubGenerator();
     clock = new StubClock();
     uiNotifier = new StubUiNotifier();
     aiClient = new StubAiClient();

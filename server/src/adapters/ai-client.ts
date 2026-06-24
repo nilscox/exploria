@@ -46,12 +46,12 @@ type CreateCompletionResult = {
 export class StubAiClient {
   results: CreateCompletionResult[] = [];
 
+  private next = async () => {
+    return defined(this.results.shift(), new Error('StubAiClient: No more result'));
+  };
+
   createCompletion = this.next;
   createCompletionStreaming = this.next;
-
-  private async next() {
-    return defined(this.results.shift(), new Error('StubAiClient: No more result'));
-  }
 }
 
 export interface AiClient {

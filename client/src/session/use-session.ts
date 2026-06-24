@@ -17,7 +17,7 @@ export function useSession(sessionId: string, onEvent: (event: Shared.SessionUiE
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [state, dispatch] = useReducer(reducer, {});
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const sessionQuery = useQuery(getSessionOptions(sessionId));
   const { mutate: postMessage } = useMutation(postMessageOptions(sessionId, dispatch));
@@ -109,23 +109,31 @@ function selectPathOptions(
   });
 }
 
-const reducer = produce(function (
-  state: {
-    session?: Shared.Session;
-    stream?: string;
-    loading?: boolean;
-    connected?: boolean;
-    prompt?: string;
-  },
-  action:
-    | { type: 'SessionFetched'; session: Shared.Session }
-    | { type: 'StreamOpened' }
-    | { type: 'StreamError' }
-    | { type: 'PostingMessage' }
-    | { type: 'MessagePosted' }
-    | Shared.SessionUiEvent
-    | Shared.AssistantUiEvent,
-) {
+type State = {
+  session?: Shared.Session;
+  stream: string;
+  loading: boolean;
+  connected: boolean;
+  prompt: string;
+};
+
+const initialState: State = {
+  stream: '',
+  loading: false,
+  connected: false,
+  prompt: '',
+};
+
+type Action =
+  | { type: 'SessionFetched'; session: Shared.Session }
+  | { type: 'StreamOpened' }
+  | { type: 'StreamError' }
+  | { type: 'PostingMessage' }
+  | { type: 'MessagePosted' }
+  | Shared.SessionUiEvent
+  | Shared.AssistantUiEvent;
+
+const reducer = produce(function (state: State, action: Action) {
   console.groupCollapsed(action.type + (action.type === 'EventEmitted' ? ' ' + action.event.type : ''));
   console.log('state\n', current(state));
   console.log('action\n', action);
@@ -168,7 +176,7 @@ const reducer = produce(function (
     const event = action.event;
 
     if (event.type === 'MessageAdded' && event.message.role === 'assistant' && event.message.content) {
-      delete state.stream;
+      state.stream = '';
     }
 
     if (event.type === 'MessageAdded' && event.message.role === 'user') {

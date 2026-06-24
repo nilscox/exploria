@@ -73,7 +73,7 @@ export type SessionEvent =
   | SessionDomainEvent<'MessageAdded', { message: Message }>
   | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
   | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
-  | SessionDomainEvent<'DiscussionPathSelected', { discussionPathId: string }>;
+  | SessionDomainEvent<'DiscussionPathSelected', { pathId: string }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -135,33 +135,107 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.uiNotifier = uiNotifier;
   }
 
-  static from(
-    generator: Generator,
-    clock: Clock,
-    uiNotifier: UiNotifier,
-    data: {
-      id: string;
-      model: string;
-      subject: string;
-      topics: Topic[];
-      notes: Note[];
-      timer: Timer | null;
-      discussionPaths: DiscussionPath[];
-      events: SessionEvent[];
-    },
-  ) {
+  static replay(generator: Generator, clock: Clock, uiNotifier: UiNotifier, id: string, events: SessionEvent[]) {
     const session = new Session(generator, clock, uiNotifier);
 
-    session._id = data.id;
-    session._model = data.model;
-    session._subject = data.subject;
-    session._topics = data.topics;
-    session._notes = data.notes;
-    session._timer = data.timer;
-    session._discussionPaths = data.discussionPaths;
-    session._events = data.events;
+    session._id = id;
+
+    for (const event of events) {
+      session.apply(event);
+    }
 
     return session;
+  }
+
+  private apply(event: SessionEvent) {
+    const handle: Partial<{ [Event in SessionEvent as Event['type']]: (event: Event) => void }> = {
+      ModelChanged: ({ model }) => {
+        this._model = model;
+      },
+
+      PlanInitialized: ({ subject, topics }) => {
+        this._subject = subject;
+        this._topics = topics;
+      },
+
+      SubjectChanged: ({ subject }) => {
+        this._subject = subject;
+      },
+
+      TopicAdded: ({ topic }) => {
+        this._topics.push(topic);
+      },
+
+      TopicRemoved: ({ topicId }) => {
+        this._topics = this._topics.filter(({ id }) => id !== topicId);
+      },
+
+      TopicLabelChanged: ({ topicId, label }) => {
+        const topic = this._topics.find(hasId(topicId));
+        assert(topic);
+        topic.label = label;
+      },
+
+      TopicStatusChanged: ({ topicId, status }) => {
+        const topic = this._topics.find(hasId(topicId));
+        assert(topic);
+        topic.status = status;
+      },
+
+      NoteAdded: ({ note }) => {
+        this._notes.push(note);
+      },
+
+      NoteRemoved: ({ noteId }) => {
+        this._notes = this._notes.filter(({ id }) => id !== noteId);
+      },
+
+      NoteContentChanged: ({ noteId, content }) => {
+        const note = this._notes.find(hasId(noteId));
+        assert(note);
+        note.content = content;
+      },
+
+      TimerStarted: ({ occurredAt, duration }) => {
+        this._timer = { duration, startedAt: occurredAt };
+      },
+
+      TimerCleared: () => {
+        this._timer = null;
+      },
+
+      TimerPaused: ({ occurredAt }) => {
+        assert(this._timer);
+        this._timer.pausedAt = occurredAt;
+      },
+
+      TimerResumed: ({ occurredAt }) => {
+        assert(this._timer);
+        assert(this._timer.pausedAt);
+
+        const elapsed = intervalToDuration({
+          start: this._timer.startedAt,
+          end: this._timer.pausedAt,
+        });
+
+        this._timer.startedAt = sub(occurredAt, elapsed);
+        delete this._timer.pausedAt;
+      },
+
+      DiscussionPathsSet: ({ paths }) => {
+        this._discussionPaths = paths;
+      },
+
+      DiscussionPathSelected: () => {
+        this._discussionPaths = [];
+      },
+    };
+
+    if (event.type in handle) {
+      (handle[event.type] as (event: SessionEvent) => void)(event);
+    }
+
+    this._events.push(event);
   }
 
   setModel(model: string) {
@@ -350,14 +424,14 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emitUiEvent('SessionChanged', { changes: { discussionPaths: this._discussionPaths } });
   }
 
-  selectDiscussionPath(discussionPathId: string) {
-    const path = this.discussionPaths.find(hasId(discussionPathId));
+  selectDiscussionPath(pathId: string) {
+    const path = this.discussionPaths.find(hasId(pathId));
 
-    assert(path, new Error(`Cannot find discussion path "${discussionPathId}"`));
+    assert(path, new Error(`Cannot find discussion path "${pathId}"`));
 
     this._discussionPaths = [];
 
-    this.emit('DiscussionPathSelected', { discussionPathId });
+    this.emit('DiscussionPathSelected', { pathId });
     this.emitUiEvent('SessionChanged', { changes: { discussionPaths: [] } });
   }
 

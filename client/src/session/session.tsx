@@ -109,13 +109,7 @@ function MainSection({
   );
 }
 
-function DiscussionPaths({
-  paths,
-  onSelect,
-}: {
-  paths: Shared.DiscussionPath[];
-  onSelect: (pathId: string) => void;
-}) {
+function DiscussionPaths({ paths, onSelect }: { paths: Shared.DiscussionPath[]; onSelect: (pathId: string) => void }) {
   if (paths.length === 0) {
     return null;
   }
