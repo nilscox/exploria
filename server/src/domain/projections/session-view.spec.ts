@@ -57,24 +57,6 @@ void describe('toSessionView', () => {
     assert.deepStrictEqual(view().timer, session.timer);
   });
 
-  void it('clears discussion paths on selection', () => {
-    session.addMessage('assistant', 'content', { model: 'model', toolCalls: [] });
-    session.setDiscussionPath([{ label: 'Path A' }, { label: 'Path B' }]);
-
-    assert.strictEqual(view().discussionPaths.length, 2);
-
-    const { id: pathId } = view().discussionPaths[0]!;
-
-    session.selectDiscussionPath(pathId);
-
-    assert.deepStrictEqual(view().discussionPaths, []);
-  });
-
-  void it('exposes events without the aggregate envelope fields', () => {
-    session.setModel('gpt-4o');
-
-    assert.deepStrictEqual(view().events, [{ type: 'ModelChanged', model: 'gpt-4o' }]);
-  });
 });
 
 void describe('toTimeline', () => {

@@ -3,7 +3,7 @@ import { intervalToDuration, sub } from 'date-fns';
 import { hasId } from '../../utils';
 
 import type { Shared } from '../../shared';
-import type { DiscussionPath, Note, SessionEvent, Timer, Topic } from '../session';
+import type { Note, SessionEvent, Timer, Topic } from '../session';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let model = '';
@@ -11,7 +11,6 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   let topics: Topic[] = [];
   let notes: Note[] = [];
   let timer: Timer | null = null;
-  let discussionPaths: DiscussionPath[] = [];
 
   for (const event of events) {
     switch (event.type) {
@@ -80,12 +79,6 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
           delete timer.pausedAt;
         }
         break;
-      case 'DiscussionPathsSet':
-        discussionPaths = event.paths;
-        break;
-      case 'DiscussionPathSelected':
-        discussionPaths = [];
-        break;
     }
   }
 
@@ -96,9 +89,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     topics,
     notes,
     timer,
-    discussionPaths,
     timeline: toTimeline(events),
-    events: events.map(toSharedEvent),
   };
 }
 
@@ -173,13 +164,4 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
   }
 
   return items;
-}
-
-function toSharedEvent({
-  aggregateType: _aggregateType,
-  aggregateId: _aggregateId,
-  occurredAt: _occurredAt,
-  ...event
-}: SessionEvent): Shared.SessionEvent {
-  return event as Shared.SessionEvent;
 }

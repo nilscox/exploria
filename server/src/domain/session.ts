@@ -420,7 +420,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._discussionPaths = paths.map((path) => ({ ...path, id: this.generator.id() }));
 
     this.emit('DiscussionPathsSet', { paths: this._discussionPaths });
-    this.emitUiEvent('SessionChanged', { changes: { discussionPaths: this._discussionPaths } });
   }
 
   selectDiscussionPath(pathId: string) {
@@ -431,7 +430,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     this._discussionPaths = [];
 
     this.emit('DiscussionPathSelected', { pathId });
-    this.emitUiEvent('SessionChanged', { changes: { discussionPaths: [] } });
   }
 
   protected override emit<Type extends SessionEvent['type']>(

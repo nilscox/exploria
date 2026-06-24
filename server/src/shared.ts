@@ -1,6 +1,5 @@
 import type * as assistant from './domain/assistant';
 import type * as session from './domain/session';
-import type { DistributiveOmit } from './utils';
 
 export namespace Shared {
   export type AssistantUiEvent = assistant.AssistantUiEvent;
@@ -13,7 +12,6 @@ export namespace Shared {
   export type Role = session.Role;
   export type ToolCall = session.ToolCall;
   export type DiscussionPath = session.DiscussionPath;
-  export type SessionEvent = DistributiveOmit<session.SessionEvent, 'aggregateType' | 'aggregateId' | 'occurredAt'>;
   export type SessionUiEvent = session.SessionUiEvent;
 
   export type SelectablePath = DiscussionPath & { selected: boolean };
@@ -33,8 +31,6 @@ export namespace Shared {
     topics: Topic[];
     notes: Note[];
     timer: Timer | null;
-    discussionPaths: DiscussionPath[];
     timeline: TimelineItem[];
-    events: SessionEvent[];
   };
 }
