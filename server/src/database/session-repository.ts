@@ -86,11 +86,13 @@ export class SessionRepository {
     await this.db.delete(sessions).where(eq(sessions.id, id));
   }
 
-  async findEvents(sessionId: string) {
-    return this.db.query.domainEvents.findMany({
+  async findEvents(sessionId: string): Promise<SessionEvent[]> {
+    const events = await this.db.query.domainEvents.findMany({
       where: { aggregateType: 'Session', aggregateId: sessionId },
       orderBy: { occurredAt: 'asc' },
     });
+
+    return events.map(SessionRepository.mapEvent);
   }
 
   private static mapEvent(this: void, event: DomainEventSelect): SessionEvent {

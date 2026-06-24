@@ -5,17 +5,16 @@ import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
 import { Session } from '../domain/session';
+import { toSessionView } from '../domain/projections/session-view';
 import { defined } from '../utils';
 import { parsePagination } from './pagination';
 import { ServerSentEvent, type SseUiNotifier } from './sse';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
-import type { DomainEventSelect } from '../database/model';
 import type { SessionRepository } from '../database/session-repository';
 import type { Assistant } from '../domain/assistant';
 import type { EventBus } from '../event-bus';
-import type { Shared } from '../shared';
 
 export class SessionController {
   private readonly generator: Generator;
@@ -196,29 +195,7 @@ export class SessionController {
   private async getSession(sessionId: string) {
     const events = await this.sessionRepository.findEvents(sessionId);
 
-    return this.serializeSession(this.getSessionInstance(), events);
-  }
-
-  private serializeSession(session: Session, events: DomainEventSelect[]): Shared.Session {
-    const serializeSessionEvent = ({ id, type, occurredAt, payload }: DomainEventSelect) => {
-      return {
-        id,
-        type,
-        date: occurredAt.toISOString(),
-        ...payload,
-      } as Shared.SessionEvent;
-    };
-
-    return {
-      id: session.id,
-      model: session.model,
-      subject: session.subject,
-      topics: session.topics,
-      notes: session.notes,
-      timer: session.timer,
-      discussionPaths: session.discussionPaths,
-      events: events.map(serializeSessionEvent),
-    };
+    return toSessionView(sessionId, events);
   }
 
   private async deleteSession(sessionId: string) {
