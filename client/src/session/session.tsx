@@ -11,8 +11,8 @@ import { Spinner } from 'src/components/spinner';
 import { assert } from 'src/utils';
 
 import { MessageForm } from './message-form';
-import { Events } from './session-events';
 import { SessionSidebar } from './session-sidebar';
+import { Timeline } from './session-timeline';
 import { useSession } from './use-session';
 
 export function SessionPage() {
@@ -92,36 +92,18 @@ function MainSection({
 
   useLayoutEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'instant' });
-  }, [stream, session.events, session.discussionPaths]);
+  }, [stream, session.timeline]);
 
   return (
     <div className="flex-1 scrollbar-thin overflow-y-auto">
       <div className="col relative mx-auto w-full max-w-4xl gap-4 p-4">
-        <Events events={session.events} />
+        <Timeline items={session.timeline} onSelectPath={onSelectPath} />
         {stream && <Markdown markdown={stream} />}
-        {!stream && <DiscussionPaths paths={session.discussionPaths} onSelect={onSelectPath} />}
       </div>
 
       <div className="to-background sticky inset-x-0 bottom-0 -my-4 h-4 bg-linear-to-b from-transparent" />
 
       <div ref={bottomRef} />
-    </div>
-  );
-}
-
-function DiscussionPaths({ paths, onSelect }: { paths: Shared.DiscussionPath[]; onSelect: (pathId: string) => void }) {
-  if (paths.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="col gap-2">
-      {paths.map((path) => (
-        <Button key={path.id} variant="outlined" className="justify-start" onClick={() => onSelect(path.id)}>
-          <span className="font-medium">{path.label}</span>
-          {path.description && <span className="text-dim">{path.description}</span>}
-        </Button>
-      ))}
     </div>
   );
 }
