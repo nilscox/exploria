@@ -10,10 +10,9 @@ import { assert, exhaustiveArray } from 'src/utils';
 const sessionUiEventTypes = exhaustiveArray<Shared.AssistantUiEvent['type'] | Shared.SessionUiEvent['type']>()([
   'Chunk',
   'SessionChanged',
-  'EventEmitted',
 ] as const);
 
-export function useSession(sessionId: string, onEvent: (event: Shared.SessionUiEvent) => void) {
+export function useSession(sessionId: string) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -61,14 +60,13 @@ export function useSession(sessionId: string, onEvent: (event: Shared.SessionUiE
         const event: Shared.SessionUiEvent = { type, ...JSON.parse(data) };
 
         dispatch(event);
-        onEvent(event);
       });
     }
 
     return () => {
       source.close();
     };
-  }, [hasSession, sessionId, onEvent]);
+  }, [hasSession, sessionId]);
 
   useEffect(() => {
     if (typeof location.state?.message === 'string' && state.connected) {
@@ -114,14 +112,12 @@ type State = {
   stream: string;
   loading: boolean;
   connected: boolean;
-  prompt: string;
 };
 
 const initialState: State = {
   stream: '',
   loading: false,
   connected: false,
-  prompt: '',
 };
 
 type Action =
@@ -134,13 +130,9 @@ type Action =
   | Shared.AssistantUiEvent;
 
 const reducer = produce(function (state: State, action: Action) {
-  console.groupCollapsed(action.type + (action.type === 'EventEmitted' ? ' ' + action.event.type : ''));
+  console.groupCollapsed(action.type);
   console.log('state\n', current(state));
   console.log('action\n', action);
-
-  if (action.type === 'EventEmitted') {
-    console.log('event\n', action.event);
-  }
 
   if (action.type === 'SessionFetched') {
     state.session = action.session;
@@ -167,20 +159,9 @@ const reducer = produce(function (state: State, action: Action) {
   if (action.type === 'SessionChanged') {
     assert(state.session);
     Object.assign(state.session, action.changes);
-  }
 
-  if (action.type === 'EventEmitted') {
-    assert(state.session);
-    state.session.events.push(action.event);
-
-    const event = action.event;
-
-    if (event.type === 'MessageAdded' && event.message.role === 'assistant' && event.message.content) {
+    if ('timeline' in action.changes) {
       state.stream = '';
-    }
-
-    if (event.type === 'MessageAdded' && event.message.role === 'user') {
-      state.prompt = '';
     }
   }
 

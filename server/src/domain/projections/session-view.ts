@@ -102,6 +102,21 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   };
 }
 
+const timelineEventTypes = new Set<SessionEvent['type']>([
+  'MessageAdded',
+  'TopicAdded',
+  'TimerStarted',
+  'TimerCleared',
+  'TimerPaused',
+  'TimerResumed',
+  'DiscussionPathsSet',
+  'DiscussionPathSelected',
+]);
+
+export function affectsTimeline(type: SessionEvent['type']): boolean {
+  return timelineEventTypes.has(type);
+}
+
 export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
   const items: Shared.TimelineItem[] = [];
 

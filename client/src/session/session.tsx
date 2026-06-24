@@ -1,14 +1,13 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import { ArrowLeftIcon } from 'lucide-react';
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useParams } from 'react-router';
 
 import { Button, LinkButton } from 'src/components/button';
 import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
-import { assert } from 'src/utils';
 
 import { MessageForm } from './message-form';
 import { SessionSidebar } from './session-sidebar';
@@ -20,15 +19,7 @@ export function SessionPage() {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  const [state, postMessage, selectPath] = useSession(
-    params.sessionId as string,
-    useCallback((event) => {
-      if (event.type === 'EventEmitted' && event.event.type === 'MessageAdded' && event.event.message.role === 'user') {
-        assert(textAreaRef.current);
-        textAreaRef.current.value = '';
-      }
-    }, []),
-  );
+  const [state, postMessage, selectPath] = useSession(params.sessionId as string);
 
   if (!state.session) {
     return (

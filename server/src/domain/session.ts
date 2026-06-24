@@ -2,6 +2,7 @@ import { intervalToDuration, sub } from 'date-fns';
 
 import { AggregateRoot, type DomainEvent } from '../aggregate-root';
 import { assert, hasId } from '../utils';
+import { affectsTimeline, toTimeline } from './projections/session-view';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
@@ -77,9 +78,7 @@ export type SessionEvent =
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
-export type SessionUiEvent =
-  | UiEvent<'SessionChanged', { sessionId: string; changes: Partial<Shared.Session> }>
-  | UiEvent<'EventEmitted', { sessionId: string; event: SessionEvent }>;
+export type SessionUiEvent = UiEvent<'SessionChanged', { sessionId: string; changes: Partial<Shared.Session> }>;
 
 export class Session extends AggregateRoot<SessionEvent> {
   private readonly uiNotifier: UiNotifier<SessionUiEvent>;
@@ -441,7 +440,11 @@ export class Session extends AggregateRoot<SessionEvent> {
   ) {
     const event = super.emit(type, payload);
 
-    this.emitUiEvent('EventEmitted', { event });
+    if (affectsTimeline(type)) {
+      this.emitUiEvent('SessionChanged', {
+        changes: { timeline: toTimeline([...this._events, ...this.peekDomainEvents()]) },
+      });
+    }
 
     return event;
   }

@@ -23,6 +23,7 @@ export function MessageForm({
       const message = data.get('message') as string;
 
       postMessage(message);
+      event.currentTarget.reset();
     },
     [postMessage],
   );
