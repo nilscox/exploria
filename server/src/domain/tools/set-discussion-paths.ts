@@ -17,7 +17,7 @@ export const setDiscussionPaths = createTool({
       .max(4),
   }),
   execute(session, { paths }) {
-    session.setDiscussionPath(paths);
+    session.setDiscussionPaths(paths);
 
     return 'Chemins de discussion proposés.';
   },

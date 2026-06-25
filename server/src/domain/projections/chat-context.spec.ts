@@ -7,6 +7,8 @@ import { StubUiNotifier } from '../../adapters/logger';
 import { Session } from '../session';
 import { toChatMessages } from './chat-context';
 
+import type { AiClientMessage } from '../../adapters/ai-client';
+
 void describe('toChatMessages', () => {
   let session: Session;
 
@@ -24,21 +26,21 @@ void describe('toChatMessages', () => {
     session.addToolCallResult('call-1', { result: 'Chronomètre démarré' });
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()), [
-      { role: 'system', content: 'instructions', toolCalls: undefined },
-      { role: 'user', content: 'Hello', toolCalls: undefined },
+      { role: 'system', content: 'instructions' },
+      { role: 'user', content: 'Hello' },
       {
         role: 'assistant',
         content: 'Calling a tool',
         toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: { duration: 42 } }],
       },
       { role: 'tool', toolCallId: 'call-1', content: 'Chronomètre démarré' },
-    ]);
+    ] satisfies AiClientMessage[]);
   });
 
   void it('wraps tool-call errors in an error object', () => {
     session.addMessage('assistant', '', {
       model: 'gpt-4o',
-      toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: {} }],
+      toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: '{}' }],
     });
     session.addToolCallResult('call-1', { error: 'boom' });
 
@@ -46,7 +48,7 @@ void describe('toChatMessages', () => {
       role: 'tool',
       toolCallId: 'call-1',
       content: { error: 'boom' },
-    });
+    } satisfies AiClientMessage);
   });
 
   void it('ignores events that are not messages or tool-call results', () => {
@@ -54,5 +56,17 @@ void describe('toChatMessages', () => {
     session.startTimer(60);
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()), []);
+  });
+
+  void it('projects discussionPathSelected to system messages', () => {
+    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
+    const { id: pathId } = session.discussionPaths[0]!;
+
+    session.selectDiscussionPath(pathId);
+
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()).at(-1), {
+      role: 'system',
+      content: 'Chemin de discussion sélectionné: "Path A"',
+    } satisfies AiClientMessage);
   });
 });

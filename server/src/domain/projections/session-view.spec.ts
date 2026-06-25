@@ -56,7 +56,6 @@ void describe('toSessionView', () => {
 
     assert.deepStrictEqual(view().timer, session.timer);
   });
-
 });
 
 void describe('toTimeline', () => {
@@ -84,7 +83,7 @@ void describe('toTimeline', () => {
 
   void it('attaches discussion paths to the preceding message', () => {
     session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
-    session.setDiscussionPath([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
+    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
 
     const [pathA, pathB] = session.discussionPaths;
 
@@ -104,7 +103,7 @@ void describe('toTimeline', () => {
 
   void it('keeps paths visible after selection and marks the selected one', () => {
     session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
-    session.setDiscussionPath([{ label: 'Path A' }, { label: 'Path B' }]);
+    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
 
     const [pathA, pathB] = session.discussionPaths;
 

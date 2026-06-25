@@ -208,7 +208,7 @@ void describe('Session', () => {
   });
 
   void it('sets discussion paths', () => {
-    session.setDiscussionPath([{ label: 'Path A', description: 'A description' }]);
+    session.setDiscussionPaths([{ label: 'Path A', description: 'A description' }]);
 
     const { id: pathId } = session.discussionPaths[0]!;
 
@@ -220,7 +220,7 @@ void describe('Session', () => {
   });
 
   void it('selects a discussion path', () => {
-    session.setDiscussionPath([{ label: 'Path A' }]);
+    session.setDiscussionPaths([{ label: 'Path A' }]);
 
     const { id: pathId } = session.discussionPaths[0]!;
 
@@ -228,7 +228,7 @@ void describe('Session', () => {
 
     assert.deepStrictEqual(session.discussionPaths, []);
 
-    expectEvent('DiscussionPathSelected', { pathId });
+    expectEvent('DiscussionPathSelected', { pathId, label: 'Path A' });
   });
 
   void it('adds a message', () => {
@@ -325,7 +325,7 @@ void describe('Session', () => {
 
     void it('reconstructs discussion paths from events', () => {
       const source = new Session(new StubGenerator(), clock, uiNotifier);
-      source.setDiscussionPath([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
+      source.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
 
       const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
 
@@ -334,7 +334,7 @@ void describe('Session', () => {
 
     void it('clears discussion paths after selection', () => {
       const source = new Session(new StubGenerator(), clock, uiNotifier);
-      source.setDiscussionPath([{ label: 'Path A' }]);
+      source.setDiscussionPaths([{ label: 'Path A' }]);
 
       const { id: pathId } = source.discussionPaths[0]!;
 

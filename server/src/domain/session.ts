@@ -67,7 +67,7 @@ export type SessionEvent =
   | SessionDomainEvent<'MessageAdded', { message: Message }>
   | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
   | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
-  | SessionDomainEvent<'DiscussionPathSelected', { pathId: string }>;
+  | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -368,7 +368,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     });
   }
 
-  setDiscussionPath(paths: Array<Omit<DiscussionPath, 'id'>>) {
+  setDiscussionPaths(paths: Array<Omit<DiscussionPath, 'id'>>) {
     const withIds: DiscussionPath[] = paths.map((path) => ({ ...path, id: this.generator.id() }));
 
     this.emit('DiscussionPathsSet', { paths: withIds });
@@ -379,7 +379,7 @@ export class Session extends AggregateRoot<SessionEvent> {
 
     assert(path, new Error(`Cannot find discussion path "${pathId}"`));
 
-    this.emit('DiscussionPathSelected', { pathId });
+    this.emit('DiscussionPathSelected', { pathId, label: path.label });
   }
 
   protected override emit<Type extends SessionEvent['type']>(

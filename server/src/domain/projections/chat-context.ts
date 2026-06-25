@@ -1,26 +1,48 @@
 import type { AiClientMessage } from '../../adapters/ai-client';
-import type { SessionEvent } from '../session';
+import type { GetSessionEvent, SessionEvent } from '../session';
 
 export function toChatMessages(events: SessionEvent[]): AiClientMessage[] {
   return events
-    .filter((event) => event.type === 'MessageAdded' || event.type === 'ToolCallResultAdded')
-    .map((event) => {
-      if (event.type === 'ToolCallResultAdded') {
-        const { result } = event;
+    .filter(
+      (event) =>
+        event.type === 'MessageAdded' ||
+        event.type === 'ToolCallResultAdded' ||
+        event.type === 'DiscussionPathSelected',
+    )
+    .map(toChatMessage);
+}
 
-        return {
-          role: 'tool',
-          toolCallId: result.id,
-          content: result.error ? { error: result.error } : result.result,
-        };
-      }
+function toChatMessage(
+  event: GetSessionEvent<'MessageAdded' | 'ToolCallResultAdded' | 'DiscussionPathSelected'>,
+): AiClientMessage {
+  if (event.type === 'ToolCallResultAdded') {
+    const { result } = event;
 
-      const { message } = event;
+    return {
+      role: 'tool',
+      toolCallId: result.id,
+      content: result.error ? { error: result.error } : result.result,
+    };
+  }
 
-      return {
-        role: message.role,
-        content: message.content,
-        toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
-      };
-    });
+  if (event.type === 'DiscussionPathSelected') {
+    return {
+      role: 'system',
+      content: `Chemin de discussion sélectionné: "${event.label}"`,
+    };
+  }
+
+  const { message } = event;
+  const { role, content } = message;
+
+  const result: AiClientMessage = {
+    role,
+    content,
+  };
+
+  if (result.role === 'assistant' && message.role === 'assistant' && message.toolCalls) {
+    result.toolCalls = message.toolCalls;
+  }
+
+  return result;
 }
