@@ -5,10 +5,11 @@
     "./shared": "./src/shared.ts"
   },
   "scripts": {
-    "dev": "nodemon -w src -w .env -w package.json -e ts -x 'tsx src/main.ts'",
+    "typecheck": "tsc --noEmit",
     "test": "tsx --test",
     "lint": "oxlint",
-    "fmt": "oxfmt"
+    "fmt": "oxfmt",
+    "dev": "nodemon -w src -w .env -w package.json -e ts -x 'tsx src/main.ts'"
   },
   "dependencies": {
     "awilix": "^13.0.5",

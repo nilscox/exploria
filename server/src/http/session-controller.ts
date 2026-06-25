@@ -4,8 +4,8 @@ import fs from 'node:fs/promises';
 import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
-import { Session } from '../domain/session';
 import { toSessionView } from '../domain/projections/session-view';
+import { Session } from '../domain/session';
 import { defined } from '../utils';
 import { parsePagination } from './pagination';
 import { ServerSentEvent, type SseUiNotifier } from './sse';

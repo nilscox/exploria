@@ -2,9 +2,10 @@
   "name": "@exploria/client",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "typecheck": "tsc --noEmit",
     "lint": "oxlint",
     "fmt": "oxfmt",
+    "dev": "vite",
     "storybook": "storybook dev -p 6006 --no-open"
   },
   "dependencies": {
