@@ -7,7 +7,7 @@ export namespace Shared {
   export type TopicStatus = session.TopicStatus;
   export type Topic = session.Topic;
   export type Note = session.Note;
-  export type Timer = session.Timer;
+  export type Timer = { duration: number; startedAt: Date; pausedAt?: Date };
   export type Message = session.Message;
   export type Role = session.Role;
   export type ToolCall = session.ToolCall;

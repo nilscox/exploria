@@ -1,8 +1,7 @@
-import { intervalToDuration, sub } from 'date-fns';
-
 import { AggregateRoot, type DomainEvent } from '../aggregate-root';
 import { assert, hasId } from '../utils';
 import { affectsTimeline, toTimeline } from './projections/session-view';
+import { Timer } from './timer';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
@@ -40,12 +39,6 @@ export type ToolCallResult = {
   date: Date;
   result?: unknown;
   error?: unknown;
-};
-
-export type Timer = {
-  duration: number;
-  startedAt: Date;
-  pausedAt?: Date;
 };
 
 export type DiscussionPath = {
@@ -196,7 +189,7 @@ export class Session extends AggregateRoot<SessionEvent> {
       },
 
       TimerStarted: ({ occurredAt, duration }) => {
-        this._timer = { duration, startedAt: occurredAt };
+        this._timer = Timer.start(duration, occurredAt);
       },
 
       TimerCleared: () => {
@@ -205,20 +198,12 @@ export class Session extends AggregateRoot<SessionEvent> {
 
       TimerPaused: ({ occurredAt }) => {
         assert(this._timer);
-        this._timer.pausedAt = occurredAt;
+        this._timer = this._timer.pause(occurredAt);
       },
 
       TimerResumed: ({ occurredAt }) => {
         assert(this._timer);
-        assert(this._timer.pausedAt);
-
-        const elapsed = intervalToDuration({
-          start: this._timer.startedAt,
-          end: this._timer.pausedAt,
-        });
-
-        this._timer.startedAt = sub(occurredAt, elapsed);
-        delete this._timer.pausedAt;
+        this._timer = this._timer.resume(occurredAt);
       },
 
       DiscussionPathsSet: ({ paths }) => {
@@ -344,8 +329,7 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   resumeTimer() {
-    assert(this._timer);
-    assert(this._timer.pausedAt);
+    assert(this._timer?.isPaused);
 
     this.emit('TimerResumed', {});
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });

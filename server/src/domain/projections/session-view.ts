@@ -1,9 +1,8 @@
-import { intervalToDuration, sub } from 'date-fns';
-
 import { hasId } from '../../utils';
+import { Timer } from '../timer';
 
 import type { Shared } from '../../shared';
-import type { Note, SessionEvent, Timer, Topic } from '../session';
+import type { Note, SessionEvent, Topic } from '../session';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let model = '';
@@ -61,22 +60,19 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
         break;
       }
       case 'TimerStarted':
-        timer = { duration: event.duration, startedAt: event.occurredAt };
+        timer = Timer.start(event.duration, event.occurredAt);
         break;
       case 'TimerCleared':
         timer = null;
         break;
       case 'TimerPaused':
         if (timer) {
-          timer.pausedAt = event.occurredAt;
+          timer = timer.pause(event.occurredAt);
         }
         break;
       case 'TimerResumed':
-        if (timer?.pausedAt) {
-          const elapsed = intervalToDuration({ start: timer.startedAt, end: timer.pausedAt });
-
-          timer.startedAt = sub(event.occurredAt, elapsed);
-          delete timer.pausedAt;
+        if (timer) {
+          timer = timer.resume(event.occurredAt);
         }
         break;
     }
