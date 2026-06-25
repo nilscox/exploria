@@ -33,7 +33,7 @@ export class Assistant {
       model: session.model,
       tools,
       messages: [
-        ...toChatMessages([...session.events, ...session.peekDomainEvents()]),
+        ...toChatMessages(session.events),
         {
           role: 'system',
           content: Assistant.formatSessionInfo(this.clock, session),

@@ -238,22 +238,18 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   setModel(model: string) {
-    this._model = model;
-    this.emit('ModelChanged', { model: this.model });
+    this.emit('ModelChanged', { model });
     this.emitUiEvent('SessionChanged', { changes: { model: this.model } });
   }
 
   initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
-    this._subject = subject;
-    this._topics = topics.map((topic) => ({ ...topic, id: this.generator.id(), status: 'pending' }));
+    const withIds: Topic[] = topics.map((topic) => ({ ...topic, id: this.generator.id(), status: 'pending' }));
 
-    this.emit('PlanInitialized', { subject: this.subject, topics: this.topics });
+    this.emit('PlanInitialized', { subject, topics: withIds });
     this.emitUiEvent('SessionChanged', { changes: { subject: this.subject, topics: this.topics } });
   }
 
   setSubject(subject: string) {
-    this._subject = subject;
-
     this.emit('SubjectChanged', { subject });
     this.emitUiEvent('SessionChanged', { changes: { subject: this.subject } });
   }
@@ -265,21 +261,17 @@ export class Session extends AggregateRoot<SessionEvent> {
       status: 'pending',
     };
 
-    this._topics.push(topic);
-
     this.emit('TopicAdded', { topic });
     this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
   }
 
   removeTopic(topicId: string) {
-    const index = this._topics.findIndex(hasId(topicId));
-
-    if (index >= 0) {
-      this._topics.splice(index, 1);
-
-      this.emit('TopicRemoved', { topicId });
-      this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
+    if (!this._topics.some(hasId(topicId))) {
+      return;
     }
+
+    this.emit('TopicRemoved', { topicId });
+    this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
   }
 
   updateTopic(topicId: string, { label, status }: Partial<Omit<Topic, 'id'>>) {
@@ -288,12 +280,10 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(topic, new Error(`Cannot find topic "${topicId}"`));
 
     if (label) {
-      topic.label = label;
       this.emit('TopicLabelChanged', { topicId, label });
     }
 
     if (status) {
-      topic.status = status;
       this.emit('TopicStatusChanged', { topicId, status });
     }
 
@@ -303,26 +293,22 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   addNote({ content }: Omit<Note, 'id'>) {
-    const note = {
+    const note: Note = {
       id: this.generator.id(),
       content,
     };
-
-    this._notes.push(note);
 
     this.emit('NoteAdded', { note });
     this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
   }
 
   removeNote(noteId: string) {
-    const index = this._notes.findIndex(hasId(noteId));
-
-    if (index >= 0) {
-      this._notes.splice(index, 1);
-
-      this.emit('NoteRemoved', { noteId });
-      this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
+    if (!this._notes.some(hasId(noteId))) {
+      return;
     }
+
+    this.emit('NoteRemoved', { noteId });
+    this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
   }
 
   updateNote(noteId: string, { content }: Partial<Omit<Note, 'id'>>) {
@@ -331,19 +317,13 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(note, new Error(`Cannot find note "${noteId}"`));
 
     if (content) {
-      note.content = content;
-
       this.emit('NoteContentChanged', { noteId, content });
       this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
     }
   }
 
   startTimer(duration: number) {
-    const now = this.clock.now();
-
     assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
-
-    this._timer = { duration, startedAt: now };
 
     this.emit('TimerStarted', { duration });
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
@@ -352,16 +332,12 @@ export class Session extends AggregateRoot<SessionEvent> {
   clearTimer() {
     assert(this._timer, new Error("Le chronomètre n'est pas lancé"));
 
-    this._timer = null;
-
     this.emit('TimerCleared', {});
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   pauseTimer() {
     assert(this._timer);
-
-    this._timer.pausedAt = this.clock.now();
 
     this.emit('TimerPaused', {});
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
@@ -370,14 +346,6 @@ export class Session extends AggregateRoot<SessionEvent> {
   resumeTimer() {
     assert(this._timer);
     assert(this._timer.pausedAt);
-
-    const elapsed = intervalToDuration({
-      start: this._timer.startedAt,
-      end: this._timer.pausedAt,
-    });
-
-    this._timer.startedAt = sub(this.clock.now(), elapsed);
-    delete this._timer.pausedAt;
 
     this.emit('TimerResumed', {});
     this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
@@ -417,17 +385,15 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   setDiscussionPath(paths: Array<Omit<DiscussionPath, 'id'>>) {
-    this._discussionPaths = paths.map((path) => ({ ...path, id: this.generator.id() }));
+    const withIds: DiscussionPath[] = paths.map((path) => ({ ...path, id: this.generator.id() }));
 
-    this.emit('DiscussionPathsSet', { paths: this._discussionPaths });
+    this.emit('DiscussionPathsSet', { paths: withIds });
   }
 
   selectDiscussionPath(pathId: string) {
-    const path = this.discussionPaths.find(hasId(pathId));
+    const path = this._discussionPaths.find(hasId(pathId));
 
     assert(path, new Error(`Cannot find discussion path "${pathId}"`));
-
-    this._discussionPaths = [];
 
     this.emit('DiscussionPathSelected', { pathId });
   }
@@ -438,10 +404,10 @@ export class Session extends AggregateRoot<SessionEvent> {
   ) {
     const event = super.emit(type, payload);
 
+    this.apply(event);
+
     if (affectsTimeline(type)) {
-      this.emitUiEvent('SessionChanged', {
-        changes: { timeline: toTimeline([...this._events, ...this.peekDomainEvents()]) },
-      });
+      this.emitUiEvent('SessionChanged', { changes: { timeline: toTimeline(this._events) } });
     }
 
     return event;
