@@ -24,9 +24,10 @@ export class Assistant {
     this.aiClient = aiClient;
   }
 
-  async run(session: Session, message?: string) {
+  async run(session: Session, message?: string, commit: () => Promise<void> = async () => {}) {
     if (message) {
       session.addMessage('user', message);
+      await commit();
     }
 
     const { content, toolCalls } = await this.aiClient.createCompletionStreaming({
@@ -55,12 +56,14 @@ export class Assistant {
       await this.handleToolCall(session, toolCall);
     }
 
+    await commit();
+
     if (toolCalls.length > 0) {
-      await this.run(session);
+      await this.run(session, undefined, commit);
     }
   }
 
-  async generateDemo(session: Session) {
+  async generateDemo(session: Session, commit: () => Promise<void> = async () => {}) {
     for (let i = 0; i <= 3; ++i) {
       const { content } = await this.aiClient.createCompletion({
         model: session.model,
@@ -89,7 +92,7 @@ export class Assistant {
         ],
       });
 
-      await this.run(session, content);
+      await this.run(session, content, commit);
     }
   }
 

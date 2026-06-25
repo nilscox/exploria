@@ -183,12 +183,17 @@ export class SessionController {
     return session.id;
   }
 
-  private async generateDemo(session: Session) {
-    try {
-      await this.assistant.generateDemo(session);
+  private makeCommit(session: Session) {
+    return async () => {
       const committed = await this.sessionRepository.save(session);
 
       this.events.emit(...committed);
+    };
+  }
+
+  private async generateDemo(session: Session) {
+    try {
+      await this.assistant.generateDemo(session, this.makeCommit(session));
     } catch (error) {
       console.error(error);
     }
@@ -227,22 +232,17 @@ export class SessionController {
   private async postMessage(message: string) {
     const session = this.getSessionInstance();
 
-    await this.assistant.run(session, message);
-
-    const committed = await this.sessionRepository.save(session);
-
-    this.events.emit(...committed);
+    await this.assistant.run(session, message, this.makeCommit(session));
   }
 
   private async selectDiscussionPath(pathId: string) {
     const session = this.getSessionInstance();
+    const commit = this.makeCommit(session);
 
     session.selectDiscussionPath(pathId);
-    await this.assistant.run(session);
+    await commit();
 
-    const committed = await this.sessionRepository.save(session);
-
-    this.events.emit(...committed);
+    await this.assistant.run(session, undefined, commit);
   }
 
   private stream(res: OutgoingMessage) {
