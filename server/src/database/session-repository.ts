@@ -75,7 +75,7 @@ export class SessionRepository {
   }
 
   async findMany({ offset, limit }: { offset: number; limit: number }) {
-    return this.db.query.sessions.findMany({ offset, limit });
+    return this.db.query.sessions.findMany({ offset, limit, orderBy: { createdAt: 'desc' } });
   }
 
   async count() {

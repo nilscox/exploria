@@ -1,5 +1,8 @@
 import type { Shared } from '@exploria/server/shared';
+import { Trans } from '@lingui/react/macro';
 import clsx from 'clsx';
+import { CheckIcon, ListIcon, PencilIcon, StickyNoteIcon, StickyNoteXIcon, TimerIcon } from 'lucide-react';
+import type { SVGProps } from 'react';
 
 import { Button } from 'src/components/button';
 import { Markdown } from 'src/components/markdown';
@@ -14,24 +17,124 @@ export function Timeline({ items, onSelectPath }: { items: TimelineItem[]; onSel
 }
 
 function TimelineEntry({ item, onSelectPath }: { item: TimelineItem; onSelectPath: (pathId: string) => void }) {
-  switch (item.kind) {
-    case 'message':
-      return <MessageItem message={item} onSelectPath={onSelectPath} />;
-    case 'topic-added':
-      return <Notification>Sujet ajouté : {item.label}</Notification>;
-    case 'timer-started':
-      return <Notification>Chronomètre démarré : {item.duration} minutes</Notification>;
-    case 'timer-cleared':
-      return <Notification>Chronomètre annulé</Notification>;
-    case 'timer-paused':
-      return <Notification>Chronomètre mis en pause</Notification>;
-    case 'timer-resumed':
-      return <Notification>Chronomètre redémarré</Notification>;
+  if (item.kind === 'message') {
+    return <MessageItem message={item} onSelectPath={onSelectPath} />;
   }
+
+  const Component = components[item.kind] as React.ComponentType<{ item: TimelineItem }>;
+
+  return <Component item={item} />;
 }
 
-function Notification({ children }: { children: React.ReactNode }) {
-  return <div className="text-dim text-sm">{children}</div>;
+const components: {
+  [Item in TimelineItem as Exclude<Item['kind'], 'message'>]: React.ComponentType<{ item: Item }>;
+} = {
+  'plan-initialized': ({ item }) => (
+    <Notification Icon={ListIcon}>
+      <Trans>
+        Plan initialized: {item.subject} ({item.topicCount} topics)
+      </Trans>
+    </Notification>
+  ),
+
+  'subject-changed': ({ item }) => (
+    <Notification Icon={PencilIcon}>
+      <Trans>Subject changed: {item.subject}</Trans>
+    </Notification>
+  ),
+
+  'topic-added': ({ item }) => (
+    <Notification Icon={ListIcon}>
+      <Trans>Topic added: {item.label}</Trans>
+    </Notification>
+  ),
+
+  'topic-removed': ({ item }) => (
+    <Notification Icon={ListIcon}>
+      <Trans>Topic removed: {item.label}</Trans>
+    </Notification>
+  ),
+
+  'topic-label-changed': ({ item }) => (
+    <Notification Icon={ListIcon}>
+      <Trans>
+        Topic renamed: {item.oldLabel} → {item.newLabel}
+      </Trans>
+    </Notification>
+  ),
+
+  'topic-status-changed': ({ item }) => (
+    <Notification Icon={item.status === 'done' ? CheckIcon : ListIcon}>
+      <Trans>
+        Status of "{item.label}": <TopicStatusLabel status={item.status} />
+      </Trans>
+    </Notification>
+  ),
+
+  'note-added': ({ item }) => (
+    <Notification Icon={StickyNoteIcon}>
+      <Trans>Note added: {item.content}</Trans>
+    </Notification>
+  ),
+
+  'note-removed': ({ item }) => (
+    <Notification Icon={StickyNoteXIcon}>
+      <Trans>Note removed: {item.content}</Trans>
+    </Notification>
+  ),
+
+  'note-content-changed': ({ item }) => (
+    <Notification Icon={StickyNoteIcon}>
+      <Trans>Note updated: {item.content}</Trans>
+    </Notification>
+  ),
+
+  'timer-started': ({ item }) => (
+    <Notification Icon={TimerIcon}>
+      <Trans>Timer started: {item.duration} minutes</Trans>
+    </Notification>
+  ),
+
+  'timer-cleared': () => (
+    <Notification Icon={TimerIcon}>
+      <Trans>Timer cleared</Trans>
+    </Notification>
+  ),
+
+  'timer-paused': () => (
+    <Notification Icon={TimerIcon}>
+      <Trans>Timer paused</Trans>
+    </Notification>
+  ),
+
+  'timer-resumed': () => (
+    <Notification Icon={TimerIcon}>
+      <Trans>Timer resumed</Trans>
+    </Notification>
+  ),
+};
+
+function Notification({
+  Icon,
+  children,
+}: {
+  Icon: React.ComponentType<SVGProps<SVGSVGElement>>;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="text-dim row items-center gap-1 text-sm">
+      <Icon className="size-3.5 shrink-0" />
+      <span className="truncate leading-none">{children}</span>
+    </div>
+  );
+}
+
+function TopicStatusLabel({ status }: { status: Shared.TopicStatus }) {
+  return {
+    pending: <Trans>pending</Trans>,
+    in_progress: <Trans>in progress</Trans>,
+    done: <Trans>done</Trans>,
+  }[status];
 }
 
 function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSelectPath: (pathId: string) => void }) {

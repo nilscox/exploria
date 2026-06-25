@@ -80,6 +80,81 @@ void describe('toTimeline', () => {
     ]);
   });
 
+  void it('emits plan-initialized with subject and topic count', () => {
+    session.initializePlan('My subject', [{ label: 'Topic A' }, { label: 'Topic B' }]);
+
+    assert.deepStrictEqual(timeline(), [{ kind: 'plan-initialized', subject: 'My subject', topicCount: 2 }]);
+  });
+
+  void it('emits subject-changed', () => {
+    session.setSubject('New subject');
+
+    assert.deepStrictEqual(timeline(), [{ kind: 'subject-changed', subject: 'New subject' }]);
+  });
+
+  void it('emits topic-removed with the topic label', () => {
+    session.addTopic({ label: 'Topic A' });
+    const topicId = session.topics[0]!.id;
+    session.removeTopic(topicId);
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'topic-added', label: 'Topic A' },
+      { kind: 'topic-removed', label: 'Topic A' },
+    ]);
+  });
+
+  void it('emits topic-label-changed with old and new labels', () => {
+    session.addTopic({ label: 'Old label' });
+    const topicId = session.topics[0]!.id;
+    session.updateTopic(topicId, { label: 'New label' });
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'topic-added', label: 'Old label' },
+      { kind: 'topic-label-changed', oldLabel: 'Old label', newLabel: 'New label' },
+    ]);
+  });
+
+  void it('emits topic-status-changed with topic label and new status', () => {
+    session.addTopic({ label: 'Topic A' });
+    const topicId = session.topics[0]!.id;
+    session.updateTopic(topicId, { status: 'in_progress' });
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'topic-added', label: 'Topic A' },
+      { kind: 'topic-status-changed', label: 'Topic A', status: 'in_progress' },
+    ]);
+  });
+
+  void it('emits note-added with note content', () => {
+    session.addNote({ content: 'My note' });
+
+    assert.deepStrictEqual(timeline(), [{ kind: 'note-added', content: 'My note' }]);
+  });
+
+  void it('emits note-removed with the note content at time of removal', () => {
+    session.addNote({ content: 'Initial content' });
+    const noteId = session.notes[0]!.id;
+    session.updateNote(noteId, { content: 'Updated content' });
+    session.removeNote(noteId);
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'note-added', content: 'Initial content' },
+      { kind: 'note-content-changed', content: 'Updated content' },
+      { kind: 'note-removed', content: 'Updated content' },
+    ]);
+  });
+
+  void it('emits note-content-changed with the new content', () => {
+    session.addNote({ content: 'Original' });
+    const noteId = session.notes[0]!.id;
+    session.updateNote(noteId, { content: 'Updated' });
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'note-added', content: 'Original' },
+      { kind: 'note-content-changed', content: 'Updated' },
+    ]);
+  });
+
   void it('attaches discussion paths to the preceding message', () => {
     session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
     session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);

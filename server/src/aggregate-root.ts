@@ -33,11 +33,11 @@ export abstract class AggregateRoot<Event extends DomainEvent> {
       aggregateId: this._id,
       occurredAt: this.clock.now(),
       type,
-      ...structuredClone(payload),
+      ...payload,
     } as Extract<Event, { type: Type }>;
 
-    this._domainEvents.push(event);
-    this.apply(event);
+    this._domainEvents.push(structuredClone(event));
+    this.apply(structuredClone(event));
 
     return event;
   }
