@@ -14,6 +14,6 @@ export const addTopic = createTool((t: Translate) => ({
       label,
     });
 
-    return t('add-topic.result', { label });
+    return t('tool.result.ok');
   },
 }));

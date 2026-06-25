@@ -12,6 +12,6 @@ export const setSubject = createTool((t: Translate) => ({
   execute(session, { subject }) {
     session.setSubject(subject);
 
-    return t('set-subject.result', { subject });
+    return t('tool.result.ok');
   },
 }));

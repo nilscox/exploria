@@ -115,7 +115,7 @@ void describe('Assistant', () => {
           id: 'id',
           date: clock.date,
           error: null,
-          result: 'Timer started: 42 minutes.',
+          result: 'OK',
         },
       }),
     ]);

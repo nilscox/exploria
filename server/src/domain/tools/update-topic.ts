@@ -1,6 +1,5 @@
 import z from 'zod';
 
-import { hasId } from '../../utils';
 import { createTool } from './create-tool';
 
 import type { Translate } from '../i18n';
@@ -18,8 +17,6 @@ export const updateTopic = createTool((t: Translate) => ({
       status,
     });
 
-    const topic = session.topics.find(hasId(id));
-
-    return t('update-topic.result', { label: topic?.label });
+    return t('tool.result.ok');
   },
 }));

@@ -14,6 +14,6 @@ export const saveNote = createTool((t: Translate) => ({
       content: note,
     });
 
-    return t('save-note.result', { note });
+    return t('tool.result.ok');
   },
 }));

@@ -10,6 +10,6 @@ export const pauseTimer = createTool((t: Translate) => ({
   execute(session) {
     session.pauseTimer();
 
-    return t('pause-timer.result');
+    return t('tool.result.ok');
   },
 }));

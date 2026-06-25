@@ -12,6 +12,6 @@ export const startTimer = createTool((t: Translate) => ({
   execute(session, { duration }) {
     session.startTimer(duration);
 
-    return t('start-timer.result', { duration });
+    return t('tool.result.ok');
   },
 }));

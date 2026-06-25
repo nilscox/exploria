@@ -20,6 +20,6 @@ export const setDiscussionPaths = createTool((t: Translate) => ({
   execute(session, { paths }) {
     session.setDiscussionPaths(paths);
 
-    return t('set-discussion-paths.result');
+    return t('tool.result.ok');
   },
 }));

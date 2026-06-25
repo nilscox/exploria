@@ -10,6 +10,6 @@ export const clearTimer = createTool((t: Translate) => ({
   execute(session) {
     session.clearTimer();
 
-    return t('clear-timer.result');
+    return t('tool.result.ok');
   },
 }));

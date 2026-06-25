@@ -16,6 +16,6 @@ export const initPlan = createTool((t: Translate) => ({
       topics.map((label) => ({ label })),
     );
 
-    return t('init-plan.result');
+    return t('tool.result.ok');
   },
 }));

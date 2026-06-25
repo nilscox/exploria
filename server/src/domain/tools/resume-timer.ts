@@ -10,6 +10,6 @@ export const resumeTimer = createTool((t: Translate) => ({
   execute(session) {
     session.resumeTimer();
 
-    return t('resume-timer.result');
+    return t('tool.result.ok');
   },
 }));
