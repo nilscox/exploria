@@ -150,7 +150,7 @@ void describe('Session', () => {
 
     assert(session.timer);
     assert.strictEqual(session.timer.duration, 60);
-    assert.strictEqual(session.timer.startedAt, clock.date);
+    assert.deepStrictEqual(session.timer.startedAt, clock.date);
 
     expectEvent('TimerStarted', { duration: 60 });
 
@@ -182,7 +182,7 @@ void describe('Session', () => {
     session.pauseTimer();
 
     assert(session.timer);
-    assert.strictEqual(session.timer.pausedAt, clock.date);
+    assert.deepStrictEqual(session.timer.pausedAt, clock.date);
 
     expectEvent('TimerPaused', {});
 

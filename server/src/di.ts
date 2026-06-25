@@ -4,6 +4,7 @@ import { OpenAiClient, type AiClient } from './adapters/ai-client';
 import { NativeDateClock } from './adapters/clock';
 import { EnvConfig, type Config } from './adapters/config';
 import { NanoIdGenerator, type Generator } from './adapters/generator';
+import { MustacheI18n, type I18n } from './adapters/i18n';
 import { createDatabase, SessionRepository } from './database';
 import { Assistant } from './domain/assistant';
 import { TestAssistant } from './domain/test-assistant';
@@ -17,12 +18,12 @@ import type { Clock } from './adapters/clock';
 import type { Logger } from './adapters/logger';
 import type { UiNotifier } from './domain/ui-notifier';
 
-function assistantFactory(config: Config, clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient) {
+function assistantFactory(config: Config, clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n) {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
   }
 
-  return new Assistant(clock, uiNotifier, aiClient);
+  return new Assistant(clock, uiNotifier, aiClient, i18n);
 }
 
 export const container = createContainer({
@@ -31,14 +32,15 @@ export const container = createContainer({
 }).register({
   config: asClass<Config>(EnvConfig),
   generator: asClass<Generator>(NanoIdGenerator),
-  clock: asClass<Clock>(NativeDateClock),
+  clock: asClass<Clock>(NativeDateClock).singleton(),
   logger: asValue<Logger>(console),
   events: asClass(EventBus),
   uiNotifier: asClass<UiNotifier>(SseUiNotifier).singleton(),
   database: asFunction(createDatabase),
+  i18n: asClass<I18n>(MustacheI18n).singleton(),
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
-  sessionSseSubscriber: asClass(SessionSseSubscriber).singleton(),
+  sessionSseSubscriber: asClass(SessionSseSubscriber),
   aiClient: asClass<AiClient>(OpenAiClient),
   assistant: asFunction(assistantFactory),
   server: asClass(Server),

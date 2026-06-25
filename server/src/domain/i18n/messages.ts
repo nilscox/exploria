@@ -44,22 +44,9 @@ export type Messages = {
   'update-topic.description': string;
   'update-topic.result': (p: { label: string | undefined }) => string;
 
-  'session-info.plan-heading': string;
   'session-info.status.pending': string;
   'session-info.status.in_progress': string;
   'session-info.status.done': string;
-  'session-info.no-topic-in-progress': string;
-  'session-info.plan-up-to-date': string;
-  'session-info.no-plan': string;
-  'session-info.time-heading': string;
-  'session-info.notes-heading': string;
-
-  'timer-info.none': string;
-  'timer-info.session-time': (p: { minutes: number }) => string;
-  'timer-info.elapsed': (p: { minutes: number }) => string;
-  'timer-info.remaining': (p: { minutes: number }) => string;
-  'timer-info.time-up': string;
-  'timer-info.paused': string;
 
   'chat.discussion-path-selected': (p: { label: string }) => string;
 
@@ -113,22 +100,9 @@ const en: Messages = {
   'update-topic.description': 'Updates a topic of the plan (label or status)',
   'update-topic.result': ({ label }) => `Topic "${label}" updated.`,
 
-  'session-info.plan-heading': '# Discussion plan',
   'session-info.status.pending': 'to address',
   'session-info.status.in_progress': 'in progress',
   'session-info.status.done': 'done',
-  'session-info.no-topic-in-progress': 'No topic in progress. Should one be updated?',
-  'session-info.plan-up-to-date': 'Is the plan up to date with the discussion?',
-  'session-info.no-plan': 'No plan defined.',
-  'session-info.time-heading': '# Time management',
-  'session-info.notes-heading': '# Notes',
-
-  'timer-info.none': 'No timer started',
-  'timer-info.session-time': ({ minutes }) => `Session time: ${minutes} minutes`,
-  'timer-info.elapsed': ({ minutes }) => `Elapsed time: ${minutes} minutes`,
-  'timer-info.remaining': ({ minutes }) => `Remaining time: ${minutes} minutes`,
-  'timer-info.time-up': 'Time is up, it is necessary to conclude',
-  'timer-info.paused': 'Timer paused',
 
   'chat.discussion-path-selected': ({ label }) => `Selected discussion path: "${label}"`,
 
@@ -185,22 +159,9 @@ const fr: Messages = {
   'update-topic.description': "Met à jour un sujet du plan (intitulé ou statut)",
   'update-topic.result': ({ label }) => `Sujet "${label}" mis à jour.`,
 
-  'session-info.plan-heading': '# Plan de discussion',
   'session-info.status.pending': 'à traiter',
   'session-info.status.in_progress': 'en cours',
   'session-info.status.done': 'traité',
-  'session-info.no-topic-in-progress': 'Aucun sujet en cours. Faut-il en mettre un à jour ?',
-  'session-info.plan-up-to-date': 'Le plan est-il à jour par rapport à la discussion ?',
-  'session-info.no-plan': 'Aucun plan défini.',
-  'session-info.time-heading': '# Gestion du temps',
-  'session-info.notes-heading': '# Notes',
-
-  'timer-info.none': 'Aucun chronomètre démarré',
-  'timer-info.session-time': ({ minutes }) => `Temps de la session : ${minutes} minutes`,
-  'timer-info.elapsed': ({ minutes }) => `Temps écoulé : ${minutes} minutes`,
-  'timer-info.remaining': ({ minutes }) => `Temps restant : ${minutes} minutes`,
-  'timer-info.time-up': 'Temps imparti écoulé, il est nécessaire de conclure',
-  'timer-info.paused': 'Chronomètre en pause',
 
   'chat.discussion-path-selected': ({ label }) => `Chemin de discussion sélectionné: "${label}"`,
 

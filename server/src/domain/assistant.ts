@@ -1,4 +1,3 @@
-import { intervalToDuration } from 'date-fns';
 import z from 'zod';
 
 import { assert, hasKey } from '../utils';
@@ -8,8 +7,8 @@ import { tools } from './tools';
 
 import type { AiClient } from '../adapters/ai-client';
 import type { Clock } from '../adapters/clock';
-import type { Translate } from './i18n';
-import type { Session, ToolCall, TopicStatus } from './session';
+import type { I18n } from '../adapters/i18n';
+import type { Session, ToolCall } from './session';
 import type { Tool } from './tools/create-tool';
 import type { UiEvent, UiNotifier } from './ui-notifier';
 
@@ -19,11 +18,13 @@ export class Assistant {
   private readonly clock: Clock;
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
   private readonly aiClient: AiClient;
+  private readonly i18n: I18n;
 
-  constructor(clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient) {
+  constructor(clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n) {
     this.clock = clock;
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
+    this.i18n = i18n;
   }
 
   async run(session: Session, message?: string, commit: () => Promise<void> = async () => {}) {
@@ -41,7 +42,7 @@ export class Assistant {
         ...toChatMessages(session.events, t),
         {
           role: 'system',
-          content: Assistant.formatSessionInfo(this.clock, session, t),
+          content: this.i18n.render(session.language, 'session-info', { session }),
         },
       ],
       onChunk: (text) => this.uiNotifier.notify(session.id, { type: 'Chunk', text }),
@@ -98,76 +99,6 @@ export class Assistant {
 
       await this.run(session, content, commit);
     }
-  }
-
-  static formatSessionInfo(clock: Clock, session: Session, t: Translate): string {
-    const lines = [];
-
-    const topicStatusMap: Record<TopicStatus, string> = {
-      pending: t('session-info.status.pending'),
-      in_progress: t('session-info.status.in_progress'),
-      done: t('session-info.status.done'),
-    };
-
-    lines.push(t('session-info.plan-heading'), '');
-
-    if (session.topics.length > 0) {
-      for (const { id, label, status } of session.topics) {
-        lines.push(`${label} (id: "${id}") : ${topicStatusMap[status]}`);
-      }
-
-      if (session.topics.filter((topic) => topic.status === 'in_progress').length !== 1) {
-        lines.push('', t('session-info.no-topic-in-progress'));
-      } else {
-        lines.push('', t('session-info.plan-up-to-date'));
-      }
-    } else {
-      lines.push(t('session-info.no-plan'));
-    }
-
-    lines.push('', t('session-info.time-heading'), '');
-    lines.push(this.formatTimerInfo(clock, session, t));
-
-    if (session.notes.length > 0) {
-      lines.push('', t('session-info.notes-heading'), '');
-
-      for (const { id, content } of session.notes) {
-        lines.push(`id: ${id}`);
-        lines.push(`note: ${content}`, '');
-      }
-    }
-
-    return lines.join('\n');
-  }
-
-  static formatTimerInfo(clock: Clock, session: Session, t: Translate) {
-    if (!session.timer) {
-      return t('timer-info.none');
-    }
-
-    const duration = intervalToDuration({
-      start: session.timer.startedAt,
-      end: session.timer.pausedAt ?? clock.now(),
-    });
-
-    const elapsed = (duration.minutes ?? 0) + (duration.hours ?? 0) * 60;
-    const remaining = Math.max(0, session.timer.duration - (elapsed ?? 0));
-
-    const lines: string[] = [];
-
-    lines.push(t('timer-info.session-time', { minutes: session.timer.duration }));
-    lines.push(t('timer-info.elapsed', { minutes: elapsed }));
-    lines.push(t('timer-info.remaining', { minutes: remaining }));
-
-    if (remaining === 0) {
-      lines.push('', t('timer-info.time-up'));
-    }
-
-    if (session.timer.pausedAt) {
-      lines.push('', t('timer-info.paused'));
-    }
-
-    return lines.join('\n');
   }
 
   private async handleToolCall(session: Session, toolCall: ToolCall) {

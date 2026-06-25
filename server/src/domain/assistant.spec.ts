@@ -5,15 +5,12 @@ import { beforeEach, describe, it } from 'node:test';
 import { StubAiClient } from '../adapters/ai-client';
 import { StubClock } from '../adapters/clock';
 import { StubGenerator } from '../adapters/generator';
+import { MustacheI18n } from '../adapters/i18n';
 import { StubUiNotifier } from '../adapters/logger';
 import { container } from '../di';
-import { Assistant } from './assistant';
-import { createTranslate } from './i18n';
 import { Session, type GetSessionEvent, type SessionEvent } from './session';
 
 import type { DomainEvent } from '../aggregate-root';
-
-const t = createTranslate('fr');
 
 void describe('Assistant', () => {
   let generator: StubGenerator;
@@ -153,33 +150,33 @@ void describe('Assistant', () => {
     });
   });
 
-  void it('formats the session info', async () => {
+  void it('renders session info with timer', () => {
+    const i18n = new MustacheI18n(clock);
     const session = new Session(generator, clock);
 
     session.startTimer(60);
-
     clock.advance({ minutes: 5 });
 
-    let result = Assistant.formatSessionInfo(clock, session, t);
+    let result = i18n.render('en', 'session-info', { session });
 
-    assert(result.includes('Temps de la session : 60 minutes'));
-    assert(result.includes('Temps écoulé : 5 minutes'));
-    assert(result.includes('Temps restant : 55 minutes'));
+    assert(result.includes('Session time: 60 minutes'));
+    assert(result.includes('Elapsed time: 5 minutes'));
+    assert(result.includes('Remaining time: 55 minutes'));
 
     session.pauseTimer();
 
-    result = Assistant.formatSessionInfo(clock, session, t);
+    result = i18n.render('en', 'session-info', { session });
 
-    assert(result.includes('Chronomètre en pause'));
+    assert(result.includes('Timer paused'));
 
     session.resumeTimer();
     clock.advance({ minutes: 60 });
 
-    result = Assistant.formatSessionInfo(clock, session, t);
+    result = i18n.render('en', 'session-info', { session });
 
-    assert(result.includes('Temps de la session : 60 minutes'));
-    assert(result.includes('Temps écoulé : 65 minutes'));
-    assert(result.includes('Temps restant : 0 minutes'));
-    assert(result.includes('Temps imparti écoulé, il est nécessaire de conclure'));
+    assert(result.includes('Session time: 60 minutes'));
+    assert(result.includes('Elapsed time: 65 minutes'));
+    assert(result.includes('Remaining time: 0 minutes'));
+    assert(result.includes('Time is up, it is necessary to conclude'));
   });
 });
