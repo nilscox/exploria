@@ -88,11 +88,16 @@ function DiscussionPaths({ paths, onSelect }: { paths: Shared.SelectablePath[]; 
           key={path.id}
           variant={path.selected ? 'solid' : 'outlined'}
           disabled={hasSelection}
-          className={clsx('justify-start', hasSelection && !path.selected && 'opacity-50')}
+          className={clsx(
+            'h-auto text-start whitespace-normal! py-2 justify-start disabled:pointer-events-none',
+            hasSelection && !path.selected && 'opacity-50',
+          )}
           onClick={() => onSelect(path.id)}
         >
-          <span className="font-medium">{path.label}</span>
-          {path.description && <span className="text-dim">{path.description}</span>}
+          <div className="col gap-0.5">
+            <span className="font-medium">{path.label}</span>
+            {path.description && <span className="text-dim">{path.description}</span>}
+          </div>
         </Button>
       ))}
     </div>
