@@ -1,5 +1,5 @@
 import { intervalToDuration } from 'date-fns';
-import type z from 'zod';
+import z from 'zod';
 
 import { assert, hasKey } from '../utils';
 import { toChatMessages } from './projections/chat-context';
@@ -175,7 +175,19 @@ export class Assistant {
         result: await tool.execute(session, toolCall.arguments),
       });
     } catch (error) {
-      session.addToolCallResult(toolCall.id, { error });
+      session.addToolCallResult(toolCall.id, { error: Assistant.toErrorMessage(error) });
     }
+  }
+
+  private static toErrorMessage(error: unknown): string {
+    if (error instanceof z.ZodError) {
+      return error.issues.map((issue) => issue.message).join('; ');
+    }
+
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return String(error);
   }
 }

@@ -38,7 +38,7 @@ export type ToolCallResult = {
   id: string;
   date: Date;
   result?: unknown;
-  error?: unknown;
+  error?: string | null;
 };
 
 export type DiscussionPath = {
@@ -357,7 +357,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit('MessageAdded', { message });
   }
 
-  addToolCallResult(toolCallId: string, param: { error: unknown } | { result: unknown }) {
+  addToolCallResult(toolCallId: string, param: { error: string } | { result: unknown }) {
     this.emit('ToolCallResultAdded', {
       result: {
         id: toolCallId,

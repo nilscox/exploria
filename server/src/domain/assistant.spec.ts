@@ -1,7 +1,6 @@
 import { asValue } from 'awilix';
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
-import type z from 'zod';
 
 import { StubAiClient } from '../adapters/ai-client';
 import { StubClock } from '../adapters/clock';
@@ -144,13 +143,11 @@ void describe('Assistant', () => {
 
     assert.partialDeepStrictEqual(event, {
       type: 'ToolCallResultAdded',
-      result: { result: null },
+      result: {
+        result: null,
+        error: 'Too small: expected number to be >=1',
+      },
     });
-
-    assert.partialDeepStrictEqual(
-      (event.result.error as z.ZodError).issues[0]?.message,
-      'Too small: expected number to be >=1',
-    );
   });
 
   void it('formats the session info', async () => {
