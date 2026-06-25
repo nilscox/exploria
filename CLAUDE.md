@@ -49,21 +49,24 @@ Domain-Driven Design with layered architecture:
 server/src/
 ├── adapters/        # Pluggable infrastructure (AiClient, Clock, Generator, Config)
 ├── domain/
-│   ├── session.ts   # Session aggregate root (event sourcing)
+│   ├── session.ts   # Session aggregate root (event-sourced write model)
+│   ├── timer.ts     # Timer value object (domain calculations)
 │   ├── assistant.ts # AI interaction logic
+│   ├── projections/ # Read models: session-view (UI), chat-context (LLM)
 │   └── tools/       # AI tools (initPlan, saveNote, startTimer, etc.)
 ├── database/        # Drizzle schema + SessionRepository
 ├── http/            # Express routes + SSE notifier
 ├── di.ts            # Awilix container wiring
-├── event-bus.ts     # Pub/sub event bus
+├── event-bus.ts     # Pub/sub event bus (reserved for future cross-context use)
 └── main.ts
 ```
 
 ### Key Patterns
 
-- **Event Sourcing**: all session state changes are captured as immutable domain events stored in `domain_events` table; some state (topics, notes, timer) is also denormalized into dedicated columns for easier querying — this is a known inconsistency, a full event-replay approach is planned
-- **Aggregate Root**: `Session` owns all business logic; mutated only via domain events
-- **Repository Pattern**: `SessionRepository` handles persistence; loads state from denormalized columns + domain events table
+- **Event Sourcing**: the `domain_events` table is the single source of truth for session state. The `sessions` table holds only lightweight columns (id, model, subject, createdAt) for listing. `Session.replay()` rebuilds an aggregate by applying its events in order.
+- **Aggregate Root**: `Session` owns all business logic. A command validates invariants and `emit`s an event; a single `apply(event)` mutates state and is the _only_ place state changes — shared by the live path (`emit` calls `apply`) and replay. Domain calculations live in value objects (e.g. `Timer`).
+- **CQRS / read-model projections**: read models are pure folds over the event stream, decoupled from the write model (they may legitimately diverge from it). `projections/session-view.ts` builds the `Shared.Session` the client consumes (including the `timeline`); `projections/chat-context.ts` builds the OpenAI message list. The aggregate keeps only the state it needs to enforce invariants.
+- **Repository Pattern**: `SessionRepository` persists new domain events (plus the lightweight `sessions` row); `find()` loads events and calls `Session.replay()`.
 - **Adapter Pattern**: `AiClient`, `Clock`, `Generator` have stub implementations for testing
 - **Dependency Injection**: Awilix container in `di.ts`; all dependencies injected, never imported directly in domain
 
@@ -73,12 +76,21 @@ server/src/
 - **API endpoints**: `server/src/http/` (one file per route group)
 - **AI tools**: `server/src/domain/tools/` (one file per tool)
 
+## Client/Server Communication
+
+- **REST** drives commands (`POST`/`PUT`/`DELETE` on `/session/...`) and the initial read: `GET /session/:id` returns a `Shared.Session` read model built by the SessionView projection (not the aggregate).
+- **SSE** (`GET /session/:id/stream`) streams real-time updates:
+  - `SessionChanged { changes: Partial<Shared.Session> }` — projection deltas (sidebar state + the recomputed `timeline`).
+  - `Chunk` — LLM token streaming, ephemeral, emitted by the `Assistant`.
+- UI updates are pushed **optimistically during** use-case execution via the injected `UiNotifier` (the SSE notifier). Token streaming bypasses the event log; state changes are sent as projection deltas, never as raw domain events.
+- The `Shared` namespace (server package) is the single source of truth for the contract — the client only sees the projected read model.
+
 ## Client Architecture
 
 ```
 client/src/
 ├── components/      # Reusable UI components (Button, Input, Modal, etc.)
-├── session/         # Session feature (sidebar, timer, topics, events, notes)
+├── session/         # Session feature (sidebar, timer, topics, timeline, notes)
 ├── hooks/           # useNow, useSession
 ├── i18n/            # Lingui setup
 ├── api.ts           # HTTP + SSE client
@@ -88,10 +100,10 @@ client/src/
 
 ### State Flow
 
-1. React Query fetches session data via REST
-2. SSE connection (`/session/:id/stream`) streams real-time events
-3. SSE events: `Chunk` (AI text streaming), `SessionChanged`, `EventEmitted`
-4. `useSession` hook holds local state, updated via Immer reducer
+1. React Query fetches the `Shared.Session` read model via `GET /session/:id`
+2. An SSE connection (`/session/:id/stream`) streams `Chunk` (AI text) and `SessionChanged` (projection deltas)
+3. `useSession` holds local state via an Immer reducer (`SessionChanged` → `Object.assign`; `Chunk` → append to the streaming buffer)
+4. The conversation renders from `session.timeline` (message + notification items); the sidebar from `topics`/`notes`/`timer`
 5. Shared types come from the server package (`Shared` namespace)
 
 ## Environment Variables
@@ -116,17 +128,16 @@ VITE_DEFAULT_MODEL= # Default LLM model name
 ## Development Commands
 
 ```bash
-# Root
-pnpm lint           # oxlint
-pnpm fmt            # oxfmt
+pnpm typecheck  # run the type checker
+pnpm lint       # run the linter (oxlint)
+pnpm fmt        # run the formatter (oxfmt)
+```
 
-# Server (cd server/)
-pnpm dev            # nodemon hot reload
-pnpm test           # native Node test runner
+> These commands should be launched from the repository's root directory. When adding `--filter <workspace>`, they will run for a specific workspace only. The two available workspaces are `@exploria/server` and `@exploria/client`.
 
-# Client (cd client/)
-pnpm dev            # Vite dev server on :8000
-pnpm storybook      # Storybook on :6006
+```bash
+pnpm --filter @exploria/server test 'src/**/*.spec.ts'      # run the server's unit tests
+pnpm --filter @exploria/server test 'src/**/*.e2e-spec.ts'  # run the server's end-to-end tests
 ```
 
 ## Code Conventions
