@@ -4,7 +4,6 @@ import { Timer } from './timer';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
-import type { Shared } from '../shared';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
@@ -68,8 +67,6 @@ export type SessionEvent =
   | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
-
-export type SessionUiEvent = { type: 'SessionChanged'; sessionId: string; changes: Partial<Shared.Session> };
 
 export class Session extends AggregateRoot<SessionEvent> {
   get id(): string {

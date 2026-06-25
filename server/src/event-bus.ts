@@ -37,10 +37,10 @@ export class EventBus<BusEvent extends DomainEvent = DomainEvent> {
   }
 
   subscribe(listener: (events: BusEvent[]) => void): () => void {
-    this.emitter.addListener('$batch', listener as (events: BusEvent[]) => void);
+    this.emitter.addListener('$batch', listener);
 
     return () => {
-      this.emitter.removeListener('$batch', listener as (events: BusEvent[]) => void);
+      this.emitter.removeListener('$batch', listener);
     };
   }
 }

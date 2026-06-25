@@ -6,7 +6,8 @@ import { after, before, describe, it, mock } from 'node:test';
 
 import { StubAiClient } from '../adapters/ai-client';
 import { container } from '../di';
-import { Session, type SessionUiEvent } from '../domain/session';
+import { Session } from '../domain/session';
+import type { Shared } from '../shared';
 import { createTestDatabase, ExpressFetcher, waitFor, type TestDatabase } from '../test-utils';
 import { defined } from '../utils';
 
@@ -78,7 +79,7 @@ void describe('SessionController', () => {
       const sessionChanged = mock.fn();
 
       sse.addEventListener('open', open);
-      sse.addEventListener('SessionChanged' satisfies SessionUiEvent['type'], sessionChanged);
+      sse.addEventListener('SessionChanged' satisfies Shared.SessionUiEvent['type'], sessionChanged);
 
       await waitFor(() => assert.strictEqual(open.mock.callCount(), 1));
 
@@ -90,7 +91,7 @@ void describe('SessionController', () => {
       await waitFor(() => assert.strictEqual(sessionChanged.mock.callCount(), 1));
 
       const event: MessageEvent = sessionChanged.mock.calls[0]?.arguments[0];
-      const data: Extract<SessionUiEvent, { type: 'SessionChanged' }> = JSON.parse(event.data);
+      const data: Extract<Shared.SessionUiEvent, { type: 'SessionChanged' }> = JSON.parse(event.data);
 
       assert.deepEqual(data, {
         sessionId: session.id,
