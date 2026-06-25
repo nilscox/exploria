@@ -11,7 +11,6 @@ import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
 import { Server } from './http/server';
 import { SessionController } from './http/session-controller';
-import { SessionSseSubscriber } from './http/session-sse-subscriber';
 import { SseUiNotifier } from './http/sse';
 
 import type { Clock } from './adapters/clock';
@@ -34,13 +33,12 @@ export const container = createContainer({
   generator: asClass<Generator>(NanoIdGenerator),
   clock: asClass<Clock>(NativeDateClock).singleton(),
   logger: asValue<Logger>(console),
-  events: asClass(EventBus),
+  events: asClass(EventBus).singleton(),
   uiNotifier: asClass<UiNotifier>(SseUiNotifier).singleton(),
   database: asFunction(createDatabase),
   i18n: asClass<I18n>(MustacheI18n).singleton(),
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
-  sessionSseSubscriber: asClass(SessionSseSubscriber),
   aiClient: asClass<AiClient>(OpenAiClient),
   assistant: asFunction(assistantFactory),
   server: asClass(Server),

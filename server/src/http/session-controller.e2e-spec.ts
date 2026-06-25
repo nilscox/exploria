@@ -7,11 +7,12 @@ import { after, before, describe, it, mock } from 'node:test';
 import { StubAiClient } from '../adapters/ai-client';
 import { container } from '../di';
 import { Session } from '../domain/session';
-import type { Shared } from '../shared';
 import { createTestDatabase, ExpressFetcher, waitFor, type TestDatabase } from '../test-utils';
 import { defined } from '../utils';
+import { SessionSseSubscriber } from './session-sse-subscriber';
 
 import type { SessionRepository } from '../database/session-repository';
+import type { Shared } from '../shared';
 
 void describe('SessionController', () => {
   let db: TestDatabase;
@@ -68,6 +69,12 @@ void describe('SessionController', () => {
   });
 
   void it('forwards UI events', async () => {
+    new SessionSseSubscriber(
+      container.resolve('events'),
+      container.resolve('sessionRepository'),
+      container.resolve('uiNotifier'),
+    );
+
     let session = container.build(Session);
 
     await repository.insert(session);
@@ -83,20 +90,27 @@ void describe('SessionController', () => {
 
       await waitFor(() => assert.strictEqual(open.mock.callCount(), 1));
 
-      const repository = container.resolve('sessionRepository');
-      session = defined(await repository.find(session.id));
+      aiClient.results.push({
+        content: '',
+        toolCalls: [],
+      });
 
-      session.setSubject('subject');
+      const res = await app.fetch(`/${session.id}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: '42;' }),
+      });
+
+      assert(res.ok);
 
       await waitFor(() => assert.strictEqual(sessionChanged.mock.callCount(), 1));
 
       const event: MessageEvent = sessionChanged.mock.calls[0]?.arguments[0];
       const data: Extract<Shared.SessionUiEvent, { type: 'SessionChanged' }> = JSON.parse(event.data);
 
-      assert.deepEqual(data, {
-        sessionId: session.id,
-        changes: { subject: 'subject' },
-      } satisfies Omit<typeof data, 'type'>);
+      assert.partialDeepStrictEqual(data.changes, {
+        timeline: [{ kind: 'message', role: 'user', content: '42;' }],
+      });
     } finally {
       sse.close();
     }
