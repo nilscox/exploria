@@ -68,7 +68,7 @@ export class SessionRepository {
 
     const dbEvents = await this.db.query.domainEvents.findMany({
       where: { aggregateType: 'Session', aggregateId: id },
-      orderBy: { occurredAt: 'asc' },
+      orderBy: { position: 'asc' },
     });
 
     return Session.replay(this.generator, this.clock, id, dbEvents.map(SessionRepository.mapEvent));
@@ -90,7 +90,7 @@ export class SessionRepository {
   async findEvents(sessionId: string): Promise<SessionEvent[]> {
     const events = await this.db.query.domainEvents.findMany({
       where: { aggregateType: 'Session', aggregateId: sessionId },
-      orderBy: { occurredAt: 'asc' },
+      orderBy: { position: 'asc' },
     });
 
     return events.map(SessionRepository.mapEvent);

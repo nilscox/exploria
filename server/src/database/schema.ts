@@ -9,6 +9,7 @@ export const sessions = p.pgTable('sessions', {
 });
 
 export const domainEvents = p.pgTable('domain_events', {
+  position: p.serial(),
   id: p.varchar({ length: 8 }).primaryKey(),
   aggregateType: p.varchar({ length: 32 }).notNull(),
   aggregateId: p.varchar({ length: 8 }).notNull(),
