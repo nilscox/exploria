@@ -12,7 +12,6 @@ import { ServerSentEvent, type SseUiNotifier } from './sse';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
-import type { I18n } from '../adapters/i18n';
 import type { SessionRepository } from '../database/session-repository';
 import type { Assistant } from '../domain/assistant';
 import type { EventBus } from '../event-bus';
@@ -25,7 +24,6 @@ export class SessionController {
   private readonly uiNotifier: SseUiNotifier;
   private readonly sessionRepository: SessionRepository;
   private readonly assistant: Assistant;
-  private readonly i18n: I18n;
 
   public router = express.Router();
 
@@ -42,7 +40,6 @@ export class SessionController {
     uiNotifier: SseUiNotifier,
     assistant: Assistant,
     sessionRepository: SessionRepository,
-    i18n: I18n,
   ) {
     this.generator = generator;
     this.clock = clock;
@@ -50,7 +47,6 @@ export class SessionController {
     this.uiNotifier = uiNotifier;
     this.assistant = assistant;
     this.sessionRepository = sessionRepository;
-    this.i18n = i18n;
 
     this.router.param('id', async (req, res, next, id: string) => {
       const session = await this.sessionRepository.find(id);
@@ -172,8 +168,6 @@ export class SessionController {
 
   private async createSession({ model, language, demo }: { model: string; language: Shared.Language; demo?: boolean }) {
     const session = Session.create(this.generator, this.clock, { model, language });
-
-    session.addMessage('system', this.i18n.render(language, 'instructions', {}));
 
     await this.sessionRepository.insert(session);
     const committed = await this.sessionRepository.save(session);

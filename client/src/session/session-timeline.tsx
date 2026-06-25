@@ -154,12 +154,10 @@ function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSe
 
   return (
     <>
-      {message.content !== '' && (
-        <Markdown
-          markdown={message.content}
-          className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
-        />
-      )}
+      <Markdown
+        markdown={message.content}
+        className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
+      />
 
       {message.role === 'assistant' && debug() && <ToolCalls toolCalls={message.toolCalls} />}
       {message.paths && <DiscussionPaths paths={message.paths} onSelect={onSelectPath} />}

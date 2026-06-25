@@ -143,6 +143,10 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
       case 'MessageAdded': {
         const { message } = event;
 
+        if (message.role === 'assistant' && message.content === '') {
+          break;
+        }
+
         items.push({
           kind: 'message',
           role: message.role,
