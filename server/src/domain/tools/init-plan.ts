@@ -2,11 +2,13 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const initPlan = createTool({
-  description: 'Initialise le plan de discussion avec les grandes étapes',
+import type { Translate } from '../i18n';
+
+export const initPlan = createTool((t: Translate) => ({
+  description: t('init-plan.description'),
   param: z.object({
-    subject: z.string().describe('Le sujet principal de la discussion en quelques mots'),
-    topics: z.array(z.string().min(1).max(64)).describe('Les différents aspects à traiter'),
+    subject: z.string().describe(t('init-plan.subject-param')),
+    topics: z.array(z.string().min(1).max(64)).describe(t('init-plan.topics-param')),
   }),
   execute(session, { subject, topics }) {
     session.initializePlan(
@@ -14,6 +16,6 @@ export const initPlan = createTool({
       topics.map((label) => ({ label })),
     );
 
-    return `Plan initialisé.`;
+    return t('init-plan.result');
   },
-});
+}));

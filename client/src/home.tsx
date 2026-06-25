@@ -1,3 +1,4 @@
+import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { infiniteQueryOptions, mutationOptions, useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { ArrowDownIcon, ArrowRightIcon } from 'lucide-react';
@@ -10,12 +11,13 @@ import { Button } from './components/button';
 import { Field, FieldLabel } from './components/field';
 import { Input } from './components/input';
 import { Settings } from './components/settings';
+import { isLanguage } from './i18n/i18n';
 import { ModelSelector } from './session/model-selector';
 
-function createSessionOptions(navigate: NavigateFunction) {
+function createSessionOptions(navigate: NavigateFunction, language: Shared.Language) {
   return mutationOptions({
     async mutationFn({ model, demo }: { model: string; demo?: boolean; message?: string }) {
-      return api.sessions.create({ model, demo });
+      return api.sessions.create({ model, language, demo });
     },
     async onSuccess(sessionId, { message }) {
       await navigate(`/session/${sessionId}`, { state: { message } });
@@ -40,9 +42,16 @@ function listSessionsOptions() {
 }
 
 export function Home() {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
+  const language = isLanguage(i18n.locale) ? i18n.locale : 'en';
+
   const navigate = useNavigate();
-  const { mutate: createSession, isPending: creatingSession, variables } = useMutation(createSessionOptions(navigate));
+
+  const {
+    mutate: createSession,
+    isPending: creatingSession,
+    variables,
+  } = useMutation(createSessionOptions(navigate, language));
 
   const formRef = useRef<HTMLFormElement>(null);
 

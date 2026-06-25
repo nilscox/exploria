@@ -2,11 +2,13 @@ import { intervalToDuration } from 'date-fns';
 import z from 'zod';
 
 import { assert, hasKey } from '../utils';
+import { createTranslate } from './i18n';
 import { toChatMessages } from './projections/chat-context';
 import { tools } from './tools';
 
 import type { AiClient } from '../adapters/ai-client';
 import type { Clock } from '../adapters/clock';
+import type { Translate } from './i18n';
 import type { Session, ToolCall, TopicStatus } from './session';
 import type { Tool } from './tools/create-tool';
 import type { UiEvent, UiNotifier } from './ui-notifier';
@@ -30,14 +32,16 @@ export class Assistant {
       await commit();
     }
 
+    const t = createTranslate(session.language);
+
     const { content, toolCalls } = await this.aiClient.createCompletionStreaming({
       model: session.model,
-      tools,
+      tools: tools[session.language],
       messages: [
-        ...toChatMessages(session.events),
+        ...toChatMessages(session.events, t),
         {
           role: 'system',
-          content: Assistant.formatSessionInfo(this.clock, session),
+          content: Assistant.formatSessionInfo(this.clock, session, t),
         },
       ],
       onChunk: (text) => this.uiNotifier.notify(session.id, { type: 'Chunk', text }),
@@ -64,6 +68,8 @@ export class Assistant {
   }
 
   async generateDemo(session: Session, commit: () => Promise<void> = async () => {}) {
+    const t = createTranslate(session.language);
+
     for (let i = 0; i <= 3; ++i) {
       const { content } = await this.aiClient.createCompletion({
         model: session.model,
@@ -71,21 +77,19 @@ export class Assistant {
           {
             role: 'system',
             content: [
-              "Tu cherches à réfléchir à un sujet de manière guidée. Ce n'est pas toi qui guide la discussion, tu te laisses guider.",
-              'Tu joue le role "user" et non pas "assistant", dans le but de créer un exemple de conversation.',
+              t('demo.role-1'),
+              t('demo.role-2'),
               ...(i === 0
-                ? [
-                    'Invente un sujet de réflexion complexe : par exemple, un choix de vie, une décision technique ou une question philosophie. Ne propose pas plusieurs options, énonce simplement le sujet choisi en quelques mots.',
-                  ]
+                ? [t('demo.invent-subject')]
                 : [
-                    'Voici le début de la conversation.',
+                    t('demo.conversation-start'),
                     ...session.events
                       .filter((event) => event.type === 'MessageAdded')
                       .filter(({ message }) => message.content !== '')
                       .filter(({ message }) => ['user', 'assistant'].includes(message.role))
                       .map(({ message }) => `${message.role}: ${message.content}`),
                     'user: ',
-                    'Génère un message court pour continuer la discussion.',
+                    t('demo.generate-continue'),
                   ]),
             ].join('\n\n'),
           },
@@ -96,16 +100,16 @@ export class Assistant {
     }
   }
 
-  static formatSessionInfo(clock: Clock, session: Session): string {
+  static formatSessionInfo(clock: Clock, session: Session, t: Translate): string {
     const lines = [];
 
     const topicStatusMap: Record<TopicStatus, string> = {
-      pending: 'à traiter',
-      in_progress: 'en cours',
-      done: 'traité',
+      pending: t('session-info.status.pending'),
+      in_progress: t('session-info.status.in_progress'),
+      done: t('session-info.status.done'),
     };
 
-    lines.push('# Plan de discussion', '');
+    lines.push(t('session-info.plan-heading'), '');
 
     if (session.topics.length > 0) {
       for (const { id, label, status } of session.topics) {
@@ -113,19 +117,19 @@ export class Assistant {
       }
 
       if (session.topics.filter((topic) => topic.status === 'in_progress').length !== 1) {
-        lines.push('', 'Aucun sujet en cours. Faut-il en mettre un à jour ?');
+        lines.push('', t('session-info.no-topic-in-progress'));
       } else {
-        lines.push('', 'Le plan est-il à jour par rapport à la discussion ?');
+        lines.push('', t('session-info.plan-up-to-date'));
       }
     } else {
-      lines.push('Aucun plan défini.');
+      lines.push(t('session-info.no-plan'));
     }
 
-    lines.push('', '# Gestion du temps', '');
-    lines.push(this.formatTimerInfo(clock, session));
+    lines.push('', t('session-info.time-heading'), '');
+    lines.push(this.formatTimerInfo(clock, session, t));
 
     if (session.notes.length > 0) {
-      lines.push('', '# Notes', '');
+      lines.push('', t('session-info.notes-heading'), '');
 
       for (const { id, content } of session.notes) {
         lines.push(`id: ${id}`);
@@ -136,9 +140,9 @@ export class Assistant {
     return lines.join('\n');
   }
 
-  static formatTimerInfo(clock: Clock, session: Session) {
+  static formatTimerInfo(clock: Clock, session: Session, t: Translate) {
     if (!session.timer) {
-      return 'Aucun chronomètre démarré';
+      return t('timer-info.none');
     }
 
     const duration = intervalToDuration({
@@ -151,26 +155,28 @@ export class Assistant {
 
     const lines: string[] = [];
 
-    lines.push(`Temps de la session : ${session.timer.duration} minutes`);
-    lines.push(`Temps écoulé : ${elapsed} minutes`);
-    lines.push(`Temps restant : ${remaining} minutes`);
+    lines.push(t('timer-info.session-time', { minutes: session.timer.duration }));
+    lines.push(t('timer-info.elapsed', { minutes: elapsed }));
+    lines.push(t('timer-info.remaining', { minutes: remaining }));
 
     if (remaining === 0) {
-      lines.push('', 'Temps imparti écoulé, il est nécessaire de conclure');
+      lines.push('', t('timer-info.time-up'));
     }
 
     if (session.timer.pausedAt) {
-      lines.push('', `Chronomètre en pause`);
+      lines.push('', t('timer-info.paused'));
     }
 
     return lines.join('\n');
   }
 
   private async handleToolCall(session: Session, toolCall: ToolCall) {
-    assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
+    const localizedTools = tools[session.language];
+
+    assert(hasKey(localizedTools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
 
     try {
-      const tool: Tool<z.ZodType<any>> = tools[toolCall.name];
+      const tool: Tool<z.ZodType<any>> = localizedTools[toolCall.name];
 
       toolCall.arguments = tool.param.parse(toolCall.arguments);
 

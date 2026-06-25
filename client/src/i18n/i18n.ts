@@ -1,12 +1,19 @@
+import type { Shared } from '@exploria/server/shared';
 import type { I18n } from '@lingui/core';
 
-export type Language = 'en' | 'fr';
+import { exhaustiveArray } from 'src/utils';
 
-export function getPreferredLanguage(): Language {
+export const languages = exhaustiveArray<Shared.Language>()(['en', 'fr']);
+
+export function isLanguage(value: string): value is Shared.Language {
+  return (languages as string[]).includes(value);
+}
+
+export function getPreferredLanguage(): Shared.Language {
   const lang = localStorage.getItem('lang') ?? navigator.language.split('-').at(0) ?? 'en';
 
-  if (['en', 'fr'].includes(lang)) {
-    return lang as Language;
+  if (isLanguage(lang)) {
+    return lang;
   }
 
   localStorage.setItem('lang', 'en');
@@ -14,7 +21,7 @@ export function getPreferredLanguage(): Language {
   return 'en';
 }
 
-export async function setLanguage(i18n: I18n, lang: Language) {
+export async function setLanguage(i18n: I18n, lang: Shared.Language) {
   const { messages } = await import(`./${lang}/messages.ts`);
 
   i18n.load(lang, messages);

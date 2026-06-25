@@ -2,14 +2,16 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const startTimer = createTool({
-  description: 'Démarre un chronomètre',
+import type { Translate } from '../i18n';
+
+export const startTimer = createTool((t: Translate) => ({
+  description: t('start-timer.description'),
   param: z.object({
-    duration: z.number().min(1).describe('Temps de la session en minutes'),
+    duration: z.number().min(1).describe(t('start-timer.duration-param')),
   }),
   execute(session, { duration }) {
     session.startTimer(duration);
 
-    return `Chronomètre démarré : ${duration} minutes.`;
+    return t('start-timer.result', { duration });
   },
-});
+}));

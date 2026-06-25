@@ -4,6 +4,7 @@ import { Timer } from './timer';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
+import type { Language } from './i18n';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
@@ -47,6 +48,7 @@ export type DiscussionPath = {
 type SessionDomainEvent<Type extends string, Payload = {}> = DomainEvent<'Session', Type> & Payload;
 
 export type SessionEvent =
+  | SessionDomainEvent<'SessionCreated', { model: string; language: Language }>
   | SessionDomainEvent<'ModelChanged', { model: string }>
   | SessionDomainEvent<'PlanInitialized', { subject: string; topics: Topic[] }>
   | SessionDomainEvent<'SubjectChanged', { subject: string }>
@@ -77,6 +79,12 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get model(): string {
     return this._model;
+  }
+
+  private _language: Language = 'en';
+
+  get language(): Language {
+    return this._language;
   }
 
   private _subject: string = '';
@@ -115,8 +123,12 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._events;
   }
 
-  constructor(generator: Generator, clock: Clock) {
-    super(generator, clock);
+  static create(generator: Generator, clock: Clock, params: { model: string; language: Language }) {
+    const session = new Session(generator, clock);
+
+    session.emit('SessionCreated', params);
+
+    return session;
   }
 
   static replay(generator: Generator, clock: Clock, id: string, events: SessionEvent[]) {
@@ -133,6 +145,11 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   protected apply(event: SessionEvent) {
     const handle: Partial<{ [Event in SessionEvent as Event['type']]: (event: Event) => void }> = {
+      SessionCreated: ({ model, language }) => {
+        this._model = model;
+        this._language = language;
+      },
+
       ModelChanged: ({ model }) => {
         this._model = model;
       },

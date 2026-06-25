@@ -8,9 +8,12 @@ import { StubGenerator } from '../adapters/generator';
 import { StubUiNotifier } from '../adapters/logger';
 import { container } from '../di';
 import { Assistant } from './assistant';
+import { createTranslate } from './i18n';
 import { Session, type GetSessionEvent, type SessionEvent } from './session';
 
 import type { DomainEvent } from '../aggregate-root';
+
+const t = createTranslate('fr');
 
 void describe('Assistant', () => {
   let generator: StubGenerator;
@@ -115,7 +118,7 @@ void describe('Assistant', () => {
           id: 'id',
           date: clock.date,
           error: null,
-          result: 'Chronomètre démarré : 42 minutes.',
+          result: 'Timer started: 42 minutes.',
         },
       }),
     ]);
@@ -157,7 +160,7 @@ void describe('Assistant', () => {
 
     clock.advance({ minutes: 5 });
 
-    let result = Assistant.formatSessionInfo(clock, session);
+    let result = Assistant.formatSessionInfo(clock, session, t);
 
     assert(result.includes('Temps de la session : 60 minutes'));
     assert(result.includes('Temps écoulé : 5 minutes'));
@@ -165,14 +168,14 @@ void describe('Assistant', () => {
 
     session.pauseTimer();
 
-    result = Assistant.formatSessionInfo(clock, session);
+    result = Assistant.formatSessionInfo(clock, session, t);
 
     assert(result.includes('Chronomètre en pause'));
 
     session.resumeTimer();
     clock.advance({ minutes: 60 });
 
-    result = Assistant.formatSessionInfo(clock, session);
+    result = Assistant.formatSessionInfo(clock, session, t);
 
     assert(result.includes('Temps de la session : 60 minutes'));
     assert(result.includes('Temps écoulé : 65 minutes'));

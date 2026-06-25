@@ -2,12 +2,14 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const pauseTimer = createTool({
-  description: 'Met en pause le chronomètre',
+import type { Translate } from '../i18n';
+
+export const pauseTimer = createTool((t: Translate) => ({
+  description: t('pause-timer.description'),
   param: z.object({}),
   execute(session) {
     session.pauseTimer();
 
-    return `Chronomètre mis en pause.`;
+    return t('pause-timer.result');
   },
-});
+}));

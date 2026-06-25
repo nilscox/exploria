@@ -2,8 +2,10 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const saveNote = createTool({
-  description: "Sauvegarde un élément important de la conversation (point clé, citation, insight de l'utilisateur)",
+import type { Translate } from '../i18n';
+
+export const saveNote = createTool((t: Translate) => ({
+  description: t('save-note.description'),
   param: z.object({
     note: z.string().min(1),
   }),
@@ -12,6 +14,6 @@ export const saveNote = createTool({
       content: note,
     });
 
-    return `Note sauvegardée : "${note}"`;
+    return t('save-note.result', { note });
   },
-});
+}));

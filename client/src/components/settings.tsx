@@ -1,9 +1,10 @@
+import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { debug, useSetDebug } from 'src/debug-context';
-import { setLanguage, type Language } from 'src/i18n/i18n';
+import { setLanguage } from 'src/i18n/i18n';
 
 import { Button } from './button';
 import { Checkbox } from './checkbox';
@@ -43,7 +44,7 @@ export function LanguageSelector({ dialog }: { dialog: HTMLElement | null }) {
   const { i18n } = useLingui();
 
   const handleChange = (lang: string) => {
-    setLanguage(i18n, lang as Language).catch(console.error);
+    setLanguage(i18n, lang as Shared.Language).catch(console.error);
   };
 
   return (

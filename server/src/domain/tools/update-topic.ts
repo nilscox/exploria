@@ -3,8 +3,10 @@ import z from 'zod';
 import { hasId } from '../../utils';
 import { createTool } from './create-tool';
 
-export const updateTopic = createTool({
-  description: "Met à jour le statut d'un sujet du plan",
+import type { Translate } from '../i18n';
+
+export const updateTopic = createTool((t: Translate) => ({
+  description: t('update-topic.description'),
   param: z.object({
     id: z.string(),
     label: z.string().optional(),
@@ -18,6 +20,6 @@ export const updateTopic = createTool({
 
     const topic = session.topics.find(hasId(id));
 
-    return `Sujet "${topic?.label}" mis à jour.`;
+    return t('update-topic.result', { label: topic?.label });
   },
-});
+}));

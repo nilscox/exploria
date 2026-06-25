@@ -1,10 +1,13 @@
 import type * as assistant from './domain/assistant';
+import type { Language as DomainLanguage } from './domain/i18n';
 import type * as session from './domain/session';
 
 export namespace Shared {
   export type AssistantUiEvent = assistant.AssistantUiEvent;
 
   export type SessionUiEvent = { type: 'SessionChanged'; sessionId: string; changes: Partial<Session> };
+
+  export type Language = DomainLanguage;
 
   export type TopicStatus = session.TopicStatus;
   export type Topic = session.Topic;
@@ -36,6 +39,7 @@ export namespace Shared {
   export type Session = {
     id: string;
     model: string;
+    language: Language;
     subject: string;
     topics: Topic[];
     notes: Note[];

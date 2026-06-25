@@ -2,8 +2,10 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const addTopic = createTool({
-  description: "Met à jour le statut d'un sujet du plan",
+import type { Translate } from '../i18n';
+
+export const addTopic = createTool((t: Translate) => ({
+  description: t('add-topic.description'),
   param: z.object({
     label: z.string().min(1).max(64),
   }),
@@ -12,6 +14,6 @@ export const addTopic = createTool({
       label,
     });
 
-    return `Sujet ajouté : ${label}.`;
+    return t('add-topic.result', { label });
   },
-});
+}));

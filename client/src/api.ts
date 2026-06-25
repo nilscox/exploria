@@ -71,10 +71,10 @@ const sessions = {
     };
   },
 
-  async create({ model, demo }: { model: string; demo?: boolean }): Promise<string> {
+  async create({ model, language, demo }: { model: string; language: string; demo?: boolean }): Promise<string> {
     const res = await fetchApi('/session', {
       method: 'POST',
-      body: { model, demo },
+      body: { model, language, demo },
     });
 
     return res.text();

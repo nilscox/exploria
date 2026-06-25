@@ -1,7 +1,8 @@
 import type { AiClientMessage } from '../../adapters/ai-client';
+import type { Translate } from '../i18n';
 import type { GetSessionEvent, SessionEvent } from '../session';
 
-export function toChatMessages(events: SessionEvent[]): AiClientMessage[] {
+export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMessage[] {
   return events
     .filter(
       (event) =>
@@ -9,11 +10,12 @@ export function toChatMessages(events: SessionEvent[]): AiClientMessage[] {
         event.type === 'ToolCallResultAdded' ||
         event.type === 'DiscussionPathSelected',
     )
-    .map(toChatMessage);
+    .map((event) => toChatMessage(event, t));
 }
 
 function toChatMessage(
   event: GetSessionEvent<'MessageAdded' | 'ToolCallResultAdded' | 'DiscussionPathSelected'>,
+  t: Translate,
 ): AiClientMessage {
   if (event.type === 'ToolCallResultAdded') {
     const { result } = event;
@@ -28,7 +30,7 @@ function toChatMessage(
   if (event.type === 'DiscussionPathSelected') {
     return {
       role: 'system',
-      content: `Chemin de discussion sélectionné: "${event.label}"`,
+      content: t('chat.discussion-path-selected', { label: event.label }),
     };
   }
 

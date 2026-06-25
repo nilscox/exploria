@@ -3,10 +3,13 @@ import { beforeEach, describe, it } from 'node:test';
 
 import { StubClock } from '../../adapters/clock';
 import { StubGenerator } from '../../adapters/generator';
+import { createTranslate } from '../i18n';
 import { Session } from '../session';
 import { toChatMessages } from './chat-context';
 
 import type { AiClientMessage } from '../../adapters/ai-client';
+
+const t = createTranslate('fr');
 
 void describe('toChatMessages', () => {
   let session: Session;
@@ -24,7 +27,7 @@ void describe('toChatMessages', () => {
     });
     session.addToolCallResult('call-1', { result: 'Chronomètre démarré' });
 
-    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()), [
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
       { role: 'system', content: 'instructions' },
       { role: 'user', content: 'Hello' },
       {
@@ -43,7 +46,7 @@ void describe('toChatMessages', () => {
     });
     session.addToolCallResult('call-1', { error: 'boom' });
 
-    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()).at(-1), {
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t).at(-1), {
       role: 'tool',
       toolCallId: 'call-1',
       content: { error: 'boom' },
@@ -54,7 +57,7 @@ void describe('toChatMessages', () => {
     session.addTopic({ label: 'Topic' });
     session.startTimer(60);
 
-    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()), []);
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
   });
 
   void it('projects discussionPathSelected to system messages', () => {
@@ -63,7 +66,7 @@ void describe('toChatMessages', () => {
 
     session.selectDiscussionPath(pathId);
 
-    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents()).at(-1), {
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t).at(-1), {
       role: 'system',
       content: 'Chemin de discussion sélectionné: "Path A"',
     } satisfies AiClientMessage);

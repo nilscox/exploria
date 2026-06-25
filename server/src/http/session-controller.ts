@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
+import { languages } from '../domain/i18n';
 import { toSessionView } from '../domain/projections/session-view';
 import { Session } from '../domain/session';
 import { defined } from '../utils';
@@ -15,6 +16,7 @@ import type { Generator } from '../adapters/generator';
 import type { SessionRepository } from '../database/session-repository';
 import type { Assistant } from '../domain/assistant';
 import type { EventBus } from '../event-bus';
+import type { Shared } from '../shared';
 
 export class SessionController {
   private readonly generator: Generator;
@@ -67,14 +69,15 @@ export class SessionController {
     });
 
     this.router.post('/', async (req, res) => {
-      const { model, demo } = z
+      const { model, language, demo } = z
         .object({
           model: z.string().min(1),
+          language: z.enum(languages).default('en'),
           demo: z.boolean().optional(),
         })
         .parse(req.body);
 
-      res.status(201).send(await this.createSession({ model, demo }));
+      res.status(201).send(await this.createSession({ model, language, demo }));
     });
 
     this.router.get('/:id', async (req, res) => {
@@ -164,11 +167,10 @@ export class SessionController {
     ] as const;
   }
 
-  private async createSession({ model, demo }: { model: string; demo?: boolean }) {
-    const session = new Session(this.generator, this.clock);
-    const instructions = await fs.readFile('instructions.md').then(String);
+  private async createSession({ model, language, demo }: { model: string; language: Shared.Language; demo?: boolean }) {
+    const session = Session.create(this.generator, this.clock, { model, language });
+    const instructions = await fs.readFile(`instructions.${language}.md`).then(String);
 
-    session.setModel(model);
     session.addMessage('system', instructions);
 
     await this.sessionRepository.insert(session);

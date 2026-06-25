@@ -2,12 +2,14 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const resumeTimer = createTool({
-  description: 'Redémarre le chronomètre',
+import type { Translate } from '../i18n';
+
+export const resumeTimer = createTool((t: Translate) => ({
+  description: t('resume-timer.description'),
   param: z.object({}),
   execute(session) {
     session.resumeTimer();
 
-    return `Chronomètre redémarré.`;
+    return t('resume-timer.result');
   },
-});
+}));

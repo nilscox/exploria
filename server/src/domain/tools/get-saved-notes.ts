@@ -2,14 +2,18 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const getSavedNotes = createTool({
-  description: 'Récupère toutes les notes sauvegardées au cours de la session',
+import type { Translate } from '../i18n';
+
+export const getSavedNotes = createTool((t: Translate) => ({
+  description: t('get-saved-notes.description'),
   param: z.object({}),
   execute(session) {
     if (session.notes.length === 0) {
-      return 'Aucune note sauvegardée.';
+      return t('get-saved-notes.empty');
     }
 
-    return `Notes sauvegardées :\n${session.notes.map((note, i) => `${i + 1}. ${note.content}`).join('\n')}`;
+    const list = session.notes.map((note, i) => `${i + 1}. ${note.content}`).join('\n');
+
+    return `${t('get-saved-notes.heading')}\n${list}`;
   },
-});
+}));

@@ -2,12 +2,14 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const clearTimer = createTool({
-  description: 'Annule le chronomètre',
+import type { Translate } from '../i18n';
+
+export const clearTimer = createTool((t: Translate) => ({
+  description: t('clear-timer.description'),
   param: z.object({}),
   execute(session) {
     session.clearTimer();
 
-    return 'Chronomètre annulé.';
+    return t('clear-timer.result');
   },
-});
+}));

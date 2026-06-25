@@ -6,6 +6,7 @@ import type { Note, SessionEvent, Topic } from '../session';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let model = '';
+  let language: Shared.Language = 'en';
   let subject = '';
   let topics: Topic[] = [];
   let notes: Note[] = [];
@@ -13,6 +14,11 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
 
   for (const event of events) {
     switch (event.type) {
+      case 'SessionCreated':
+        model = event.model;
+        language = event.language;
+        break;
+
       case 'ModelChanged':
         model = event.model;
         break;
@@ -91,6 +97,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   return {
     id,
     model,
+    language,
     subject,
     topics,
     notes,

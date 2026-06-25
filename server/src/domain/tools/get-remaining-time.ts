@@ -4,10 +4,12 @@ import { container } from '../../di';
 import { Assistant } from '../assistant';
 import { createTool } from './create-tool';
 
-export const getRemainingTime = createTool({
-  description: 'Récupérer le temps restant sur le chronomètre',
+import type { Translate } from '../i18n';
+
+export const getRemainingTime = createTool((t: Translate) => ({
+  description: t('get-remaining-time.description'),
   param: z.object({}),
   execute(session) {
-    return Assistant.formatTimerInfo(container.resolve('clock'), session);
+    return Assistant.formatTimerInfo(container.resolve('clock'), session, t);
   },
-});
+}));

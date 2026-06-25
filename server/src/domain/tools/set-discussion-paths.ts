@@ -2,15 +2,16 @@ import z from 'zod';
 
 import { createTool } from './create-tool';
 
-export const setDiscussionPaths = createTool({
-  description:
-    "Propose à l'utilisateur plusieurs chemins possibles pour la suite de la discussion (approfondir, changer d'angle, passer à la suite, etc.)",
+import type { Translate } from '../i18n';
+
+export const setDiscussionPaths = createTool((t: Translate) => ({
+  description: t('set-discussion-paths.description'),
   param: z.object({
     paths: z
       .array(
         z.object({
-          label: z.string().min(1).max(64).describe('Intitulé court du chemin'),
-          description: z.string().max(128).optional().describe('Description optionnelle en une phrase'),
+          label: z.string().min(1).max(64).describe(t('set-discussion-paths.label-param')),
+          description: z.string().max(128).optional().describe(t('set-discussion-paths.description-param')),
         }),
       )
       .min(2)
@@ -19,6 +20,6 @@ export const setDiscussionPaths = createTool({
   execute(session, { paths }) {
     session.setDiscussionPaths(paths);
 
-    return 'Chemins de discussion proposés.';
+    return t('set-discussion-paths.result');
   },
-});
+}));
