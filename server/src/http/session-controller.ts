@@ -165,15 +165,16 @@ export class SessionController {
   }
 
   private async createSession({ model, demo }: { model: string; demo?: boolean }) {
-    const session = new Session(this.generator, this.clock, this.uiNotifier);
+    const session = new Session(this.generator, this.clock);
     const instructions = await fs.readFile('instructions.md').then(String);
 
     session.setModel(model);
     session.addMessage('system', instructions);
 
     await this.sessionRepository.insert(session);
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
 
     if (demo) {
       void this.generateDemo(session);
@@ -185,8 +186,9 @@ export class SessionController {
   private async generateDemo(session: Session) {
     try {
       await this.assistant.generateDemo(session);
-      await this.sessionRepository.save(session);
-      this.events.emit(...session.pullDomainEvents());
+      const committed = await this.sessionRepository.save(session);
+
+      this.events.emit(...committed);
     } catch (error) {
       console.error(error);
     }
@@ -207,8 +209,9 @@ export class SessionController {
 
     session.setModel(model);
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private async addTopic(label: string) {
@@ -216,8 +219,9 @@ export class SessionController {
 
     session.addTopic({ label });
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private async postMessage(message: string) {
@@ -225,8 +229,9 @@ export class SessionController {
 
     await this.assistant.run(session, message);
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private async selectDiscussionPath(pathId: string) {
@@ -235,8 +240,9 @@ export class SessionController {
     session.selectDiscussionPath(pathId);
     await this.assistant.run(session);
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private stream(res: OutgoingMessage) {
@@ -256,8 +262,9 @@ export class SessionController {
 
     session.startTimer(duration);
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private async clearTimer() {
@@ -265,8 +272,9 @@ export class SessionController {
 
     session.clearTimer();
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private async pauseTimer() {
@@ -274,8 +282,9 @@ export class SessionController {
 
     session.pauseTimer();
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 
   private async resumeTimer() {
@@ -283,7 +292,8 @@ export class SessionController {
 
     session.resumeTimer();
 
-    await this.sessionRepository.save(session);
-    this.events.emit(...session.pullDomainEvents());
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 }

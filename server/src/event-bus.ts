@@ -16,10 +16,16 @@ export class EventBus<BusEvent extends DomainEvent = DomainEvent> {
   }
 
   emit(...events: BusEvent[]) {
-    events.forEach((event) => {
+    if (events.length === 0) {
+      return;
+    }
+
+    for (const event of events) {
       this.logger.log('[EVT]', event.aggregateType, event.aggregateId, event.type, event);
       this.emitter.emit(event.type, event);
-    });
+    }
+
+    this.emitter.emit('$batch', events);
   }
 
   addListener<Type extends BusEvent['type']>(type: Type, listener: EventHandler<Extract<BusEvent, { type: Type }>>) {
@@ -27,6 +33,14 @@ export class EventBus<BusEvent extends DomainEvent = DomainEvent> {
 
     return () => {
       this.emitter.removeListener(type, listener);
+    };
+  }
+
+  subscribe(listener: (events: BusEvent[]) => void): () => void {
+    this.emitter.addListener('$batch', listener as (events: BusEvent[]) => void);
+
+    return () => {
+      this.emitter.removeListener('$batch', listener as (events: BusEvent[]) => void);
     };
   }
 }

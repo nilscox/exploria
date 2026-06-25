@@ -22,6 +22,8 @@ export abstract class AggregateRoot<Event extends DomainEvent> {
     this._id = generator.id();
   }
 
+  protected abstract apply(event: Event): void;
+
   protected emit<Type extends Event['type']>(
     type: Type,
     payload: Omit<Extract<Event, { type: Type }>, 'occurredAt' | 'aggregateType' | 'aggregateId' | 'type'>,
@@ -35,6 +37,7 @@ export abstract class AggregateRoot<Event extends DomainEvent> {
     } as Extract<Event, { type: Type }>;
 
     this._domainEvents.push(event);
+    this.apply(event);
 
     return event;
   }

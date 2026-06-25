@@ -5,19 +5,16 @@ import { domainEvents, sessions } from './schema';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
-import type { UiNotifier } from '../domain/ui-notifier';
 import type { Database } from './database';
 import type { DomainEventSelect } from './model';
 
 export class SessionRepository {
   private generator: Generator;
   private clock: Clock;
-  private uiNotifier: UiNotifier;
   private db: Database;
 
-  constructor(generator: Generator, clock: Clock, uiNotifier: UiNotifier, database: Database) {
+  constructor(generator: Generator, clock: Clock, database: Database) {
     this.clock = clock;
-    this.uiNotifier = uiNotifier;
     this.generator = generator;
     this.db = database;
   }
@@ -30,23 +27,23 @@ export class SessionRepository {
     });
   }
 
-  async save(session: Session) {
+  async save(session: Session): Promise<SessionEvent[]> {
     const newEvents = session.peekDomainEvents();
 
     if (newEvents.length === 0) {
-      return;
+      return [];
     }
 
-    await this.db
-      .update(sessions)
-      .set({ model: session.model, subject: session.subject })
-      .where(eq(sessions.id, session.id));
+    await this.db.transaction(async (tx) => {
+      await tx
+        .update(sessions)
+        .set({ model: session.model, subject: session.subject })
+        .where(eq(sessions.id, session.id));
 
-    await Promise.all(
-      newEvents.map(async (event) => {
+      for (const event of newEvents) {
         const { aggregateId, aggregateType, occurredAt, type, ...payload } = event;
 
-        await this.db.insert(domainEvents).values({
+        await tx.insert(domainEvents).values({
           id: this.generator.id(),
           aggregateId,
           aggregateType,
@@ -54,8 +51,12 @@ export class SessionRepository {
           type,
           payload,
         });
-      }),
-    );
+      }
+    });
+
+    session.pullDomainEvents();
+
+    return newEvents;
   }
 
   async find(id: string) {
@@ -70,7 +71,7 @@ export class SessionRepository {
       orderBy: { occurredAt: 'asc' },
     });
 
-    return Session.replay(this.generator, this.clock, this.uiNotifier, id, dbEvents.map(SessionRepository.mapEvent));
+    return Session.replay(this.generator, this.clock, id, dbEvents.map(SessionRepository.mapEvent));
   }
 
   async findMany({ offset, limit }: { offset: number; limit: number }) {

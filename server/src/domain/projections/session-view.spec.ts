@@ -3,7 +3,6 @@ import { beforeEach, describe, it } from 'node:test';
 
 import { StubClock } from '../../adapters/clock';
 import { StubGenerator } from '../../adapters/generator';
-import { StubUiNotifier } from '../../adapters/logger';
 import { Session } from '../session';
 import { toSessionView, toTimeline } from './session-view';
 
@@ -15,7 +14,7 @@ void describe('toSessionView', () => {
 
   beforeEach(() => {
     clock = new StubClock();
-    session = new Session(new StubGenerator(), clock, new StubUiNotifier());
+    session = new Session(new StubGenerator(), clock);
   });
 
   void it('reconstructs model and subject', () => {
@@ -64,7 +63,7 @@ void describe('toTimeline', () => {
   const timeline = () => toTimeline(session.peekDomainEvents());
 
   beforeEach(() => {
-    session = new Session(new StubGenerator(), new StubClock(), new StubUiNotifier());
+    session = new Session(new StubGenerator(), new StubClock());
   });
 
   void it('interleaves messages and activity notifications in order', () => {

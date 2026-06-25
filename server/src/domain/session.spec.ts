@@ -4,20 +4,17 @@ import { beforeEach, describe, it } from 'node:test';
 
 import { StubClock } from '../adapters/clock';
 import { StubGenerator } from '../adapters/generator';
-import { StubUiNotifier } from '../adapters/logger';
 import { Session, type SessionEvent } from './session';
 
 void describe('Session', () => {
   let generator: StubGenerator;
   let clock: StubClock;
-  let uiNotifier: StubUiNotifier;
   let session: Session;
 
   beforeEach(() => {
     generator = new StubGenerator();
     clock = new StubClock();
-    uiNotifier = new StubUiNotifier();
-    session = new Session(generator, clock, uiNotifier);
+    session = new Session(generator, clock);
   });
 
   const expectEvent = <Type extends SessionEvent['type']>(
@@ -256,11 +253,11 @@ void describe('Session', () => {
 
   void describe('replay', () => {
     void it('reconstructs model and subject from events', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.setModel('gpt-4o');
       source.setSubject('My subject');
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.strictEqual(replayed.id, source.id);
       assert.strictEqual(replayed.model, 'gpt-4o');
@@ -268,7 +265,7 @@ void describe('Session', () => {
     });
 
     void it('reconstructs topics from events', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.addTopic({ label: 'Topic A' });
       source.addTopic({ label: 'Topic B' });
 
@@ -279,13 +276,13 @@ void describe('Session', () => {
       source.updateTopic(topicBId, { label: 'Topic B updated' });
       source.removeTopic(topicAId);
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.deepStrictEqual(replayed.topics, source.topics);
     });
 
     void it('reconstructs notes from events', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.addNote({ content: 'Note A' });
       source.addNote({ content: 'Note B' });
 
@@ -295,62 +292,62 @@ void describe('Session', () => {
       source.updateNote(noteAId, { content: 'Note A updated' });
       source.removeNote(noteBId);
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.deepStrictEqual(replayed.notes, source.notes);
     });
 
     void it('reconstructs timer from events', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.startTimer(60);
       clock.advance({ minutes: 5 });
       source.pauseTimer();
       clock.advance({ minutes: 2 });
       source.resumeTimer();
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.deepStrictEqual(replayed.timer, source.timer);
     });
 
     void it('reconstructs timer cleared', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.startTimer(60);
       source.clearTimer();
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.strictEqual(replayed.timer, null);
     });
 
     void it('reconstructs discussion paths from events', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.deepStrictEqual(replayed.discussionPaths, source.discussionPaths);
     });
 
     void it('clears discussion paths after selection', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.setDiscussionPaths([{ label: 'Path A' }]);
 
       const { id: pathId } = source.discussionPaths[0]!;
 
       source.selectDiscussionPath(pathId);
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.deepStrictEqual(replayed.discussionPaths, []);
     });
 
     void it('populates session.events with replayed events', () => {
-      const source = new Session(new StubGenerator(), clock, uiNotifier);
+      const source = new Session(new StubGenerator(), clock);
       source.addMessage('user', 'hello');
       source.addMessage('assistant', 'world', { model: 'gpt-4o', toolCalls: [] });
 
-      const replayed = Session.replay(generator, clock, uiNotifier, source.id, source.peekDomainEvents());
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.strictEqual(replayed.events.length, 2);
       assert.strictEqual(replayed.events[0]?.type, 'MessageAdded');

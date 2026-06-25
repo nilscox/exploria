@@ -151,7 +151,7 @@ void describe('Assistant', () => {
   });
 
   void it('formats the session info', async () => {
-    const session = new Session(generator, clock, uiNotifier);
+    const session = new Session(generator, clock);
 
     session.startTimer(60);
 

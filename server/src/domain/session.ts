@@ -1,12 +1,10 @@
 import { AggregateRoot, type DomainEvent } from '../aggregate-root';
 import { assert, hasId } from '../utils';
-import { affectsTimeline, toTimeline } from './projections/session-view';
 import { Timer } from './timer';
 
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
 import type { Shared } from '../shared';
-import type { UiEvent, UiNotifier } from './ui-notifier';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
@@ -71,11 +69,9 @@ export type SessionEvent =
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
-export type SessionUiEvent = UiEvent<'SessionChanged', { sessionId: string; changes: Partial<Shared.Session> }>;
+export type SessionUiEvent = { type: 'SessionChanged'; sessionId: string; changes: Partial<Shared.Session> };
 
 export class Session extends AggregateRoot<SessionEvent> {
-  private readonly uiNotifier: UiNotifier<SessionUiEvent>;
-
   get id(): string {
     return this._id;
   }
@@ -122,13 +118,12 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._events;
   }
 
-  constructor(generator: Generator, clock: Clock, uiNotifier: UiNotifier) {
+  constructor(generator: Generator, clock: Clock) {
     super(generator, clock);
-    this.uiNotifier = uiNotifier;
   }
 
-  static replay(generator: Generator, clock: Clock, uiNotifier: UiNotifier, id: string, events: SessionEvent[]) {
-    const session = new Session(generator, clock, uiNotifier);
+  static replay(generator: Generator, clock: Clock, id: string, events: SessionEvent[]) {
+    const session = new Session(generator, clock);
 
     session._id = id;
 
@@ -139,7 +134,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     return session;
   }
 
-  private apply(event: SessionEvent) {
+  protected apply(event: SessionEvent) {
     const handle: Partial<{ [Event in SessionEvent as Event['type']]: (event: Event) => void }> = {
       ModelChanged: ({ model }) => {
         this._model = model;
@@ -224,19 +219,16 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   setModel(model: string) {
     this.emit('ModelChanged', { model });
-    this.emitUiEvent('SessionChanged', { changes: { model: this.model } });
   }
 
   initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
     const withIds: Topic[] = topics.map((topic) => ({ ...topic, id: this.generator.id(), status: 'pending' }));
 
     this.emit('PlanInitialized', { subject, topics: withIds });
-    this.emitUiEvent('SessionChanged', { changes: { subject: this.subject, topics: this.topics } });
   }
 
   setSubject(subject: string) {
     this.emit('SubjectChanged', { subject });
-    this.emitUiEvent('SessionChanged', { changes: { subject: this.subject } });
   }
 
   addTopic({ label }: Omit<Topic, 'id' | 'status'>) {
@@ -247,7 +239,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     };
 
     this.emit('TopicAdded', { topic });
-    this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
   }
 
   removeTopic(topicId: string) {
@@ -256,7 +247,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
 
     this.emit('TopicRemoved', { topicId });
-    this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
   }
 
   updateTopic(topicId: string, { label, status }: Partial<Omit<Topic, 'id'>>) {
@@ -271,10 +261,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     if (status) {
       this.emit('TopicStatusChanged', { topicId, status });
     }
-
-    if (label || status) {
-      this.emitUiEvent('SessionChanged', { changes: { topics: this.topics } });
-    }
   }
 
   addNote({ content }: Omit<Note, 'id'>) {
@@ -284,7 +270,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     };
 
     this.emit('NoteAdded', { note });
-    this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
   }
 
   removeNote(noteId: string) {
@@ -293,7 +278,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
 
     this.emit('NoteRemoved', { noteId });
-    this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
   }
 
   updateNote(noteId: string, { content }: Partial<Omit<Note, 'id'>>) {
@@ -303,7 +287,6 @@ export class Session extends AggregateRoot<SessionEvent> {
 
     if (content) {
       this.emit('NoteContentChanged', { noteId, content });
-      this.emitUiEvent('SessionChanged', { changes: { notes: this.notes } });
     }
   }
 
@@ -311,28 +294,24 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
 
     this.emit('TimerStarted', { duration });
-    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   clearTimer() {
     assert(this._timer, new Error("Le chronomètre n'est pas lancé"));
 
     this.emit('TimerCleared', {});
-    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   pauseTimer() {
     assert(this._timer);
 
     this.emit('TimerPaused', {});
-    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   resumeTimer() {
     assert(this._timer?.isPaused);
 
     this.emit('TimerResumed', {});
-    this.emitUiEvent('SessionChanged', { changes: { timer: this.timer } });
   }
 
   addMessage(role: Exclude<Role, 'assistant'>, content: string): void;
@@ -380,30 +359,5 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(path, new Error(`Cannot find discussion path "${pathId}"`));
 
     this.emit('DiscussionPathSelected', { pathId, label: path.label });
-  }
-
-  protected override emit<Type extends SessionEvent['type']>(
-    type: Type,
-    payload: Omit<Extract<SessionEvent, { type: Type }>, 'occurredAt' | 'aggregateType' | 'aggregateId' | 'type'>,
-  ) {
-    const event = super.emit(type, payload);
-
-    this.apply(event);
-
-    if (affectsTimeline(type)) {
-      this.emitUiEvent('SessionChanged', { changes: { timeline: toTimeline(this._events) } });
-    }
-
-    return event;
-  }
-
-  private emitUiEvent<Type extends SessionUiEvent['type']>(
-    type: Type,
-    event: Omit<Extract<SessionUiEvent, { type: Type }>, 'sessionId' | 'type'>,
-  ) {
-    this.uiNotifier.notify(this._id, { sessionId: this._id, type, ...event } as Extract<
-      SessionUiEvent,
-      { type: Type }
-    >);
   }
 }

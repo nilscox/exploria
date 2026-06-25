@@ -3,7 +3,6 @@ import { beforeEach, describe, it } from 'node:test';
 
 import { StubClock } from '../../adapters/clock';
 import { StubGenerator } from '../../adapters/generator';
-import { StubUiNotifier } from '../../adapters/logger';
 import { Session } from '../session';
 import { toChatMessages } from './chat-context';
 
@@ -13,7 +12,7 @@ void describe('toChatMessages', () => {
   let session: Session;
 
   beforeEach(() => {
-    session = new Session(new StubGenerator(), new StubClock(), new StubUiNotifier());
+    session = new Session(new StubGenerator(), new StubClock());
   });
 
   void it('projects message and tool-call events to chat messages', () => {

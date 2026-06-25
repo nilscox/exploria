@@ -10,6 +10,7 @@ import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
 import { Server } from './http/server';
 import { SessionController } from './http/session-controller';
+import { SessionSseSubscriber } from './http/session-sse-subscriber';
 import { SseUiNotifier } from './http/sse';
 
 import type { Clock } from './adapters/clock';
@@ -37,6 +38,7 @@ export const container = createContainer({
   database: asFunction(createDatabase),
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
+  sessionSseSubscriber: asClass(SessionSseSubscriber).singleton(),
   aiClient: asClass<AiClient>(OpenAiClient),
   assistant: asFunction(assistantFactory),
   server: asClass(Server),
