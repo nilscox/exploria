@@ -1,6 +1,3 @@
-import { Trans } from '@lingui/react/macro';
-import { queryOptions, useQuery } from '@tanstack/react-query';
-
 import { Select, SelectItem } from 'src/components/select';
 
 export function ModelSelector({
@@ -12,21 +9,13 @@ export function ModelSelector({
   value?: string;
   onChange?: (value: string) => void;
 }) {
-  const modelsQuery = useQuery(listModelsOptions());
-
-  if (modelsQuery.isError) {
-    return <Trans>Error while loading models: {modelsQuery.error.message}</Trans>;
-  }
-
   return (
     <Select name={name} value={value} onValueChange={onChange} renderValue={() => value}>
-      {modelsQuery.data?.map((model) => (
-        <SelectItem key={model} value={model}>
+      {models.map(({ id, provider }) => (
+        <SelectItem key={id} value={id}>
           <div className="col gap-0.5">
-            <span>{model}</span>
-            <span className="text-dim text-xs">
-              {providers.find(({ re }) => re.exec(model))?.label ?? <Trans>Unknown provider</Trans>}
-            </span>
+            <span>{id}</span>
+            <span className="text-dim text-xs">{provider}</span>
           </div>
         </SelectItem>
       ))}
@@ -34,44 +23,27 @@ export function ModelSelector({
   );
 }
 
-function listModelsOptions() {
-  return queryOptions({
-    queryKey: ['listModels'],
-    async queryFn(): Promise<string[]> {
-      const mock = false;
-
-      if (mock) {
-        return ['gpt-5', 'mistral-small-3.2-24b-instruct'];
-      }
-
-      const res = await fetch('https://api.mammouth.ai/public/models');
-
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
-
-      const { data }: { data: Array<{ id: string }> } = await res.json();
-
-      return data.map(({ id }) => id);
-    },
-  });
-}
-
-// Thanks!
-// https://codeberg.org/mammouth-ai/mammouth-model-explorer/src/branch/pages/index.html#L378
-const providers = [
-  { label: 'Anthropic', re: /^claude|^mythos/i },
-  { label: 'Google', re: /^gemini|^palm|^bison|^gecko/i },
-  { label: 'Moonshot AI', re: /^kimi/i },
-  { label: 'Mistral', re: /stral/i },
-  { label: 'xAI', re: /^grok/i },
-  { label: 'Meta', re: /^llama|^meta-llama|^muse|^avocado/i },
-  { label: 'Z.ai', re: /^glm|^chatglm/i },
-  { label: 'Alibaba', re: /^qwen/i },
-  { label: 'DeepSeek', re: /^deepseek/i },
-  { label: 'Cohere', re: /^command|^cohere/i },
-  { label: 'NVIDIA', re: /^nemotron|^nvidia/i },
-  { label: '01.AI', re: /^yi-/i },
-  { label: 'Perplexity', re: /^pplx|^sonar/i },
-  { label: 'OpenAI', re: /^(gpt|o\d|chatgpt|dall-e|whisper|tts|text-embedding|babbage|davinci)/i },
+const models = [
+  { id: 'claude-opus-4-8', provider: 'Anthropic' },
+  { id: 'claude-opus-4-7', provider: 'Anthropic' },
+  { id: 'claude-sonnet-4-6', provider: 'Anthropic' },
+  { id: 'claude-sonnet-4-5', provider: 'Anthropic' },
+  { id: 'claude-haiku-4-5', provider: 'Anthropic' },
+  { id: 'gpt-5.5', provider: 'OpenAI' },
+  { id: 'gpt-5.4', provider: 'OpenAI' },
+  { id: 'gpt-5.2', provider: 'OpenAI' },
+  { id: 'gpt-5.1', provider: 'OpenAI' },
+  { id: 'gpt-4.1', provider: 'OpenAI' },
+  { id: 'gpt-4o', provider: 'OpenAI' },
+  { id: 'gemini-2.5-pro', provider: 'Google' },
+  { id: 'gemini-3.1-pro-preview', provider: 'Google' },
+  { id: 'gemini-3.5-flash', provider: 'Google' },
+  { id: 'gemini-3-flash-preview', provider: 'Google' },
+  { id: 'gemini-2.5-flash', provider: 'Google' },
+  { id: 'grok-4.3', provider: 'xAI' },
+  { id: 'deepseek-v4-pro', provider: 'DeepSeek' },
+  { id: 'deepseek-v4-flash', provider: 'DeepSeek' },
+  { id: 'mistral-large-3', provider: 'Mistral' },
+  { id: 'qwen3.7-max', provider: 'Alibaba' },
+  { id: 'qwen3.5-397b-a17b', provider: 'Alibaba' },
 ];
