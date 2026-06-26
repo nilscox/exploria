@@ -54,6 +54,13 @@ export class MustacheI18n implements I18n {
     }) as Translate;
   }
 
+  date(language: Language, date: Date) {
+    return [
+      new Intl.DateTimeFormat(language, { dateStyle: 'full' }).format(date),
+      new Intl.DateTimeFormat(language, { timeStyle: 'full' }).format(date),
+    ].join(', ');
+  }
+
   render<T extends Template>(lang: Language, template: T, values: Templates[T]): string {
     const content = this.templates[template][lang];
 
@@ -87,6 +94,7 @@ export class MustacheI18n implements I18n {
       notes: session.notes,
       posture: session.posture,
       auto: session.postureMode === 'auto',
+      date: this.date(lang, new Date()),
     };
   };
 

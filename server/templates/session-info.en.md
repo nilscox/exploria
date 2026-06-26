@@ -46,3 +46,7 @@ note: {{content}}
 
 {{/notes}}
 {{/hasNotes}}
+
+# Date
+
+Date actuelle : {{date}}
