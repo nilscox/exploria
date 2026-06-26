@@ -11,10 +11,18 @@ import { createTestDatabase, ExpressFetcher, waitFor, type TestDatabase } from '
 import { defined } from '../utils';
 import { SessionSseSubscriber } from './session-sse-subscriber';
 
+import type { Config } from '../adapters/config';
 import type { SessionRepository } from '../database/session-repository';
 import type { Shared } from '../shared';
 
 void describe('SessionController', () => {
+  const config: Config = {
+    server: { host: '', port: 0 },
+    database: { url: '', debug: false },
+    openAi: { baseUrl: '', apiKey: '' },
+    assistant: undefined,
+  };
+
   let db: TestDatabase;
   let app: ExpressFetcher;
   let aiClient: StubAiClient;
@@ -26,6 +34,7 @@ void describe('SessionController', () => {
     aiClient = new StubAiClient();
 
     container.register({
+      config: asValue(config),
       logger: asValue({ log: () => {} }),
       aiClient: asValue(aiClient),
       database: asValue(db),
@@ -75,42 +84,43 @@ void describe('SessionController', () => {
       container.resolve('uiNotifier'),
     );
 
-    let session = container.build(Session);
-
+    const session = container.build(Session);
     await repository.insert(session);
 
     const sse = new EventSource(new URL(`/${session.id}/stream`, app.baseUrl));
 
     try {
       const open = mock.fn();
-      const sessionChanged = mock.fn();
 
       sse.addEventListener('open', open);
-      sse.addEventListener('SessionChanged' satisfies Shared.SessionUiEvent['type'], sessionChanged);
-
       await waitFor(() => assert.strictEqual(open.mock.callCount(), 1));
 
+      const timeline: Shared.TimelineItem[] = [];
+
+      sse.addEventListener('TimelineItemAdded' satisfies Shared.SessionUiEvent['type'], ({ data }) => {
+        const event: Extract<Shared.SessionUiEvent, { type: 'TimelineItemAdded' }> = JSON.parse(data);
+        timeline.push(event.item);
+      });
+
       aiClient.results.push({
-        content: '',
+        content: 'Answer.',
         toolCalls: [],
       });
 
       const res = await app.fetch(`/${session.id}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: '42;' }),
+        body: JSON.stringify({ message: 'Question?' }),
       });
 
       assert(res.ok);
 
-      await waitFor(() => assert.strictEqual(sessionChanged.mock.callCount(), 1));
-
-      const event: MessageEvent = sessionChanged.mock.calls[0]?.arguments[0];
-      const data: Extract<Shared.SessionUiEvent, { type: 'SessionChanged' }> = JSON.parse(event.data);
-
-      assert.partialDeepStrictEqual(data.changes, {
-        timeline: [{ kind: 'message', role: 'user', content: '42;' }],
-      });
+      await waitFor(() =>
+        assert.deepStrictEqual(timeline, [
+          { kind: 'message', role: 'user', content: 'Question?' },
+          { kind: 'message', role: 'assistant', content: 'Answer.' },
+        ] satisfies Shared.TimelineItem[]),
+      );
     } finally {
       sse.close();
     }

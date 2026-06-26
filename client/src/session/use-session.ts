@@ -10,6 +10,8 @@ import { assert, exhaustiveArray } from 'src/utils';
 const sessionUiEventTypes = exhaustiveArray<Shared.AssistantUiEvent['type'] | Shared.SessionUiEvent['type']>()([
   'Chunk',
   'SessionChanged',
+  'TimelineItemAdded',
+  'TimelineItemChanged',
 ] as const);
 
 export function useSession(sessionId: string) {
@@ -157,10 +159,20 @@ const reducer = produce(function (state: State, action: Action) {
   if (action.type === 'SessionChanged') {
     assert(state.session);
     Object.assign(state.session, action.changes);
+  }
 
-    if ('timeline' in action.changes) {
+  if (action.type === 'TimelineItemAdded') {
+    assert(state.session);
+    state.session.timeline.push(action.item);
+
+    if (action.item.kind === 'message') {
       state.stream = '';
     }
+  }
+
+  if (action.type === 'TimelineItemChanged') {
+    assert(state.session?.timeline[action.index]);
+    state.session.timeline[action.index] = action.item;
   }
 
   console.log('state\n', current(state));

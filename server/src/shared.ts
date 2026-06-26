@@ -5,7 +5,10 @@ import type * as session from './domain/session';
 export namespace Shared {
   export type AssistantUiEvent = assistant.AssistantUiEvent;
 
-  export type SessionUiEvent = { type: 'SessionChanged'; sessionId: string; changes: Partial<Session> };
+  export type SessionUiEvent =
+    | { type: 'SessionChanged'; sessionId: string; changes: Partial<Omit<Session, 'timeline'>> }
+    | { type: 'TimelineItemAdded'; sessionId: string; item: TimelineItem }
+    | { type: 'TimelineItemChanged'; sessionId: string; index: number; item: TimelineItem };
 
   export type Language = DomainLanguage;
 
