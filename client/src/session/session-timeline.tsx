@@ -9,6 +9,8 @@ import { Markdown } from 'src/components/markdown';
 import { debug } from 'src/debug-context';
 import { Details } from 'src/details';
 
+import { PostureLabel } from './posture';
+
 type TimelineItem = Shared.TimelineItem;
 type TimelineMessage = Extract<TimelineItem, { kind: 'message' }>;
 
@@ -130,16 +132,6 @@ function PostureChanged({ item }: { item: Extract<TimelineItem, { kind: 'posture
       </Trans>
     </Notification>
   );
-}
-
-export function PostureLabel({ posture }: { posture: Shared.Posture }) {
-  return {
-    socratic: <Trans>Socratic</Trans>,
-    devils_advocate: <Trans>Devil's advocate</Trans>,
-    examiner: <Trans>Examiner</Trans>,
-    advisor: <Trans>Advisor</Trans>,
-    mirror: <Trans>Mirror</Trans>,
-  }[posture];
 }
 
 function Notification({

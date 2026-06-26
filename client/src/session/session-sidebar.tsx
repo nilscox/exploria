@@ -1,4 +1,4 @@
-import { postures, type Shared } from '@exploria/server/shared';
+import { type Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import { mutationOptions, useMutation } from '@tanstack/react-query';
 
@@ -8,7 +8,7 @@ import { Markdown } from 'src/components/markdown';
 import { Select, SelectItem } from 'src/components/select';
 
 import { ModelSelector } from './model-selector';
-import { PostureLabel } from './session-timeline';
+import { PostureDescription, PostureLabel, PostureOption } from './posture';
 import { Timer } from './timer';
 import { TopicsList } from './topics-list';
 
@@ -62,23 +62,42 @@ function PostureSection({
 }) {
   const value = session.postureMode === 'auto' ? 'auto' : session.posture;
 
+  const renderValue = () => {
+    if (session.postureMode === 'auto') {
+      return (
+        <div className="row items-center gap-2">
+          <Trans>
+            Automatic
+            <span className="text-dim text-sm">
+              (<PostureLabel posture={session.posture} />)
+            </span>
+          </Trans>
+        </div>
+      );
+    }
+
+    return <PostureLabel posture={session.posture} />;
+  };
+
   return (
     <section>
       <Field>
         <FieldLabel className="text-dim text-xs font-medium uppercase">
           <Trans>Stance</Trans>
         </FieldLabel>
-        <Select
-          value={value}
-          onValueChange={onSetPosture}
-          renderValue={() => (value === 'auto' ? <Trans>Automatic</Trans> : <PostureLabel posture={session.posture} />)}
-        >
+        <Select value={value} onValueChange={onSetPosture} renderValue={renderValue}>
           <SelectItem value="auto">
-            <Trans>Automatic</Trans>
+            <PostureOption
+              label={<Trans>Automatic</Trans>}
+              description={<Trans>Assistant picks the best stance</Trans>}
+            />
           </SelectItem>
-          {postures.map((posture) => (
+          {(['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror'] as const).map((posture) => (
             <SelectItem key={posture} value={posture}>
-              <PostureLabel posture={posture} />
+              <PostureOption
+                label={<PostureLabel posture={posture} />}
+                description={<PostureDescription posture={posture} />}
+              />
             </SelectItem>
           ))}
         </Select>
