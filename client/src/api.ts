@@ -2,7 +2,7 @@ import type { Shared } from '@exploria/server/shared';
 
 import { type Assign } from './utils';
 
-const baseUrl = 'http://localhost:3000';
+const baseUrl = new URL(import.meta.env['VITE_API_BASE_URL'], window.location.origin);
 
 async function fetchApi(
   endpoint: string,
@@ -14,7 +14,7 @@ async function fetchApi(
     }
   > = {},
 ) {
-  const url = new URL(endpoint, baseUrl);
+  const url = new URL(baseUrl.pathname + endpoint, baseUrl.origin);
   const headers = new Headers(init.headers);
   let body: BodyInit | undefined = undefined;
 
@@ -127,7 +127,7 @@ const sessions = {
   },
 
   stream(id: string): EventSource {
-    return new EventSource(new URL(`/session/${id}/stream`, baseUrl));
+    return new EventSource(new URL(`${baseUrl.pathname}/session/${id}/stream`, baseUrl.origin));
   },
 
   timer: {

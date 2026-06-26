@@ -78,6 +78,8 @@ export type SessionEvent =
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
 export class Session extends AggregateRoot<SessionEvent> {
+  protected _aggregateType = 'Session';
+
   get id(): string {
     return this._id;
   }

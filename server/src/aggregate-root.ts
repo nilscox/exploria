@@ -12,6 +12,8 @@ export abstract class AggregateRoot<Event extends DomainEvent> {
   protected readonly generator: Generator;
   protected readonly clock: Clock;
 
+  protected abstract _aggregateType: string;
+
   protected _id: string;
   private _domainEvents: Event[] = [];
 
@@ -29,7 +31,7 @@ export abstract class AggregateRoot<Event extends DomainEvent> {
     payload: Omit<Extract<Event, { type: Type }>, 'occurredAt' | 'aggregateType' | 'aggregateId' | 'type'>,
   ) {
     const event = {
-      aggregateType: this.constructor.name,
+      aggregateType: this._aggregateType,
       aggregateId: this._id,
       occurredAt: this.clock.now(),
       type,

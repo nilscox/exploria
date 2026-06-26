@@ -2,6 +2,8 @@ export interface Config {
   server: {
     host: string;
     port: number;
+    basePath?: string;
+    publicDir?: string;
   };
 
   openAi: {
@@ -20,47 +22,50 @@ export interface Config {
 }
 
 export class EnvConfig implements Config {
-  private env(name: string, defaultValue?: string): string;
-  private env<T>(name: string, defaultValue?: string, parse?: (value: string) => T): T;
-  private env<T>(name: string, defaultValue?: string, parse?: (value: string) => T): string | T {
-    const value = process.env[name] ?? defaultValue;
+  private env(name: string): string | undefined;
+  private env(name: string, required: true): string;
+  private env(name: string, required?: true) {
+    const value = process.env[name];
 
-    if (value === undefined) {
+    if (value === undefined && required) {
       throw new Error(`Missing environment variable ${name}`);
     }
 
-    return parse ? parse(value) : value;
+    return value;
   }
 
   get server() {
     return {
-      host: this.env('HOST', 'localhost'),
-      port: this.env('PORT', '3000', Number.parseInt),
+      host: this.env('HOST') ?? 'localhost',
+      port: Number.parseInt(this.env('PORT') ?? '3000'),
+      basePath: this.env('BASE_PATH'),
+      publicDir: this.env('PUBLIC_DIR'),
     };
   }
 
   get openAi() {
     return {
-      baseUrl: this.env('OPEN_AI_BASE_URL'),
-      apiKey: this.env('OPEN_AI_API_KEY'),
+      baseUrl: this.env('OPEN_AI_BASE_URL', true),
+      apiKey: this.env('OPEN_AI_API_KEY', true),
     };
   }
 
   get database() {
     return {
-      url: this.env('DATABASE_URL'),
-      debug: this.env('DATABASE_URL', 'false', (value) => value === 'true'),
+      url: this.env('DATABASE_URL', true),
+      debug: this.env('DATABASE_DEBUG') === 'true',
     };
   }
 
   get assistant() {
-    return this.env('ASSISTANT', '', (value) =>
-      ['test', 'eval'].includes(value) ? (value as 'test' | 'eval') : undefined,
-    );
+    const value = this.env('ASSISTANT');
+
+    if (value === 'test' || value === 'eval') {
+      return value;
+    }
   }
 
   get searchApiKey() {
-    const value = process.env['SEARCH_API_KEY'];
-    return value || undefined;
+    return this.env('SEARCH_API_KEY');
   }
 }

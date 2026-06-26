@@ -6,6 +6,7 @@
     "lint": "oxlint",
     "fmt": "oxfmt",
     "dev": "vite",
+    "build": "vite build",
     "storybook": "storybook dev -p 6006 --no-open"
   },
   "dependencies": {
