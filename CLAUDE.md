@@ -150,6 +150,8 @@ pnpm --filter @exploria/client exec lingui extract --clean   # update .po files 
 pnpm --filter @exploria/client exec lingui compile --typescript  # generate .ts catalogs from .po files
 ```
 
+When filling in translations: read the full `.po` file, generate **all** missing `msgstr` entries at once, then write the file in a **single Write operation** (not multiple Edits).
+
 Source language is English. Translation files live in `client/src/i18n/{locale}/messages.po`.
 
 ## Code Conventions
