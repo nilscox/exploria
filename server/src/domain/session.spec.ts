@@ -43,20 +43,6 @@ void describe('Session', () => {
     );
   };
 
-  void it('initializes a plan', () => {
-    session.initializePlan('Subject', [{ label: 'Topic' }]);
-
-    const { id: topicId } = session.topics[0]!;
-
-    assert.strictEqual(session.subject, 'Subject');
-    assert.deepStrictEqual(session.topics, [{ id: topicId, label: 'Topic', status: 'pending' }]);
-
-    expectEvent('PlanInitialized', {
-      subject: 'Subject',
-      topics: [{ id: topicId, label: 'Topic', status: 'pending' }],
-    });
-  });
-
   void it('changes the subject', () => {
     session.setSubject('Subject');
 
@@ -73,6 +59,20 @@ void describe('Session', () => {
     assert.deepStrictEqual(session.topics, [{ id: topicId, label: 'Topic', status: 'pending' }]);
 
     expectEvent('TopicAdded', { topic: { id: topicId, label: 'Topic', status: 'pending' } });
+  });
+
+  void it('adds multiple topics at once', () => {
+    session.addTopics(['Topic A', 'Topic B']);
+
+    const [topicA, topicB] = session.topics;
+
+    assert.deepStrictEqual(session.topics, [
+      { id: topicA!.id, label: 'Topic A', status: 'pending' },
+      { id: topicB!.id, label: 'Topic B', status: 'pending' },
+    ]);
+
+    expectEvent('TopicAdded', { topic: { id: topicA!.id, label: 'Topic A', status: 'pending' } });
+    expectEvent('TopicAdded', { topic: { id: topicB!.id, label: 'Topic B', status: 'pending' } });
   });
 
   void it('removes a topic', () => {

@@ -80,12 +80,6 @@ void describe('toTimeline', () => {
     ]);
   });
 
-  void it('emits plan-initialized with subject and topic count', () => {
-    session.initializePlan('My subject', [{ label: 'Topic A' }, { label: 'Topic B' }]);
-
-    assert.deepStrictEqual(timeline(), [{ kind: 'plan-initialized', subject: 'My subject', topicCount: 2 }]);
-  });
-
   void it('emits subject-changed', () => {
     session.setSubject('New subject');
 

@@ -10,7 +10,7 @@ export type Messages = {
   'start-timer.description': string;
   'start-timer.duration-param': string;
 
-  'add-topic.description': string;
+  'add-topics.description': string;
 
   'clear-timer.description': string;
 
@@ -19,10 +19,6 @@ export type Messages = {
   'get-saved-notes.description': string;
   'get-saved-notes.empty': string;
   'get-saved-notes.heading': string;
-
-  'init-plan.description': string;
-  'init-plan.subject-param': string;
-  'init-plan.topics-param': string;
 
   'pause-timer.description': string;
 
@@ -59,8 +55,8 @@ const en: Messages = {
     'Starts a timer to bound the session duration. Use it when the user sets or asks for a time limit.',
   'start-timer.duration-param': 'Session duration in minutes',
 
-  'add-topic.description':
-    'Adds a topic to the plan. Use it when the discussion surfaces an angle that was not planned initially.',
+  'add-topics.description':
+    'Adds one or more topics to the discussion. Use it when the conversation surfaces new angles to explore.',
 
   'clear-timer.description': 'Cancels the current timer.',
 
@@ -71,11 +67,6 @@ const en: Messages = {
     'Gets all notes saved during the session. Use it before producing a summary, or to recall what has been said.',
   'get-saved-notes.empty': 'No notes saved.',
   'get-saved-notes.heading': 'Saved notes:',
-
-  'init-plan.description':
-    'Initializes the discussion plan with the main angles to address. Call it once, at the start of the session, as soon as you have enough context.',
-  'init-plan.subject-param': 'The main subject of the discussion in a few words',
-  'init-plan.topics-param': 'The different aspects to address',
 
   'pause-timer.description': 'Pauses the timer.',
 
@@ -117,8 +108,8 @@ const fr: Messages = {
     "Démarre un chronomètre pour cadrer la durée de la session. À utiliser quand l'utilisateur fixe ou demande une limite de temps.",
   'start-timer.duration-param': 'Temps de la session en minutes',
 
-  'add-topic.description':
-    'Ajoute un sujet au plan. À utiliser quand la discussion fait émerger un axe non prévu initialement.',
+  'add-topics.description':
+    'Ajoute un ou plusieurs sujets à la discussion. À utiliser quand la conversation fait émerger de nouveaux axes à explorer.',
 
   'clear-timer.description': 'Annule le chronomètre en cours.',
 
@@ -129,11 +120,6 @@ const fr: Messages = {
     'Récupère toutes les notes sauvegardées au cours de la session. À utiliser avant de produire une synthèse, ou pour te remémorer ce qui a été dit.',
   'get-saved-notes.empty': 'Aucune note sauvegardée.',
   'get-saved-notes.heading': 'Notes sauvegardées :',
-
-  'init-plan.description':
-    'Initialise le plan de discussion avec les grands axes à aborder. À appeler une seule fois, en début de session, dès que tu as assez de contexte.',
-  'init-plan.subject-param': 'Le sujet principal de la discussion en quelques mots',
-  'init-plan.topics-param': 'Les différents aspects à traiter',
 
   'pause-timer.description': 'Met en pause le chronomètre.',
 

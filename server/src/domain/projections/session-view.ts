@@ -23,11 +23,6 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
         model = event.model;
         break;
 
-      case 'PlanInitialized':
-        subject = event.subject;
-        topics = [...event.topics];
-        break;
-
       case 'SubjectChanged':
         subject = event.subject;
         break;
@@ -108,7 +103,6 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
 
 const timelineEventTypes = new Set<SessionEvent['type']>([
   'MessageAdded',
-  'PlanInitialized',
   'SubjectChanged',
   'TopicAdded',
   'TopicRemoved',
@@ -169,14 +163,6 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
 
         break;
       }
-
-      case 'PlanInitialized':
-        for (const topic of event.topics) {
-          topics.set(topic.id, topic.label);
-        }
-
-        items.push({ kind: 'plan-initialized', subject: event.subject, topicCount: event.topics.length });
-        break;
 
       case 'SubjectChanged':
         items.push({ kind: 'subject-changed', subject: event.subject });

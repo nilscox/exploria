@@ -29,14 +29,6 @@ function TimelineEntry({ item, onSelectPath }: { item: TimelineItem; onSelectPat
 const components: {
   [Item in TimelineItem as Exclude<Item['kind'], 'message'>]: React.ComponentType<{ item: Item }>;
 } = {
-  'plan-initialized': ({ item }) => (
-    <Notification Icon={ListIcon}>
-      <Trans>
-        Plan initialized: {item.subject} ({item.topicCount} topics)
-      </Trans>
-    </Notification>
-  ),
-
   'subject-changed': ({ item }) => (
     <Notification Icon={PencilIcon}>
       <Trans>Subject changed: {item.subject}</Trans>

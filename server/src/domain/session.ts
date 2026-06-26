@@ -50,7 +50,6 @@ type SessionDomainEvent<Type extends string, Payload = {}> = DomainEvent<'Sessio
 export type SessionEvent =
   | SessionDomainEvent<'SessionCreated', { model: string; language: Language }>
   | SessionDomainEvent<'ModelChanged', { model: string }>
-  | SessionDomainEvent<'PlanInitialized', { subject: string; topics: Topic[] }>
   | SessionDomainEvent<'SubjectChanged', { subject: string }>
   | SessionDomainEvent<'TopicAdded', { topic: Topic }>
   | SessionDomainEvent<'TopicRemoved', { topicId: string }>
@@ -154,11 +153,6 @@ export class Session extends AggregateRoot<SessionEvent> {
         this._model = model;
       },
 
-      PlanInitialized: ({ subject, topics }) => {
-        this._subject = subject;
-        this._topics = topics;
-      },
-
       SubjectChanged: ({ subject }) => {
         this._subject = subject;
       },
@@ -235,12 +229,6 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit('ModelChanged', { model });
   }
 
-  initializePlan(subject: string, topics: Array<Omit<Topic, 'id' | 'status'>>) {
-    const withIds: Topic[] = topics.map((topic) => ({ ...topic, id: this.generator.id(), status: 'pending' }));
-
-    this.emit('PlanInitialized', { subject, topics: withIds });
-  }
-
   setSubject(subject: string) {
     this.emit('SubjectChanged', { subject });
   }
@@ -253,6 +241,12 @@ export class Session extends AggregateRoot<SessionEvent> {
     };
 
     this.emit('TopicAdded', { topic });
+  }
+
+  addTopics(labels: string[]) {
+    for (const label of labels) {
+      this.addTopic({ label });
+    }
   }
 
   removeTopic(topicId: string) {

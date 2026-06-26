@@ -1,9 +1,8 @@
 import { type Language, type Translate, createTranslate, languages } from '../i18n';
-import { addTopic } from './add-topic';
+import { addTopics } from './add-topics';
 import { clearTimer } from './clear-tmer';
 import { getRemainingTime } from './get-remaining-time';
 import { getSavedNotes } from './get-saved-notes';
-import { initPlan } from './init-plan';
 import { pauseTimer } from './pause-timer';
 import { resumeTimer } from './resume-timer';
 import { saveNote } from './save-note';
@@ -16,9 +15,8 @@ import type { Entries } from '../../utils';
 import type { Tool } from './create-tool';
 
 const builders = {
-  initPlan,
   setSubject,
-  addTopic,
+  addTopics,
   updateTopic,
   saveNote,
   getSavedNotes,

@@ -25,7 +25,6 @@ export namespace Shared {
 
   export type TimelineItem =
     | { kind: 'message'; role: Role; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }
-    | { kind: 'plan-initialized'; subject: string; topicCount: number }
     | { kind: 'subject-changed'; subject: string }
     | { kind: 'topic-added'; label: string }
     | { kind: 'topic-removed'; label: string }
