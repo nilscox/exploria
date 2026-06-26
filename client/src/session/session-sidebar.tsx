@@ -7,6 +7,7 @@ import { Field, FieldLabel } from 'src/components/field';
 import { Markdown } from 'src/components/markdown';
 
 import { ModelSelector } from './model-selector';
+import { PostureLabel } from './session-timeline';
 import { Timer } from './timer';
 import { TopicsList } from './topics-list';
 
@@ -28,6 +29,7 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
       />
 
       <ModelSelectorSection session={session} />
+      <PostureSection session={session} />
       <TopicsList topics={session.topics} onAdd={addTopic} />
 
       {session.notes.length > 0 && (
@@ -46,6 +48,24 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
         </section>
       )}
     </aside>
+  );
+}
+
+function PostureSection({ session }: { session: Shared.Session }) {
+  return (
+    <section>
+      <Field>
+        <FieldLabel className="text-dim text-xs font-medium uppercase">
+          <Trans>Stance</Trans>
+        </FieldLabel>
+        <div className="flex items-center gap-2 text-sm">
+          <PostureLabel posture={session.posture} />
+          <span className="text-dim text-xs">
+            {session.postureMode === 'auto' ? <Trans>auto</Trans> : <Trans>forced</Trans>}
+          </span>
+        </div>
+      </Field>
+    </section>
   );
 }
 

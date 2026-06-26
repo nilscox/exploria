@@ -132,7 +132,7 @@ function PostureChanged({ item }: { item: Extract<TimelineItem, { kind: 'posture
   );
 }
 
-function PostureLabel({ posture }: { posture: Shared.Posture }) {
+export function PostureLabel({ posture }: { posture: Shared.Posture }) {
   return {
     socratic: <Trans>Socratic</Trans>,
     devils_advocate: <Trans>Devil's advocate</Trans>,

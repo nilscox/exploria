@@ -145,10 +145,9 @@ pnpm --filter @exploria/server test 'src/**/*.e2e-spec.ts'  # run the server's e
 After adding or modifying `<Trans>` tags in the client, update translations:
 
 ```bash
-cd client
-pnpm lingui extract --clean   # update .po files (removes obsolete, adds missing)
-# then fill in msgstr "" entries in src/i18n/fr/messages.po
-pnpm lingui compile --typescript  # generate .ts catalogs from .po files
+pnpm --filter @exploria/client exec lingui extract --clean   # update .po files (removes obsolete, adds missing)
+# then fill in msgstr "" entries in client/src/i18n/fr/messages.po
+pnpm --filter @exploria/client exec lingui compile --typescript  # generate .ts catalogs from .po files
 ```
 
 Source language is English. Translation files live in `client/src/i18n/{locale}/messages.po`.
