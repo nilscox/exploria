@@ -14,7 +14,7 @@ export interface Config {
     debug: boolean;
   };
 
-  assistant: 'test' | undefined;
+  assistant: 'test' | 'eval' | undefined;
 }
 
 export class EnvConfig implements Config {
@@ -52,6 +52,8 @@ export class EnvConfig implements Config {
   }
 
   get assistant() {
-    return this.env('ASSISTANT', '', (value) => (value === 'test' ? value : undefined));
+    return this.env('ASSISTANT', '', (value) =>
+      ['test', 'eval'].includes(value) ? (value as 'test' | 'eval') : undefined,
+    );
   }
 }

@@ -7,6 +7,7 @@ import { NanoIdGenerator, type Generator } from './adapters/generator';
 import { MustacheI18n, type I18n } from './adapters/i18n';
 import { createDatabase, SessionRepository } from './database';
 import { Assistant } from './domain/assistant';
+import { EvalAssistant } from './domain/eval-assistant';
 import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
 import { Server } from './http/server';
@@ -20,6 +21,10 @@ import type { UiNotifier } from './domain/ui-notifier';
 function assistantFactory(config: Config, clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n) {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
+  }
+
+  if (config.assistant === 'eval') {
+    return new EvalAssistant(uiNotifier);
   }
 
   return new Assistant(clock, uiNotifier, aiClient, i18n);

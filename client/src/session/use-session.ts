@@ -144,7 +144,6 @@ const reducer = produce(function (state: State, action: Action) {
 
   if (action.type === 'PostingMessage') {
     state.loading = true;
-    state.stream = '';
   }
 
   if (action.type === 'MessagePosted') {
@@ -152,7 +151,6 @@ const reducer = produce(function (state: State, action: Action) {
   }
 
   if (action.type === 'Chunk') {
-    state.stream ??= '';
     state.stream = state.stream + action.text;
   }
 
