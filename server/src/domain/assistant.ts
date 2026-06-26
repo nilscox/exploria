@@ -34,7 +34,7 @@ export class Assistant {
     while (true) {
       const { content, toolCalls } = await this.aiClient.createCompletionStreaming({
         model: session.model,
-        tools: tools[session.language],
+        tools: Assistant.availableTools(session),
         messages: this.buildMessages(session),
         onChunk: (text) => this.uiNotifier.notify(session.id, { type: 'Chunk', text }),
       });
@@ -125,6 +125,16 @@ export class Assistant {
     } catch (error) {
       session.addToolCallResult(toolCall.id, { error: Assistant.toErrorMessage(error) });
     }
+  }
+
+  private static availableTools(session: Session): Record<string, Tool<any>> {
+    const localized = tools[session.language];
+
+    if (session.postureMode === 'auto') {
+      return localized;
+    }
+
+    return Object.fromEntries(Object.entries(localized).filter(([name]) => name !== 'setPosture'));
   }
 
   private static toErrorMessage(error: unknown): string {

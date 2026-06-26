@@ -228,6 +228,37 @@ void describe('Session', () => {
     expectEvent('DiscussionPathSelected', { pathId, label: 'Path A' });
   });
 
+  void it('defaults to automatic mode and the socratic posture', () => {
+    assert.strictEqual(session.postureMode, 'auto');
+    assert.strictEqual(session.posture, 'socratic');
+  });
+
+  void it('changes the posture from the assistant without leaving automatic mode', () => {
+    session.setPosture('mirror', 'You seem overwhelmed', false);
+
+    assert.strictEqual(session.posture, 'mirror');
+    assert.strictEqual(session.postureMode, 'auto');
+
+    expectEvent('PostureChanged', { posture: 'mirror', reason: 'You seem overwhelmed', forced: false });
+  });
+
+  void it('forces a posture from the user', () => {
+    session.setPosture('examiner', '', true);
+
+    assert.strictEqual(session.posture, 'examiner');
+    assert.strictEqual(session.postureMode, 'forced');
+
+    expectEvent('PostureChanged', { posture: 'examiner', reason: '', forced: true });
+  });
+
+  void it('returns to automatic mode while keeping the active posture', () => {
+    session.setPosture('examiner', '', true);
+    session.setPosture('auto', '', true);
+
+    assert.strictEqual(session.postureMode, 'auto');
+    assert.strictEqual(session.posture, 'examiner');
+  });
+
   void it('adds a message', () => {
     session.addMessage('user', 'content');
 
@@ -340,6 +371,17 @@ void describe('Session', () => {
       const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
       assert.deepStrictEqual(replayed.discussionPaths, []);
+    });
+
+    void it('reconstructs posture and mode from events', () => {
+      const source = new Session(new StubGenerator(), clock);
+      source.setPosture('devils_advocate', 'reason', false);
+      source.setPosture('mirror', '', true);
+
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
+
+      assert.strictEqual(replayed.posture, source.posture);
+      assert.strictEqual(replayed.postureMode, source.postureMode);
     });
 
     void it('populates session.events with replayed events', () => {

@@ -1,7 +1,7 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import clsx from 'clsx';
-import { CheckIcon, ListIcon, PencilIcon, StickyNoteIcon, StickyNoteXIcon, TimerIcon } from 'lucide-react';
+import { CheckIcon, DramaIcon, ListIcon, PencilIcon, StickyNoteIcon, StickyNoteXIcon, TimerIcon } from 'lucide-react';
 import type { SVGProps } from 'react';
 
 import { Button } from 'src/components/button';
@@ -104,7 +104,43 @@ const components: {
       <Trans>Timer resumed</Trans>
     </Notification>
   ),
+
+  'posture-changed': ({ item }) => <PostureChanged item={item} />,
 };
+
+function PostureChanged({ item }: { item: Extract<TimelineItem, { kind: 'posture-changed' }> }) {
+  if (item.forced) {
+    return (
+      <Notification Icon={DramaIcon}>
+        {item.posture === 'auto' ? (
+          <Trans>Back to automatic stance</Trans>
+        ) : (
+          <Trans>
+            Stance forced: <PostureLabel posture={item.posture} />
+          </Trans>
+        )}
+      </Notification>
+    );
+  }
+
+  return (
+    <Notification Icon={DramaIcon}>
+      <Trans>
+        <PostureLabel posture={item.posture} />: {item.reason}
+      </Trans>
+    </Notification>
+  );
+}
+
+function PostureLabel({ posture }: { posture: Shared.Posture }) {
+  return {
+    socratic: <Trans>Socratic</Trans>,
+    devils_advocate: <Trans>Devil's advocate</Trans>,
+    examiner: <Trans>Examiner</Trans>,
+    advisor: <Trans>Advisor</Trans>,
+    mirror: <Trans>Mirror</Trans>,
+  }[posture];
+}
 
 function Notification({
   Icon,

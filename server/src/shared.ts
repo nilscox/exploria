@@ -20,6 +20,8 @@ export namespace Shared {
   export type Role = session.Role;
   export type ToolCall = session.ToolCall;
   export type DiscussionPath = session.DiscussionPath;
+  export type Posture = session.Posture;
+  export type PostureMode = session.PostureMode;
 
   export type SelectablePath = DiscussionPath & { selected?: boolean };
 
@@ -36,7 +38,9 @@ export namespace Shared {
     | { kind: 'timer-started'; duration: number }
     | { kind: 'timer-cleared' }
     | { kind: 'timer-paused' }
-    | { kind: 'timer-resumed' };
+    | { kind: 'timer-resumed' }
+    | { kind: 'posture-changed'; posture: Posture; reason: string; forced: false }
+    | { kind: 'posture-changed'; posture: Posture | 'auto'; reason: string; forced: true };
 
   export type Session = {
     id: string;
@@ -46,6 +50,8 @@ export namespace Shared {
     topics: Topic[];
     notes: Note[];
     timer: Timer | null;
+    postureMode: PostureMode;
+    posture: Posture;
     timeline: TimelineItem[];
   };
 }

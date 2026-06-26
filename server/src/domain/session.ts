@@ -8,6 +8,12 @@ import type { Language } from './i18n';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
+export const postures = ['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror'] as const;
+
+export type Posture = (typeof postures)[number];
+
+export type PostureMode = 'auto' | 'forced';
+
 export type Topic = {
   id: string;
   label: string;
@@ -65,7 +71,8 @@ export type SessionEvent =
   | SessionDomainEvent<'MessageAdded', { message: Message }>
   | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
   | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
-  | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>;
+  | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>
+  | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -114,6 +121,18 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get discussionPaths() {
     return this._discussionPaths;
+  }
+
+  private _postureMode: PostureMode = 'auto';
+
+  get postureMode(): PostureMode {
+    return this._postureMode;
+  }
+
+  private _posture: Posture = 'socratic';
+
+  get posture(): Posture {
+    return this._posture;
   }
 
   private _events: SessionEvent[] = [];
@@ -215,6 +234,16 @@ export class Session extends AggregateRoot<SessionEvent> {
 
       DiscussionPathSelected: () => {
         this._discussionPaths = [];
+      },
+
+      PostureChanged: ({ posture, forced }) => {
+        if (posture !== 'auto') {
+          this._posture = posture;
+        }
+
+        if (forced) {
+          this._postureMode = posture === 'auto' ? 'auto' : 'forced';
+        }
       },
     };
 
@@ -367,5 +396,9 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(path, new Error(`Cannot find discussion path "${pathId}"`));
 
     this.emit('DiscussionPathSelected', { pathId, label: path.label });
+  }
+
+  setPosture(posture: Posture | 'auto', reason: string, forced: boolean) {
+    this.emit('PostureChanged', { posture, reason, forced });
   }
 }

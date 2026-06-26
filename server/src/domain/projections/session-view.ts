@@ -2,7 +2,7 @@ import { assert, hasId } from '../../utils';
 import { Timer } from '../timer';
 
 import type { Shared } from '../../shared';
-import type { Note, SessionEvent, Topic } from '../session';
+import type { Note, Posture, PostureMode, SessionEvent, Topic } from '../session';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let model = '';
@@ -11,6 +11,8 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   let topics: Topic[] = [];
   let notes: Note[] = [];
   let timer: Timer | null = null;
+  let postureMode: PostureMode = 'auto';
+  let posture: Posture = 'socratic';
 
   for (const event of events) {
     switch (event.type) {
@@ -86,6 +88,15 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
         assert(timer);
         timer = timer.resume(event.occurredAt);
         break;
+
+      case 'PostureChanged':
+        if (event.posture !== 'auto') {
+          posture = event.posture;
+        }
+        if (event.forced) {
+          postureMode = event.posture === 'auto' ? 'auto' : 'forced';
+        }
+        break;
     }
   }
 
@@ -97,6 +108,8 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     topics,
     notes,
     timer,
+    postureMode,
+    posture,
     timeline: toTimeline(events),
   };
 }
@@ -117,6 +130,7 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'TimerResumed',
   'DiscussionPathsSet',
   'DiscussionPathSelected',
+  'PostureChanged',
 ]);
 
 export function affectsTimeline(type: SessionEvent['type']): boolean {
@@ -247,6 +261,14 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
 
         for (const path of message.paths) {
           path.selected = path.id === event.pathId;
+        }
+        break;
+
+      case 'PostureChanged':
+        if (event.forced) {
+          items.push({ kind: 'posture-changed', posture: event.posture, reason: event.reason, forced: true });
+        } else {
+          items.push({ kind: 'posture-changed', posture: event.posture as Posture, reason: event.reason, forced: false });
         }
         break;
     }

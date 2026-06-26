@@ -28,6 +28,10 @@ export type Messages = {
   'set-discussion-paths.label-param': string;
   'set-discussion-paths.description-param': string;
 
+  'set-posture.description': string;
+  'set-posture.posture-param': string;
+  'set-posture.reason-param': string;
+
   'set-subject.description': string;
 
   'update-topic.description': string;
@@ -76,6 +80,13 @@ const en: Messages = {
     'Offers several possible directions for what comes next, shown as clickable options below your message. Do not list them in your text. Use it occasionally, only when a genuine choice of direction arises and it is worth letting the user decide.',
   'set-discussion-paths.label-param': 'Short label of the path',
   'set-discussion-paths.description-param': 'Optional one-sentence description',
+
+  'set-posture.description':
+    'Changes the stance you adopt for the conversation. Call it before your reply whenever another stance fits the discussion better than the current one.',
+  'set-posture.posture-param':
+    'The stance to adopt: socratic (question to deepen thinking), devils_advocate (attack the ideas to test them), examiner (demanding pressure, e.g. interview prep), advisor (neutral help to structure a decision), mirror (reflect and welcome, without challenging).',
+  'set-posture.reason-param':
+    'A short explanation, addressed to the user in their language, of why you are adopting this stance.',
 
   'set-subject.description':
     'Updates the overall subject of the conversation, when it becomes clearer or shifts along the way.',
@@ -129,6 +140,13 @@ const fr: Messages = {
     "Propose plusieurs axes possibles pour la suite, affichés comme des options cliquables sous ton message. Ne les énumère pas dans ton texte. À utiliser ponctuellement, uniquement quand un vrai choix de direction se présente et qu'il est pertinent de laisser l'utilisateur trancher.",
   'set-discussion-paths.label-param': 'Intitulé court du chemin',
   'set-discussion-paths.description-param': 'Description optionnelle en une phrase',
+
+  'set-posture.description':
+    'Change la posture que tu adoptes pour la conversation. À appeler avant ta réponse dès qu’une autre posture est plus adaptée à la discussion que la posture courante.',
+  'set-posture.posture-param':
+    'La posture à adopter : socratic (questionner pour approfondir la pensée), devils_advocate (attaquer les idées pour les tester), examiner (pression exigeante, ex. préparation d’entretien), advisor (aide neutre à structurer une décision), mirror (refléter et accueillir, sans challenger).',
+  'set-posture.reason-param':
+    'Une courte explication, adressée à l’utilisateur dans sa langue, de la raison pour laquelle tu adoptes cette posture.',
 
   'set-subject.description':
     'Met à jour le sujet global de la conversation, lorsqu’il se précise ou évolue en cours de route.',

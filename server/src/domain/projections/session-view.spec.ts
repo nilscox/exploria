@@ -55,6 +55,24 @@ void describe('toSessionView', () => {
 
     assert.deepStrictEqual(view().timer, session.timer);
   });
+
+  void it('defaults the posture to automatic', () => {
+    assert.strictEqual(view().postureMode, 'auto');
+    assert.strictEqual(view().posture, 'socratic');
+  });
+
+  void it('reconstructs the forced posture mode', () => {
+    session.setPosture('examiner', '', true);
+
+    assert.strictEqual(view().postureMode, 'forced');
+    assert.strictEqual(view().posture, 'examiner');
+  });
+
+  void it('keeps automatic mode when the assistant changes posture', () => {
+    session.setPosture('mirror', 'reason', false);
+
+    assert.strictEqual(view().postureMode, 'auto');
+  });
 });
 
 void describe('toTimeline', () => {
@@ -84,6 +102,14 @@ void describe('toTimeline', () => {
     session.setSubject('New subject');
 
     assert.deepStrictEqual(timeline(), [{ kind: 'subject-changed', subject: 'New subject' }]);
+  });
+
+  void it('emits posture-changed with reason and forced flag', () => {
+    session.setPosture('devils_advocate', 'Testing your thesis', false);
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'posture-changed', posture: 'devils_advocate', reason: 'Testing your thesis', forced: false },
+    ]);
   });
 
   void it('emits topic-removed with the topic label', () => {
