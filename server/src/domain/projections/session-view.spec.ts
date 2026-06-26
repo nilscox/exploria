@@ -155,9 +155,9 @@ void describe('toTimeline', () => {
     ]);
   });
 
-  void it('attaches discussion paths to the preceding message', () => {
-    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
+  void it("attaches discussion paths to the assistant's message", () => {
     session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
+    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
 
     const [pathA, pathB] = session.discussionPaths;
 
@@ -168,16 +168,16 @@ void describe('toTimeline', () => {
         content: 'Which path?',
         toolCalls: undefined,
         paths: [
-          { id: pathA!.id, label: 'Path A', selected: false },
-          { id: pathB!.id, label: 'Path B', description: 'desc', selected: false },
+          { id: pathA!.id, label: 'Path A' },
+          { id: pathB!.id, label: 'Path B', description: 'desc' },
         ],
       },
     ]);
   });
 
   void it('keeps paths visible after selection and marks the selected one', () => {
-    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
     session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
+    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
 
     const [pathA, pathB] = session.discussionPaths;
 
@@ -188,6 +188,23 @@ void describe('toTimeline', () => {
     assert(item?.kind === 'message');
     assert.deepStrictEqual(item.paths, [
       { id: pathA!.id, label: 'Path A', selected: true },
+      { id: pathB!.id, label: 'Path B', selected: false },
+    ]);
+  });
+
+  void it('marks no path as selected when a user message was added', () => {
+    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
+    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
+
+    const [pathA, pathB] = session.discussionPaths;
+
+    session.addMessage('user', 'Something else.');
+
+    const item = timeline()[0];
+
+    assert(item?.kind === 'message');
+    assert.deepStrictEqual(item.paths, [
+      { id: pathA!.id, label: 'Path A', selected: false },
       { id: pathB!.id, label: 'Path B', selected: false },
     ]);
   });

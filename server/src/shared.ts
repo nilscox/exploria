@@ -18,7 +18,7 @@ export namespace Shared {
   export type ToolCall = session.ToolCall;
   export type DiscussionPath = session.DiscussionPath;
 
-  export type SelectablePath = DiscussionPath & { selected: boolean };
+  export type SelectablePath = DiscussionPath & { selected?: boolean };
 
   export type TimelineItem =
     | { kind: 'message'; role: Role; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }

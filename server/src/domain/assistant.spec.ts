@@ -121,38 +121,6 @@ void describe('Assistant', () => {
     ]);
   });
 
-  void it('emits DiscussionPathsSet after the prose message', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
-
-    aiClient.results.push(
-      {
-        content: '',
-        toolCalls: [
-          {
-            id: 'id',
-            name: 'setDiscussionPaths',
-            arguments: { paths: [{ label: 'Option A' }, { label: 'Option B' }] },
-          },
-        ],
-      },
-      {
-        content: 'Pour la suite, souhaites-tu :',
-        toolCalls: [],
-      },
-    );
-
-    await assistant.run(session);
-
-    const events = session.peekDomainEvents();
-    const types = events.map((e) => e.type);
-
-    const messageAddedIndex = types.lastIndexOf('MessageAdded');
-    const pathsSetIndex = types.indexOf('DiscussionPathsSet');
-
-    assert(pathsSetIndex > messageAddedIndex, 'DiscussionPathsSet must come after the prose MessageAdded');
-  });
-
   void it('handles failing tool calls', async () => {
     const session = container.build(Session);
     const assistant = container.resolve('assistant');

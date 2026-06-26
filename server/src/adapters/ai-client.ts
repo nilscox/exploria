@@ -47,7 +47,11 @@ export class StubAiClient {
   results: CreateCompletionResult[] = [];
 
   private next = async () => {
-    return defined(this.results.shift(), new Error('StubAiClient: No more result'));
+    if (this.results.length === 0) {
+      return { content: '', toolCalls: [] };
+    }
+
+    return defined(this.results.shift());
   };
 
   createCompletion = this.next;

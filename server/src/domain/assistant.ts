@@ -8,8 +8,7 @@ import { tools } from './tools';
 import type { AiClient } from '../adapters/ai-client';
 import type { Clock } from '../adapters/clock';
 import type { I18n } from '../adapters/i18n';
-import type { DiscussionPath, Session, ToolCall } from './session';
-import type { Translate } from './i18n';
+import type { Session, ToolCall } from './session';
 import type { Tool } from './tools/create-tool';
 import type { UiEvent, UiNotifier } from './ui-notifier';
 
@@ -26,20 +25,17 @@ export class Assistant {
     this.i18n = i18n;
   }
 
-  async run(session: Session, message?: string, commit: () => Promise<void> = async () => {}) {
+  async run(session: Session, message?: string, commit?: () => Promise<void>) {
     if (message) {
       session.addMessage('user', message);
-      await commit();
+      await commit?.();
     }
-
-    const t = createTranslate(session.language);
-    let pendingPaths: Array<Omit<DiscussionPath, 'id'>> | null = null;
 
     while (true) {
       const { content, toolCalls } = await this.aiClient.createCompletionStreaming({
         model: session.model,
         tools: tools[session.language],
-        messages: this.buildMessages(session, t),
+        messages: this.buildMessages(session),
         onChunk: (text) => this.uiNotifier.notify(session.id, { type: 'Chunk', text }),
       });
 
@@ -52,30 +48,19 @@ export class Assistant {
         toolCalls,
       });
 
+      for (const toolCall of toolCalls) {
+        await this.handleToolCall(session, toolCall);
+      }
+
+      await commit?.();
+
       if (toolCalls.length === 0) {
-        // Prose message: flush any deferred paths after it so the timeline
-        // projection anchors them to this message rather than to an empty one.
-        if (pendingPaths !== null) {
-          session.setDiscussionPaths(pendingPaths);
-          pendingPaths = null;
-        }
-        await commit();
         break;
       }
-
-      for (const toolCall of toolCalls) {
-        const deferred = await this.handleToolCall(session, toolCall, t);
-
-        if (deferred !== null) {
-          pendingPaths = deferred;
-        }
-      }
-
-      await commit();
     }
   }
 
-  async generateDemo(session: Session, commit: () => Promise<void> = async () => {}) {
+  async generateDemo(session: Session, commit?: () => Promise<void>) {
     const t = createTranslate(session.language);
 
     for (let i = 0; i <= 3; ++i) {
@@ -108,7 +93,9 @@ export class Assistant {
     }
   }
 
-  private buildMessages(session: Session, t: Translate) {
+  private buildMessages(session: Session) {
+    const t = createTranslate(session.language);
+
     return [
       {
         role: 'system' as const,
@@ -122,11 +109,7 @@ export class Assistant {
     ];
   }
 
-  private async handleToolCall(
-    session: Session,
-    toolCall: ToolCall,
-    t: Translate,
-  ): Promise<Array<Omit<DiscussionPath, 'id'>> | null> {
+  private async handleToolCall(session: Session, toolCall: ToolCall) {
     const localizedTools = tools[session.language];
 
     assert(hasKey(localizedTools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
@@ -136,24 +119,12 @@ export class Assistant {
 
       toolCall.arguments = tool.param.parse(toolCall.arguments);
 
-      if (toolCall.name === 'setDiscussionPaths') {
-        // Defer DiscussionPathsSet until after the prose message is added, so the
-        // timeline projection anchors paths to the prose rather than an empty message.
-        const { paths } = toolCall.arguments as { paths: Array<Omit<DiscussionPath, 'id'>> };
-
-        session.addToolCallResult(toolCall.id, { result: t('tool.result.ok') });
-
-        return paths;
-      }
-
       session.addToolCallResult(toolCall.id, {
         result: await tool.execute(session, toolCall.arguments),
       });
     } catch (error) {
       session.addToolCallResult(toolCall.id, { error: Assistant.toErrorMessage(error) });
     }
-
-    return null;
   }
 
   private static toErrorMessage(error: unknown): string {

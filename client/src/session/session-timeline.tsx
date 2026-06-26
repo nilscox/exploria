@@ -180,18 +180,16 @@ function DiscussionPaths({ paths, onSelect }: { paths: Shared.SelectablePath[]; 
     return null;
   }
 
-  const hasSelection = paths.some((path) => path.selected);
-
   return (
     <div className="col gap-2">
       {paths.map((path) => (
         <Button
           key={path.id}
           variant={path.selected ? 'solid' : 'outlined'}
-          disabled={hasSelection}
+          disabled={path.selected !== undefined}
           className={clsx(
             'h-auto text-start whitespace-normal! py-2 justify-start disabled:pointer-events-none',
-            hasSelection && !path.selected && 'opacity-50',
+            path.selected === false && 'opacity-50',
           )}
           onClick={() => onSelect(path.id)}
         >

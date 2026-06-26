@@ -134,9 +134,7 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
   const topics = new Map<string, string>();
   const notes = new Map<string, string>();
 
-  const lastMessage = () => {
-    return items.findLast((item) => item.kind === 'message');
-  };
+  let pendingPaths: Shared.SelectablePath[] | null = null;
 
   for (const event of events) {
     switch (event.type) {
@@ -147,12 +145,27 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
           break;
         }
 
-        items.push({
+        const item: Shared.TimelineItem = {
           kind: 'message',
           role: message.role,
           content: message.content,
           toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
-        });
+        };
+
+        if (item.role === 'assistant' && pendingPaths) {
+          item.paths = pendingPaths;
+          pendingPaths = null;
+        }
+
+        if (item.role === 'user') {
+          const prevItem = items.findLast((item) => item.kind === 'message');
+
+          if (prevItem?.role === 'assistant' && prevItem.paths) {
+            prevItem.paths.forEach((path) => (path.selected = false));
+          }
+        }
+
+        items.push(item);
 
         break;
       }
@@ -238,23 +251,17 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         break;
 
       case 'DiscussionPathsSet': {
-        const message = lastMessage();
-
-        assert(message?.kind === 'message');
-        message.paths = event.paths.map((path) => ({ ...path, selected: false }));
-
+        pendingPaths = structuredClone(event.paths);
         break;
       }
 
       case 'DiscussionPathSelected':
-        for (const item of items) {
-          if (item.kind === 'message' && item.paths?.some(hasId(event.pathId))) {
-            for (const path of item.paths) {
-              path.selected = path.id === event.pathId;
-            }
-          }
-        }
+        const message = items.findLast((item) => item.kind === 'message');
+        assert(message?.paths);
 
+        for (const path of message.paths) {
+          path.selected = path.id === event.pathId;
+        }
         break;
     }
   }
