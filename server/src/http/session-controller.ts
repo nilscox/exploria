@@ -5,7 +5,7 @@ import z from 'zod';
 
 import { languages } from '../domain/i18n';
 import { toSessionView } from '../domain/projections/session-view';
-import { Session } from '../domain/session';
+import { Session, postures } from '../domain/session';
 import { defined } from '../utils';
 import { parsePagination } from './pagination';
 import { ServerSentEvent, type SseUiNotifier } from './sse';
@@ -92,6 +92,14 @@ export class SessionController {
       const { model } = z.object({ model: z.string().min(1) }).parse(req.body);
 
       await this.setModel(model);
+
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/posture', async (req, res) => {
+      const { posture } = z.object({ posture: z.enum([...postures, 'auto']) }).parse(req.body);
+
+      await this.setPosture(posture);
 
       res.status(204).end();
     });
@@ -211,6 +219,16 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     session.setModel(model);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async setPosture(posture: (typeof postures)[number] | 'auto') {
+    const session = this.getSessionInstance();
+
+    session.setPosture(posture, '', true);
 
     const committed = await this.sessionRepository.save(session);
 

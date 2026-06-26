@@ -26,9 +26,10 @@ msgstr "Add"
 msgid "Advisor"
 msgstr "Advisor"
 
-#: src/session/session-sidebar.tsx:64
-msgid "auto"
-msgstr "auto"
+#: src/session/session-sidebar.tsx:74
+#: src/session/session-sidebar.tsx:77
+msgid "Automatic"
+msgstr "Automatic"
 
 #: src/session/session-timeline.tsx:116
 msgid "Back to automatic stance"
@@ -87,10 +88,6 @@ msgstr "Examiner"
 msgid "Exploria"
 msgstr "Exploria"
 
-#: src/session/session-sidebar.tsx:64
-msgid "forced"
-msgstr "forced"
-
 #: src/session/session-timeline.tsx:163
 msgid "in progress"
 msgstr "in progress"
@@ -120,7 +117,7 @@ msgid "Mirror"
 msgstr "Mirror"
 
 #: src/home.tsx:112
-#: src/session/session-sidebar.tsx:79
+#: src/session/session-sidebar.tsx:97
 msgid "Model"
 msgstr "Model"
 
@@ -147,7 +144,7 @@ msgstr "Note removed: {0}"
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
 
-#: src/session/session-sidebar.tsx:38
+#: src/session/session-sidebar.tsx:40
 msgid "Notes"
 msgstr "Notes"
 
@@ -184,7 +181,7 @@ msgstr "Settings"
 msgid "Socratic"
 msgstr "Socratic"
 
-#: src/session/session-sidebar.tsx:59
+#: src/session/session-sidebar.tsx:69
 msgid "Stance"
 msgstr "Stance"
 

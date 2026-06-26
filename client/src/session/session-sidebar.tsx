@@ -1,10 +1,11 @@
-import type { Shared } from '@exploria/server/shared';
+import { postures, type Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import { mutationOptions, useMutation } from '@tanstack/react-query';
 
 import { api } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
 import { Markdown } from 'src/components/markdown';
+import { Select, SelectItem } from 'src/components/select';
 
 import { ModelSelector } from './model-selector';
 import { PostureLabel } from './session-timeline';
@@ -12,6 +13,7 @@ import { Timer } from './timer';
 import { TopicsList } from './topics-list';
 
 export function SessionSidebar({ session }: { session: Shared.Session }) {
+  const { mutate: setPosture } = useMutation(setPostureOptions(session.id));
   const { mutate: addTopic } = useMutation(addTopicOptions(session.id));
   const { mutate: startTimer } = useMutation(startTimerOptions(session.id));
   const { mutate: clearTimer } = useMutation(clearTimerOptions(session.id));
@@ -29,7 +31,7 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
       />
 
       <ModelSelectorSection session={session} />
-      <PostureSection session={session} />
+      <PostureSection session={session} onSetPosture={setPosture} />
       <TopicsList topics={session.topics} onAdd={addTopic} />
 
       {session.notes.length > 0 && (
@@ -51,19 +53,35 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
   );
 }
 
-function PostureSection({ session }: { session: Shared.Session }) {
+function PostureSection({
+  session,
+  onSetPosture,
+}: {
+  session: Shared.Session;
+  onSetPosture: (posture: string) => void;
+}) {
+  const value = session.postureMode === 'auto' ? 'auto' : session.posture;
+
   return (
     <section>
       <Field>
         <FieldLabel className="text-dim text-xs font-medium uppercase">
           <Trans>Stance</Trans>
         </FieldLabel>
-        <div className="flex items-center gap-2 text-sm">
-          <PostureLabel posture={session.posture} />
-          <span className="text-dim text-xs">
-            {session.postureMode === 'auto' ? <Trans>auto</Trans> : <Trans>forced</Trans>}
-          </span>
-        </div>
+        <Select
+          value={value}
+          onValueChange={onSetPosture}
+          renderValue={() => (value === 'auto' ? <Trans>Automatic</Trans> : <PostureLabel posture={session.posture} />)}
+        >
+          <SelectItem value="auto">
+            <Trans>Automatic</Trans>
+          </SelectItem>
+          {postures.map((posture) => (
+            <SelectItem key={posture} value={posture}>
+              <PostureLabel posture={posture} />
+            </SelectItem>
+          ))}
+        </Select>
       </Field>
     </section>
   );
@@ -82,6 +100,12 @@ function ModelSelectorSection({ session }: { session: Shared.Session }) {
       </Field>
     </section>
   );
+}
+
+function setPostureOptions(sessionId: string) {
+  return mutationOptions({
+    mutationFn: (posture: string) => api.sessions.setPosture(sessionId, posture),
+  });
 }
 
 function setModelOptions(sessionId: string) {

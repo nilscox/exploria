@@ -99,6 +99,13 @@ const sessions = {
     });
   },
 
+  async setPosture(id: string, posture: string): Promise<void> {
+    await fetchApi(`/session/${id}/posture`, {
+      method: 'PUT',
+      body: { posture },
+    });
+  },
+
   async addTopic(id: string, topic: string): Promise<void> {
     await fetchApi(`/session/${id}/topic`, {
       method: 'POST',

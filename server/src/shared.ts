@@ -1,6 +1,8 @@
 import type * as assistant from './domain/assistant';
 import type { Language as DomainLanguage } from './domain/i18n';
-import type * as session from './domain/session';
+import * as session from './domain/session';
+
+export const postures = session.postures;
 
 export namespace Shared {
   export type AssistantUiEvent = assistant.AssistantUiEvent;
