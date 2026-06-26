@@ -29,18 +29,32 @@ export class EventBus<BusEvent extends DomainEvent = DomainEvent> {
   }
 
   addListener<Type extends BusEvent['type']>(type: Type, listener: EventHandler<Extract<BusEvent, { type: Type }>>) {
-    this.emitter.addListener(type, listener);
+    const wrapped = this.wrapListener(listener);
+
+    this.emitter.addListener(type, wrapped);
 
     return () => {
-      this.emitter.removeListener(type, listener);
+      this.emitter.removeListener(type, wrapped);
     };
   }
 
   subscribe(listener: (events: BusEvent[]) => void): () => void {
-    this.emitter.addListener('$batch', listener);
+    const wrapped = this.wrapListener(listener);
+
+    this.emitter.addListener('$batch', wrapped);
 
     return () => {
-      this.emitter.removeListener('$batch', listener);
+      this.emitter.removeListener('$batch', wrapped);
+    };
+  }
+
+  private wrapListener<Args extends unknown[]>(listener: (...args: Args) => void | Promise<void>) {
+    return async (...args: Args) => {
+      try {
+        await listener(...args);
+      } catch (error) {
+        console.error(error);
+      }
     };
   }
 }
