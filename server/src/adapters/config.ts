@@ -15,6 +15,8 @@ export interface Config {
   };
 
   assistant: 'test' | 'eval' | undefined;
+
+  searchApiKey: string | undefined;
 }
 
 export class EnvConfig implements Config {
@@ -55,5 +57,10 @@ export class EnvConfig implements Config {
     return this.env('ASSISTANT', '', (value) =>
       ['test', 'eval'].includes(value) ? (value as 'test' | 'eval') : undefined,
     );
+  }
+
+  get searchApiKey() {
+    const value = process.env['SEARCH_API_KEY'];
+    return value || undefined;
   }
 }

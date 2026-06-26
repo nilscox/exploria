@@ -5,8 +5,10 @@ import { NativeDateClock } from './adapters/clock';
 import { EnvConfig, type Config } from './adapters/config';
 import { NanoIdGenerator, type Generator } from './adapters/generator';
 import { MustacheI18n, type I18n } from './adapters/i18n';
+import { TavilySearchClient, type SearchClient } from './adapters/search-client';
 import { createDatabase, SessionRepository } from './database';
 import { Assistant } from './domain/assistant';
+import { createTools, type AssistantTools } from './domain/assistant-tools';
 import { EvalAssistant } from './domain/eval-assistant';
 import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
@@ -18,16 +20,27 @@ import type { Clock } from './adapters/clock';
 import type { Logger } from './adapters/logger';
 import type { UiNotifier } from './domain/ui-notifier';
 
-function assistantFactory(config: Config, clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n) {
+function searchClientFactory(config: Config): SearchClient | null {
+  return config.searchApiKey ? new TavilySearchClient(config.searchApiKey) : null;
+}
+
+function assistantFactory(
+  config: Config,
+  clock: Clock,
+  uiNotifier: UiNotifier,
+  aiClient: AiClient,
+  i18n: I18n,
+  assistantTools: AssistantTools,
+) {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
   }
 
   if (config.assistant === 'eval') {
-    return new EvalAssistant(uiNotifier);
+    return new EvalAssistant(uiNotifier, assistantTools);
   }
 
-  return new Assistant(clock, uiNotifier, aiClient, i18n);
+  return new Assistant(clock, uiNotifier, aiClient, i18n, assistantTools);
 }
 
 export const container = createContainer({
@@ -45,6 +58,8 @@ export const container = createContainer({
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
   aiClient: asClass<AiClient>(OpenAiClient),
+  searchClient: asFunction(searchClientFactory),
+  assistantTools: asFunction(createTools),
   assistant: asFunction(assistantFactory),
   server: asClass(Server),
 });

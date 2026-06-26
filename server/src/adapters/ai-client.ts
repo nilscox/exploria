@@ -3,7 +3,7 @@ import type { Stream } from 'openai/streaming';
 
 import { assert, defined } from '../utils';
 
-import type { Tool } from '../domain/tools/create-tool';
+import type { Tool } from '../domain/assistant-tools';
 import type { Config } from './config';
 
 export type AiClientMessage =
@@ -31,7 +31,7 @@ export type AiClientToolCall = {
 type CreateCompletionParams = {
   model: string;
   messages: AiClientMessage[];
-  tools?: Record<string, Tool<any>>;
+  tools?: Record<string, Tool>;
 };
 
 type CreateCompletionStreamingParams = CreateCompletionParams & {

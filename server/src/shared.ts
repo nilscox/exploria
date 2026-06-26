@@ -40,7 +40,8 @@ export namespace Shared {
     | { kind: 'timer-paused' }
     | { kind: 'timer-resumed' }
     | { kind: 'posture-changed'; posture: Posture; reason: string; forced: false }
-    | { kind: 'posture-changed'; posture: Posture | 'auto'; reason: string; forced: true };
+    | { kind: 'posture-changed'; posture: Posture | 'auto'; reason: string; forced: true }
+    | { kind: 'web-searched'; query: string; resultCount: number };
 
   export type Session = {
     id: string;

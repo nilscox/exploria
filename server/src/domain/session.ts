@@ -72,7 +72,8 @@ export type SessionEvent =
   | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
   | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
   | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>
-  | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>;
+  | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
+  | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -400,5 +401,9 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   setPosture(posture: Posture | 'auto', reason: string, forced: boolean) {
     this.emit('PostureChanged', { posture, reason, forced });
+  }
+
+  recordSearch(query: string, resultCount: number) {
+    this.emit('SearchPerformed', { query, resultCount });
   }
 }

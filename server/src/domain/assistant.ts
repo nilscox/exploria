@@ -1,15 +1,13 @@
 import z from 'zod';
 
 import { assert, hasKey } from '../utils';
-import { createTranslate } from './i18n';
 import { toChatMessages } from './projections/chat-context';
-import { tools } from './tools';
 
 import type { AiClient } from '../adapters/ai-client';
 import type { Clock } from '../adapters/clock';
 import type { I18n } from '../adapters/i18n';
+import type { AssistantTools, Tool, Tools } from './assistant-tools';
 import type { Session, ToolCall } from './session';
-import type { Tool } from './tools/create-tool';
 import type { UiEvent, UiNotifier } from './ui-notifier';
 
 export type AssistantUiEvent = UiEvent<'Chunk', { text: string }>;
@@ -18,11 +16,13 @@ export class Assistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
   private readonly aiClient: AiClient;
   private readonly i18n: I18n;
+  private readonly assistantTools: AssistantTools;
 
-  constructor(_clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n) {
+  constructor(_clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n, assistantTools: AssistantTools) {
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
     this.i18n = i18n;
+    this.assistantTools = assistantTools;
   }
 
   async run(session: Session, message?: string, commit?: () => Promise<void>) {
@@ -34,7 +34,7 @@ export class Assistant {
     while (true) {
       const { content, toolCalls } = await this.aiClient.createCompletionStreaming({
         model: session.model,
-        tools: Assistant.availableTools(session),
+        tools: this.availableTools(session),
         messages: this.buildMessages(session),
         onChunk: (text) => this.uiNotifier.notify(session.id, { type: 'Chunk', text }),
       });
@@ -61,7 +61,7 @@ export class Assistant {
   }
 
   async generateDemo(session: Session, commit?: () => Promise<void>) {
-    const t = createTranslate(session.language);
+    const t = this.i18n.translate(session.language);
 
     for (let i = 0; i <= 3; ++i) {
       const { content } = await this.aiClient.createCompletion({
@@ -94,7 +94,7 @@ export class Assistant {
   }
 
   private buildMessages(session: Session) {
-    const t = createTranslate(session.language);
+    const t = this.i18n.translate(session.language);
 
     return [
       {
@@ -110,12 +110,12 @@ export class Assistant {
   }
 
   private async handleToolCall(session: Session, toolCall: ToolCall) {
-    const localizedTools = tools[session.language];
+    const tools = this.availableTools(session);
 
-    assert(hasKey(localizedTools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
+    assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
 
     try {
-      const tool: Tool<z.ZodType<any>> = localizedTools[toolCall.name];
+      const tool: Tool<z.ZodType<any>> = tools[toolCall.name] as Tool<z.ZodType<any>>;
 
       toolCall.arguments = tool.param.parse(toolCall.arguments);
 
@@ -127,14 +127,14 @@ export class Assistant {
     }
   }
 
-  private static availableTools(session: Session): Record<string, Tool<any>> {
-    const localized = tools[session.language];
+  private availableTools(session: Session) {
+    const tools: Partial<Tools> = this.assistantTools(session.language);
 
-    if (session.postureMode === 'auto') {
-      return localized;
+    if (session.postureMode === 'forced') {
+      delete tools.setPosture;
     }
 
-    return Object.fromEntries(Object.entries(localized).filter(([name]) => name !== 'setPosture'));
+    return tools;
   }
 
   private static toErrorMessage(error: unknown): string {

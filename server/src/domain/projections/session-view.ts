@@ -131,6 +131,7 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'DiscussionPathsSet',
   'DiscussionPathSelected',
   'PostureChanged',
+  'SearchPerformed',
 ]);
 
 export function affectsTimeline(type: SessionEvent['type']): boolean {
@@ -270,6 +271,10 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         } else {
           items.push({ kind: 'posture-changed', posture: event.posture as Posture, reason: event.reason, forced: false });
         }
+        break;
+
+      case 'SearchPerformed':
+        items.push({ kind: 'web-searched', query: event.query, resultCount: event.resultCount });
         break;
     }
   }

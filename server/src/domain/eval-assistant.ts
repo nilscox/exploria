@@ -1,16 +1,18 @@
 import { assert } from '../utils';
-import { tools } from './tools';
 
 import type { Assistant, AssistantUiEvent } from './assistant';
+import type { AssistantTools } from './assistant-tools';
 import type { UiNotifier } from './ui-notifier';
 
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
 export class EvalAssistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
+  private readonly assistantTools: AssistantTools;
 
-  constructor(uiNotifier: UiNotifier) {
+  constructor(uiNotifier: UiNotifier, assistantTools: AssistantTools) {
     this.uiNotifier = uiNotifier;
+    this.assistantTools = assistantTools;
   }
 
   run: Assistant['run'] = async (session, message) => {
@@ -21,7 +23,7 @@ export class EvalAssistant {
     // oxlint-disable-next-line no-eval typescript/no-implied-eval
     const fn = new AsyncFunction('session', 'tools', 'send', message);
 
-    await fn(session, tools, (text: string) => {
+    await fn(session, this.assistantTools(session.language), (text: string) => {
       this.uiNotifier.notify(session.id, { type: 'Chunk', text });
     });
   };

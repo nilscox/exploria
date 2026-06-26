@@ -88,6 +88,10 @@ export class SessionController {
       res.status(204).end();
     });
 
+    this.router.get('/:id/events', async (req, res) => {
+      res.json(await this.listEvents(req.params.id));
+    });
+
     this.router.put('/:id/model', async (req, res) => {
       const { model } = z.object({ model: z.string().min(1) }).parse(req.body);
 
@@ -213,6 +217,10 @@ export class SessionController {
 
   private async deleteSession(sessionId: string) {
     await this.sessionRepository.delete(sessionId);
+  }
+
+  private async listEvents(sessionId: string) {
+    return this.sessionRepository.findEvents(sessionId);
   }
 
   private async setModel(model: string) {

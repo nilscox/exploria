@@ -36,6 +36,10 @@ export type Messages = {
 
   'update-topic.description': string;
 
+  'web-search.description': string;
+  'web-search.query-param': string;
+  'web-search.no-results': (p: { query: string }) => string;
+
   'session-info.status.pending': string;
   'session-info.status.in_progress': string;
   'session-info.status.done': string;
@@ -87,6 +91,11 @@ const en: Messages = {
     'The stance to adopt: socratic (question to deepen thinking), devils_advocate (attack the ideas to test them), examiner (demanding pressure, e.g. interview prep), advisor (neutral help to structure a decision), mirror (reflect and welcome, without challenging).',
   'set-posture.reason-param':
     'A short explanation, addressed to the user in their language, of why you are adopting this stance.',
+
+  'web-search.description':
+    'Searches the web to verify a factual claim. Use it before challenging or endorsing a fact. Do not use it for subjective or philosophical questions. Cite sources naturally in your reply.',
+  'web-search.query-param': 'The search query',
+  'web-search.no-results': ({ query }) => `No results found for: "${query}"`,
 
   'set-subject.description':
     'Updates the overall subject of the conversation, when it becomes clearer or shifts along the way.',
@@ -142,17 +151,22 @@ const fr: Messages = {
   'set-discussion-paths.description-param': 'Description optionnelle en une phrase',
 
   'set-posture.description':
-    'Change la posture que tu adoptes pour la conversation. À appeler avant ta réponse dès qu’une autre posture est plus adaptée à la discussion que la posture courante.',
+    "Change la posture que tu adoptes pour la conversation. À appeler avant ta réponse dès qu'une autre posture est plus adaptée à la discussion que la posture courante.",
   'set-posture.posture-param':
-    'La posture à adopter : socratic (questionner pour approfondir la pensée), devils_advocate (attaquer les idées pour les tester), examiner (pression exigeante, ex. préparation d’entretien), advisor (aide neutre à structurer une décision), mirror (refléter et accueillir, sans challenger).',
+    "La posture à adopter : socratic (questionner pour approfondir la pensée), devils_advocate (attaquer les idées pour les tester), examiner (pression exigeante, ex. préparation d'entretien), advisor (aide neutre à structurer une décision), mirror (refléter et accueillir, sans challenger).",
   'set-posture.reason-param':
-    'Une courte explication, adressée à l’utilisateur dans sa langue, de la raison pour laquelle tu adoptes cette posture.',
+    "Une courte explication, adressée à l'utilisateur dans sa langue, de la raison pour laquelle tu adoptes cette posture.",
+
+  'web-search.description':
+    "Effectue une recherche web pour vérifier une affirmation factuelle. À utiliser avant de contester ou d'endosser un fait. Ne pas utiliser pour des questions subjectives ou philosophiques. Cite les sources naturellement dans ta réponse.",
+  'web-search.query-param': 'La requête de recherche',
+  'web-search.no-results': ({ query }) => `Aucun résultat trouvé pour : "${query}"`,
 
   'set-subject.description':
-    'Met à jour le sujet global de la conversation, lorsqu’il se précise ou évolue en cours de route.',
+    "Met à jour le sujet global de la conversation, lorsqu'il se précise ou évolue en cours de route.",
 
   'update-topic.description':
-    'Met à jour un sujet du plan (intitulé ou statut). À appeler dès que tu commences à aborder un sujet (« en cours ») ou que tu l’as suffisamment traité (« traité »).',
+    "Met à jour un sujet du plan (intitulé ou statut). À appeler dès que tu commences à aborder un sujet (« en cours ») ou que tu l'as suffisamment traité (« traité »).",
 
   'session-info.status.pending': 'à traiter',
   'session-info.status.in_progress': 'en cours',

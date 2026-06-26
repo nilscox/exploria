@@ -3,18 +3,19 @@ import { beforeEach, describe, it } from 'node:test';
 
 import { StubClock } from '../../adapters/clock';
 import { StubGenerator } from '../../adapters/generator';
-import { createTranslate } from '../i18n';
+import { MustacheI18n } from '../../adapters/i18n';
+import { type Translate } from '../i18n';
 import { Session } from '../session';
 import { toChatMessages } from './chat-context';
 
 import type { AiClientMessage } from '../../adapters/ai-client';
 
-const t = createTranslate('fr');
-
 void describe('toChatMessages', () => {
+  let t: Translate;
   let session: Session;
 
   beforeEach(() => {
+    t = new MustacheI18n(new StubClock()).translate('en');
     session = new Session(new StubGenerator(), new StubClock());
   });
 
@@ -25,7 +26,7 @@ void describe('toChatMessages', () => {
       model: 'gpt-4o',
       toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: { duration: 42 } }],
     });
-    session.addToolCallResult('call-1', { result: 'Chronomètre démarré' });
+    session.addToolCallResult('call-1', { result: 'Timer started' });
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
       { role: 'system', content: 'instructions' },
@@ -35,7 +36,7 @@ void describe('toChatMessages', () => {
         content: 'Calling a tool',
         toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: { duration: 42 } }],
       },
-      { role: 'tool', toolCallId: 'call-1', content: 'Chronomètre démarré' },
+      { role: 'tool', toolCallId: 'call-1', content: 'Timer started' },
     ] satisfies AiClientMessage[]);
   });
 
@@ -68,7 +69,7 @@ void describe('toChatMessages', () => {
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t).at(-1), {
       role: 'system',
-      content: 'Chemin de discussion sélectionné: "Path A"',
+      content: 'Selected discussion path: "Path A"',
     } satisfies AiClientMessage);
   });
 });

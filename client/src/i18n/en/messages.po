@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. placeholder {0}: item.reason
-#: src/session/session-timeline.tsx:130
+#: src/session/session-timeline.tsx:138
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
@@ -38,11 +38,11 @@ msgstr "Attack ideas to test them"
 msgid "Automatic"
 msgstr "Automatic"
 
-#: src/session/session-sidebar.tsx:77
+#: src/session/session-sidebar.tsx:69
 msgid "Automatic<0>(<1/>)</0>"
 msgstr "Automatic<0>(<1/>)</0>"
 
-#: src/session/session-timeline.tsx:118
+#: src/session/session-timeline.tsx:126
 msgid "Back to automatic stance"
 msgstr "Back to automatic stance"
 
@@ -74,7 +74,7 @@ msgstr "Demanding pressure, e.g. interview prep"
 msgid "Devil's advocate"
 msgstr "Devil's advocate"
 
-#: src/session/session-timeline.tsx:156
+#: src/session/session-timeline.tsx:164
 msgid "done"
 msgstr "done"
 
@@ -107,7 +107,7 @@ msgstr "Exploria"
 msgid "Help structure a decision"
 msgstr "Help structure a decision"
 
-#: src/session/session-timeline.tsx:155
+#: src/session/session-timeline.tsx:163
 msgid "in progress"
 msgstr "in progress"
 
@@ -171,7 +171,7 @@ msgstr "Notes"
 msgid "Pause"
 msgstr "Pause"
 
-#: src/session/session-timeline.tsx:154
+#: src/session/session-timeline.tsx:162
 msgid "pending"
 msgstr "pending"
 
@@ -191,6 +191,12 @@ msgstr "Reflect and welcome, without challenging"
 msgid "Resume"
 msgstr "Resume"
 
+#. placeholder {0}: item.query
+#. placeholder {1}: item.resultCount
+#: src/session/session-timeline.tsx:114
+msgid "Search: \"{0}\" ({1} result(s))"
+msgstr "Search: \"{0}\" ({1} result(s))"
+
 #: src/home.tsx:99
 msgid "Session subject"
 msgstr "Session subject"
@@ -208,11 +214,11 @@ msgstr "Settings"
 msgid "Socratic"
 msgstr "Socratic"
 
-#: src/session/session-sidebar.tsx:69
+#: src/session/session-sidebar.tsx:86
 msgid "Stance"
 msgstr "Stance"
 
-#: src/session/session-timeline.tsx:120
+#: src/session/session-timeline.tsx:128
 msgid "Stance forced: <0/>"
 msgstr "Stance forced: <0/>"
 

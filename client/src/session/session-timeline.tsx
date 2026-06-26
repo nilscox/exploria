@@ -1,7 +1,7 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import clsx from 'clsx';
-import { CheckIcon, DramaIcon, ListIcon, PencilIcon, StickyNoteIcon, StickyNoteXIcon, TimerIcon } from 'lucide-react';
+import { CheckIcon, DramaIcon, ListIcon, PencilIcon, SearchIcon, StickyNoteIcon, StickyNoteXIcon, TimerIcon } from 'lucide-react';
 import type { SVGProps } from 'react';
 
 import { Button } from 'src/components/button';
@@ -108,6 +108,14 @@ const components: {
   ),
 
   'posture-changed': ({ item }) => <PostureChanged item={item} />,
+
+  'web-searched': ({ item }) => (
+    <Notification Icon={SearchIcon}>
+      <Trans>
+        Search: "{item.query}" ({item.resultCount} result(s))
+      </Trans>
+    </Notification>
+  ),
 };
 
 function PostureChanged({ item }: { item: Extract<TimelineItem, { kind: 'posture-changed' }> }) {
