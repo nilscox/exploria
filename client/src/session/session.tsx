@@ -9,6 +9,7 @@ import { useParams } from 'react-router';
 import { api } from 'src/api';
 import { Button, LinkButton } from 'src/components/button';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
+import { DocumentTitle } from 'src/components/document-title';
 import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
@@ -35,6 +36,7 @@ export function SessionPage() {
 
   return (
     <div className="col h-full">
+      <DocumentTitle title={state.session.subject} />
       <Header session={state.session} />
 
       <div className="row flex-1 overflow-hidden">
