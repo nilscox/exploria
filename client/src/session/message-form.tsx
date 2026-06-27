@@ -39,8 +39,11 @@ export function MessageForm({ loading, postMessage }: { loading?: boolean; postM
   };
 
   return (
-    <section className="mx-auto w-full max-w-4xl p-4">
-      <form onSubmit={handleSubmit} className="row items-end gap-4">
+    <section className="max-w-x4l relative mx-auto w-full max-w-4xl px-4 pb-8">
+      <form
+        onSubmit={handleSubmit}
+        className="col bg-neutral items-stretch rounded-lg border shadow-2xl has-focus-visible:outline"
+      >
         <textarea
           ref={textAreaRef}
           rows={1}
@@ -50,16 +53,22 @@ export function MessageForm({ loading, postMessage }: { loading?: boolean; postM
           aria-label={t`Message`}
           placeholder={t`Type a message...`}
           onInput={resizeTextArea}
-          className="read-only:text-dim bg-neutral block w-full resize-none rounded-md border p-2"
+          className="h-full resize-none p-4 outline-none"
         />
-        <Button type="submit" size="icon" className="size-auto p-2">
-          <SendIcon className="size-6" />
-        </Button>
-      </form>
 
-      <span className="text-dim text-xs">
-        <Trans>Enter to send &bull; Shift+Enter for new line</Trans>
-      </span>
+        <div className="row items-end justify-between px-4 pb-2">
+          <div className="text-dim text-xs opacity-70">
+            <Trans>Enter to send &bull; Shift+Enter for new line</Trans>
+          </div>
+
+          <div className="self-end">
+            <Button type="submit" size="small">
+              <SendIcon className="size-4" />
+              <Trans>Send</Trans>
+            </Button>
+          </div>
+        </div>
+      </form>
     </section>
   );
 }

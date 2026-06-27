@@ -40,10 +40,11 @@
 
   * {
     border-color: var(--color-border);
+    outline-color: var(--color-primary);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid;
   }
 
   body {

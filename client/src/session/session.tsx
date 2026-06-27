@@ -119,12 +119,10 @@ function MainSection({
 
   return (
     <div className="flex-1 scrollbar-thin overflow-y-auto">
-      <div className="col relative mx-auto w-full max-w-4xl gap-4 p-4">
+      <div className="col relative mx-auto w-full max-w-4xl gap-4 px-6 py-4">
         <Timeline session={session} onSelectPath={onSelectPath} />
         {stream && <Markdown markdown={stream} />}
       </div>
-
-      <div className="to-background sticky inset-x-0 bottom-0 -my-4 h-4 bg-linear-to-b from-transparent" />
 
       <div ref={bottomRef} />
     </div>

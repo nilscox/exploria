@@ -26,7 +26,7 @@ msgstr "Ajouter"
 msgid "Advisor"
 msgstr "Conseiller"
 
-#: src/session/summary.ts:40
+#: src/session/summary.ts:42
 msgid "Assistant"
 msgstr "Assistant"
 
@@ -51,12 +51,12 @@ msgid "Back to automatic stance"
 msgstr "Retour à la posture automatique"
 
 #: src/session/session-summary.tsx:144
-#: src/session/summary.ts:42
+#: src/session/summary.ts:44
 msgid "Biases"
 msgstr "Biais"
 
 #: src/session/session-summary.tsx:163
-#: src/session/summary.ts:43
+#: src/session/summary.ts:45
 msgid "Blind spots"
 msgstr "Angles morts"
 
@@ -70,7 +70,7 @@ msgid "Close"
 msgstr "Fermer"
 
 #: src/session/session-summary.tsx:199
-#: src/session/summary.ts:46
+#: src/session/summary.ts:48
 msgid "Conclusion"
 msgstr "Conclusion"
 
@@ -78,7 +78,7 @@ msgstr "Conclusion"
 msgid "Dark"
 msgstr "Sombre"
 
-#: src/session/summary.ts:36
+#: src/session/summary.ts:37
 msgid "Date"
 msgstr "Date"
 
@@ -143,7 +143,7 @@ msgid "JSON"
 msgstr "JSON"
 
 #: src/session/session-summary.tsx:132
-#: src/session/summary.ts:41
+#: src/session/summary.ts:43
 msgid "Key points"
 msgstr "Points clés"
 
@@ -159,7 +159,7 @@ msgstr "Clair"
 msgid "Load demo"
 msgstr "Voir une démo"
 
-#: src/session/message-form.tsx:50
+#: src/session/message-form.tsx:53
 msgid "Message"
 msgstr "Message"
 
@@ -205,7 +205,7 @@ msgid "Notes"
 msgstr "Notes"
 
 #: src/session/session-summary.tsx:187
-#: src/session/summary.ts:45
+#: src/session/summary.ts:47
 msgid "Open questions"
 msgstr "Questions ouvertes"
 
@@ -238,6 +238,10 @@ msgstr "Reprendre"
 #: src/session/session-timeline.tsx:153
 msgid "Search: \"{0}\" ({1} result(s))"
 msgstr "Recherche : \"{0}\" ({1} résultat(s))"
+
+#: src/session/message-form.tsx:67
+msgid "Send"
+msgstr "Envoyer"
 
 #: src/home.tsx:99
 msgid "Session subject"
@@ -295,12 +299,12 @@ msgstr "Sujet à définir"
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
-#: src/session/summary.ts:37
+#: src/session/summary.ts:39
 msgid "Summary"
 msgstr "Bilan"
 
 #: src/session/session-summary.tsx:175
-#: src/session/summary.ts:44
+#: src/session/summary.ts:46
 msgid "Tensions & contradictions"
 msgstr "Tensions et contradictions"
 
@@ -349,11 +353,11 @@ msgstr "Sujet renommé : {0} → {1}"
 msgid "Topics"
 msgstr "Sujets"
 
-#: src/session/summary.ts:38
+#: src/session/summary.ts:40
 msgid "Transcript"
 msgstr "Transcription"
 
-#: src/session/message-form.tsx:51
+#: src/session/message-form.tsx:54
 msgid "Type a message..."
 msgstr "Entrez un message..."
 
@@ -361,6 +365,6 @@ msgstr "Entrez un message..."
 msgid "What do you need to think about?"
 msgstr "A quel sujet souhaitez-vous réfléchir ?"
 
-#: src/session/summary.ts:39
+#: src/session/summary.ts:41
 msgid "You"
 msgstr "Vous"
