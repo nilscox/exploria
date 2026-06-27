@@ -34,6 +34,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         solid: 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent',
+        secondary: 'bg-accent text-accent-foreground hover:bg-accent/90 border-transparent',
         outlined: 'border-border hover:bg-accent/25',
         ghost: 'border-transparent hover:bg-accent',
       },

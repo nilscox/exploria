@@ -49,7 +49,7 @@ export function Timer({
       </div>
 
       <div className="row items-center gap-2">
-        <Button className="flex-1" onClick={action}>
+        <Button variant="secondary" className="flex-1" onClick={action}>
           <Icon className="size-4" />
           {label}
         </Button>
@@ -78,7 +78,7 @@ function StartTimer({ onStart }: { onStart: (duration: number) => void }) {
   return (
     <Section title={<Trans>Session timer</Trans>}>
       <div className="col items-center py-6 text-center">
-        <Button onClick={withPrompt(t`Duration (minutes):`, handleStart)}>
+        <Button variant="outlined" onClick={withPrompt(t`Duration (minutes):`, handleStart)}>
           <Trans>Start timer</Trans>
         </Button>
       </div>
