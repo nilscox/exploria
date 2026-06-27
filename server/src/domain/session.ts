@@ -332,14 +332,15 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
   }
 
+  // add translations
   startTimer(duration: number) {
-    assert(!this._timer, new Error('Un chronomètre est déjà lancé'));
+    assert(!this._timer, new Error('Un minuteur est déjà lancé'));
 
     this.emit('TimerStarted', { duration });
   }
 
   clearTimer() {
-    assert(this._timer, new Error("Le chronomètre n'est pas lancé"));
+    assert(this._timer, new Error("Le minuteur n'est pas lancé"));
 
     this.emit('TimerCleared', {});
   }

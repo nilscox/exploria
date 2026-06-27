@@ -125,25 +125,25 @@ const fr: Messages = {
     "Sauvegarde un élément important de la conversation (point clé, position de l'utilisateur, insight, tension identifiée). À utiliser dès qu'un élément mérite d'être retenu pour la synthèse finale.",
 
   'start-timer.description':
-    "Démarre un chronomètre pour cadrer la durée de la session. À utiliser quand l'utilisateur fixe ou demande une limite de temps.",
+    "Démarre un minuteur pour cadrer la durée de la session. À utiliser quand l'utilisateur fixe ou demande une limite de temps.",
   'start-timer.duration-param': 'Temps de la session en minutes',
 
   'add-topics.description':
     'Ajoute un ou plusieurs sujets à la discussion. À utiliser quand la conversation fait émerger de nouveaux axes à explorer.',
 
-  'clear-timer.description': 'Annule le chronomètre en cours.',
+  'clear-timer.description': 'Annule le minuteur en cours.',
 
   'get-remaining-time.description':
-    "Récupère le temps restant sur le chronomètre. À utiliser pour jauger le rythme ou décider s'il faut conclure.",
+    "Récupère le temps restant sur le minuteur. À utiliser pour jauger le rythme ou décider s'il faut conclure.",
 
   'get-saved-notes.description':
     'Récupère toutes les notes sauvegardées au cours de la session. À utiliser avant de produire une synthèse, ou pour te remémorer ce qui a été dit.',
   'get-saved-notes.empty': 'Aucune note sauvegardée.',
   'get-saved-notes.heading': 'Notes sauvegardées :',
 
-  'pause-timer.description': 'Met en pause le chronomètre.',
+  'pause-timer.description': 'Met en pause le minuteur.',
 
-  'resume-timer.description': 'Redémarre le chronomètre mis en pause.',
+  'resume-timer.description': 'Redémarre le minuteur mis en pause.',
 
   'set-discussion-paths.description':
     "Propose plusieurs axes possibles pour la suite, affichés comme des options cliquables sous ton message. Ne les énumère pas dans ton texte. À utiliser ponctuellement, uniquement quand un vrai choix de direction se présente et qu'il est pertinent de laisser l'utilisateur trancher.",

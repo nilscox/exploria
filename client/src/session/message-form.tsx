@@ -57,7 +57,7 @@ export function MessageForm({ loading, postMessage }: { loading?: boolean; postM
         />
 
         <div className="row items-end justify-between px-4 pb-2">
-          <div className="text-dim text-xs opacity-70">
+          <div className="text-dim-40 text-xs">
             <Trans>Enter to send &bull; Shift+Enter for new line</Trans>
           </div>
 

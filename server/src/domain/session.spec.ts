@@ -172,7 +172,7 @@ void describe('Session', () => {
     }
 
     assert(error instanceof Error);
-    assert.strictEqual(error.message, 'Un chronomètre est déjà lancé');
+    assert.strictEqual(error.message, 'Un minuteur est déjà lancé');
   });
 
   void it('pauses and resumes the timer', () => {

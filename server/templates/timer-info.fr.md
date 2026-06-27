@@ -9,11 +9,11 @@ Temps imparti écoulé, il est nécessaire de conclure
 {{/timeUp}}
 
 {{#paused}}
-Chronomètre en pause
+Minuteur en pause
 {{/paused}}
 
 {{/timer}}
 
 {{^timer}}
-Aucun chronomètre démarré
+Aucun minuteur démarré
 {{/timer}}

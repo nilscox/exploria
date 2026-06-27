@@ -66,6 +66,10 @@
   color: color-mix(in srgb, var(--color-foreground) 60%, transparent);
 }
 
+@utility text-dim-* {
+  color: color-mix(in srgb, var(--color-foreground) calc(--value(integer) * 1%), transparent);
+}
+
 @utility col {
   display: flex;
   flex-direction: column;

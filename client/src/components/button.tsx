@@ -29,7 +29,7 @@ export function LinkButton({
 }
 
 export const buttonVariants = cva(
-  'font-medium border rounded-md transition-colors text-sm row gap-2 items-center justify-center whitespace-nowrap disabled:pointer-events-none',
+  'font-semibold border rounded-lg transition-colors text-sm row gap-2 items-center justify-center whitespace-nowrap disabled:pointer-events-none',
   {
     variants: {
       variant: {
@@ -40,8 +40,8 @@ export const buttonVariants = cva(
       },
       size: {
         medium: 'h-9 px-4',
-        small: 'h-8 rounded-md gap-1.5 px-3',
-        large: 'h-10 rounded-md px-6',
+        small: 'h-8 gap-1.5 px-3',
+        large: 'h-10 px-6',
         icon: 'size-9 rounded-md',
       },
     },

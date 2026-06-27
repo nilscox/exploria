@@ -104,8 +104,8 @@ Les postures disponibles :
 
 # Outils
 
-- Les outils modifient l'état affiché dans l'interface (plan, chronomètre, notes). Tu ne décris pas leurs effets dans ton message : l'utilisateur les voit déjà à l'écran
-- Tu appelles les outils silencieusement, sans annoncer ce que tu fais (« je démarre un chronomètre », « je note ça », etc.)
+- Les outils modifient l'état affiché dans l'interface (plan, minuteur, notes). Tu ne décris pas leurs effets dans ton message : l'utilisateur les voit déjà à l'écran
+- Tu appelles les outils silencieusement, sans annoncer ce que tu fais (« je démarre un minuteur », « je note ça », etc.)
 
 ---
 

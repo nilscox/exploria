@@ -1,7 +1,7 @@
 import { type Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { add, intervalToDuration } from 'date-fns';
-import { ClockIcon, PauseIcon, PlayIcon, Trash2Icon } from 'lucide-react';
+import { PauseIcon, PlayIcon } from 'lucide-react';
 
 import { Button } from 'src/components/button';
 import { useNow } from 'src/hooks/use-now';
@@ -26,6 +26,33 @@ export function Timer({
     return <StartTimer onStart={onStart} />;
   }
 
+  const { formattedTime, elapsedPercent } = computeTimer(timer, now);
+
+  const { Icon, label, action } = timer.pausedAt
+    ? { Icon: PlayIcon, label: <Trans>Resume</Trans>, action: onResume }
+    : { Icon: PauseIcon, label: <Trans>Pause</Trans>, action: onPause };
+
+  return (
+    <Section>
+      <div className="py-4 text-center font-mono text-4xl font-bold tracking-wide">{formattedTime}</div>
+
+      <ProgressBar percent={elapsedPercent} />
+
+      <div className="row mt-3 gap-2">
+        <Button variant="secondary" className="flex-1" onClick={action}>
+          <Icon className="size-4" />
+          {label}
+        </Button>
+
+        <Button variant="outlined" className="flex-1" onClick={withConfirm(t`Clear the timer?`, onClear)}>
+          <Trans>Stop</Trans>
+        </Button>
+      </div>
+    </Section>
+  );
+}
+
+function computeTimer(timer: Shared.Timer, now: Date) {
   const {
     hours = 0,
     minutes = 0,
@@ -35,30 +62,28 @@ export function Timer({
     end: add(timer.startedAt, { minutes: timer.duration }),
   });
 
-  const { Icon, label, action } = timer.pausedAt
-    ? { Icon: PlayIcon, label: <Trans>Resume</Trans>, action: onResume }
-    : { Icon: PauseIcon, label: <Trans>Pause</Trans>, action: onPause };
+  const remainingSeconds = Math.max(0, hours * 3600 + minutes * 60 + seconds);
+  const totalSeconds = timer.duration * 60;
+  const elapsedPercent = Math.min(100, ((totalSeconds - remainingSeconds) / totalSeconds) * 100);
 
+  const parts = hours > 0 ? [hours, minutes, seconds] : [minutes, seconds];
+
+  const formattedTime = parts
+    .map((v) => Math.max(0, v))
+    .map((v) => String(v).padStart(2, '0'))
+    .join(':');
+
+  return {
+    formattedTime,
+    elapsedPercent,
+  };
+}
+
+function ProgressBar({ percent }: { percent: number }) {
   return (
-    <Section title={<Trans>Session timer</Trans>}>
-      <div className="py-6 text-center font-mono text-2xl font-medium">
-        {[hours, minutes, seconds]
-          .map((value) => Math.max(0, value))
-          .map((value) => String(value).padStart(2, '0'))
-          .join(':')}
-      </div>
-
-      <div className="row items-center gap-2">
-        <Button variant="secondary" className="flex-1" onClick={action}>
-          <Icon className="size-4" />
-          {label}
-        </Button>
-
-        <Button variant="outlined" size="icon" onClick={withConfirm(t`Clear the timer?`, onClear)}>
-          <Trash2Icon className="size-4" />
-        </Button>
-      </div>
-    </Section>
+    <div className="bg-accent h-1 w-full rounded-full">
+      <div className="bg-primary h-1 rounded-full transition-all" style={{ width: `${percent}%` }} />
+    </div>
   );
 }
 
@@ -76,8 +101,8 @@ function StartTimer({ onStart }: { onStart: (duration: number) => void }) {
   };
 
   return (
-    <Section title={<Trans>Session timer</Trans>}>
-      <div className="col items-center py-6 text-center">
+    <Section>
+      <div className="col items-center py-4">
         <Button variant="outlined" onClick={withPrompt(t`Duration (minutes):`, handleStart)}>
           <Trans>Start timer</Trans>
         </Button>
@@ -86,12 +111,11 @@ function StartTimer({ onStart }: { onStart: (duration: number) => void }) {
   );
 }
 
-function Section({ title, children }: { title: React.ReactNode; children: React.ReactNode }) {
+function Section({ children }: { children: React.ReactNode }) {
   return (
-    <section className="bg-neutral rounded-md border p-2">
-      <h2 className="text-dim inline-row flex items-center gap-1 text-xs font-medium uppercase">
-        <ClockIcon className="size-4" />
-        <span className="leading-none">{title}</span>
+    <section className="bg-neutral rounded-md border p-4">
+      <h2 className="text-dim-50 flex items-center gap-1 text-xs font-medium uppercase">
+        <Trans>Session timer</Trans>
       </h2>
       {children}
     </section>

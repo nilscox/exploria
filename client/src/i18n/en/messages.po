@@ -18,9 +18,13 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
-#: src/session/topics-list.tsx:93
+#: src/session/topics-list.tsx:98
 msgid "Add a topic..."
 msgstr "Add a topic..."
+
+#: src/session/topics-list.tsx:97
+msgid "Add topic"
+msgstr "Add topic"
 
 #: src/session/posture.tsx:9
 msgid "Advisor"
@@ -60,7 +64,7 @@ msgstr "Biases"
 msgid "Blind spots"
 msgstr "Blind spots"
 
-#: src/session/timer.tsx:57
+#: src/session/timer.tsx:47
 msgid "Clear the timer?"
 msgstr "Clear the timer?"
 
@@ -102,7 +106,7 @@ msgstr "Devil's advocate"
 msgid "done"
 msgstr "done"
 
-#: src/session/topics-list.tsx:66
+#: src/session/topics-list.tsx:73
 msgid "Done"
 msgstr "Done"
 
@@ -110,7 +114,7 @@ msgstr "Done"
 msgid "Download"
 msgstr "Download"
 
-#: src/session/timer.tsx:81
+#: src/session/timer.tsx:106
 msgid "Duration (minutes):"
 msgstr "Duration (minutes):"
 
@@ -138,11 +142,11 @@ msgstr "Help structure a decision"
 msgid "in progress"
 msgstr "in progress"
 
-#: src/session/topics-list.tsx:67
+#: src/session/topics-list.tsx:74
 msgid "In progress"
 msgstr "In progress"
 
-#: src/session/timer.tsx:72
+#: src/session/timer.tsx:97
 msgid "Invalid input."
 msgstr "Invalid input."
 
@@ -213,7 +217,7 @@ msgstr "Notes"
 msgid "Open questions"
 msgstr "Open questions"
 
-#: src/session/timer.tsx:40
+#: src/session/timer.tsx:33
 msgid "Pause"
 msgstr "Pause"
 
@@ -233,7 +237,7 @@ msgstr "Question to deepen thinking"
 msgid "Reflect and welcome, without challenging"
 msgstr "Reflect and welcome, without challenging"
 
-#: src/session/timer.tsx:39
+#: src/session/timer.tsx:32
 msgid "Resume"
 msgstr "Resume"
 
@@ -256,8 +260,7 @@ msgstr "Session subject"
 msgid "Session summary"
 msgstr "Session summary"
 
-#: src/session/timer.tsx:43
-#: src/session/timer.tsx:79
+#: src/session/timer.tsx:118
 msgid "Session timer"
 msgstr "Session timer"
 
@@ -281,7 +284,7 @@ msgstr "Stance forced: <0/>"
 msgid "Start session"
 msgstr "Start session"
 
-#: src/session/timer.tsx:82
+#: src/session/timer.tsx:107
 msgid "Start timer"
 msgstr "Start timer"
 
@@ -289,6 +292,10 @@ msgstr "Start timer"
 #: src/session/session-timeline.tsx:101
 msgid "Status of \"{0}\": <0/>"
 msgstr "Status of \"{0}\": <0/>"
+
+#: src/session/timer.tsx:48
+msgid "Stop"
+msgstr "Stop"
 
 #. placeholder {0}: item.subject
 #: src/session/session-timeline.tsx:75
@@ -333,7 +340,7 @@ msgstr "Timer resumed"
 msgid "Timer started: {0} minutes"
 msgstr "Timer started: {0} minutes"
 
-#: src/session/topics-list.tsx:68
+#: src/session/topics-list.tsx:75
 msgid "To do"
 msgstr "To do"
 
@@ -341,10 +348,6 @@ msgstr "To do"
 #: src/session/session-timeline.tsx:81
 msgid "Topic added: {0}"
 msgstr "Topic added: {0}"
-
-#: src/session/topics-list.tsx:92
-msgid "Topic label"
-msgstr "Topic label"
 
 #. placeholder {0}: item.label
 #: src/session/session-timeline.tsx:87

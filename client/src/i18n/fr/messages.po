@@ -18,9 +18,13 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/> : {0}"
 
-#: src/session/topics-list.tsx:93
+#: src/session/topics-list.tsx:98
 msgid "Add a topic..."
 msgstr "Ajouter un sujet…"
+
+#: src/session/topics-list.tsx:97
+msgid "Add topic"
+msgstr "Ajouter un sujet"
 
 #: src/session/posture.tsx:9
 msgid "Advisor"
@@ -60,7 +64,7 @@ msgstr "Biais"
 msgid "Blind spots"
 msgstr "Angles morts"
 
-#: src/session/timer.tsx:57
+#: src/session/timer.tsx:47
 msgid "Clear the timer?"
 msgstr "Annuler le minuteur ?"
 
@@ -102,7 +106,7 @@ msgstr "Avocat du diable"
 msgid "done"
 msgstr "terminé"
 
-#: src/session/topics-list.tsx:66
+#: src/session/topics-list.tsx:73
 msgid "Done"
 msgstr "Traité"
 
@@ -110,7 +114,7 @@ msgstr "Traité"
 msgid "Download"
 msgstr "Télécharger"
 
-#: src/session/timer.tsx:81
+#: src/session/timer.tsx:106
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
@@ -138,11 +142,11 @@ msgstr "Aide neutre à structurer une décision"
 msgid "in progress"
 msgstr "en cours"
 
-#: src/session/topics-list.tsx:67
+#: src/session/topics-list.tsx:74
 msgid "In progress"
 msgstr "En cours"
 
-#: src/session/timer.tsx:72
+#: src/session/timer.tsx:97
 msgid "Invalid input."
 msgstr "Entrée invalide."
 
@@ -213,7 +217,7 @@ msgstr "Notes"
 msgid "Open questions"
 msgstr "Questions ouvertes"
 
-#: src/session/timer.tsx:40
+#: src/session/timer.tsx:33
 msgid "Pause"
 msgstr "Pause"
 
@@ -233,7 +237,7 @@ msgstr "Questionner pour approfondir la pensée"
 msgid "Reflect and welcome, without challenging"
 msgstr "Refléter et accueillir, sans challenger"
 
-#: src/session/timer.tsx:39
+#: src/session/timer.tsx:32
 msgid "Resume"
 msgstr "Reprendre"
 
@@ -256,8 +260,7 @@ msgstr "Sujet de la session"
 msgid "Session summary"
 msgstr "Bilan de session"
 
-#: src/session/timer.tsx:43
-#: src/session/timer.tsx:79
+#: src/session/timer.tsx:118
 msgid "Session timer"
 msgstr "Minuteur de session"
 
@@ -281,7 +284,7 @@ msgstr "Posture forcée : <0/>"
 msgid "Start session"
 msgstr "Démarrer la session"
 
-#: src/session/timer.tsx:82
+#: src/session/timer.tsx:107
 msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
@@ -289,6 +292,10 @@ msgstr "Démarrer un minuteur"
 #: src/session/session-timeline.tsx:101
 msgid "Status of \"{0}\": <0/>"
 msgstr "Statut de « {0} » : <0/>"
+
+#: src/session/timer.tsx:48
+msgid "Stop"
+msgstr "Arrêter"
 
 #. placeholder {0}: item.subject
 #: src/session/session-timeline.tsx:75
@@ -318,22 +325,22 @@ msgstr "Thème"
 
 #: src/session/session-timeline.tsx:133
 msgid "Timer cleared"
-msgstr "Chronomètre annulé"
+msgstr "Minuteur annulé"
 
 #: src/session/session-timeline.tsx:139
 msgid "Timer paused"
-msgstr "Chronomètre mis en pause"
+msgstr "Minuteur mis en pause"
 
 #: src/session/session-timeline.tsx:145
 msgid "Timer resumed"
-msgstr "Chronomètre redémarré"
+msgstr "Minuteur redémarré"
 
 #. placeholder {0}: item.duration
 #: src/session/session-timeline.tsx:127
 msgid "Timer started: {0} minutes"
-msgstr "Chronomètre démarré : {0} minutes"
+msgstr "Minuteur démarré : {0} minutes"
 
-#: src/session/topics-list.tsx:68
+#: src/session/topics-list.tsx:75
 msgid "To do"
 msgstr "À traiter"
 
@@ -341,10 +348,6 @@ msgstr "À traiter"
 #: src/session/session-timeline.tsx:81
 msgid "Topic added: {0}"
 msgstr "Sujet ajouté : {0}"
-
-#: src/session/topics-list.tsx:92
-msgid "Topic label"
-msgstr "Sujet ajouté"
 
 #. placeholder {0}: item.label
 #: src/session/session-timeline.tsx:87

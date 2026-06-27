@@ -50,7 +50,7 @@ export function Select({
         <Content
           position="popper"
           sideOffset={8}
-          className="bg-neutral max-h-(--radix-select-content-available-height) w-(--radix-select-trigger-width) overflow-hidden rounded-md shadow-xl ring-1 ring-border"
+          className="bg-neutral ring-border max-h-(--radix-select-content-available-height) w-(--radix-select-trigger-width) overflow-hidden rounded-md shadow-xl ring-1"
         >
           <ScrollUpButton className="row items-center justify-center py-1">
             <ChevronUpIcon className="size-4" />
