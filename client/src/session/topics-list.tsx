@@ -1,34 +1,21 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import clsx from 'clsx';
-import { CheckIcon, PlusIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from 'src/components/button';
 import { Input } from 'src/components/input';
 
 export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (label: string) => void }) {
-  const [showAddTopic, setShowAddTopic] = useState(false);
-
   return (
     <section className="col gap-2">
-      <div className="row items-center justify-between gap-2">
-        <h2 className="text-dim text-xs font-medium uppercase">
-          <Trans>Topics</Trans>
-        </h2>
-        <Button variant="ghost" size="icon" onClick={() => setShowAddTopic(!showAddTopic)}>
-          <PlusIcon className="size-4" />
-        </Button>
-      </div>
-
-      {topics.length === 0 && (
-        <div className="text-dim col min-h-16 items-center justify-center text-sm">
-          <Trans>No topic yet.</Trans>
-        </div>
-      )}
+      <h2 className="text-dim text-xs font-medium uppercase">
+        <Trans>Topics</Trans>
+      </h2>
 
       {topics.length > 0 && (
-        <ul className="col gap-2">
+        <ul className="col gap-1.5">
           {topics.map((topic) => (
             <li key={topic.id}>
               <TopicItem topic={topic} />
@@ -37,56 +24,91 @@ export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (
         </ul>
       )}
 
-      {showAddTopic && (
-        <AddTopicForm
-          onSubmit={(label: string) => {
-            onAdd(label);
-            setShowAddTopic(false);
-          }}
-          onCancel={() => setShowAddTopic(false)}
-        />
-      )}
+      <AddTopicForm onSubmit={onAdd} />
     </section>
   );
 }
 
 function TopicItem({ topic }: { topic: Shared.Topic }) {
   return (
-    <div
-      className={clsx(
-        'row gap-2 items-center text-start font-medium px-2 py-1 w-full transition-colors',
-        topic.status === 'in_progress' && 'rounded-md border bg-accent',
-        topic.status === 'done' && 'opacity-50',
-      )}
-    >
-      <span>&bull;</span>
-      <span className={clsx(topic.status === 'done' && 'line-through text-dim')}>{topic.label}</span>
-      {topic.status === 'done' && <CheckIcon className="ms-auto size-3" />}
+    <div className="row bg-neutral items-center gap-2.5 rounded-lg border px-3 py-2">
+      <TopicDot status={topic.status} />
+
+      <span
+        className={clsx(
+          'flex-1 text-sm font-medium',
+          topic.status === 'done' && 'text-dim decoration-foreground/20 line-through',
+        )}
+      >
+        {topic.label}
+      </span>
+
+      <TopicStatusBadge status={topic.status} />
     </div>
   );
 }
 
-function AddTopicForm({ onSubmit, onCancel }: { onSubmit: (label: string) => void; onCancel: () => void }) {
+function TopicDot({ status }: { status: Shared.TopicStatus }) {
+  return (
+    <span
+      className={clsx(
+        'size-2 shrink-0 rounded-full self-start mt-1.5',
+        status === 'in_progress' && 'bg-blue-500',
+        status === 'pending' && 'bg-foreground/30',
+        status === 'done' && 'bg-foreground/20 opacity-60',
+      )}
+    />
+  );
+}
+
+function TopicStatusBadge({ status }: { status: Shared.TopicStatus }) {
+  return (
+    <span
+      className={clsx(
+        'shrink-0 font-mono text-xs',
+        status === 'in_progress' && 'text-blue-500',
+        status !== 'in_progress' && 'text-dim',
+      )}
+    >
+      {status === 'done' && <Trans>Done</Trans>}
+      {status === 'in_progress' && <Trans>In progress</Trans>}
+      {status === 'pending' && <Trans>To do</Trans>}
+    </span>
+  );
+}
+
+function AddTopicForm({ onSubmit }: { onSubmit: (label: string) => void }) {
   const { t } = useLingui();
+  const [value, setValue] = useState('');
 
   const handleSubmit: React.SubmitEventHandler = (event) => {
     event.preventDefault();
 
-    const formData = new FormData(event.target);
-    const label = formData.get('label') as string;
-
-    if (label === '') {
-      onCancel();
-    } else {
-      onSubmit(label);
+    if (value !== '') {
+      onSubmit(value);
+      setValue('');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="row items-center gap-2">
-      <Input name="label" aria-label={t`Topic label`} />
-      <Button type="submit">
-        <Trans>Add</Trans>
+    <form onSubmit={handleSubmit} className="row items-stretch gap-1">
+      <Input
+        name="label"
+        aria-label={t`Add topic`}
+        placeholder={t`Add a topic...`}
+        value={value}
+        autoComplete="off"
+        onChange={(e) => setValue(e.target.value)}
+        className="text-sm"
+      />
+      <Button
+        type="submit"
+        variant="outlined"
+        size="icon"
+        disabled={value.trim() === ''}
+        className="bg-neutral aspect-square"
+      >
+        <PlusIcon className="size-4" />
       </Button>
     </form>
   );

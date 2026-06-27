@@ -18,9 +18,9 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
-#: src/session/topics-list.tsx:89
-msgid "Add"
-msgstr "Add"
+#: src/session/topics-list.tsx:93
+msgid "Add a topic..."
+msgstr "Add a topic..."
 
 #: src/session/posture.tsx:9
 msgid "Advisor"
@@ -102,6 +102,10 @@ msgstr "Devil's advocate"
 msgid "done"
 msgstr "done"
 
+#: src/session/topics-list.tsx:66
+msgid "Done"
+msgstr "Done"
+
 #: src/session/session-summary.tsx:57
 msgid "Download"
 msgstr "Download"
@@ -133,6 +137,10 @@ msgstr "Help structure a decision"
 #: src/session/session-timeline.tsx:224
 msgid "in progress"
 msgstr "in progress"
+
+#: src/session/topics-list.tsx:67
+msgid "In progress"
+msgstr "In progress"
 
 #: src/session/timer.tsx:72
 msgid "Invalid input."
@@ -180,10 +188,6 @@ msgstr "Model changed: {0}"
 #: src/home.tsx:171
 msgid "More"
 msgstr "More"
-
-#: src/session/topics-list.tsx:26
-msgid "No topic yet."
-msgstr "No topic yet."
 
 #. placeholder {0}: item.content
 #: src/session/session-timeline.tsx:109
@@ -329,12 +333,16 @@ msgstr "Timer resumed"
 msgid "Timer started: {0} minutes"
 msgstr "Timer started: {0} minutes"
 
+#: src/session/topics-list.tsx:68
+msgid "To do"
+msgstr "To do"
+
 #. placeholder {0}: item.label
 #: src/session/session-timeline.tsx:81
 msgid "Topic added: {0}"
 msgstr "Topic added: {0}"
 
-#: src/session/topics-list.tsx:87
+#: src/session/topics-list.tsx:92
 msgid "Topic label"
 msgstr "Topic label"
 
@@ -349,7 +357,7 @@ msgstr "Topic removed: {0}"
 msgid "Topic renamed: {0} → {1}"
 msgstr "Topic renamed: {0} → {1}"
 
-#: src/session/topics-list.tsx:17
+#: src/session/topics-list.tsx:14
 msgid "Topics"
 msgstr "Topics"
 
