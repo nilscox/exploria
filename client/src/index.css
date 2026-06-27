@@ -8,23 +8,27 @@
 @theme {
   --color-neutral: var(--color-white);
   --color-inverted: var(--color-black);
-  --color-background: var(--color-slate-50);
-  --color-foreground: var(--color-mauve-800);
-  --color-accent: var(--color-mauve-300);
-  --color-accent-foreground: var(--color-mauve-950);
-  --color-border: var(--color-mauve-300);
+  --color-background: var(--color-stone-100);
+  --color-foreground: var(--color-stone-900);
+  --color-accent: var(--color-stone-200);
+  --color-accent-foreground: var(--color-stone-900);
+  --color-border: var(--color-stone-300);
+  --color-primary: var(--color-amber-600);
+  --color-primary-foreground: var(--color-white);
   --font-sans: 'Inter Variable', sans-serif;
   --font-mono: 'JetBrains Mono Variable', monospace;
 }
 
 :root.dark {
-  --color-neutral: var(--color-black);
+  --color-neutral: var(--color-stone-900);
   --color-inverted: var(--color-white);
-  --color-background: var(--color-mist-950);
-  --color-foreground: var(--color-mist-100);
+  --color-background: var(--color-stone-950);
+  --color-foreground: var(--color-stone-100);
   --color-accent: var(--color-stone-800);
   --color-accent-foreground: var(--color-stone-200);
   --color-border: var(--color-stone-700);
+  --color-primary: var(--color-amber-500);
+  --color-primary-foreground: var(--color-stone-950);
 }
 
 @layer base {
@@ -39,7 +43,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-border);
+    outline: 2px solid var(--color-primary);
   }
 
   body {

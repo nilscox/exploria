@@ -29,11 +29,11 @@ export function LinkButton({
 }
 
 const variants = cva(
-  'font-medium border rounded-md transition-colors text-sm row gap-2 items-center justify-center whitespace-nowrap',
+  'font-medium border rounded-md transition-colors text-sm row gap-2 items-center justify-center whitespace-nowrap focus-visible:outline-offset-2',
   {
     variants: {
       variant: {
-        solid: 'bg-accent text-accent-foreground hover:bg-accent/75 border-transparent',
+        solid: 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent',
         outlined: 'border-border hover:bg-accent/25',
         ghost: 'border-transparent hover:bg-accent',
       },

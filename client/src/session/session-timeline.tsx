@@ -1,7 +1,17 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import clsx from 'clsx';
-import { CheckIcon, DramaIcon, ListIcon, PencilIcon, SearchIcon, StickyNoteIcon, StickyNoteXIcon, TimerIcon } from 'lucide-react';
+import {
+  BotIcon,
+  CheckIcon,
+  DramaIcon,
+  ListIcon,
+  PencilIcon,
+  SearchIcon,
+  StickyNoteIcon,
+  StickyNoteXIcon,
+  TimerIcon,
+} from 'lucide-react';
 import type { SVGProps } from 'react';
 
 import { Button } from 'src/components/button';
@@ -31,6 +41,12 @@ function TimelineEntry({ item, onSelectPath }: { item: TimelineItem; onSelectPat
 const components: {
   [Item in TimelineItem as Exclude<Item['kind'], 'message'>]: React.ComponentType<{ item: Item }>;
 } = {
+  'model-changed': ({ item }) => (
+    <Notification Icon={BotIcon}>
+      <Trans>Model changed: {item.model}</Trans>
+    </Notification>
+  ),
+
   'subject-changed': ({ item }) => (
     <Notification Icon={PencilIcon}>
       <Trans>Subject changed: {item.subject}</Trans>

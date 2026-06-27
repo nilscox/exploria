@@ -14,7 +14,7 @@ export function Dialog({
       <div
         className={clsx(
           classes.content,
-          'bg-neutral fixed top-1/3 left-1/2 mx-auto w-full -translate-x-1/2 -translate-y-1/2 rounded-md p-4 shadow-md',
+          'bg-neutral fixed top-1/3 left-1/2 mx-auto w-full -translate-x-1/2 -translate-y-1/2 rounded-md p-4 shadow-xl ring-1 ring-border',
         )}
       >
         {children}

@@ -17,8 +17,6 @@ import { useSession } from './use-session';
 export function SessionPage() {
   const params = useParams<'sessionId'>();
 
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
   const [state, postMessage, selectPath] = useSession(params.sessionId as string);
 
   if (!state.session) {
@@ -38,9 +36,9 @@ export function SessionPage() {
           <SessionSidebar session={state.session} />
         </div>
 
-        <div className="col flex-1">
+        <div className="col min-w-0 flex-1">
           <MainSection session={state.session} stream={state.stream} onSelectPath={selectPath} />
-          <MessageForm textAreaRef={textAreaRef} loading={state.loading} postMessage={postMessage} />
+          <MessageForm loading={state.loading} postMessage={postMessage} />
         </div>
       </div>
     </div>
