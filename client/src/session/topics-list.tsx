@@ -1,7 +1,7 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import clsx from 'clsx';
-import { PlusIcon } from 'lucide-react';
+import { ListChecksIcon, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from 'src/components/button';
@@ -9,9 +9,9 @@ import { Input } from 'src/components/input';
 
 import { SidebarSection } from './sidebar-section';
 
-export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (label: string) => void }) {
+export function TopicsListSection({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (label: string) => void }) {
   return (
-    <SidebarSection title={<Trans>Topics</Trans>}>
+    <SidebarSection Icon={ListChecksIcon} title={<Trans>Topics</Trans>}>
       {topics.length > 0 && (
         <ul className="col gap-1.5">
           {topics.map((topic) => (

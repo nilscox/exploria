@@ -2,11 +2,11 @@ import type { Shared } from '@exploria/server/shared';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { action } from 'storybook/actions';
 
-import { TopicsList } from './topics-list';
+import { TopicsListSection } from './topics-list';
 
 export default {
   title: 'TopicsList',
-  component: TopicsList,
+  component: TopicsListSection,
   args: {
     onAdd: action('onAdd'),
   },
@@ -17,19 +17,19 @@ export default {
       </div>
     ),
   ],
-} satisfies Meta<typeof TopicsList>;
+} satisfies Meta<typeof TopicsListSection>;
 
 function topic(label: string, status: Shared.TopicStatus = 'pending') {
   return { id: label, label, status };
 }
 
-export const noTopic: StoryObj<typeof TopicsList> = {
+export const noTopic: StoryObj<typeof TopicsListSection> = {
   args: {
     topics: [],
   },
 };
 
-export const noTopicSelected: StoryObj<typeof TopicsList> = {
+export const noTopicSelected: StoryObj<typeof TopicsListSection> = {
   args: {
     topics: [
       topic('Market Positioning'),
@@ -40,7 +40,7 @@ export const noTopicSelected: StoryObj<typeof TopicsList> = {
   },
 };
 
-export const inProgress: StoryObj<typeof TopicsList> = {
+export const inProgress: StoryObj<typeof TopicsListSection> = {
   args: {
     topics: [
       topic('Market Positioning', 'done'),

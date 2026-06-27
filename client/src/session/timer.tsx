@@ -1,7 +1,7 @@
 import { type Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { add, intervalToDuration } from 'date-fns';
-import { PauseIcon, PlayIcon } from 'lucide-react';
+import { HourglassIcon, PauseIcon, PlayIcon } from 'lucide-react';
 
 import { Button } from 'src/components/button';
 import { useNow } from 'src/hooks/use-now';
@@ -35,7 +35,7 @@ export function Timer({
     : { Icon: PauseIcon, label: <Trans>Pause</Trans>, action: onPause };
 
   return (
-    <SidebarSection title={<Trans>Session timer</Trans>} variant="solid">
+    <SidebarSection Icon={HourglassIcon} title={<Trans>Session timer</Trans>} variant="solid">
       <div className="py-4 text-center font-mono text-3xl font-bold tracking-wide">{formattedTime}</div>
 
       <ProgressBar percent={elapsedPercent} />
@@ -103,7 +103,7 @@ function StartTimer({ onStart }: { onStart: (duration: number) => void }) {
   };
 
   return (
-    <SidebarSection title={<Trans>Session timer</Trans>} variant="solid">
+    <SidebarSection Icon={HourglassIcon} title={<Trans>Session timer</Trans>} variant="solid">
       <div className="col items-center py-4">
         <Button variant="outlined" onClick={withPrompt(t`Duration (minutes):`, handleStart)}>
           <Trans>Start timer</Trans>

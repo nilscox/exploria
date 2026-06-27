@@ -1,6 +1,7 @@
 import { type Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import { mutationOptions, useMutation } from '@tanstack/react-query';
+import { BotIcon, MessageSquareTextIcon } from 'lucide-react';
 
 import { api } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
@@ -10,7 +11,7 @@ import { ModelSelector } from './model-selector';
 import { PostureSection } from './posture';
 import { SidebarSection } from './sidebar-section';
 import { Timer } from './timer';
-import { TopicsList } from './topics-list';
+import { TopicsListSection } from './topics-list';
 
 export function SessionSidebar({ session }: { session: Shared.Session }) {
   const { mutate: setPosture } = useMutation(setPostureOptions(session.id));
@@ -29,22 +30,10 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
         onResume={resumeTimer}
         onClear={clearTimer}
       />
-
-      <TopicsList topics={session.topics} onAdd={addTopic} />
+      <TopicsListSection topics={session.topics} onAdd={addTopic} />
       <PostureSection session={session} onSetPosture={setPosture} />
+      <NotesSection session={session} />
       <ModelSelectorSection session={session} />
-
-      {session.notes.length > 0 && (
-        <SidebarSection title={<Trans>Notes</Trans>}>
-          <ul className="col gap-2">
-            {session.notes.map((note) => (
-              <li key={note.id} className="bg-accent rounded-md p-2">
-                <Markdown markdown={note.content} title={note.content} className="line-clamp-2 text-sm" />
-              </li>
-            ))}
-          </ul>
-        </SidebarSection>
-      )}
     </aside>
   );
 }
@@ -53,13 +42,31 @@ function ModelSelectorSection({ session }: { session: Shared.Session }) {
   const { mutate: setModel } = useMutation(setModelOptions(session.id));
 
   return (
-    <SidebarSection>
+    <SidebarSection Icon={BotIcon} title={<Trans>Model</Trans>}>
       <Field>
-        <FieldLabel className="text-dim-50 mb-1 text-xs font-medium uppercase">
+        <FieldLabel className="sr-only">
           <Trans>Model</Trans>
         </FieldLabel>
         <ModelSelector value={session.model} onChange={setModel} />
       </Field>
+    </SidebarSection>
+  );
+}
+
+function NotesSection({ session }: { session: Shared.Session }) {
+  if (session.notes.length === 0) {
+    return null;
+  }
+
+  return (
+    <SidebarSection Icon={MessageSquareTextIcon} title={<Trans>Notes</Trans>}>
+      <ul className="col gap-2">
+        {session.notes.map((note) => (
+          <li key={note.id} className="border-primary bg-accent rounded-md border-l-2 p-2">
+            <Markdown markdown={note.content} title={note.content} className="line-clamp-2 text-sm" />
+          </li>
+        ))}
+      </ul>
     </SidebarSection>
   );
 }

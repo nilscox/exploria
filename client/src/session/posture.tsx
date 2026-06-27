@@ -1,6 +1,7 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import clsx from 'clsx';
+import { SlidersHorizontalIcon } from 'lucide-react';
 
 import { FieldLabel, FieldProvider } from 'src/components/field';
 import { Switch } from 'src/components/switch';
@@ -18,6 +19,7 @@ export function PostureSection({
 
   return (
     <SidebarSection
+      Icon={SlidersHorizontalIcon}
       title={<Trans>Stance</Trans>}
       titleEnd={
         <FieldProvider>
