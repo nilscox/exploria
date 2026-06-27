@@ -2,7 +2,6 @@ import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
 
 import { debug, useSetDebug } from 'src/debug-context';
 import { setLanguage } from 'src/i18n/i18n';
@@ -100,11 +99,8 @@ export function ThemeModeSelector() {
 }
 
 function useTheme() {
-  const [searchParams] = useSearchParams();
-  const themeSearchParam = searchParams.get('theme');
-
   const [theme, setTheme] = useState(() => {
-    const theme = themeSearchParam ?? localStorage.getItem('theme');
+    const theme = localStorage.getItem('theme');
 
     if (theme && ['light', 'dark'].includes(theme)) {
       return theme;

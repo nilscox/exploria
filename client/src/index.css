@@ -22,13 +22,13 @@
 :root.dark {
   --color-neutral: var(--color-stone-900);
   --color-inverted: var(--color-white);
-  --color-background: var(--color-stone-950);
-  --color-foreground: var(--color-stone-100);
+  --color-background: var(--color-neutral-900);
+  --color-foreground: var(--color-orange-100);
   --color-accent: var(--color-stone-800);
-  --color-accent-foreground: var(--color-stone-200);
-  --color-border: var(--color-stone-700);
-  --color-primary: var(--color-amber-500);
-  --color-primary-foreground: var(--color-stone-950);
+  --color-accent-foreground: var(--color-orange-100);
+  --color-border: var(--color-stone-800);
+  --color-primary: var(--color-amber-400);
+  --color-primary-foreground: var(--color-stone-900);
 }
 
 @layer base {
