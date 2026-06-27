@@ -1,8 +1,11 @@
 import type * as assistant from './domain/assistant';
 import type { Language as DomainLanguage } from './domain/i18n';
 import type * as session from './domain/session';
+import type * as summary from './domain/summary';
 
 export namespace Shared {
+  export type Summary = summary.Summary;
+
   export type AssistantUiEvent = assistant.AssistantUiEvent;
 
   export type SessionUiEvent =
@@ -42,7 +45,8 @@ export namespace Shared {
     | { kind: 'timer-resumed' }
     | { kind: 'posture-changed'; posture: Posture; reason: string; forced: false }
     | { kind: 'posture-changed'; posture: Posture | 'auto'; reason: string; forced: true }
-    | { kind: 'web-searched'; query: string; resultCount: number };
+    | { kind: 'web-searched'; query: string; resultCount: number }
+    | { kind: 'summary'; summary: Summary };
 
   export type Session = {
     id: string;

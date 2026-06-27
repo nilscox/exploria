@@ -282,6 +282,22 @@ void describe('Session', () => {
     });
   });
 
+  void it('adds a summary', () => {
+    const summary = {
+      summary: 'A good session.',
+      keyPoints: ['Key idea'],
+      biases: [],
+      blindSpots: [],
+      tensions: [],
+      openQuestions: [],
+      conclusion: null,
+    };
+
+    session.addSummary(summary);
+
+    expectEvent('SummaryAdded', { summary });
+  });
+
   void describe('replay', () => {
     void it('reconstructs model and subject from events', () => {
       const source = new Session(new StubGenerator(), clock);

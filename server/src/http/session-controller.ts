@@ -14,6 +14,7 @@ import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
 import type { SessionRepository } from '../database/session-repository';
 import type { Assistant } from '../domain/assistant';
+import type { SummaryGenerator } from '../domain/summary-generator';
 import type { EventBus } from '../event-bus';
 import type { Shared } from '../shared';
 
@@ -24,6 +25,7 @@ export class SessionController {
   private readonly uiNotifier: SseUiNotifier;
   private readonly sessionRepository: SessionRepository;
   private readonly assistant: Assistant;
+  private readonly summaryGenerator: SummaryGenerator;
 
   public router = express.Router();
 
@@ -40,6 +42,7 @@ export class SessionController {
     uiNotifier: SseUiNotifier,
     assistant: Assistant,
     sessionRepository: SessionRepository,
+    summaryGenerator: SummaryGenerator,
   ) {
     this.generator = generator;
     this.clock = clock;
@@ -47,6 +50,7 @@ export class SessionController {
     this.uiNotifier = uiNotifier;
     this.assistant = assistant;
     this.sessionRepository = sessionRepository;
+    this.summaryGenerator = summaryGenerator;
 
     this.router.param('id', async (req, res, next, id: string) => {
       const session = await this.sessionRepository.find(id);
@@ -161,6 +165,10 @@ export class SessionController {
     this.router.put('/:id/timer/resume', async (req, res) => {
       await this.resumeTimer();
       res.status(204).end();
+    });
+
+    this.router.post('/:id/summary', async (req, res) => {
+      res.json(await this.generateSummary());
     });
   }
 
@@ -319,5 +327,19 @@ export class SessionController {
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
+  }
+
+  private async generateSummary() {
+    const session = this.getSessionInstance();
+
+    const summary = await this.summaryGenerator.generate(session);
+
+    session.addSummary(summary);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+
+    return summary;
   }
 }

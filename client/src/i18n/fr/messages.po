@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. placeholder {0}: item.reason
-#: src/session/session-timeline.tsx:138
+#: src/session/session-timeline.tsx:177
 msgid "<0/>: {0}"
 msgstr "<0/> : {0}"
 
@@ -25,6 +25,10 @@ msgstr "Ajouter"
 #: src/session/posture.tsx:9
 msgid "Advisor"
 msgstr "Conseiller"
+
+#: src/session/summary.ts:40
+msgid "Assistant"
+msgstr "Assistant"
 
 #: src/session/session-sidebar.tsx:92
 msgid "Assistant picks the best stance"
@@ -42,23 +46,43 @@ msgstr "Automatique"
 msgid "Automatic<0>(<1/>)</0>"
 msgstr "Automatique<0>(<1/>)</0>"
 
-#: src/session/session-timeline.tsx:126
+#: src/session/session-timeline.tsx:165
 msgid "Back to automatic stance"
 msgstr "Retour à la posture automatique"
+
+#: src/session/session-summary.tsx:144
+#: src/session/summary.ts:42
+msgid "Biases"
+msgstr "Biais"
+
+#: src/session/session-summary.tsx:163
+#: src/session/summary.ts:43
+msgid "Blind spots"
+msgstr "Angles morts"
 
 #: src/session/timer.tsx:57
 msgid "Clear the timer?"
 msgstr "Annuler le minuteur ?"
 
-#: src/components/settings.tsx:35
+#: src/components/settings.tsx:42
+#: src/session/session-summary.tsx:71
 msgid "Close"
 msgstr "Fermer"
 
-#: src/components/settings.tsx:86
+#: src/session/session-summary.tsx:199
+#: src/session/summary.ts:46
+msgid "Conclusion"
+msgstr "Conclusion"
+
+#: src/components/settings.tsx:95
 msgid "Dark"
 msgstr "Sombre"
 
-#: src/components/settings.tsx:127
+#: src/session/summary.ts:36
+msgid "Date"
+msgstr "Date"
+
+#: src/components/settings.tsx:139
 msgid "Debug"
 msgstr "Debug"
 
@@ -74,26 +98,25 @@ msgstr "Pression exigeante, ex. préparation d'entretien"
 msgid "Devil's advocate"
 msgstr "Avocat du diable"
 
-#: src/session/session-timeline.tsx:164
+#: src/session/session-timeline.tsx:225
 msgid "done"
 msgstr "terminé"
+
+#: src/session/session-summary.tsx:57
+msgid "Download"
+msgstr "Télécharger"
 
 #: src/session/timer.tsx:81
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
-#: src/session/session.tsx:65
+#: src/session/session.tsx:91
 msgid "End session"
 msgstr "Terminer la session"
 
 #: src/session/message-form.tsx:61
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne"
-
-#. placeholder {0}: modelsQuery.error.message
-#: src/session/model-selector.tsx:18
-msgid "Error while loading models: {0}"
-msgstr "Erreur lors du chargement des modèles"
 
 #: src/session/posture.tsx:8
 msgid "Examiner"
@@ -107,7 +130,7 @@ msgstr "Exploria"
 msgid "Help structure a decision"
 msgstr "Aide neutre à structurer une décision"
 
-#: src/session/session-timeline.tsx:163
+#: src/session/session-timeline.tsx:224
 msgid "in progress"
 msgstr "en cours"
 
@@ -115,11 +138,20 @@ msgstr "en cours"
 msgid "Invalid input."
 msgstr "Entrée invalide."
 
-#: src/components/settings.tsx:53
+#: src/session/session-summary.tsx:65
+msgid "JSON"
+msgstr "JSON"
+
+#: src/session/session-summary.tsx:132
+#: src/session/summary.ts:41
+msgid "Key points"
+msgstr "Points clés"
+
+#: src/components/settings.tsx:62
 msgid "Language"
 msgstr "Langue"
 
-#: src/components/settings.tsx:82
+#: src/components/settings.tsx:91
 msgid "Light"
 msgstr "Clair"
 
@@ -127,7 +159,7 @@ msgstr "Clair"
 msgid "Load demo"
 msgstr "Voir une démo"
 
-#: src/session/message-form.tsx:47
+#: src/session/message-form.tsx:50
 msgid "Message"
 msgstr "Message"
 
@@ -140,6 +172,11 @@ msgstr "Miroir"
 msgid "Model"
 msgstr "Modèle"
 
+#. placeholder {0}: item.model
+#: src/session/session-timeline.tsx:69
+msgid "Model changed: {0}"
+msgstr "Modèle changé : {0}"
+
 #: src/home.tsx:171
 msgid "More"
 msgstr "Plus"
@@ -149,17 +186,17 @@ msgid "No topic yet."
 msgstr "Aucun sujet."
 
 #. placeholder {0}: item.content
-#: src/session/session-timeline.tsx:70
+#: src/session/session-timeline.tsx:109
 msgid "Note added: {0}"
 msgstr "Note ajoutée : {0}"
 
 #. placeholder {0}: item.content
-#: src/session/session-timeline.tsx:76
+#: src/session/session-timeline.tsx:115
 msgid "Note removed: {0}"
 msgstr "Note supprimée : {0}"
 
 #. placeholder {0}: item.content
-#: src/session/session-timeline.tsx:82
+#: src/session/session-timeline.tsx:121
 msgid "Note updated: {0}"
 msgstr "Note modifiée : {0}"
 
@@ -167,11 +204,16 @@ msgstr "Note modifiée : {0}"
 msgid "Notes"
 msgstr "Notes"
 
+#: src/session/session-summary.tsx:187
+#: src/session/summary.ts:45
+msgid "Open questions"
+msgstr "Questions ouvertes"
+
 #: src/session/timer.tsx:40
 msgid "Pause"
 msgstr "Pause"
 
-#: src/session/session-timeline.tsx:162
+#: src/session/session-timeline.tsx:223
 msgid "pending"
 msgstr "en attente"
 
@@ -193,7 +235,7 @@ msgstr "Reprendre"
 
 #. placeholder {0}: item.query
 #. placeholder {1}: item.resultCount
-#: src/session/session-timeline.tsx:114
+#: src/session/session-timeline.tsx:153
 msgid "Search: \"{0}\" ({1} result(s))"
 msgstr "Recherche : \"{0}\" ({1} résultat(s))"
 
@@ -201,12 +243,17 @@ msgstr "Recherche : \"{0}\" ({1} résultat(s))"
 msgid "Session subject"
 msgstr "Sujet de la session"
 
+#: src/session/session-summary.tsx:38
+#: src/session/session-timeline.tsx:195
+msgid "Session summary"
+msgstr "Bilan de session"
+
 #: src/session/timer.tsx:43
 #: src/session/timer.tsx:79
 msgid "Session timer"
 msgstr "Minuteur de session"
 
-#: src/components/settings.tsx:26
+#: src/components/settings.tsx:29
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -218,7 +265,7 @@ msgstr "Socratique"
 msgid "Stance"
 msgstr "Posture"
 
-#: src/session/session-timeline.tsx:128
+#: src/session/session-timeline.tsx:167
 msgid "Stance forced: <0/>"
 msgstr "Posture forcée : <0/>"
 
@@ -231,46 +278,55 @@ msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
 #. placeholder {0}: item.label
-#: src/session/session-timeline.tsx:62
+#: src/session/session-timeline.tsx:101
 msgid "Status of \"{0}\": <0/>"
 msgstr "Statut de « {0} » : <0/>"
 
 #. placeholder {0}: item.subject
-#: src/session/session-timeline.tsx:36
+#: src/session/session-timeline.tsx:75
 msgid "Subject changed: {0}"
 msgstr "Sujet modifié : {0}"
 
-#: src/session/session.tsx:59
-msgid "Subject to be define"
+#: src/session/session.tsx:82
+msgid "Subject to be defined"
 msgstr "Sujet à définir"
 
 #: src/home.tsx:158
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
-#: src/components/settings.tsx:76
+#: src/session/summary.ts:37
+msgid "Summary"
+msgstr "Bilan"
+
+#: src/session/session-summary.tsx:175
+#: src/session/summary.ts:44
+msgid "Tensions & contradictions"
+msgstr "Tensions et contradictions"
+
+#: src/components/settings.tsx:85
 msgid "Theme"
 msgstr "Thème"
 
-#: src/session/session-timeline.tsx:94
+#: src/session/session-timeline.tsx:133
 msgid "Timer cleared"
 msgstr "Chronomètre annulé"
 
-#: src/session/session-timeline.tsx:100
+#: src/session/session-timeline.tsx:139
 msgid "Timer paused"
 msgstr "Chronomètre mis en pause"
 
-#: src/session/session-timeline.tsx:106
+#: src/session/session-timeline.tsx:145
 msgid "Timer resumed"
 msgstr "Chronomètre redémarré"
 
 #. placeholder {0}: item.duration
-#: src/session/session-timeline.tsx:88
+#: src/session/session-timeline.tsx:127
 msgid "Timer started: {0} minutes"
 msgstr "Chronomètre démarré : {0} minutes"
 
 #. placeholder {0}: item.label
-#: src/session/session-timeline.tsx:42
+#: src/session/session-timeline.tsx:81
 msgid "Topic added: {0}"
 msgstr "Sujet ajouté : {0}"
 
@@ -279,13 +335,13 @@ msgid "Topic label"
 msgstr "Sujet ajouté"
 
 #. placeholder {0}: item.label
-#: src/session/session-timeline.tsx:48
+#: src/session/session-timeline.tsx:87
 msgid "Topic removed: {0}"
 msgstr "Sujet supprimé : {0}"
 
 #. placeholder {0}: item.oldLabel
 #. placeholder {1}: item.newLabel
-#: src/session/session-timeline.tsx:54
+#: src/session/session-timeline.tsx:93
 msgid "Topic renamed: {0} → {1}"
 msgstr "Sujet renommé : {0} → {1}"
 
@@ -293,14 +349,18 @@ msgstr "Sujet renommé : {0} → {1}"
 msgid "Topics"
 msgstr "Sujets"
 
-#: src/session/message-form.tsx:48
+#: src/session/summary.ts:38
+msgid "Transcript"
+msgstr "Transcription"
+
+#: src/session/message-form.tsx:51
 msgid "Type a message..."
 msgstr "Entrez un message..."
-
-#: src/session/model-selector.tsx:28
-msgid "Unknown provider"
-msgstr "Provider inconnu"
 
 #: src/home.tsx:104
 msgid "What do you need to think about?"
 msgstr "A quel sujet souhaitez-vous réfléchir ?"
+
+#: src/session/summary.ts:39
+msgid "You"
+msgstr "Vous"

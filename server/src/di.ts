@@ -10,6 +10,7 @@ import { createDatabase, SessionRepository } from './database';
 import { Assistant } from './domain/assistant';
 import { createTools, type AssistantTools } from './domain/assistant-tools';
 import { EvalAssistant } from './domain/eval-assistant';
+import { SummaryGenerator } from './domain/summary-generator';
 import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
 import { Server } from './http/server';
@@ -61,5 +62,6 @@ export const container = createContainer({
   searchClient: asFunction(searchClientFactory),
   assistantTools: asFunction(createTools),
   assistant: asFunction(assistantFactory),
+  summaryGenerator: asClass(SummaryGenerator),
   server: asClass(Server),
 });

@@ -126,6 +126,12 @@ const sessions = {
     });
   },
 
+  async generateSummary(id: string): Promise<Shared.Summary> {
+    const res = await fetchApi(`/session/${id}/summary`, { method: 'POST' });
+
+    return res.json();
+  },
+
   stream(id: string): EventSource {
     return new EventSource(new URL(`${baseUrl.pathname}/session/${id}/stream`, baseUrl.origin));
   },

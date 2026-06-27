@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import type { Stream } from 'openai/streaming';
+import type z from 'zod';
 
 import { assert, defined } from '../utils';
 
@@ -43,8 +44,15 @@ type CreateCompletionResult = {
   toolCalls: AiClientToolCall[];
 };
 
+type CreateStructuredCompletionParams<T> = {
+  model: string;
+  messages: AiClientMessage[];
+  schema: z.ZodType<T>;
+};
+
 export class StubAiClient {
   results: CreateCompletionResult[] = [];
+  structuredResults: unknown[] = [];
 
   private next = async () => {
     if (this.results.length === 0) {
@@ -56,11 +64,16 @@ export class StubAiClient {
 
   createCompletion = this.next;
   createCompletionStreaming = this.next;
+
+  createStructuredCompletion = async <T>({ schema }: CreateStructuredCompletionParams<T>): Promise<T> => {
+    return schema.parse(defined(this.structuredResults.shift()));
+  };
 }
 
 export interface AiClient {
   createCompletion(params: CreateCompletionParams): Promise<CreateCompletionResult>;
   createCompletionStreaming(params: CreateCompletionStreamingParams): Promise<CreateCompletionResult>;
+  createStructuredCompletion<T>(params: CreateStructuredCompletionParams<T>): Promise<T>;
 }
 
 export class OpenAiClient implements AiClient {
@@ -196,6 +209,26 @@ export class OpenAiClient implements AiClient {
       arguments: JSON.parse(toolCall.function.arguments),
     };
   };
+
+  async createStructuredCompletion<T>({ model, messages, schema }: CreateStructuredCompletionParams<T>): Promise<T> {
+    const result = await this.client.chat.completions.create({
+      model,
+      messages: messages.map(OpenAiClient.mapMessage),
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'summary',
+          strict: true,
+          schema: schema.toJSONSchema(),
+        },
+      },
+    });
+
+    assert(result.choices[0]);
+    assert(result.choices[0].message.content);
+
+    return schema.parse(JSON.parse(result.choices[0].message.content));
+  }
 
   private static mapTools = (tools?: Record<string, Tool>): OpenAI.Chat.Completions.ChatCompletionTool[] => {
     return Object.entries(tools ?? {}).map(([name, tool]) => this.mapTool(name, tool));

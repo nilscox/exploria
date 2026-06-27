@@ -5,6 +5,7 @@ import { Timer } from './timer';
 import type { Clock } from '../adapters/clock';
 import type { Generator } from '../adapters/generator';
 import type { Language } from './i18n';
+import type { Summary } from './summary';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
@@ -73,7 +74,8 @@ export type SessionEvent =
   | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
   | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>
   | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
-  | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>;
+  | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>
+  | SessionDomainEvent<'SummaryAdded', { summary: Summary }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -407,5 +409,9 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   recordSearch(query: string, resultCount: number) {
     this.emit('SearchPerformed', { query, resultCount });
+  }
+
+  addSummary(summary: Summary) {
+    this.emit('SummaryAdded', { summary });
   }
 }

@@ -133,6 +133,7 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'DiscussionPathSelected',
   'PostureChanged',
   'SearchPerformed',
+  'SummaryAdded',
 ]);
 
 export function affectsTimeline(type: SessionEvent['type']): boolean {
@@ -285,6 +286,10 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
 
       case 'SearchPerformed':
         items.push({ kind: 'web-searched', query: event.query, resultCount: event.resultCount });
+        break;
+
+      case 'SummaryAdded':
+        items.push({ kind: 'summary', summary: event.summary });
         break;
     }
   }

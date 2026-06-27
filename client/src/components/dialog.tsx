@@ -21,7 +21,7 @@ export function DialogContent({
         <D.Popup
           className={clsx(
             className,
-            'col w-full rounded-lg bg-neutral p-6 shadow-lg transition-opacity data-starting-style:opacity-0 data-ending-style:opacity-0',
+            'col w-full rounded-lg bg-neutral shadow-lg max-h-full overflow-y-auto transition-opacity data-starting-style:opacity-0 data-ending-style:opacity-0',
           )}
         >
           {children}
@@ -32,9 +32,9 @@ export function DialogContent({
 }
 
 export function DialogHeader({ className, ...props }: React.ComponentProps<'header'>) {
-  return <header className={clsx(className, 'text-lg font-semibold')} {...props} />;
+  return <header className={clsx(className, 'text-lg p-4 font-semibold border-b')} {...props} />;
 }
 
 export function DialogActions({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div className={clsx(className, 'row justify-end gap-2')} {...props} />;
+  return <div className={clsx(className, 'row justify-end gap-2 border-t p-4 flex-wrap')} {...props} />;
 }

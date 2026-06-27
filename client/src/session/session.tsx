@@ -1,23 +1,29 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
+import { mutationOptions, useMutation } from '@tanstack/react-query';
 import { ArrowLeftIcon } from 'lucide-react';
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useParams } from 'react-router';
 
+import { api } from 'src/api';
 import { Button, LinkButton } from 'src/components/button';
+import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
 
 import { MessageForm } from './message-form';
 import { SessionSidebar } from './session-sidebar';
+import { SessionSummaryDialog } from './session-summary';
 import { Timeline } from './session-timeline';
 import { useSession } from './use-session';
 
 export function SessionPage() {
   const params = useParams<'sessionId'>();
+  const sessionId = params.sessionId as string;
 
-  const [state, postMessage, selectPath] = useSession(params.sessionId as string);
+  const [state, postMessage, selectPath] = useSession(sessionId);
 
   if (!state.session) {
     return (
@@ -45,7 +51,26 @@ export function SessionPage() {
   );
 }
 
+function generateSummaryOptions(sessionId: string, { onError }: { onError: (error: Error) => void }) {
+  return mutationOptions({
+    mutationKey: ['generateSummary', sessionId],
+    mutationFn: () => api.sessions.generateSummary(sessionId),
+    onError,
+  });
+}
+
 function Header({ session }: { session: Shared.Session }) {
+  const [summaryOpen, setSummaryOpen] = useState(false);
+
+  const { data, isPending, mutate } = useMutation(
+    generateSummaryOptions(session.id, {
+      onError: (error) => {
+        toast.error(error.message);
+        setSummaryOpen(false);
+      },
+    }),
+  );
+
   return (
     <header className="row items-center justify-between border-b px-4 py-2">
       <div className="row items-center gap-2">
@@ -54,14 +79,23 @@ function Header({ session }: { session: Shared.Session }) {
         </LinkButton>
 
         <h1 className="text-xl font-medium">
-          {session.subject ? session.subject : <Trans>Subject to be define</Trans>}
+          {session.subject ? session.subject : <Trans>Subject to be defined</Trans>}
         </h1>
       </div>
 
       <div className="row items-center gap-2">
-        <Button variant="ghost">
-          <Trans>End session</Trans>
-        </Button>
+        <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>
+          <DialogTrigger
+            render={
+              <Button variant="ghost" onClick={() => mutate()}>
+                <Trans>End session</Trans>
+              </Button>
+            }
+          />
+
+          <SessionSummaryDialog loading={isPending} session={session} summary={data} />
+        </Dialog>
+
         <Settings />
       </div>
     </header>
@@ -86,7 +120,7 @@ function MainSection({
   return (
     <div className="flex-1 scrollbar-thin overflow-y-auto">
       <div className="col relative mx-auto w-full max-w-4xl gap-4 p-4">
-        <Timeline items={session.timeline} onSelectPath={onSelectPath} />
+        <Timeline session={session} onSelectPath={onSelectPath} />
         {stream && <Markdown markdown={stream} />}
       </div>
 

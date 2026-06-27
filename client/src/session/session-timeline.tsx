@@ -8,6 +8,7 @@ import {
   ListIcon,
   PencilIcon,
   SearchIcon,
+  SparklesIcon,
   StickyNoteIcon,
   StickyNoteXIcon,
   TimerIcon,
@@ -15,22 +16,44 @@ import {
 import type { SVGProps } from 'react';
 
 import { Button } from 'src/components/button';
+import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { Markdown } from 'src/components/markdown';
 import { debug } from 'src/debug-context';
 import { Details } from 'src/details';
 
 import { PostureLabel } from './posture';
+import { SessionSummaryDialog } from './session-summary';
 
 type TimelineItem = Shared.TimelineItem;
 type TimelineMessage = Extract<TimelineItem, { kind: 'message' }>;
 
-export function Timeline({ items, onSelectPath }: { items: TimelineItem[]; onSelectPath: (pathId: string) => void }) {
-  return items.map((item, index) => <TimelineEntry key={index} item={item} onSelectPath={onSelectPath} />);
+export function Timeline({
+  session,
+  onSelectPath,
+}: {
+  session: Shared.Session;
+  onSelectPath: (pathId: string) => void;
+}) {
+  return session.timeline.map((item, index) => (
+    <TimelineEntry key={index} session={session} item={item} onSelectPath={onSelectPath} />
+  ));
 }
 
-function TimelineEntry({ item, onSelectPath }: { item: TimelineItem; onSelectPath: (pathId: string) => void }) {
+function TimelineEntry({
+  session,
+  item,
+  onSelectPath,
+}: {
+  session: Shared.Session;
+  item: TimelineItem;
+  onSelectPath: (pathId: string) => void;
+}) {
   if (item.kind === 'message') {
     return <MessageItem message={item} onSelectPath={onSelectPath} />;
+  }
+
+  if (item.kind === 'summary') {
+    return <SummaryItem session={session} item={item} />;
   }
 
   const Component = components[item.kind] as React.ComponentType<{ item: TimelineItem }>;
@@ -39,7 +62,7 @@ function TimelineEntry({ item, onSelectPath }: { item: TimelineItem; onSelectPat
 }
 
 const components: {
-  [Item in TimelineItem as Exclude<Item['kind'], 'message'>]: React.ComponentType<{ item: Item }>;
+  [Item in TimelineItem as Exclude<Item['kind'], 'message' | 'summary'>]: React.ComponentType<{ item: Item }>;
 } = {
   'model-changed': ({ item }) => (
     <Notification Icon={BotIcon}>
@@ -155,6 +178,28 @@ function PostureChanged({ item }: { item: Extract<TimelineItem, { kind: 'posture
         <PostureLabel posture={item.posture} />: {item.reason}
       </Trans>
     </Notification>
+  );
+}
+
+function SummaryItem({ session, item }: { session: Shared.Session; item: Extract<TimelineItem, { kind: 'summary' }> }) {
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={
+          <button
+            type="button"
+            className="text-dim row max-w-fit cursor-pointer items-center gap-1 text-start text-sm hover:text-inherit"
+          >
+            <SparklesIcon className="size-3.5 shrink-0" />
+            <span className="truncate leading-none">
+              <Trans>Session summary</Trans>
+            </span>
+          </button>
+        }
+      />
+
+      <SessionSummaryDialog session={session} summary={item.summary} />
+    </Dialog>
   );
 }
 

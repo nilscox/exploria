@@ -24,14 +24,16 @@ export function Settings() {
         }
       />
 
-      <DialogContent className="col max-w-md gap-4">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <Trans>Settings</Trans>
         </DialogHeader>
 
-        <LanguageSelector />
-        <ThemeModeSelector />
-        <DebugMode />
+        <div className="col gap-4 p-4">
+          <LanguageSelector />
+          <ThemeModeSelector />
+          <DebugMode />
+        </div>
 
         <DialogActions>
           <DialogClose
