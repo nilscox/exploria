@@ -3,13 +3,17 @@ import { createContext, use, useId } from 'react';
 
 const fieldContext = createContext<string | undefined>(undefined);
 
-export function Field({ children }: { children: React.ReactNode }) {
+export function FieldProvider({ children }: { children: React.ReactNode }) {
   const id = useId();
 
+  return <fieldContext.Provider value={id}>{children}</fieldContext.Provider>;
+}
+
+export function Field({ children }: { children: React.ReactNode }) {
   return (
-    <fieldContext.Provider value={id}>
+    <FieldProvider>
       <div className="col gap-1">{children}</div>
-    </fieldContext.Provider>
+    </FieldProvider>
   );
 }
 
@@ -40,8 +44,14 @@ export function labelProps() {
   };
 }
 
-export function FieldLabel({ className, ...props }: React.ComponentProps<'label'>) {
-  return <label className={clsx(className, 'text-dim max-w-fit text-sm')} {...labelProps()} {...props} />;
+export function FieldLabel({ inline, className, ...props }: { inline?: boolean } & React.ComponentProps<'label'>) {
+  return (
+    <label
+      className={clsx(className, 'max-w-fit text-sm', inline ? 'font-medium' : 'text-dim')}
+      {...labelProps()}
+      {...props}
+    />
+  );
 }
 
 export function FieldError({ className, ...props }: React.ComponentProps<'div'>) {

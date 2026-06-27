@@ -18,19 +18,15 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
-#: src/session/session-sidebar.tsx:70
-msgid "<0/><1>(Automatic)</1>"
-msgstr "<0/><1>(Automatic)</1>"
-
-#: src/session/topics-list.tsx:96
+#: src/session/topics-list.tsx:101
 msgid "Add a topic..."
 msgstr "Add a topic..."
 
-#: src/session/topics-list.tsx:95
+#: src/session/topics-list.tsx:100
 msgid "Add topic"
 msgstr "Add topic"
 
-#: src/session/posture.tsx:9
+#: src/session/posture.tsx:90
 msgid "Advisor"
 msgstr "Advisor"
 
@@ -38,17 +34,9 @@ msgstr "Advisor"
 msgid "Assistant"
 msgstr "Assistant"
 
-#: src/session/session-sidebar.tsx:88
-msgid "Assistant picks the best stance"
-msgstr "Assistant picks the best stance"
-
-#: src/session/posture.tsx:26
+#: src/session/posture.tsx:107
 msgid "Attack ideas to test them"
 msgstr "Attack ideas to test them"
-
-#: src/session/session-sidebar.tsx:87
-msgid "Automatic"
-msgstr "Automatic"
 
 #: src/session/session-timeline.tsx:165
 msgid "Back to automatic stance"
@@ -94,11 +82,11 @@ msgstr "Debug"
 msgid "Deep thoughts with AI."
 msgstr "Deep thoughts with AI."
 
-#: src/session/posture.tsx:27
+#: src/session/posture.tsx:108
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Demanding pressure, e.g. interview prep"
 
-#: src/session/posture.tsx:7
+#: src/session/posture.tsx:88
 msgid "Devil's advocate"
 msgstr "Devil's advocate"
 
@@ -106,7 +94,7 @@ msgstr "Devil's advocate"
 msgid "done"
 msgstr "done"
 
-#: src/session/topics-list.tsx:71
+#: src/session/topics-list.tsx:76
 msgid "Done"
 msgstr "Done"
 
@@ -126,7 +114,7 @@ msgstr "End session"
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Enter to send • Shift+Enter for new line"
 
-#: src/session/posture.tsx:8
+#: src/session/posture.tsx:89
 msgid "Examiner"
 msgstr "Examiner"
 
@@ -134,7 +122,7 @@ msgstr "Examiner"
 msgid "Exploria"
 msgstr "Exploria"
 
-#: src/session/posture.tsx:28
+#: src/session/posture.tsx:109
 msgid "Help structure a decision"
 msgstr "Help structure a decision"
 
@@ -142,7 +130,7 @@ msgstr "Help structure a decision"
 msgid "in progress"
 msgstr "in progress"
 
-#: src/session/topics-list.tsx:72
+#: src/session/topics-list.tsx:77
 msgid "In progress"
 msgstr "In progress"
 
@@ -175,12 +163,12 @@ msgstr "Load demo"
 msgid "Message"
 msgstr "Message"
 
-#: src/session/posture.tsx:10
+#: src/session/posture.tsx:91
 msgid "Mirror"
 msgstr "Mirror"
 
 #: src/home.tsx:112
-#: src/session/session-sidebar.tsx:112
+#: src/session/session-sidebar.tsx:59
 msgid "Model"
 msgstr "Model"
 
@@ -208,7 +196,7 @@ msgstr "Note removed: {0}"
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
 
-#: src/session/session-sidebar.tsx:41
+#: src/session/session-sidebar.tsx:38
 msgid "Notes"
 msgstr "Notes"
 
@@ -229,11 +217,11 @@ msgstr "pending"
 msgid "Previous sessions"
 msgstr "Previous sessions"
 
-#: src/session/posture.tsx:25
+#: src/session/posture.tsx:106
 msgid "Question to deepen thinking"
 msgstr "Question to deepen thinking"
 
-#: src/session/posture.tsx:29
+#: src/session/posture.tsx:110
 msgid "Reflect and welcome, without challenging"
 msgstr "Reflect and welcome, without challenging"
 
@@ -269,11 +257,11 @@ msgstr "Session timer"
 msgid "Settings"
 msgstr "Settings"
 
-#: src/session/posture.tsx:6
+#: src/session/posture.tsx:87
 msgid "Socratic"
 msgstr "Socratic"
 
-#: src/session/session-sidebar.tsx:82
+#: src/session/posture.tsx:21
 msgid "Stance"
 msgstr "Stance"
 
@@ -341,7 +329,7 @@ msgstr "Timer resumed"
 msgid "Timer started: {0} minutes"
 msgstr "Timer started: {0} minutes"
 
-#: src/session/topics-list.tsx:73
+#: src/session/topics-list.tsx:78
 msgid "To do"
 msgstr "To do"
 

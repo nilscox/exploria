@@ -5,10 +5,9 @@ import { mutationOptions, useMutation } from '@tanstack/react-query';
 import { api } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
 import { Markdown } from 'src/components/markdown';
-import { Select, SelectItem } from 'src/components/select';
 
 import { ModelSelector } from './model-selector';
-import { PostureDescription, PostureLabel, PostureOption } from './posture';
+import { PostureSection } from './posture';
 import { SidebarSection } from './sidebar-section';
 import { Timer } from './timer';
 import { TopicsList } from './topics-list';
@@ -47,54 +46,6 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
         </SidebarSection>
       )}
     </aside>
-  );
-}
-
-function PostureSection({
-  session,
-  onSetPosture,
-}: {
-  session: Shared.Session;
-  onSetPosture: (posture: string) => void;
-}) {
-  const value = session.postureMode === 'auto' ? 'auto' : session.posture;
-
-  const renderValue = () => {
-    if (session.postureMode === 'auto') {
-      return (
-        <div className="row items-center gap-2">
-          <Trans>
-            <PostureLabel posture={session.posture} />
-            <span className="text-dim text-sm">(Automatic)</span>
-          </Trans>
-        </div>
-      );
-    }
-
-    return <PostureLabel posture={session.posture} />;
-  };
-
-  return (
-    <SidebarSection title={<Trans>Stance</Trans>}>
-      <Field>
-        <Select value={value} onValueChange={onSetPosture} renderValue={renderValue}>
-          <SelectItem value="auto">
-            <PostureOption
-              label={<Trans>Automatic</Trans>}
-              description={<Trans>Assistant picks the best stance</Trans>}
-            />
-          </SelectItem>
-          {(['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror'] as const).map((posture) => (
-            <SelectItem key={posture} value={posture}>
-              <PostureOption
-                label={<PostureLabel posture={posture} />}
-                description={<PostureDescription posture={posture} />}
-              />
-            </SelectItem>
-          ))}
-        </Select>
-      </Field>
-    </SidebarSection>
   );
 }
 

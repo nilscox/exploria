@@ -29,7 +29,12 @@ export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (
 
 function TopicItem({ topic }: { topic: Shared.Topic }) {
   return (
-    <div className="row bg-neutral items-center gap-2.5 rounded-lg border px-3 py-2">
+    <div
+      className={clsx(
+        'row bg-neutral items-center gap-2.5 rounded-lg border px-3 py-2',
+        topic.status === 'in_progress' && 'shadow-sm',
+      )}
+    >
       <TopicDot status={topic.status} />
 
       <span
@@ -51,7 +56,7 @@ function TopicDot({ status }: { status: Shared.TopicStatus }) {
     <span
       className={clsx(
         'size-2 shrink-0 rounded-full self-start mt-1.5',
-        status === 'in_progress' && 'bg-blue-500',
+        status === 'in_progress' && 'bg-primary',
         status === 'pending' && 'bg-foreground/30',
         status === 'done' && 'bg-foreground/20 opacity-60',
       )}
@@ -64,7 +69,7 @@ function TopicStatusBadge({ status }: { status: Shared.TopicStatus }) {
     <span
       className={clsx(
         'shrink-0 font-mono text-xs',
-        status === 'in_progress' && 'text-blue-500',
+        status === 'in_progress' && 'text-primary',
         status !== 'in_progress' && 'text-dim',
       )}
     >

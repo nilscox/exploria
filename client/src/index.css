@@ -50,7 +50,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    @apply scrollbar-thumb-accent-foreground/50 scrollbar-track-accent;
+    @apply scrollbar-thumb-accent-foreground/40 scrollbar-track-accent;
   }
 
   [popover] {

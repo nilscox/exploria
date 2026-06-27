@@ -36,7 +36,7 @@ export function Timer({
 
   return (
     <SidebarSection title={<Trans>Session timer</Trans>} variant="solid">
-      <div className="py-4 text-center font-mono text-4xl font-bold tracking-wide">{formattedTime}</div>
+      <div className="py-4 text-center font-mono text-3xl font-bold tracking-wide">{formattedTime}</div>
 
       <ProgressBar percent={elapsedPercent} />
 
