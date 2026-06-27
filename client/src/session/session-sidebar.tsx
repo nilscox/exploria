@@ -9,6 +9,7 @@ import { Select, SelectItem } from 'src/components/select';
 
 import { ModelSelector } from './model-selector';
 import { PostureDescription, PostureLabel, PostureOption } from './posture';
+import { SidebarSection } from './sidebar-section';
 import { Timer } from './timer';
 import { TopicsList } from './topics-list';
 
@@ -30,24 +31,20 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
         onClear={clearTimer}
       />
 
-      <ModelSelectorSection session={session} />
-      <PostureSection session={session} onSetPosture={setPosture} />
       <TopicsList topics={session.topics} onAdd={addTopic} />
+      <PostureSection session={session} onSetPosture={setPosture} />
+      <ModelSelectorSection session={session} />
 
       {session.notes.length > 0 && (
-        <section>
-          <h2 className="my-4 text-lg font-semibold">
-            <Trans>Notes</Trans>
-          </h2>
-
+        <SidebarSection title={<Trans>Notes</Trans>}>
           <ul className="col gap-2">
             {session.notes.map((note) => (
               <li key={note.id} className="bg-accent rounded-md p-2">
-                <Markdown markdown={note.content} title={note.content} className="line-clamp-2" />
+                <Markdown markdown={note.content} title={note.content} className="line-clamp-2 text-sm" />
               </li>
             ))}
           </ul>
-        </section>
+        </SidebarSection>
       )}
     </aside>
   );
@@ -67,10 +64,8 @@ function PostureSection({
       return (
         <div className="row items-center gap-2">
           <Trans>
-            Automatic
-            <span className="text-dim text-sm">
-              (<PostureLabel posture={session.posture} />)
-            </span>
+            <PostureLabel posture={session.posture} />
+            <span className="text-dim text-sm">(Automatic)</span>
           </Trans>
         </div>
       );
@@ -80,11 +75,8 @@ function PostureSection({
   };
 
   return (
-    <section>
+    <SidebarSection title={<Trans>Stance</Trans>}>
       <Field>
-        <FieldLabel className="text-dim text-xs font-medium uppercase">
-          <Trans>Stance</Trans>
-        </FieldLabel>
         <Select value={value} onValueChange={onSetPosture} renderValue={renderValue}>
           <SelectItem value="auto">
             <PostureOption
@@ -102,7 +94,7 @@ function PostureSection({
           ))}
         </Select>
       </Field>
-    </section>
+    </SidebarSection>
   );
 }
 
@@ -110,14 +102,14 @@ function ModelSelectorSection({ session }: { session: Shared.Session }) {
   const { mutate: setModel } = useMutation(setModelOptions(session.id));
 
   return (
-    <section>
+    <SidebarSection>
       <Field>
-        <FieldLabel className="text-dim text-xs font-medium uppercase">
+        <FieldLabel className="text-dim-50 mb-1 text-xs font-medium uppercase">
           <Trans>Model</Trans>
         </FieldLabel>
         <ModelSelector value={session.model} onChange={setModel} />
       </Field>
-    </section>
+    </SidebarSection>
   );
 }
 

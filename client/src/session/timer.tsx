@@ -6,6 +6,8 @@ import { PauseIcon, PlayIcon } from 'lucide-react';
 import { Button } from 'src/components/button';
 import { useNow } from 'src/hooks/use-now';
 
+import { SidebarSection } from './sidebar-section';
+
 export function Timer({
   timer,
   onStart,
@@ -33,7 +35,7 @@ export function Timer({
     : { Icon: PauseIcon, label: <Trans>Pause</Trans>, action: onPause };
 
   return (
-    <Section>
+    <SidebarSection title={<Trans>Session timer</Trans>} variant="solid">
       <div className="py-4 text-center font-mono text-4xl font-bold tracking-wide">{formattedTime}</div>
 
       <ProgressBar percent={elapsedPercent} />
@@ -48,7 +50,7 @@ export function Timer({
           <Trans>Stop</Trans>
         </Button>
       </div>
-    </Section>
+    </SidebarSection>
   );
 }
 
@@ -101,24 +103,13 @@ function StartTimer({ onStart }: { onStart: (duration: number) => void }) {
   };
 
   return (
-    <Section>
+    <SidebarSection title={<Trans>Session timer</Trans>} variant="solid">
       <div className="col items-center py-4">
         <Button variant="outlined" onClick={withPrompt(t`Duration (minutes):`, handleStart)}>
           <Trans>Start timer</Trans>
         </Button>
       </div>
-    </Section>
-  );
-}
-
-function Section({ children }: { children: React.ReactNode }) {
-  return (
-    <section className="bg-neutral rounded-md border p-4">
-      <h2 className="text-dim-50 flex items-center gap-1 text-xs font-medium uppercase">
-        <Trans>Session timer</Trans>
-      </h2>
-      {children}
-    </section>
+    </SidebarSection>
   );
 }
 

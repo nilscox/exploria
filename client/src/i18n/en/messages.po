@@ -18,11 +18,15 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
-#: src/session/topics-list.tsx:98
+#: src/session/session-sidebar.tsx:70
+msgid "<0/><1>(Automatic)</1>"
+msgstr "<0/><1>(Automatic)</1>"
+
+#: src/session/topics-list.tsx:96
 msgid "Add a topic..."
 msgstr "Add a topic..."
 
-#: src/session/topics-list.tsx:97
+#: src/session/topics-list.tsx:95
 msgid "Add topic"
 msgstr "Add topic"
 
@@ -34,7 +38,7 @@ msgstr "Advisor"
 msgid "Assistant"
 msgstr "Assistant"
 
-#: src/session/session-sidebar.tsx:92
+#: src/session/session-sidebar.tsx:88
 msgid "Assistant picks the best stance"
 msgstr "Assistant picks the best stance"
 
@@ -42,13 +46,9 @@ msgstr "Assistant picks the best stance"
 msgid "Attack ideas to test them"
 msgstr "Attack ideas to test them"
 
-#: src/session/session-sidebar.tsx:91
+#: src/session/session-sidebar.tsx:87
 msgid "Automatic"
 msgstr "Automatic"
-
-#: src/session/session-sidebar.tsx:69
-msgid "Automatic<0>(<1/>)</0>"
-msgstr "Automatic<0>(<1/>)</0>"
 
 #: src/session/session-timeline.tsx:165
 msgid "Back to automatic stance"
@@ -64,7 +64,7 @@ msgstr "Biases"
 msgid "Blind spots"
 msgstr "Blind spots"
 
-#: src/session/timer.tsx:47
+#: src/session/timer.tsx:49
 msgid "Clear the timer?"
 msgstr "Clear the timer?"
 
@@ -106,7 +106,7 @@ msgstr "Devil's advocate"
 msgid "done"
 msgstr "done"
 
-#: src/session/topics-list.tsx:73
+#: src/session/topics-list.tsx:71
 msgid "Done"
 msgstr "Done"
 
@@ -114,7 +114,7 @@ msgstr "Done"
 msgid "Download"
 msgstr "Download"
 
-#: src/session/timer.tsx:106
+#: src/session/timer.tsx:108
 msgid "Duration (minutes):"
 msgstr "Duration (minutes):"
 
@@ -142,11 +142,11 @@ msgstr "Help structure a decision"
 msgid "in progress"
 msgstr "in progress"
 
-#: src/session/topics-list.tsx:74
+#: src/session/topics-list.tsx:72
 msgid "In progress"
 msgstr "In progress"
 
-#: src/session/timer.tsx:97
+#: src/session/timer.tsx:99
 msgid "Invalid input."
 msgstr "Invalid input."
 
@@ -180,7 +180,7 @@ msgid "Mirror"
 msgstr "Mirror"
 
 #: src/home.tsx:112
-#: src/session/session-sidebar.tsx:116
+#: src/session/session-sidebar.tsx:112
 msgid "Model"
 msgstr "Model"
 
@@ -208,7 +208,7 @@ msgstr "Note removed: {0}"
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
 
-#: src/session/session-sidebar.tsx:40
+#: src/session/session-sidebar.tsx:41
 msgid "Notes"
 msgstr "Notes"
 
@@ -217,7 +217,7 @@ msgstr "Notes"
 msgid "Open questions"
 msgstr "Open questions"
 
-#: src/session/timer.tsx:33
+#: src/session/timer.tsx:35
 msgid "Pause"
 msgstr "Pause"
 
@@ -237,7 +237,7 @@ msgstr "Question to deepen thinking"
 msgid "Reflect and welcome, without challenging"
 msgstr "Reflect and welcome, without challenging"
 
-#: src/session/timer.tsx:32
+#: src/session/timer.tsx:34
 msgid "Resume"
 msgstr "Resume"
 
@@ -260,7 +260,8 @@ msgstr "Session subject"
 msgid "Session summary"
 msgstr "Session summary"
 
-#: src/session/timer.tsx:118
+#: src/session/timer.tsx:38
+#: src/session/timer.tsx:106
 msgid "Session timer"
 msgstr "Session timer"
 
@@ -272,7 +273,7 @@ msgstr "Settings"
 msgid "Socratic"
 msgstr "Socratic"
 
-#: src/session/session-sidebar.tsx:86
+#: src/session/session-sidebar.tsx:82
 msgid "Stance"
 msgstr "Stance"
 
@@ -284,7 +285,7 @@ msgstr "Stance forced: <0/>"
 msgid "Start session"
 msgstr "Start session"
 
-#: src/session/timer.tsx:107
+#: src/session/timer.tsx:109
 msgid "Start timer"
 msgstr "Start timer"
 
@@ -293,7 +294,7 @@ msgstr "Start timer"
 msgid "Status of \"{0}\": <0/>"
 msgstr "Status of \"{0}\": <0/>"
 
-#: src/session/timer.tsx:48
+#: src/session/timer.tsx:50
 msgid "Stop"
 msgstr "Stop"
 
@@ -340,7 +341,7 @@ msgstr "Timer resumed"
 msgid "Timer started: {0} minutes"
 msgstr "Timer started: {0} minutes"
 
-#: src/session/topics-list.tsx:75
+#: src/session/topics-list.tsx:73
 msgid "To do"
 msgstr "To do"
 

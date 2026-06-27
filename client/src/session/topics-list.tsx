@@ -7,13 +7,11 @@ import { useState } from 'react';
 import { Button } from 'src/components/button';
 import { Input } from 'src/components/input';
 
+import { SidebarSection } from './sidebar-section';
+
 export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (label: string) => void }) {
   return (
-    <section className="col gap-2">
-      <h2 className="text-dim text-xs font-medium uppercase">
-        <Trans>Topics</Trans>
-      </h2>
-
+    <SidebarSection title={<Trans>Topics</Trans>}>
       {topics.length > 0 && (
         <ul className="col gap-1.5">
           {topics.map((topic) => (
@@ -25,7 +23,7 @@ export function TopicsList({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (
       )}
 
       <AddTopicForm onSubmit={onAdd} />
-    </section>
+    </SidebarSection>
   );
 }
 
@@ -91,7 +89,7 @@ function AddTopicForm({ onSubmit }: { onSubmit: (label: string) => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="row items-stretch gap-1">
+    <form onSubmit={handleSubmit} className="row mt-2 items-stretch gap-1">
       <Input
         name="label"
         aria-label={t`Add topic`}

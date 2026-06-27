@@ -18,11 +18,15 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/> : {0}"
 
-#: src/session/topics-list.tsx:98
+#: src/session/session-sidebar.tsx:70
+msgid "<0/><1>(Automatic)</1>"
+msgstr "<0/><1>(Automatique)</1>"
+
+#: src/session/topics-list.tsx:96
 msgid "Add a topic..."
 msgstr "Ajouter un sujet…"
 
-#: src/session/topics-list.tsx:97
+#: src/session/topics-list.tsx:95
 msgid "Add topic"
 msgstr "Ajouter un sujet"
 
@@ -34,7 +38,7 @@ msgstr "Conseiller"
 msgid "Assistant"
 msgstr "Assistant"
 
-#: src/session/session-sidebar.tsx:92
+#: src/session/session-sidebar.tsx:88
 msgid "Assistant picks the best stance"
 msgstr "L'assistant choisit la posture la plus adaptée"
 
@@ -42,13 +46,9 @@ msgstr "L'assistant choisit la posture la plus adaptée"
 msgid "Attack ideas to test them"
 msgstr "Attaquer les idées pour les tester"
 
-#: src/session/session-sidebar.tsx:91
+#: src/session/session-sidebar.tsx:87
 msgid "Automatic"
 msgstr "Automatique"
-
-#: src/session/session-sidebar.tsx:69
-msgid "Automatic<0>(<1/>)</0>"
-msgstr "Automatique<0>(<1/>)</0>"
 
 #: src/session/session-timeline.tsx:165
 msgid "Back to automatic stance"
@@ -64,7 +64,7 @@ msgstr "Biais"
 msgid "Blind spots"
 msgstr "Angles morts"
 
-#: src/session/timer.tsx:47
+#: src/session/timer.tsx:49
 msgid "Clear the timer?"
 msgstr "Annuler le minuteur ?"
 
@@ -106,7 +106,7 @@ msgstr "Avocat du diable"
 msgid "done"
 msgstr "terminé"
 
-#: src/session/topics-list.tsx:73
+#: src/session/topics-list.tsx:71
 msgid "Done"
 msgstr "Traité"
 
@@ -114,7 +114,7 @@ msgstr "Traité"
 msgid "Download"
 msgstr "Télécharger"
 
-#: src/session/timer.tsx:106
+#: src/session/timer.tsx:108
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
@@ -142,11 +142,11 @@ msgstr "Aide neutre à structurer une décision"
 msgid "in progress"
 msgstr "en cours"
 
-#: src/session/topics-list.tsx:74
+#: src/session/topics-list.tsx:72
 msgid "In progress"
 msgstr "En cours"
 
-#: src/session/timer.tsx:97
+#: src/session/timer.tsx:99
 msgid "Invalid input."
 msgstr "Entrée invalide."
 
@@ -180,7 +180,7 @@ msgid "Mirror"
 msgstr "Miroir"
 
 #: src/home.tsx:112
-#: src/session/session-sidebar.tsx:116
+#: src/session/session-sidebar.tsx:112
 msgid "Model"
 msgstr "Modèle"
 
@@ -208,7 +208,7 @@ msgstr "Note supprimée : {0}"
 msgid "Note updated: {0}"
 msgstr "Note modifiée : {0}"
 
-#: src/session/session-sidebar.tsx:40
+#: src/session/session-sidebar.tsx:41
 msgid "Notes"
 msgstr "Notes"
 
@@ -217,7 +217,7 @@ msgstr "Notes"
 msgid "Open questions"
 msgstr "Questions ouvertes"
 
-#: src/session/timer.tsx:33
+#: src/session/timer.tsx:35
 msgid "Pause"
 msgstr "Pause"
 
@@ -237,7 +237,7 @@ msgstr "Questionner pour approfondir la pensée"
 msgid "Reflect and welcome, without challenging"
 msgstr "Refléter et accueillir, sans challenger"
 
-#: src/session/timer.tsx:32
+#: src/session/timer.tsx:34
 msgid "Resume"
 msgstr "Reprendre"
 
@@ -260,7 +260,8 @@ msgstr "Sujet de la session"
 msgid "Session summary"
 msgstr "Bilan de session"
 
-#: src/session/timer.tsx:118
+#: src/session/timer.tsx:38
+#: src/session/timer.tsx:106
 msgid "Session timer"
 msgstr "Minuteur de session"
 
@@ -272,7 +273,7 @@ msgstr "Paramètres"
 msgid "Socratic"
 msgstr "Socratique"
 
-#: src/session/session-sidebar.tsx:86
+#: src/session/session-sidebar.tsx:82
 msgid "Stance"
 msgstr "Posture"
 
@@ -284,7 +285,7 @@ msgstr "Posture forcée : <0/>"
 msgid "Start session"
 msgstr "Démarrer la session"
 
-#: src/session/timer.tsx:107
+#: src/session/timer.tsx:109
 msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
@@ -293,7 +294,7 @@ msgstr "Démarrer un minuteur"
 msgid "Status of \"{0}\": <0/>"
 msgstr "Statut de « {0} » : <0/>"
 
-#: src/session/timer.tsx:48
+#: src/session/timer.tsx:50
 msgid "Stop"
 msgstr "Arrêter"
 
@@ -340,7 +341,7 @@ msgstr "Minuteur redémarré"
 msgid "Timer started: {0} minutes"
 msgstr "Minuteur démarré : {0} minutes"
 
-#: src/session/topics-list.tsx:75
+#: src/session/topics-list.tsx:73
 msgid "To do"
 msgstr "À traiter"
 
