@@ -9,39 +9,45 @@ import { setLanguage } from 'src/i18n/i18n';
 
 import { Button } from './button';
 import { Checkbox } from './checkbox';
-import { Dialog } from './dialog';
+import { Dialog, DialogActions, DialogClose, DialogContent, DialogHeader, DialogTrigger } from './dialog';
 import { Field, FieldLabel } from './field';
 import { Select, SelectItem } from './select';
 
 export function Settings() {
-  const [dialog, setDialog] = useState<HTMLElement | null>(null);
-
   return (
-    <>
-      <Button variant="ghost" size="icon" popoverTarget="settings-dialog">
-        <SettingsIcon className="size-4" />
-      </Button>
+    <Dialog>
+      <DialogTrigger
+        render={
+          <Button variant="ghost" size="icon">
+            <SettingsIcon className="size-4" />
+          </Button>
+        }
+      />
 
-      <Dialog ref={setDialog} id="settings-dialog" popover="" classes={{ content: 'max-w-md col gap-4' }}>
-        <header className="text-lg font-semibold">
+      <DialogContent className="col max-w-md gap-4">
+        <DialogHeader>
           <Trans>Settings</Trans>
-        </header>
+        </DialogHeader>
 
-        <LanguageSelector dialog={dialog} />
-        <ThemeModeSelector dialog={dialog} />
+        <LanguageSelector />
+        <ThemeModeSelector />
         <DebugMode />
 
-        <div className="row justify-end gap-2">
-          <Button variant="ghost" popoverTarget="settings-dialog" popoverTargetAction="hide">
-            <Trans>Close</Trans>
-          </Button>
-        </div>
-      </Dialog>
-    </>
+        <DialogActions>
+          <DialogClose
+            render={
+              <Button variant="ghost">
+                <Trans>Close</Trans>
+              </Button>
+            }
+          />
+        </DialogActions>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-export function LanguageSelector({ dialog }: { dialog: HTMLElement | null }) {
+export function LanguageSelector() {
   const { i18n } = useLingui();
 
   const handleChange = (lang: string) => {
@@ -54,7 +60,7 @@ export function LanguageSelector({ dialog }: { dialog: HTMLElement | null }) {
         <Trans>Language</Trans>
       </FieldLabel>
 
-      <Select container={dialog} value={i18n.locale} onValueChange={handleChange}>
+      <Select value={i18n.locale} onValueChange={handleChange}>
         <SelectItem value="en">
           <span className="me-2">🇺🇸</span>
           English
@@ -68,7 +74,7 @@ export function LanguageSelector({ dialog }: { dialog: HTMLElement | null }) {
   );
 }
 
-export function ThemeModeSelector({ dialog }: { dialog: HTMLElement | null }) {
+export function ThemeModeSelector() {
   const [theme, setTheme] = useTheme();
 
   return (
@@ -77,7 +83,7 @@ export function ThemeModeSelector({ dialog }: { dialog: HTMLElement | null }) {
         <Trans>Theme</Trans>
       </FieldLabel>
 
-      <Select container={dialog} value={theme} onValueChange={setTheme}>
+      <Select value={theme} onValueChange={setTheme}>
         <SelectItem value="light">
           <span className="me-2 inline-block size-3 rounded-sm border bg-white" />
           <Trans>Light</Trans>

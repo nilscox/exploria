@@ -10,9 +10,9 @@ export function Button({
   className,
   children,
   ...props
-}: React.ComponentProps<'button'> & VariantProps<typeof variants> & { loading?: boolean }) {
+}: React.ComponentProps<'button'> & VariantProps<typeof buttonVariants> & { loading?: boolean }) {
   return (
-    <button type="button" className={variants({ variant, size, className })} {...props}>
+    <button type="button" className={buttonVariants({ variant, size, className })} {...props}>
       {loading && <Spinner className="size-4" />}
       {children}
     </button>
@@ -24,11 +24,11 @@ export function LinkButton({
   size,
   className,
   ...props
-}: React.ComponentProps<typeof Link> & VariantProps<typeof variants>) {
-  return <Link className={variants({ variant, size, className })} {...props} />;
+}: React.ComponentProps<typeof Link> & VariantProps<typeof buttonVariants>) {
+  return <Link className={buttonVariants({ variant, size, className })} {...props} />;
 }
 
-const variants = cva(
+export const buttonVariants = cva(
   'font-medium border rounded-md transition-colors text-sm row gap-2 items-center justify-center whitespace-nowrap focus-visible:outline-offset-2',
   {
     variants: {
