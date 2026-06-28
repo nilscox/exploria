@@ -20,7 +20,6 @@ void describe('toChatMessages', () => {
   });
 
   void it('projects message and tool-call events to chat messages', () => {
-    session.addMessage('system', 'instructions');
     session.addMessage('user', 'Hello');
     session.addMessage('assistant', 'Calling a tool', {
       model: 'gpt-4o',

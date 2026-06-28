@@ -117,7 +117,7 @@ function formatSummaryText(labels: Labels, session: Shared.Session, summary: Sha
   lines.push('═'.repeat(60));
   lines.push('');
 
-  const messages = session.timeline.filter((item) => item.kind === 'message' && item.role !== 'system');
+  const messages = session.timeline.filter((item) => item.kind === 'message');
 
   for (const item of messages) {
     if (item.kind !== 'message') {

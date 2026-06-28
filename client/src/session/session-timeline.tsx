@@ -231,20 +231,6 @@ function TopicStatusLabel({ status }: { status: Shared.TopicStatus }) {
 }
 
 function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSelectPath: (pathId: string) => void }) {
-  if (message.role === 'system') {
-    if (!config()) {
-      return null;
-    }
-
-    return (
-      <Details className="text-dim text-sm" summary="System prompt">
-        <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
-          {message.content}
-        </div>
-      </Details>
-    );
-  }
-
   return (
     <>
       <Markdown

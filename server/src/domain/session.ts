@@ -27,7 +27,6 @@ export type Note = {
 };
 
 export type Message =
-  | { date: Date; role: 'system'; content: string }
   | { date: Date; role: 'user'; content: string }
   | { date: Date; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] };
 
@@ -332,7 +331,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
   }
 
-  // add translations
+  // use error codes
   startTimer(duration: number) {
     assert(!this._timer, new Error('Un minuteur est déjà lancé'));
 
