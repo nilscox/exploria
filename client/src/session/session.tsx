@@ -40,20 +40,41 @@ export function SessionPage() {
   }
 
   return (
-    <div className="col h-full">
-      <DocumentTitle title={state.session.subject} />
-      <Header session={state.session} view={view} onViewChanged={setView} />
-
-      <div className="row flex-1 overflow-hidden">
-        <div className={clsx('h-full', view !== 'sidebar' && 'max-lg:hidden')}>
-          <SessionSidebar session={state.session} />
-        </div>
-
-        <div className={clsx('col min-w-0 flex-1', view !== 'main' && 'max-lg:hidden')}>
+    <Layout
+      view={view}
+      header={<Header session={state.session} view={view} onViewChanged={setView} />}
+      aside={<SessionSidebar session={state.session} />}
+      main={
+        <>
+          <DocumentTitle title={state.session.subject} />
           <MainSection session={state.session} stream={state.stream} onSelectPath={selectPath} />
           <MessageForm loading={state.loading} postMessage={postMessage} />
-        </div>
-      </div>
+        </>
+      }
+    />
+  );
+}
+
+function Layout({
+  view,
+  header,
+  aside,
+  main,
+}: {
+  view: View;
+  header: React.ReactNode;
+  aside: React.ReactNode;
+  main: React.ReactNode;
+}) {
+  return (
+    <div className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[24rem_1fr] lg:grid-rows-[auto_1fr]">
+      <header className="col-span-2">{header}</header>
+      <aside className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'sidebar' && 'max-lg:hidden')}>
+        {aside}
+      </aside>
+      <main className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'main' && 'max-lg:hidden')}>
+        {main}
+      </main>
     </div>
   );
 }
@@ -87,18 +108,18 @@ function Header({
   );
 
   return (
-    <header className="col md:row gap-1 border-b px-4 py-2 md:items-center md:justify-between">
+    <div className="row flex-wrap items-center gap-4 border-b px-4 py-2">
       <div className="row items-center gap-2">
-        <LinkButton to="/" variant="ghost" size="icon">
+        <LinkButton to="/" variant="ghost" size="icon" className="shrink-0">
           <ArrowLeftIcon className="size-4" />
         </LinkButton>
 
-        <h1 className="text-xl font-medium">
+        <h1 className="line-clamp-2 font-medium md:text-xl">
           {session.subject ? session.subject : <Trans>Subject to be defined</Trans>}
         </h1>
       </div>
 
-      <div className="row items-center gap-1">
+      <div className="row ms-auto items-center gap-1">
         <Button
           variant={view === 'sidebar' ? 'secondary' : 'ghost'}
           size="small"
@@ -122,7 +143,7 @@ function Header({
 
         <Settings />
       </div>
-    </header>
+    </div>
   );
 }
 
@@ -132,7 +153,7 @@ function MainSection({
   onSelectPath,
 }: {
   session: Shared.Session;
-  stream?: string;
+  stream: string;
   onSelectPath: (pathId: string) => void;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -143,13 +164,13 @@ function MainSection({
   }, [stream, session.timeline, showTimelineActions, showTimelineDates]);
 
   return (
-    <div className="flex-1 scrollbar-thin overflow-y-auto">
-      <div className="col relative mx-auto w-full max-w-4xl gap-4 px-6 py-4">
+    <>
+      <div className="col relative mx-auto w-full max-w-4xl gap-4 p-6">
         <Timeline session={session} onSelectPath={onSelectPath} />
         {stream && <Markdown markdown={stream} />}
       </div>
 
       <div ref={bottomRef} />
-    </div>
+    </>
   );
 }

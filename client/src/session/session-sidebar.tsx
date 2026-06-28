@@ -22,7 +22,7 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
   const { mutate: resumeTimer } = useMutation(resumeTimerOptions(session.id));
 
   return (
-    <aside className="col sticky top-0 max-h-full w-full scrollbar-thin gap-6 overflow-y-auto p-2 lg:w-92">
+    <div className="col gap-6 p-2">
       <Timer
         timer={session.timer}
         onStart={startTimer}
@@ -34,7 +34,7 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
       <PostureSection session={session} onSetPosture={setPosture} />
       <NotesSection session={session} />
       <ModelSelectorSection session={session} />
-    </aside>
+    </div>
   );
 }
 

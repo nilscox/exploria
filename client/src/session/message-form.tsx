@@ -39,7 +39,7 @@ export function MessageForm({ loading, postMessage }: { loading?: boolean; postM
   };
 
   return (
-    <section className="max-w-x4l relative mx-auto w-full max-w-4xl px-4 pb-8">
+    <section className="max-w-x4l sticky bottom-0 mx-auto w-full max-w-4xl px-4 pb-8">
       <form
         onSubmit={handleSubmit}
         className="col bg-neutral items-stretch rounded-lg border shadow-2xl has-focus-visible:outline"
@@ -56,12 +56,12 @@ export function MessageForm({ loading, postMessage }: { loading?: boolean; postM
           className="h-full resize-none p-4 outline-none"
         />
 
-        <div className="row items-end justify-between px-4 pb-2">
-          <div className="text-dim-40 text-xs">
+        <div className="row items-end px-4 pb-2">
+          <div className="text-dim-40 text-xs max-sm:hidden">
             <Trans>Enter to send &bull; Shift+Enter for new line</Trans>
           </div>
 
-          <div className="self-end">
+          <div className="ml-auto self-end">
             <Button type="submit" size="small">
               <SendIcon className="size-4" />
               <Trans>Send</Trans>
