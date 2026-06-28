@@ -26,7 +26,7 @@
   --color-foreground: var(--color-orange-100);
   --color-accent: var(--color-stone-800);
   --color-accent-foreground: var(--color-orange-100);
-  --color-border: var(--color-stone-800);
+  --color-border: var(--color-stone-700);
   --color-primary: var(--color-amber-400);
   --color-primary-foreground: var(--color-stone-900);
 }

@@ -3,14 +3,14 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { debug, useSetDebug } from 'src/debug-context';
+import { config, useSetConfig } from 'src/config-context';
 import { setLanguage } from 'src/i18n/i18n';
 
 import { Button } from './button';
-import { Checkbox } from './checkbox';
 import { Dialog, DialogActions, DialogClose, DialogContent, DialogHeader, DialogTrigger } from './dialog';
-import { Field, FieldLabel } from './field';
+import { Field, FieldLabel, FieldProvider } from './field';
 import { Select, SelectItem } from './select';
+import { Switch } from './switch';
 
 export function Settings() {
   return (
@@ -31,6 +31,7 @@ export function Settings() {
         <div className="col gap-4 p-4">
           <LanguageSelector />
           <ThemeModeSelector />
+          <ShowTimelineActions />
           <DebugMode />
         </div>
 
@@ -127,12 +128,35 @@ function useTheme() {
   ] as const;
 }
 
-function DebugMode() {
-  const setDebug = useSetDebug();
+function ShowTimelineActions() {
+  const setConfig = useSetConfig();
 
   return (
-    <Field>
-      <Checkbox defaultChecked={debug()} onCheckedChange={setDebug} label={<Trans>Debug</Trans>} />
-    </Field>
+    <FieldProvider>
+      <div className="row my-1 gap-2">
+        <Switch
+          checked={config().showTimelineActions}
+          onCheckedChange={(checked) => setConfig({ showTimelineActions: Boolean(checked) })}
+        />
+        <FieldLabel inline className="cursor-pointer">
+          <Trans>Show timeline actions</Trans>
+        </FieldLabel>
+      </div>
+    </FieldProvider>
+  );
+}
+
+function DebugMode() {
+  const setConfig = useSetConfig();
+
+  return (
+    <FieldProvider>
+      <div className="row my-1 gap-2">
+        <Switch checked={config().debug} onCheckedChange={(checked) => setConfig({ debug: Boolean(checked) })} />
+        <FieldLabel inline className="cursor-pointer">
+          <Trans>Debug</Trans>
+        </FieldLabel>
+      </div>
+    </FieldProvider>
   );
 }

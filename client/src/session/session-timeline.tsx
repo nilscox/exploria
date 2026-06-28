@@ -18,7 +18,7 @@ import type { SVGProps } from 'react';
 import { Button } from 'src/components/button';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { Markdown } from 'src/components/markdown';
-import { debug } from 'src/debug-context';
+import { config } from 'src/config-context';
 import { Details } from 'src/details';
 
 import { PostureLabel } from './posture';
@@ -54,6 +54,10 @@ function TimelineEntry({
 
   if (item.kind === 'summary') {
     return <SummaryItem session={session} item={item} />;
+  }
+
+  if (!config().showTimelineActions) {
+    return null;
   }
 
   const Component = components[item.kind] as React.ComponentType<{ item: TimelineItem }>;
@@ -228,7 +232,7 @@ function TopicStatusLabel({ status }: { status: Shared.TopicStatus }) {
 
 function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSelectPath: (pathId: string) => void }) {
   if (message.role === 'system') {
-    if (!debug()) {
+    if (!config()) {
       return null;
     }
 
@@ -248,7 +252,7 @@ function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSe
         className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
       />
 
-      {message.role === 'assistant' && debug() && <ToolCalls toolCalls={message.toolCalls} />}
+      {message.role === 'assistant' && config().debug && <ToolCalls toolCalls={message.toolCalls} />}
       {message.paths && <DiscussionPaths paths={message.paths} onSelect={onSelectPath} />}
     </>
   );

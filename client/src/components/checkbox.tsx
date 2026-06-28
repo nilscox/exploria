@@ -1,22 +1,18 @@
-import { Indicator, Root } from '@radix-ui/react-checkbox';
+import { Checkbox as C } from '@base-ui/react/checkbox';
 import { CheckIcon } from 'lucide-react';
 
-import { fieldProps, labelProps } from './field';
+import { fieldProps } from './field';
 
-export function Checkbox({ label, ...props }: { label?: React.ReactNode } & React.ComponentProps<typeof Root>) {
+export function Checkbox(props: React.ComponentProps<typeof C.Root>) {
   return (
-    <div className="row items-center gap-2">
-      <Root
-        className="bg-neutral data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground inline-block size-5 rounded-sm border"
-        {...fieldProps()}
-        {...props}
-      >
-        <Indicator className="inline-block">
-          <CheckIcon className="size-4" />
-        </Indicator>
-      </Root>
-
-      {label && <label {...labelProps()}>{label}</label>}
-    </div>
+    <C.Root
+      className="bg-neutral data-checked:bg-accent data-checked:text-accent-foreground inline-flex size-5 items-center justify-center rounded-sm border"
+      {...fieldProps()}
+      {...props}
+    >
+      <C.Indicator>
+        <CheckIcon className="size-4 stroke-2" />
+      </C.Indicator>
+    </C.Root>
   );
 }

@@ -9,7 +9,7 @@ import './index.css';
 
 import { BrowserRouter, Route, Routes } from 'react-router';
 
-import { DebugProvider } from './debug-context';
+import { ConfigProvider } from './config-context';
 import { Home } from './home';
 import { messages } from './i18n/en/messages';
 import { getPreferredLanguage, setLanguage } from './i18n/i18n';
@@ -66,7 +66,7 @@ function App() {
     <ErrorBoundary>
       <I18nProvider i18n={i18n}>
         <QueryClientProvider client={client}>
-          <DebugProvider>
+          <ConfigProvider>
             <Toaster position="top-right" />
             <BrowserRouter>
               <Routes>
@@ -74,7 +74,7 @@ function App() {
                 <Route path="/session/:sessionId" element={<SessionPage />} />
               </Routes>
             </BrowserRouter>
-          </DebugProvider>
+          </ConfigProvider>
         </QueryClientProvider>
       </I18nProvider>
     </ErrorBoundary>
