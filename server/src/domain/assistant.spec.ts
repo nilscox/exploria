@@ -62,14 +62,14 @@ void describe('Assistant', () => {
     assert.deepStrictEqual(events, [
       createSessionEvent(session.id, 'MessageAdded', {
         message: {
-          date: clock.date,
+          date: clock.date.toISOString(),
           content: 'Hello!',
           role: 'user',
         },
       }),
       createSessionEvent(session.id, 'MessageAdded', {
         message: {
-          date: clock.date,
+          date: clock.date.toISOString(),
           content: 'Hi (:',
           role: 'assistant',
           model: '',
@@ -100,7 +100,7 @@ void describe('Assistant', () => {
     assert.deepStrictEqual(events, [
       createSessionEvent(session.id, 'MessageAdded', {
         message: {
-          date: clock.date,
+          date: clock.date.toISOString(),
           role: 'assistant',
           content: 'Call this tool',
           model: '',

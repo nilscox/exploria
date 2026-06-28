@@ -76,25 +76,31 @@ void describe('toSessionView', () => {
 });
 
 void describe('toTimeline', () => {
+  let generator: StubGenerator;
+  let clock: StubClock;
   let session: Session;
 
   const timeline = () => toTimeline(session.peekDomainEvents());
 
   beforeEach(() => {
-    session = new Session(new StubGenerator(), new StubClock());
+    generator = new StubGenerator();
+    clock = new StubClock();
+    session = new Session(generator, clock);
   });
 
   void it('interleaves messages and activity notifications in order', () => {
+    const date = clock.date.toISOString();
+
     session.addMessage('user', 'Hello');
     session.addTopic({ label: 'Topic' });
     session.startTimer(60);
     session.addMessage('assistant', 'Hi', { model: 'model', toolCalls: [] });
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'message', role: 'user', content: 'Hello', toolCalls: undefined },
+      { kind: 'message', date, role: 'user', content: 'Hello', toolCalls: undefined },
       { kind: 'topic-added', label: 'Topic' },
       { kind: 'timer-started', duration: 60 },
-      { kind: 'message', role: 'assistant', content: 'Hi', toolCalls: undefined },
+      { kind: 'message', date, role: 'assistant', content: 'Hi', toolCalls: undefined },
     ]);
   });
 
@@ -184,6 +190,7 @@ void describe('toTimeline', () => {
     assert.deepStrictEqual(timeline(), [
       {
         kind: 'message',
+        date: clock.date.toISOString(),
         role: 'assistant',
         content: 'Which path?',
         toolCalls: undefined,

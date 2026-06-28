@@ -28,7 +28,6 @@ void describe('toChatMessages', () => {
     session.addToolCallResult('call-1', { result: 'Timer started' });
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
-      { role: 'system', content: 'instructions' },
       { role: 'user', content: 'Hello' },
       {
         role: 'assistant',

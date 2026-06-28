@@ -263,7 +263,7 @@ void describe('Session', () => {
     session.addMessage('user', 'content');
 
     expectEvent('MessageAdded', {
-      message: { date: clock.date, role: 'user', content: 'content' },
+      message: { date: clock.date.toISOString(), role: 'user', content: 'content' },
     });
   });
 
@@ -271,7 +271,7 @@ void describe('Session', () => {
     session.addMessage('assistant', 'content', { model: 'model', toolCalls: [] });
 
     expectEvent('MessageAdded', {
-      message: { date: clock.date, role: 'assistant', content: 'content', model: 'model' },
+      message: { date: clock.date.toISOString(), role: 'assistant', content: 'content', model: 'model' },
     });
   });
 

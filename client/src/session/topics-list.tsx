@@ -30,6 +30,7 @@ export function TopicsListSection({ topics, onAdd }: { topics: Shared.Topic[]; o
 function TopicItem({ topic }: { topic: Shared.Topic }) {
   return (
     <div
+      id={topic.id}
       className={clsx(
         'row bg-neutral items-center gap-2.5 rounded-lg border px-3 py-2',
         topic.status === 'in_progress' && 'shadow-sm',

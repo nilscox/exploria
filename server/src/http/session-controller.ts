@@ -5,7 +5,7 @@ import z from 'zod';
 
 import { languages } from '../domain/i18n';
 import { toSessionView } from '../domain/projections/session-view';
-import { Session, postures } from '../domain/session';
+import { Session, postures, type TopicStatus } from '../domain/session';
 import { defined } from '../utils';
 import { parsePagination } from './pagination';
 import { ServerSentEvent, type SseUiNotifier } from './sse';
@@ -117,6 +117,23 @@ export class SessionController {
 
       await this.addTopic(topic);
 
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/topic/:topicId', async (req, res) => {
+      await this.removeTopic(req.params.topicId);
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/topic/:topicId', async (req, res) => {
+      const { label, status } = z
+        .object({
+          label: z.string().min(1).max(64).optional(),
+          status: z.enum(['pending', 'in_progress', 'done']).optional(),
+        })
+        .parse(req.body);
+
+      await this.updateTopic(req.params.topicId, { label, status });
       res.status(204).end();
     });
 
@@ -255,6 +272,26 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     session.addTopic({ label });
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async removeTopic(topicId: string) {
+    const session = this.getSessionInstance();
+
+    session.removeTopic(topicId);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async updateTopic(topicId: string, changes: { label?: string; status?: TopicStatus }) {
+    const session = this.getSessionInstance();
+
+    session.updateTopic(topicId, changes);
 
     const committed = await this.sessionRepository.save(session);
 

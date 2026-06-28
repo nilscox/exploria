@@ -30,7 +30,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
         break;
 
       case 'TopicAdded':
-        topics.push(event.topic);
+        topics.push(structuredClone(event.topic));
         break;
 
       case 'TopicRemoved':
@@ -56,7 +56,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
       }
 
       case 'NoteAdded':
-        notes.push(event.note);
+        notes.push(structuredClone(event.note));
         break;
 
       case 'NoteRemoved':

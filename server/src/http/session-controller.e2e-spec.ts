@@ -5,6 +5,7 @@ import assert from 'node:assert';
 import { after, before, describe, it, mock } from 'node:test';
 
 import { StubAiClient } from '../adapters/ai-client';
+import { StubClock } from '../adapters/clock';
 import { container } from '../di';
 import { Session } from '../domain/session';
 import { createTestDatabase, ExpressFetcher, waitFor, type TestDatabase } from '../test-utils';
@@ -24,6 +25,7 @@ void describe('SessionController', () => {
     searchApiKey: undefined,
   };
 
+  let clock: StubClock;
   let db: TestDatabase;
   let app: ExpressFetcher;
   let aiClient: StubAiClient;
@@ -31,11 +33,13 @@ void describe('SessionController', () => {
   let repository: SessionRepository;
 
   before(async () => {
+    clock = new StubClock();
     db = await createTestDatabase();
     aiClient = new StubAiClient();
 
     container.register({
       config: asValue(config),
+      clock: asValue(clock),
       logger: asValue({ log: () => {} }),
       aiClient: asValue(aiClient),
       database: asValue(db),
@@ -118,8 +122,8 @@ void describe('SessionController', () => {
 
       await waitFor(() =>
         assert.deepStrictEqual(timeline, [
-          { kind: 'message', role: 'user', content: 'Question?' },
-          { kind: 'message', role: 'assistant', content: 'Answer.' },
+          { kind: 'message', date: clock.date.toISOString(), role: 'user', content: 'Question?' },
+          { kind: 'message', date: clock.date.toISOString(), role: 'assistant', content: 'Answer.' },
         ] satisfies Shared.TimelineItem[]),
       );
     } finally {

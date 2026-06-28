@@ -2,13 +2,14 @@ import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import clsx from 'clsx';
 import {
+  ArrowRightIcon,
   BotIcon,
   CheckIcon,
+  ClipboardListIcon,
   DramaIcon,
   ListIcon,
   PencilIcon,
   SearchIcon,
-  SparklesIcon,
   StickyNoteIcon,
   StickyNoteXIcon,
   TimerIcon,
@@ -51,12 +52,14 @@ function TimelineEntry({
     return <MessageItem message={item} onSelectPath={onSelectPath} />;
   }
 
-  if (item.kind === 'summary') {
-    return <SummaryItem session={session} item={item} />;
+  const { showTimelineActions } = config();
+
+  if (!showTimelineActions) {
+    return null;
   }
 
-  if (!config().showTimelineActions) {
-    return null;
+  if (item.kind === 'summary') {
+    return <SummaryItem session={session} item={item} />;
   }
 
   const Component = components[item.kind] as React.ComponentType<{ item: TimelineItem }>;
@@ -94,16 +97,20 @@ const components: {
   'topic-label-changed': ({ item }) => (
     <Notification Icon={ListIcon}>
       <Trans>
-        Topic renamed: {item.oldLabel} → {item.newLabel}
+        Topic renamed: {item.oldLabel} <ArrowRightIcon className="mb-0.5 inline-block size-3.5" /> {item.newLabel}
       </Trans>
     </Notification>
   ),
 
   'topic-status-changed': ({ item }) => (
     <Notification Icon={item.status === 'done' ? CheckIcon : ListIcon}>
-      <Trans>
-        Status of "{item.label}": <TopicStatusLabel status={item.status} />
-      </Trans>
+      {
+        {
+          pending: <Trans>Topic "{item.label}" is pending</Trans>,
+          in_progress: <Trans>Topic "{item.label}" in progress</Trans>,
+          done: <Trans>Topic "{item.label}" done</Trans>,
+        }[item.status]
+      }
     </Notification>
   ),
 
@@ -193,7 +200,7 @@ function SummaryItem({ session, item }: { session: Shared.Session; item: Extract
             type="button"
             className="text-dim row max-w-fit cursor-pointer items-center gap-1 text-start text-sm hover:text-inherit"
           >
-            <SparklesIcon className="size-3.5 shrink-0" />
+            <ClipboardListIcon className="size-3.5 shrink-0" />
             <span className="truncate leading-none">
               <Trans>Session summary</Trans>
             </span>
@@ -219,14 +226,6 @@ function Notification({
       <span className="truncate leading-none">{children}</span>
     </div>
   );
-}
-
-function TopicStatusLabel({ status }: { status: Shared.TopicStatus }) {
-  return {
-    pending: <Trans>pending</Trans>,
-    in_progress: <Trans>in progress</Trans>,
-    done: <Trans>done</Trans>,
-  }[status];
 }
 
 function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSelectPath: (pathId: string) => void }) {

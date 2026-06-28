@@ -90,10 +90,6 @@ msgstr "Pression exigeante, ex. préparation d'entretien"
 msgid "Devil's advocate"
 msgstr "Avocat du diable"
 
-#: src/session/session-timeline.tsx
-msgid "done"
-msgstr "terminé"
-
 #: src/session/topics-list.tsx
 msgid "Done"
 msgstr "Traité"
@@ -125,10 +121,6 @@ msgstr "Exploria"
 #: src/session/posture.tsx
 msgid "Help structure a decision"
 msgstr "Aide neutre à structurer une décision"
-
-#: src/session/session-timeline.tsx
-msgid "in progress"
-msgstr "en cours"
 
 #: src/session/topics-list.tsx
 msgid "In progress"
@@ -209,10 +201,6 @@ msgstr "Questions ouvertes"
 msgid "Pause"
 msgstr "Pause"
 
-#: src/session/session-timeline.tsx
-msgid "pending"
-msgstr "en attente"
-
 #: src/home.tsx
 msgid "Previous sessions"
 msgstr "Sessions précédentes"
@@ -284,11 +272,6 @@ msgstr "Démarrer la session"
 msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Status of \"{0}\": <0/>"
-msgstr "Statut de « {0} » : <0/>"
-
 #: src/session/timer.tsx
 msgid "Stop"
 msgstr "Arrêter"
@@ -342,6 +325,21 @@ msgstr "À traiter"
 
 #. placeholder {0}: item.label
 #: src/session/session-timeline.tsx
+msgid "Topic \"{0}\" done"
+msgstr "Sujet \"{0}\" traité"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic \"{0}\" in progress"
+msgstr "Sujet \"{0}\" en cours"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic \"{0}\" is pending"
+msgstr "Sujet \"{0}\" à traiter"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
 msgid "Topic added: {0}"
 msgstr "Sujet ajouté : {0}"
 
@@ -353,8 +351,8 @@ msgstr "Sujet supprimé : {0}"
 #. placeholder {0}: item.oldLabel
 #. placeholder {1}: item.newLabel
 #: src/session/session-timeline.tsx
-msgid "Topic renamed: {0} → {1}"
-msgstr "Sujet renommé : {0} → {1}"
+msgid "Topic renamed: {0} <0/> {1}"
+msgstr "Sujet renommé: {0} <0/> {1}"
 
 #: src/session/topics-list.tsx
 msgid "Topics"
