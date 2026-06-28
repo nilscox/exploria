@@ -1,5 +1,5 @@
 import type { Shared } from '@exploria/server/shared';
-import { Trans } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import clsx from 'clsx';
 import {
   BotIcon,
@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import type { SVGProps } from 'react';
 
-import { Button } from 'src/components/button';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { Markdown } from 'src/components/markdown';
 import { config } from 'src/config-context';
@@ -231,8 +230,18 @@ function TopicStatusLabel({ status }: { status: Shared.TopicStatus }) {
 }
 
 function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSelectPath: (pathId: string) => void }) {
+  const { i18n } = useLingui();
+
   return (
-    <>
+    <div>
+      {config().showTimelineDates && (
+        <div className="text-dim mb-0.5 text-end text-xs">
+          {new Intl.DateTimeFormat(i18n.locale, { dateStyle: 'short', timeStyle: 'short' }).format(
+            new Date(message.date),
+          )}
+        </div>
+      )}
+
       <Markdown
         markdown={message.content}
         className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
@@ -240,13 +249,17 @@ function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSe
 
       {message.role === 'assistant' && config().debug && <ToolCalls toolCalls={message.toolCalls} />}
       {message.paths && <DiscussionPaths paths={message.paths} onSelect={onSelectPath} />}
-    </>
+    </div>
   );
 }
 
 function ToolCalls({ toolCalls }: { toolCalls?: Shared.ToolCall[] }) {
   return toolCalls?.map((toolCall) => (
-    <Details key={toolCall.id} className="text-dim text-sm" summary={`Tool call ${toolCall.name} (${toolCall.id})`}>
+    <Details
+      key={toolCall.id}
+      className="text-dim my-0.5 text-sm"
+      summary={`Tool call ${toolCall.name} (${toolCall.id})`}
+    >
       <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
         {JSON.stringify(toolCall.arguments, null, 2)}
       </div>
@@ -260,23 +273,21 @@ function DiscussionPaths({ paths, onSelect }: { paths: Shared.SelectablePath[]; 
   }
 
   return (
-    <div className="col gap-2">
+    <div className="col bg-accent mt-2 gap-2 rounded-lg p-4">
       {paths.map((path) => (
-        <Button
+        <button
           key={path.id}
-          variant={path.selected ? 'solid' : 'outlined'}
           disabled={path.selected !== undefined}
           className={clsx(
-            'h-auto text-start whitespace-normal! py-2 justify-start disabled:pointer-events-none',
+            'col gap-0.5 h-auto text-start py-2 text-sm disabled:pointer-events-none bg-neutral/80 rounded-md p-2 hover:bg-neutral transition-colors',
+            path.selected && 'shadow-sm',
             path.selected === false && 'opacity-50',
           )}
           onClick={() => onSelect(path.id)}
         >
-          <div className="col gap-0.5">
-            <span className="font-medium">{path.label}</span>
-            {path.description && <span className="text-dim">{path.description}</span>}
-          </div>
-        </Button>
+          <span className="font-medium">{path.label}</span>
+          {path.description && <span className="text-dim">{path.description}</span>}
+        </button>
       ))}
     </div>
   );

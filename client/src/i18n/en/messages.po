@@ -14,362 +14,364 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. placeholder {0}: item.reason
-#: src/session/session-timeline.tsx:181
+#: src/session/session-timeline.tsx
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
-#: src/session/topics-list.tsx:101
+#: src/session/topics-list.tsx
 msgid "Add a topic..."
 msgstr "Add a topic..."
 
-#: src/session/topics-list.tsx:100
+#: src/session/topics-list.tsx
 msgid "Add topic"
 msgstr "Add topic"
 
-#: src/session/posture.tsx:92
+#: src/session/posture.tsx
 msgid "Advisor"
 msgstr "Advisor"
 
-#: src/session/summary.ts:42
+#: src/session/summary.ts
 msgid "Assistant"
 msgstr "Assistant"
 
-#: src/session/posture.tsx:109
+#: src/session/posture.tsx
 msgid "Attack ideas to test them"
 msgstr "Attack ideas to test them"
 
-#: src/session/session-timeline.tsx:169
+#: src/session/session-timeline.tsx
 msgid "Back to automatic stance"
 msgstr "Back to automatic stance"
 
-#: src/session/session-summary.tsx:144
-#: src/session/summary.ts:44
+#: src/session/session-summary.tsx
+#: src/session/summary.ts
 msgid "Biases"
 msgstr "Biases"
 
-#: src/session/session-summary.tsx:163
-#: src/session/summary.ts:45
+#: src/session/session-summary.tsx
+#: src/session/summary.ts
 msgid "Blind spots"
 msgstr "Blind spots"
 
-#: src/session/timer.tsx:49
+#: src/session/timer.tsx
 msgid "Clear the timer?"
 msgstr "Clear the timer?"
 
-#: src/components/settings.tsx:42
-#: src/session/session-summary.tsx:71
+#: src/components/settings.tsx
+#: src/session/session-summary.tsx
 msgid "Close"
 msgstr "Close"
 
-#: src/session/session-summary.tsx:199
-#: src/session/summary.ts:48
+#: src/session/session-summary.tsx
+#: src/session/summary.ts
 msgid "Conclusion"
 msgstr "Conclusion"
 
-#: src/components/settings.tsx:95
+#: src/components/settings.tsx
 msgid "Dark"
 msgstr "Dark"
 
-#: src/session/summary.ts:37
+#: src/session/summary.ts
 msgid "Date"
 msgstr "Date"
 
-#: src/components/settings.tsx:157
+#: src/components/settings.tsx
 msgid "Debug"
 msgstr "Debug"
 
-#: src/home.tsx:68
+#: src/home.tsx
 msgid "Deep thoughts with AI."
 msgstr "Deep thoughts with AI."
 
-#: src/session/posture.tsx:110
+#: src/session/posture.tsx
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Demanding pressure, e.g. interview prep"
 
-#: src/session/posture.tsx:90
+#: src/session/posture.tsx
 msgid "Devil's advocate"
 msgstr "Devil's advocate"
 
-#: src/session/session-timeline.tsx:229
+#: src/session/session-timeline.tsx
 msgid "done"
 msgstr "done"
 
-#: src/session/topics-list.tsx:76
+#: src/session/topics-list.tsx
 msgid "Done"
 msgstr "Done"
 
-#: src/session/session-summary.tsx:57
+#: src/session/session-summary.tsx
 msgid "Download"
 msgstr "Download"
 
-#: src/session/timer.tsx:108
+#: src/session/timer.tsx
 msgid "Duration (minutes):"
 msgstr "Duration (minutes):"
 
-#: src/session/session.tsx:93
+#: src/session/session.tsx
 msgid "End session"
 msgstr "End session"
 
-#: src/session/message-form.tsx:61
+#: src/session/message-form.tsx
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Enter to send • Shift+Enter for new line"
 
-#: src/session/posture.tsx:91
+#: src/session/posture.tsx
 msgid "Examiner"
 msgstr "Examiner"
 
-#: src/home.tsx:65
+#: src/home.tsx
 msgid "Exploria"
 msgstr "Exploria"
 
-#: src/session/posture.tsx:111
+#: src/session/posture.tsx
 msgid "Help structure a decision"
 msgstr "Help structure a decision"
 
-#: src/session/session-timeline.tsx:228
+#: src/session/session-timeline.tsx
 msgid "in progress"
 msgstr "in progress"
 
-#: src/session/topics-list.tsx:77
+#: src/session/topics-list.tsx
 msgid "In progress"
 msgstr "In progress"
 
-#: src/session/timer.tsx:99
+#: src/session/timer.tsx
 msgid "Invalid input."
 msgstr "Invalid input."
 
-#: src/session/session-summary.tsx:65
+#: src/session/session-summary.tsx
 msgid "JSON"
 msgstr "JSON"
 
-#: src/session/session-summary.tsx:132
-#: src/session/summary.ts:43
+#: src/session/session-summary.tsx
+#: src/session/summary.ts
 msgid "Key points"
 msgstr "Key points"
 
-#: src/components/settings.tsx:62
+#: src/components/settings.tsx
 msgid "Language"
 msgstr "Language"
 
-#: src/components/settings.tsx:91
+#: src/components/settings.tsx
 msgid "Light"
 msgstr "Light"
 
-#: src/home.tsx:95
+#: src/home.tsx
 msgid "Load demo"
 msgstr "Load demo"
 
-#: src/session/message-form.tsx:53
+#: src/session/message-form.tsx
 msgid "Message"
 msgstr "Message"
 
-#: src/session/posture.tsx:93
+#: src/session/posture.tsx
 msgid "Mirror"
 msgstr "Mirror"
 
-#: src/home.tsx:88
-#: src/session/session-sidebar.tsx:45
-#: src/session/session-sidebar.tsx:48
+#: src/home.tsx
+#: src/session/session-sidebar.tsx
 msgid "Model"
 msgstr "Model"
 
 #. placeholder {0}: item.model
-#: src/session/session-timeline.tsx:73
+#: src/session/session-timeline.tsx
 msgid "Model changed: {0}"
 msgstr "Model changed: {0}"
 
-#: src/home.tsx:147
+#: src/home.tsx
 msgid "More"
 msgstr "More"
 
 #. placeholder {0}: item.content
-#: src/session/session-timeline.tsx:113
+#: src/session/session-timeline.tsx
 msgid "Note added: {0}"
 msgstr "Note added: {0}"
 
 #. placeholder {0}: item.content
-#: src/session/session-timeline.tsx:119
+#: src/session/session-timeline.tsx
 msgid "Note removed: {0}"
 msgstr "Note removed: {0}"
 
 #. placeholder {0}: item.content
-#: src/session/session-timeline.tsx:125
+#: src/session/session-timeline.tsx
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
 
-#: src/session/session-sidebar.tsx:62
+#: src/session/session-sidebar.tsx
 msgid "Notes"
 msgstr "Notes"
 
-#: src/session/session-summary.tsx:187
-#: src/session/summary.ts:47
+#: src/session/session-summary.tsx
+#: src/session/summary.ts
 msgid "Open questions"
 msgstr "Open questions"
 
-#: src/session/timer.tsx:35
+#: src/session/timer.tsx
 msgid "Pause"
 msgstr "Pause"
 
-#: src/session/session-timeline.tsx:227
+#: src/session/session-timeline.tsx
 msgid "pending"
 msgstr "pending"
 
-#: src/home.tsx:124
+#: src/home.tsx
 msgid "Previous sessions"
 msgstr "Previous sessions"
 
-#: src/session/posture.tsx:108
+#: src/session/posture.tsx
 msgid "Question to deepen thinking"
 msgstr "Question to deepen thinking"
 
-#: src/session/posture.tsx:112
+#: src/session/posture.tsx
 msgid "Reflect and welcome, without challenging"
 msgstr "Reflect and welcome, without challenging"
 
-#: src/session/timer.tsx:34
+#: src/session/timer.tsx
 msgid "Resume"
 msgstr "Resume"
 
 #. placeholder {0}: item.query
 #. placeholder {1}: item.resultCount
-#: src/session/session-timeline.tsx:157
+#: src/session/session-timeline.tsx
 msgid "Search: \"{0}\" ({1} result(s))"
 msgstr "Search: \"{0}\" ({1} result(s))"
 
-#: src/session/message-form.tsx:67
+#: src/session/message-form.tsx
 msgid "Send"
 msgstr "Send"
 
-#: src/home.tsx:75
+#: src/home.tsx
 msgid "Session subject"
 msgstr "Session subject"
 
-#: src/session/session-summary.tsx:38
-#: src/session/session-timeline.tsx:199
+#: src/session/session-summary.tsx
+#: src/session/session-timeline.tsx
 msgid "Session summary"
 msgstr "Session summary"
 
-#: src/session/timer.tsx:38
-#: src/session/timer.tsx:106
+#: src/session/timer.tsx
 msgid "Session timer"
 msgstr "Session timer"
 
-#: src/components/settings.tsx:28
+#: src/components/settings.tsx
 msgid "Settings"
 msgstr "Settings"
 
-#: src/components/settings.tsx:142
+#: src/components/settings.tsx
 msgid "Show timeline actions"
 msgstr "Show timeline actions"
 
-#: src/session/posture.tsx:89
+#: src/components/settings.tsx
+msgid "Show timeline dates"
+msgstr "Show timeline dates"
+
+#: src/session/posture.tsx
 msgid "Socratic"
 msgstr "Socratic"
 
-#: src/session/posture.tsx:23
+#: src/session/posture.tsx
 msgid "Stance"
 msgstr "Stance"
 
-#: src/session/session-timeline.tsx:171
+#: src/session/session-timeline.tsx
 msgid "Stance forced: <0/>"
 msgstr "Stance forced: <0/>"
 
-#: src/home.tsx:98
+#: src/home.tsx
 msgid "Start session"
 msgstr "Start session"
 
-#: src/session/timer.tsx:109
+#: src/session/timer.tsx
 msgid "Start timer"
 msgstr "Start timer"
 
 #. placeholder {0}: item.label
-#: src/session/session-timeline.tsx:105
+#: src/session/session-timeline.tsx
 msgid "Status of \"{0}\": <0/>"
 msgstr "Status of \"{0}\": <0/>"
 
-#: src/session/timer.tsx:50
+#: src/session/timer.tsx
 msgid "Stop"
 msgstr "Stop"
 
 #. placeholder {0}: item.subject
-#: src/session/session-timeline.tsx:79
+#: src/session/session-timeline.tsx
 msgid "Subject changed: {0}"
 msgstr "Subject changed: {0}"
 
-#: src/session/session.tsx:84
+#: src/session/session.tsx
 msgid "Subject to be defined"
 msgstr "Subject to be defined"
 
-#: src/home.tsx:134
+#: src/home.tsx
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
-#: src/session/summary.ts:39
+#: src/session/summary.ts
 msgid "Summary"
 msgstr "Summary"
 
-#: src/session/session-summary.tsx:175
-#: src/session/summary.ts:46
+#: src/session/session-summary.tsx
+#: src/session/summary.ts
 msgid "Tensions & contradictions"
 msgstr "Tensions & contradictions"
 
-#: src/components/settings.tsx:85
+#: src/components/settings.tsx
 msgid "Theme"
 msgstr "Theme"
 
-#: src/session/session-timeline.tsx:137
+#: src/session/session-timeline.tsx
 msgid "Timer cleared"
 msgstr "Timer cleared"
 
-#: src/session/session-timeline.tsx:143
+#: src/session/session-timeline.tsx
 msgid "Timer paused"
 msgstr "Timer paused"
 
-#: src/session/session-timeline.tsx:149
+#: src/session/session-timeline.tsx
 msgid "Timer resumed"
 msgstr "Timer resumed"
 
 #. placeholder {0}: item.duration
-#: src/session/session-timeline.tsx:131
+#: src/session/session-timeline.tsx
 msgid "Timer started: {0} minutes"
 msgstr "Timer started: {0} minutes"
 
-#: src/session/topics-list.tsx:78
+#: src/session/topics-list.tsx
 msgid "To do"
 msgstr "To do"
 
 #. placeholder {0}: item.label
-#: src/session/session-timeline.tsx:85
+#: src/session/session-timeline.tsx
 msgid "Topic added: {0}"
 msgstr "Topic added: {0}"
 
 #. placeholder {0}: item.label
-#: src/session/session-timeline.tsx:91
+#: src/session/session-timeline.tsx
 msgid "Topic removed: {0}"
 msgstr "Topic removed: {0}"
 
 #. placeholder {0}: item.oldLabel
 #. placeholder {1}: item.newLabel
-#: src/session/session-timeline.tsx:97
+#: src/session/session-timeline.tsx
 msgid "Topic renamed: {0} → {1}"
 msgstr "Topic renamed: {0} → {1}"
 
-#: src/session/topics-list.tsx:14
+#: src/session/topics-list.tsx
 msgid "Topics"
 msgstr "Topics"
 
-#: src/session/summary.ts:40
+#: src/session/summary.ts
 msgid "Transcript"
 msgstr "Transcript"
 
-#: src/session/message-form.tsx:54
+#: src/session/message-form.tsx
 msgid "Type a message..."
 msgstr "Type a message..."
 
-#: src/home.tsx:80
+#: src/home.tsx
 msgid "What do you need to think about?"
 msgstr "What do you need to think about?"
 
-#: src/session/summary.ts:41
+#: src/session/summary.ts
 msgid "You"
 msgstr "You"

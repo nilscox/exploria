@@ -27,8 +27,8 @@ export type Note = {
 };
 
 export type Message =
-  | { date: Date; role: 'user'; content: string }
-  | { date: Date; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] };
+  | { date: string; role: 'user'; content: string }
+  | { date: string; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] };
 
 export type Role = Message['role'];
 
@@ -360,7 +360,7 @@ export class Session extends AggregateRoot<SessionEvent> {
   addMessage(role: Extract<Role, 'assistant'>, content: string, params: { model: string; toolCalls: ToolCall[] }): void;
 
   addMessage(role: Role, content: string, params?: { model: string; toolCalls: ToolCall[] }) {
-    const date = this.clock.now();
+    const date = this.clock.now().toISOString();
     let message: Message;
 
     if (role === 'assistant') {

@@ -13,6 +13,7 @@ import { DocumentTitle } from 'src/components/document-title';
 import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
+import { config } from 'src/config-context';
 
 import { MessageForm } from './message-form';
 import { SessionSidebar } from './session-sidebar';
@@ -114,10 +115,11 @@ function MainSection({
   onSelectPath: (pathId: string) => void;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { showTimelineActions, showTimelineDates } = config();
 
   useLayoutEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'instant' });
-  }, [stream, session.timeline]);
+  }, [stream, session.timeline, showTimelineActions, showTimelineDates]);
 
   return (
     <div className="flex-1 scrollbar-thin overflow-y-auto">

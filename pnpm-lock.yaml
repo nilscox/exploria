@@ -44,6 +44,9 @@ importers:
       '@lingui/core':
         specifier: ^6.4.0
         version: 6.4.0
+      '@lingui/format-po':
+        specifier: ^6.4.0
+        version: 6.4.0
       '@lingui/react':
         specifier: ^6.4.0
         version: 6.4.0(react@19.2.7)

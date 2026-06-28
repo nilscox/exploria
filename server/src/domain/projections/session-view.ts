@@ -158,6 +158,7 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
 
         const item: Shared.TimelineItem = {
           kind: 'message',
+          date: message.date,
           role: message.role,
           content: message.content,
           toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,

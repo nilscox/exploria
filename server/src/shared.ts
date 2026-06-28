@@ -29,7 +29,7 @@ export namespace Shared {
   export type SelectablePath = DiscussionPath & { selected?: boolean };
 
   export type TimelineItem =
-    | { kind: 'message'; role: Role; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }
+    | { kind: 'message'; role: Role; date: string; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }
     | { kind: 'model-changed'; model: string }
     | { kind: 'subject-changed'; subject: string }
     | { kind: 'topic-added'; label: string }

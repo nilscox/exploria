@@ -32,6 +32,7 @@ export function Settings() {
           <LanguageSelector />
           <ThemeModeSelector />
           <ShowTimelineActions />
+          <ShowTimelineDates />
           <DebugMode />
         </div>
 
@@ -140,6 +141,24 @@ function ShowTimelineActions() {
         />
         <FieldLabel inline className="cursor-pointer">
           <Trans>Show timeline actions</Trans>
+        </FieldLabel>
+      </div>
+    </FieldProvider>
+  );
+}
+
+function ShowTimelineDates() {
+  const setConfig = useSetConfig();
+
+  return (
+    <FieldProvider>
+      <div className="row my-1 gap-2">
+        <Switch
+          checked={config().showTimelineDates}
+          onCheckedChange={(checked) => setConfig({ showTimelineDates: Boolean(checked) })}
+        />
+        <FieldLabel inline className="cursor-pointer">
+          <Trans>Show timeline dates</Trans>
         </FieldLabel>
       </div>
     </FieldProvider>
