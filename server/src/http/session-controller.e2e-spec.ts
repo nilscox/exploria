@@ -22,7 +22,7 @@ void describe('SessionController', () => {
     database: { url: '', debug: false },
     openAi: { baseUrl: '', apiKey: '' },
     assistant: undefined,
-    searchApiKey: undefined,
+    tavilyApiKey: undefined,
   };
 
   let clock: StubClock;

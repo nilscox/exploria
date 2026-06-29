@@ -1,8 +1,6 @@
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
-import fs from 'node:fs';
 import type { Server as HttpServer } from 'node:http';
-import path from 'node:path';
 import { promisify } from 'node:util';
 import z from 'zod';
 
@@ -26,29 +24,17 @@ export class Server {
     this.logger = logger;
     this.uiNotifier = uiNotifier;
 
+    this.logger.log(`Registering API routes`);
+
     const api = express.Router();
 
-    if (config.server.basePath) {
-      this.logger.log(`Registering API routes at ${config.server.basePath}`);
-      this.app.use(config.server.basePath, api);
-    } else {
-      this.logger.log(`Registering API routes`);
-      this.app.use(api);
-    }
+    this.app.use(api);
 
     api.use(cors({ exposedHeaders: ['X-Page', 'X-Total-Pages'] }));
     api.use(express.json());
     api.use('/session', sessionController.router);
     api.use((req, res) => res.status(404).end());
     api.use(this.errorHandler);
-
-    if (config.server.publicDir) {
-      this.logger.log(`Serving static files from ${config.server.publicDir}`);
-      this.app.use(express.static(config.server.publicDir));
-
-      const index = fs.readFileSync(path.join(config.server.publicDir, 'index.html'));
-      this.app.use((req, res) => res.type('html').send(index));
-    }
   }
 
   async start() {

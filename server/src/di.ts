@@ -22,7 +22,7 @@ import type { Logger } from './adapters/logger';
 import type { UiNotifier } from './domain/ui-notifier';
 
 function searchClientFactory(config: Config): SearchClient | null {
-  return config.searchApiKey ? new TavilySearchClient(config.searchApiKey) : null;
+  return config.tavilyApiKey ? new TavilySearchClient(config.tavilyApiKey) : null;
 }
 
 function assistantFactory(

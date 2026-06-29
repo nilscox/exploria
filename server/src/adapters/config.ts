@@ -2,12 +2,10 @@ export interface Config {
   server: {
     host: string;
     port: number;
-    basePath?: string;
-    publicDir?: string;
   };
 
   openAi: {
-    baseUrl?: string;
+    baseUrl: string;
     apiKey: string;
   };
 
@@ -16,9 +14,9 @@ export interface Config {
     debug: boolean;
   };
 
-  assistant: 'test' | 'eval' | undefined;
+  assistant?: 'test' | 'eval';
 
-  searchApiKey: string | undefined;
+  tavilyApiKey?: string;
 }
 
 export class EnvConfig implements Config {
@@ -38,8 +36,6 @@ export class EnvConfig implements Config {
     return {
       host: this.env('HOST') ?? 'localhost',
       port: Number.parseInt(this.env('PORT') ?? '3000'),
-      basePath: this.env('BASE_PATH'),
-      publicDir: this.env('PUBLIC_DIR'),
     };
   }
 
@@ -65,7 +61,7 @@ export class EnvConfig implements Config {
     }
   }
 
-  get searchApiKey() {
-    return this.env('SEARCH_API_KEY');
+  get tavilyApiKey() {
+    return this.env('TAVILY_API_KEY');
   }
 }
