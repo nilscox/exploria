@@ -32,6 +32,7 @@ export class Server {
 
     api.use(cors({ exposedHeaders: ['X-Page', 'X-Total-Pages'] }));
     api.use(express.json());
+    api.use('/health', (req, res) => res.status(204).end());
     api.use('/session', sessionController.router);
     api.use((req, res) => res.status(404).end());
     api.use(this.errorHandler);
