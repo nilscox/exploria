@@ -9,8 +9,10 @@ import type { EventBus } from '../event-bus';
 import type { Shared } from '../shared';
 
 export class SessionSseSubscriber {
+  readonly unsubscribe: () => void;
+
   constructor(events: EventBus, sessionRepository: SessionRepository, uiNotifier: UiNotifier<Shared.SessionUiEvent>) {
-    events.subscribe(async (batch) => {
+    this.unsubscribe = events.subscribe(async (batch) => {
       const sessionEvents = batch.filter((e): e is SessionEvent => e.aggregateType === 'Session');
 
       if (sessionEvents.length === 0) {

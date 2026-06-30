@@ -3,12 +3,12 @@ import { container } from './di';
 import { SessionSseSubscriber } from './http/session-sse-subscriber';
 
 async function main() {
-  const server = container.resolve('server');
   const database = container.resolve('database');
-
-  container.build(SessionSseSubscriber);
+  const server = container.resolve('server');
+  const subscriber = container.build(SessionSseSubscriber);
 
   async function close() {
+    subscriber.unsubscribe();
     await server.stop();
     await database.$client.end();
   }
