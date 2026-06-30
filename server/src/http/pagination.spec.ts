@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { describe, it } from 'node:test';
 
-import { parsePagination } from './pagination';
+import { parsePagination } from './pagination.ts';
 
 void describe('parsePagination', () => {
   void it('returns the default value', () => {

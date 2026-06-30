@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { StubClock } from '../../adapters/clock';
-import { StubGenerator } from '../../adapters/generator';
-import { Session } from '../session';
-import { toSessionView, toTimeline } from './session-view';
+import { StubClock } from '../../adapters/clock.ts';
+import { StubGenerator } from '../../adapters/generator.ts';
+import { Session } from '../session.ts';
+import { toSessionView, toTimeline } from './session-view.ts';
 
 void describe('toSessionView', () => {
   let clock: StubClock;

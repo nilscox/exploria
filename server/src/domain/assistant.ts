@@ -1,14 +1,14 @@
 import z from 'zod';
 
-import { assert, hasKey } from '../utils';
-import { toChatMessages } from './projections/chat-context';
+import { assert, hasKey } from '../utils.ts';
+import { toChatMessages } from './projections/chat-context.ts';
 
-import type { AiClient } from '../adapters/ai-client';
-import type { Clock } from '../adapters/clock';
-import type { I18n } from '../adapters/i18n';
-import type { AssistantTools, Tool, Tools } from './assistant-tools';
-import type { Session, ToolCall } from './session';
-import type { UiEvent, UiNotifier } from './ui-notifier';
+import type { AiClient } from '../adapters/ai-client.ts';
+import type { Clock } from '../adapters/clock.ts';
+import type { I18n } from '../adapters/i18n.ts';
+import type { AssistantTools, Tool, Tools } from './assistant-tools.ts';
+import type { Session, ToolCall } from './session.ts';
+import type { UiEvent, UiNotifier } from './ui-notifier.ts';
 
 export type AssistantUiEvent = UiEvent<'Chunk', { text: string }>;
 

@@ -1,6 +1,6 @@
-import type { Assistant, AssistantUiEvent } from './assistant';
-import type { Session } from './session';
-import type { UiNotifier } from './ui-notifier';
+import type { Assistant, AssistantUiEvent } from './assistant.ts';
+import type { Session } from './session.ts';
+import type { UiNotifier } from './ui-notifier.ts';
 
 export class TestAssistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;

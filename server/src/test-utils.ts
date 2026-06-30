@@ -8,18 +8,18 @@ import express from 'express';
 import type { Server } from 'node:http';
 import { promisify } from 'node:util';
 
-import { StubAiClient } from './adapters/ai-client';
-import { StubClock } from './adapters/clock';
-import { StubGenerator } from './adapters/generator';
-import { schema } from './database';
-import { container } from './di';
-import { EventBus } from './event-bus';
-import { assert } from './utils';
+import { StubAiClient } from './adapters/ai-client.ts';
+import { StubClock } from './adapters/clock.ts';
+import { StubGenerator } from './adapters/generator.ts';
+import { schema } from './database/index.ts';
+import { container } from './di.ts';
+import { EventBus } from './event-bus.ts';
+import { assert } from './utils.ts';
 
-import type { Config } from './adapters/config';
-import type { Database } from './database/database';
-import type { SessionRepository } from './database/session-repository';
-import type { UserRepository } from './database/user-repository';
+import type { Config } from './adapters/config.ts';
+import type { Database } from './database/database.ts';
+import type { SessionRepository } from './database/session-repository.ts';
+import type { UserRepository } from './database/user-repository.ts';
 
 export interface TestDatabase extends Database {
   $testClient: PGlite;

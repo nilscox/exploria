@@ -3,20 +3,20 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
-import { languages } from '../domain/i18n';
-import { toSessionView } from '../domain/projections/session-view';
-import { Session, postures, type TopicStatus } from '../domain/session';
-import { defined } from '../utils';
-import { parsePagination } from './pagination';
-import { ServerSentEvent, type SseUiNotifier } from './sse';
+import { languages } from '../domain/i18n/index.ts';
+import { toSessionView } from '../domain/projections/session-view.ts';
+import { Session, postures, type TopicStatus } from '../domain/session.ts';
+import { defined } from '../utils.ts';
+import { parsePagination } from './pagination.ts';
+import { ServerSentEvent, type SseUiNotifier } from './sse.ts';
 
-import type { Clock } from '../adapters/clock';
-import type { Generator } from '../adapters/generator';
-import type { SessionRepository } from '../database/session-repository';
-import type { Assistant } from '../domain/assistant';
-import type { SummaryGenerator } from '../domain/summary-generator';
-import type { EventBus } from '../event-bus';
-import type { Shared } from '../shared';
+import type { Clock } from '../adapters/clock.ts';
+import type { Generator } from '../adapters/generator.ts';
+import type { SessionRepository } from '../database/session-repository.ts';
+import type { Assistant } from '../domain/assistant.ts';
+import type { SummaryGenerator } from '../domain/summary-generator.ts';
+import type { EventBus } from '../event-bus.ts';
+import type { Shared } from '../shared.ts';
 
 export class SessionController {
   private readonly generator: Generator;

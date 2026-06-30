@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { container } from './di';
-import { SessionSseSubscriber } from './http/session-sse-subscriber';
+import { container } from './di.ts';
+import { SessionSseSubscriber } from './http/session-sse-subscriber.ts';
 
 async function main() {
   const database = container.resolve('database');

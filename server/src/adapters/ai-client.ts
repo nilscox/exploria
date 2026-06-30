@@ -2,10 +2,10 @@ import OpenAI from 'openai';
 import type { Stream } from 'openai/streaming';
 import type z from 'zod';
 
-import { assert, defined } from '../utils';
+import { assert, defined } from '../utils.ts';
 
-import type { Tool } from '../domain/assistant-tools';
-import type { Config } from './config';
+import type { Tool } from '../domain/assistant-tools.ts';
+import type { Config } from './config.ts';
 
 export type AiClientMessage =
   | {

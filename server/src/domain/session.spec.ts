@@ -2,9 +2,9 @@ import { sub } from 'date-fns';
 import assert, { AssertionError } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { StubClock } from '../adapters/clock';
-import { StubGenerator } from '../adapters/generator';
-import { Session, type SessionEvent } from './session';
+import { StubClock } from '../adapters/clock.ts';
+import { StubGenerator } from '../adapters/generator.ts';
+import { Session, type SessionEvent } from './session.ts';
 
 void describe('Session', () => {
   let generator: StubGenerator;

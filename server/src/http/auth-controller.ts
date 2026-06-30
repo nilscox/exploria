@@ -1,12 +1,12 @@
 import express from 'express';
 import z from 'zod';
 
-import { assert } from '../utils';
+import { assert } from '../utils.ts';
 
-import type { Config } from '../adapters/config';
-import type { UserRepository } from '../database/user-repository';
-import type { User } from '../domain/user';
-import type { Shared } from '../shared';
+import type { Config } from '../adapters/config.ts';
+import type { UserRepository } from '../database/user-repository.ts';
+import type { User } from '../domain/user.ts';
+import type { Shared } from '../shared.ts';
 
 export class AuthController {
   private readonly config: Config;

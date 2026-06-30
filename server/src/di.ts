@@ -1,26 +1,26 @@
 import { asClass, asFunction, asValue, createContainer, InjectionMode } from 'awilix';
 
-import { OpenAiClient, type AiClient } from './adapters/ai-client';
-import { NativeDateClock } from './adapters/clock';
-import { EnvConfig, type Config } from './adapters/config';
-import { NanoIdGenerator, type Generator } from './adapters/generator';
-import { MustacheI18n, type I18n } from './adapters/i18n';
-import { TavilySearchClient, type SearchClient } from './adapters/search-client';
-import { createDatabase, SessionRepository, UserRepository } from './database';
-import { Assistant } from './domain/assistant';
-import { createTools, type AssistantTools } from './domain/assistant-tools';
-import { EvalAssistant } from './domain/eval-assistant';
-import { SummaryGenerator } from './domain/summary-generator';
-import { TestAssistant } from './domain/test-assistant';
-import { EventBus } from './event-bus';
-import { AuthController } from './http/auth-controller';
-import { Server } from './http/server';
-import { SessionController } from './http/session-controller';
-import { SseUiNotifier } from './http/sse';
+import { OpenAiClient, type AiClient } from './adapters/ai-client.ts';
+import { NativeDateClock } from './adapters/clock.ts';
+import { EnvConfig, type Config } from './adapters/config.ts';
+import { NanoIdGenerator, type Generator } from './adapters/generator.ts';
+import { MustacheI18n, type I18n } from './adapters/i18n.ts';
+import { TavilySearchClient, type SearchClient } from './adapters/search-client.ts';
+import { createDatabase, SessionRepository, UserRepository } from './database/index.ts';
+import { createTools, type AssistantTools } from './domain/assistant-tools.ts';
+import { Assistant } from './domain/assistant.ts';
+import { EvalAssistant } from './domain/eval-assistant.ts';
+import { SummaryGenerator } from './domain/summary-generator.ts';
+import { TestAssistant } from './domain/test-assistant.ts';
+import { EventBus } from './event-bus.ts';
+import { AuthController } from './http/auth-controller.ts';
+import { Server } from './http/server.ts';
+import { SessionController } from './http/session-controller.ts';
+import { SseUiNotifier } from './http/sse.ts';
 
-import type { Clock } from './adapters/clock';
-import type { Logger } from './adapters/logger';
-import type { UiNotifier } from './domain/ui-notifier';
+import type { Clock } from './adapters/clock.ts';
+import type { Logger } from './adapters/logger.ts';
+import type { UiNotifier } from './domain/ui-notifier.ts';
 
 function searchClientFactory(config: Config): SearchClient | null {
   return config.tavilyApiKey ? new TavilySearchClient(config.tavilyApiKey) : null;

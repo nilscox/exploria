@@ -2,13 +2,13 @@ import { intervalToDuration } from 'date-fns';
 import Mustache from 'mustache';
 import fs from 'node:fs';
 
-import { languages } from '../domain/i18n';
-import { messages } from '../domain/i18n/messages';
+import { languages } from '../domain/i18n/index.ts';
+import { messages } from '../domain/i18n/messages.ts';
 
-import type { Language, Translate } from '../domain/i18n';
-import type { Session, TopicStatus } from '../domain/session';
-import type { Timer } from '../domain/timer';
-import type { Clock } from './clock';
+import type { Language, Translate } from '../domain/i18n/index.ts';
+import type { Session, TopicStatus } from '../domain/session.ts';
+import type { Timer } from '../domain/timer.ts';
+import type { Clock } from './clock.ts';
 
 type Templates = {
   instructions: {};

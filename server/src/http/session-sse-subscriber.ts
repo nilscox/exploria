@@ -1,12 +1,12 @@
 import { dequal } from 'dequal';
 
-import { toSessionView } from '../domain/projections/session-view';
+import { toSessionView } from '../domain/projections/session-view.ts';
 
-import type { SessionRepository } from '../database/session-repository';
-import type { SessionEvent } from '../domain/session';
-import type { UiNotifier } from '../domain/ui-notifier';
-import type { EventBus } from '../event-bus';
-import type { Shared } from '../shared';
+import type { SessionRepository } from '../database/session-repository.ts';
+import type { SessionEvent } from '../domain/session.ts';
+import type { UiNotifier } from '../domain/ui-notifier.ts';
+import type { EventBus } from '../event-bus.ts';
+import type { Shared } from '../shared.ts';
 
 export class SessionSseSubscriber {
   readonly unsubscribe: () => void;

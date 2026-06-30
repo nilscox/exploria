@@ -1,6 +1,6 @@
-import { type Messages } from './messages';
+import { type Messages } from './messages.ts';
 
-export { languages, type Language } from './messages';
+export { languages, type Language } from './messages.ts';
 
 export type Translate = <K extends keyof Messages>(
   key: K,

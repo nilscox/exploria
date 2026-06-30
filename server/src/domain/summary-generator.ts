@@ -1,10 +1,10 @@
-import { toChatMessages } from './projections/chat-context';
-import { summarySchema } from './summary';
+import { toChatMessages } from './projections/chat-context.ts';
+import { summarySchema } from './summary.ts';
 
-import type { AiClient } from '../adapters/ai-client';
-import type { I18n } from '../adapters/i18n';
-import type { Session } from './session';
-import type { Summary } from './summary';
+import type { AiClient } from '../adapters/ai-client.ts';
+import type { I18n } from '../adapters/i18n.ts';
+import type { Session } from './session.ts';
+import type { Summary } from './summary.ts';
 
 export class SummaryGenerator {
   private readonly aiClient: AiClient;

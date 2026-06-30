@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { container } from '../di';
+import { container } from '../di.ts';
 
 async function main() {
   const [, , email, name] = process.argv;

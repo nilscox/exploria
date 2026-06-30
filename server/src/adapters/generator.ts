@@ -1,5 +1,5 @@
-import { randomBytes } from 'node:crypto';
 import { customAlphabet } from 'nanoid';
+import { randomBytes } from 'node:crypto';
 
 export interface Generator {
   id(): string;

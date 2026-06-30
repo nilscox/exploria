@@ -2,15 +2,15 @@ import { asValue } from 'awilix';
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { StubAiClient } from '../adapters/ai-client';
-import { StubClock } from '../adapters/clock';
-import { StubGenerator } from '../adapters/generator';
-import { MustacheI18n } from '../adapters/i18n';
-import { StubUiNotifier } from '../adapters/logger';
-import { container } from '../di';
-import { Session, type GetSessionEvent, type SessionEvent } from './session';
+import { StubAiClient } from '../adapters/ai-client.ts';
+import { StubClock } from '../adapters/clock.ts';
+import { StubGenerator } from '../adapters/generator.ts';
+import { MustacheI18n } from '../adapters/i18n.ts';
+import { StubUiNotifier } from '../adapters/logger.ts';
+import { container } from '../di.ts';
+import { Session, type GetSessionEvent, type SessionEvent } from './session.ts';
 
-import type { DomainEvent } from '../aggregate-root';
+import type { DomainEvent } from '../aggregate-root.ts';
 
 void describe('Assistant', () => {
   let generator: StubGenerator;

@@ -1,8 +1,8 @@
-import { assert, hasId } from '../../utils';
-import { Timer } from '../timer';
+import { assert, hasId } from '../../utils.ts';
+import { Timer } from '../timer.ts';
 
-import type { Shared } from '../../shared';
-import type { Note, Posture, PostureMode, SessionEvent, Topic } from '../session';
+import type { Shared } from '../../shared.ts';
+import type { Note, Posture, PostureMode, SessionEvent, Topic } from '../session.ts';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let model = '';

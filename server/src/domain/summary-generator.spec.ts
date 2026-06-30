@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { StubAiClient } from '../adapters/ai-client';
-import { StubClock } from '../adapters/clock';
-import { StubGenerator } from '../adapters/generator';
-import { MustacheI18n } from '../adapters/i18n';
-import { Session } from './session';
-import { SummaryGenerator } from './summary-generator';
+import { StubAiClient } from '../adapters/ai-client.ts';
+import { StubClock } from '../adapters/clock.ts';
+import { StubGenerator } from '../adapters/generator.ts';
+import { MustacheI18n } from '../adapters/i18n.ts';
+import { Session } from './session.ts';
+import { SummaryGenerator } from './summary-generator.ts';
 
 const stubSummary = {
   summary: 'A thoughtful session.',

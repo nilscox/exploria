@@ -1,6 +1,6 @@
 import { intervalToDuration, sub } from 'date-fns';
 
-import { assert } from '../utils';
+import { assert } from '../utils.ts';
 
 export class Timer {
   readonly duration: number;

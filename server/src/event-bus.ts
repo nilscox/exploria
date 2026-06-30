@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
-import type { Logger } from './adapters/logger';
-import type { DomainEvent } from './aggregate-root';
+import type { Logger } from './adapters/logger.ts';
+import type { DomainEvent } from './aggregate-root.ts';
 
 type EventHandler<Event extends DomainEvent = DomainEvent> = (event: Event) => void;
 

@@ -5,14 +5,14 @@ import type { Server as HttpServer } from 'node:http';
 import { promisify } from 'node:util';
 import z from 'zod';
 
-import { SseUiNotifier } from './sse';
+import { SseUiNotifier } from './sse.ts';
 
-import type { Config } from '../adapters/config';
-import type { Logger } from '../adapters/logger';
-import type { UserRepository } from '../database/user-repository';
-import type { UiNotifier } from '../domain/ui-notifier';
-import type { AuthController } from './auth-controller';
-import type { SessionController } from './session-controller';
+import type { Config } from '../adapters/config.ts';
+import type { Logger } from '../adapters/logger.ts';
+import type { UserRepository } from '../database/user-repository.ts';
+import type { UiNotifier } from '../domain/ui-notifier.ts';
+import type { AuthController } from './auth-controller.ts';
+import type { SessionController } from './session-controller.ts';
 
 export class Server {
   private readonly config: Config;

@@ -1,6 +1,6 @@
-import type { AiClientMessage } from '../../adapters/ai-client';
-import type { Translate } from '../i18n';
-import type { GetSessionEvent, SessionEvent } from '../session';
+import type { AiClientMessage } from '../../adapters/ai-client.ts';
+import type { Translate } from '../i18n/index.ts';
+import type { GetSessionEvent, SessionEvent } from '../session.ts';
 
 export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMessage[] {
   return events

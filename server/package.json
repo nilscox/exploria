@@ -6,13 +6,13 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test",
+    "test": "node --test",
     "lint": "oxlint",
     "fmt": "oxfmt",
-    "dev": "nodemon -w src -w .env -w package.json -e ts -x 'tsx src/main.ts'",
+    "dev": "nodemon -w src -w .env -w package.json -e ts -x 'node src/main.ts'",
     "build": "tsup",
-    "start": "tsx src/main.ts",
-    "create-user": "tsx src/cli/create-user.ts"
+    "start": "node src/main.ts",
+    "create-user": "node src/cli/create-user.ts"
   },
   "dependencies": {
     "awilix": "^13.0.5",

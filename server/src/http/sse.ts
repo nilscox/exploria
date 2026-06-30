@@ -1,8 +1,8 @@
 import type { OutgoingMessage } from 'node:http';
 import { promisify } from 'node:util';
 
-import type { Logger } from '../adapters/logger';
-import type { UiEvent, UiNotifier } from '../domain/ui-notifier';
+import type { Logger } from '../adapters/logger.ts';
+import type { UiEvent, UiNotifier } from '../domain/ui-notifier.ts';
 
 export class SseUiNotifier<Event extends UiEvent = UiEvent> implements UiNotifier<Event> {
   private readonly logger: Logger;

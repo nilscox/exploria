@@ -2,10 +2,10 @@ import 'dotenv/config';
 import assert from 'node:assert';
 import { afterEach, beforeEach, describe, it } from 'node:test';
 
-import { container } from '../di';
-import { E2eTest, TestFetcher } from '../test-utils';
+import { container } from '../di.ts';
+import { E2eTest, TestFetcher } from '../test-utils.ts';
 
-import type { UserRepository } from '../database/user-repository';
+import type { UserRepository } from '../database/user-repository.ts';
 
 void describe('Auth', () => {
   let test: E2eTest;

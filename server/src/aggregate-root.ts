@@ -1,5 +1,5 @@
-import type { Clock } from './adapters/clock';
-import type { Generator } from './adapters/generator';
+import type { Clock } from './adapters/clock.ts';
+import type { Generator } from './adapters/generator.ts';
 
 export type DomainEvent<Aggregate extends string = string, Type extends string = string> = {
   aggregateType: Aggregate;

@@ -1,11 +1,11 @@
-import { AggregateRoot, type DomainEvent } from '../aggregate-root';
-import { assert, hasId } from '../utils';
-import { Timer } from './timer';
+import { AggregateRoot, type DomainEvent } from '../aggregate-root.ts';
+import { assert, hasId } from '../utils.ts';
+import { Timer } from './timer.ts';
 
-import type { Clock } from '../adapters/clock';
-import type { Generator } from '../adapters/generator';
-import type { Language } from './i18n';
-import type { Summary } from './summary';
+import type { Clock } from '../adapters/clock.ts';
+import type { Generator } from '../adapters/generator.ts';
+import type { Language } from './i18n/index.ts';
+import type { Summary } from './summary.ts';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 

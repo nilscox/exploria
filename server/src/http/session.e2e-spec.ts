@@ -3,13 +3,13 @@ import { EventSource } from 'eventsource';
 import assert from 'node:assert';
 import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 
-import { container } from '../di';
-import { Session } from '../domain/session';
-import { E2eTest, waitFor } from '../test-utils';
-import { defined } from '../utils';
-import { SessionSseSubscriber } from './session-sse-subscriber';
+import { container } from '../di.ts';
+import { Session } from '../domain/session.ts';
+import { E2eTest, waitFor } from '../test-utils.ts';
+import { defined } from '../utils.ts';
+import { SessionSseSubscriber } from './session-sse-subscriber.ts';
 
-import type { Shared } from '../shared';
+import type { Shared } from '../shared.ts';
 
 void describe('SessionController', () => {
   let test: E2eTest;

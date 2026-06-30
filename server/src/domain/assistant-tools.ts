@@ -1,11 +1,11 @@
 import z from 'zod';
 
-import { postures } from './session';
+import { postures } from './session.ts';
 
-import type { I18n } from '../adapters/i18n';
-import type { SearchClient } from '../adapters/search-client';
-import type { Language, Translate } from './i18n';
-import type { Session } from './session';
+import type { I18n } from '../adapters/i18n.ts';
+import type { SearchClient } from '../adapters/search-client.ts';
+import type { Language, Translate } from './i18n/index.ts';
+import type { Session } from './session.ts';
 
 export function createTools(i18n: I18n, searchClient: SearchClient | null) {
   return (language: Language) => tools(i18n, searchClient, i18n.translate(language));

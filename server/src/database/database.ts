@@ -1,8 +1,8 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 
-import { relations } from './schema';
+import { relations } from './schema.ts';
 
-import type { Config } from '../adapters/config';
+import type { Config } from '../adapters/config.ts';
 
 export type Database = ReturnType<typeof createDatabase>;
 

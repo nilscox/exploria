@@ -1,4 +1,4 @@
-import type { domainEvents, sessions } from './schema';
+import type { domainEvents, sessions } from './schema.ts';
 
 export type SessionSelect = typeof sessions.$inferSelect;
 export type SessionInsert = typeof sessions.$inferInsert;

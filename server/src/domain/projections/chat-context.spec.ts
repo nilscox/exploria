@@ -1,14 +1,14 @@
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { StubClock } from '../../adapters/clock';
-import { StubGenerator } from '../../adapters/generator';
-import { MustacheI18n } from '../../adapters/i18n';
-import { type Translate } from '../i18n';
-import { Session } from '../session';
-import { toChatMessages } from './chat-context';
+import { StubClock } from '../../adapters/clock.ts';
+import { StubGenerator } from '../../adapters/generator.ts';
+import { MustacheI18n } from '../../adapters/i18n.ts';
+import { type Translate } from '../i18n/index.ts';
+import { Session } from '../session.ts';
+import { toChatMessages } from './chat-context.ts';
 
-import type { AiClientMessage } from '../../adapters/ai-client';
+import type { AiClientMessage } from '../../adapters/ai-client.ts';
 
 void describe('toChatMessages', () => {
   let t: Translate;

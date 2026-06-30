@@ -1,7 +1,7 @@
-import type * as assistant from './domain/assistant';
-import type { Language as DomainLanguage } from './domain/i18n';
-import type * as session from './domain/session';
-import type * as summary from './domain/summary';
+import type * as assistant from './domain/assistant.ts';
+import type { Language as DomainLanguage } from './domain/i18n/index.ts';
+import type * as session from './domain/session.ts';
+import type * as summary from './domain/summary.ts';
 
 export namespace Shared {
   export type User = { id: string; email: string; name: string | null };

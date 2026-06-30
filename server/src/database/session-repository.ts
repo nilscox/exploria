@@ -1,12 +1,12 @@
 import { eq, isNull } from 'drizzle-orm';
 
-import { Session, type SessionEvent } from '../domain/session';
-import { domainEvents, sessions } from './schema';
+import { Session, type SessionEvent } from '../domain/session.ts';
+import { domainEvents, sessions } from './schema.ts';
 
-import type { Clock } from '../adapters/clock';
-import type { Generator } from '../adapters/generator';
-import type { Database } from './database';
-import type { DomainEventSelect } from './model';
+import type { Clock } from '../adapters/clock.ts';
+import type { Generator } from '../adapters/generator.ts';
+import type { Database } from './database.ts';
+import type { DomainEventSelect } from './model.ts';
 
 export class SessionRepository {
   private generator: Generator;

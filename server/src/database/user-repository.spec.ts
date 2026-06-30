@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
-import { StubClock } from '../adapters/clock';
-import { StubGenerator } from '../adapters/generator';
-import { createTestDatabase, type TestDatabase } from '../test-utils';
-import { UserRepository } from './user-repository';
+import { StubClock } from '../adapters/clock.ts';
+import { StubGenerator } from '../adapters/generator.ts';
+import { createTestDatabase, type TestDatabase } from '../test-utils.ts';
+import { UserRepository } from './user-repository.ts';
 
 void describe('UserRepository', () => {
   let db: TestDatabase;

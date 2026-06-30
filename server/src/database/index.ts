@@ -1,4 +1,4 @@
-export { createDatabase } from './database';
-export * as schema from './schema';
-export { SessionRepository } from './session-repository';
-export { UserRepository } from './user-repository';
+export { createDatabase } from './database.ts';
+export * as schema from './schema.ts';
+export { SessionRepository } from './session-repository.ts';
+export { UserRepository } from './user-repository.ts';

@@ -1,10 +1,10 @@
-import { assert } from '../utils';
-import { users } from './schema';
+import { assert } from '../utils.ts';
+import { users } from './schema.ts';
 
-import type { Clock } from '../adapters/clock';
-import type { Generator } from '../adapters/generator';
-import type { User } from '../domain/user';
-import type { Database } from './database';
+import type { Clock } from '../adapters/clock.ts';
+import type { Generator } from '../adapters/generator.ts';
+import type { User } from '../domain/user.ts';
+import type { Database } from './database.ts';
 
 export class UserRepository {
   private generator: Generator;
