@@ -13,8 +13,7 @@ import { ServerSentEvent, type SseUiNotifier } from './sse.ts';
 import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
 import type { SessionRepository } from '../database/session-repository.ts';
-import type { Assistant } from '../domain/assistant.ts';
-import type { SummaryGenerator } from '../domain/summary-generator.ts';
+import type { IAssistant } from '../domain/assistant.ts';
 import type { EventBus } from '../event-bus.ts';
 import type { Shared } from '../shared.ts';
 
@@ -24,8 +23,7 @@ export class SessionController {
   private readonly events: EventBus;
   private readonly uiNotifier: SseUiNotifier;
   private readonly sessionRepository: SessionRepository;
-  private readonly assistant: Assistant;
-  private readonly summaryGenerator: SummaryGenerator;
+  private readonly assistant: IAssistant;
 
   public router = express.Router();
 
@@ -40,9 +38,8 @@ export class SessionController {
     clock: Clock,
     events: EventBus,
     uiNotifier: SseUiNotifier,
-    assistant: Assistant,
+    assistant: IAssistant,
     sessionRepository: SessionRepository,
-    summaryGenerator: SummaryGenerator,
   ) {
     this.generator = generator;
     this.clock = clock;
@@ -50,7 +47,6 @@ export class SessionController {
     this.uiNotifier = uiNotifier;
     this.assistant = assistant;
     this.sessionRepository = sessionRepository;
-    this.summaryGenerator = summaryGenerator;
 
     this.router.param('id', async (req, res, next, id: string) => {
       const session = await this.sessionRepository.find(id);
@@ -196,8 +192,13 @@ export class SessionController {
       res.status(204).end();
     });
 
-    this.router.post('/:id/summary', async (req, res) => {
-      res.json(await this.generateSummary());
+    this.router.put('/:id/end', async (req, res) => {
+      res.json(await this.endSession());
+    });
+
+    this.router.put('/:id/reopen', async (req, res) => {
+      await this.reopenSession();
+      res.status(204).end();
     });
   }
 
@@ -388,17 +389,27 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async generateSummary() {
+  private async endSession() {
     const session = this.getSessionInstance();
 
-    const summary = await this.summaryGenerator.generate(session);
+    const summary = await this.assistant.generateSummary(session);
 
-    session.addSummary(summary);
+    session.end();
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
 
     return summary;
+  }
+
+  private async reopenSession() {
+    const session = this.getSessionInstance();
+
+    session.reopen();
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
   }
 }

@@ -55,6 +55,8 @@ type SessionDomainEvent<Type extends string, Payload = {}> = DomainEvent<'Sessio
 
 export type SessionEvent =
   | SessionDomainEvent<'SessionCreated', { model: string; language: Language; ownerId: string | null }>
+  | SessionDomainEvent<'SessionEnded'>
+  | SessionDomainEvent<'SessionReopened'>
   | SessionDomainEvent<'ModelChanged', { model: string }>
   | SessionDomainEvent<'SubjectChanged', { subject: string }>
   | SessionDomainEvent<'TopicAdded', { topic: Topic }>
@@ -74,7 +76,7 @@ export type SessionEvent =
   | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>
   | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
   | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>
-  | SessionDomainEvent<'SummaryAdded', { summary: Summary }>;
+  | SessionDomainEvent<'SummaryGenerated', { summary: Summary }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
 
@@ -89,6 +91,12 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get ownerId(): string | null {
     return this._ownerId;
+  }
+
+  private _ended = false;
+
+  get ended(): boolean {
+    return this._ended;
   }
 
   private _model: string = '';
@@ -181,6 +189,14 @@ export class Session extends AggregateRoot<SessionEvent> {
         this._ownerId = ownerId;
         this._model = model;
         this._language = language;
+      },
+
+      SessionEnded: () => {
+        this._ended = true;
+      },
+
+      SessionReopened: () => {
+        this._ended = false;
       },
 
       ModelChanged: ({ model }) => {
@@ -374,6 +390,10 @@ export class Session extends AggregateRoot<SessionEvent> {
     const date = this.clock.now().toISOString();
     let message: Message;
 
+    if (this.ended) {
+      throw new Error('Session has ended');
+    }
+
     if (role === 'assistant') {
       assert(params);
 
@@ -423,6 +443,22 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   addSummary(summary: Summary) {
-    this.emit('SummaryAdded', { summary });
+    this.emit('SummaryGenerated', { summary });
+  }
+
+  end() {
+    if (this._ended) {
+      throw new Error('Session is already ended');
+    }
+
+    this.emit('SessionEnded', {});
+  }
+
+  reopen() {
+    if (!this._ended) {
+      throw new Error('Session is not ended');
+    }
+
+    this.emit('SessionReopened', {});
   }
 }

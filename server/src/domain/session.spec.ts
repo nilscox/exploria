@@ -275,6 +275,11 @@ void describe('Session', () => {
     });
   });
 
+  void it('fails to add a message when the session has ended', () => {
+    session.end();
+    assert.throws(() => session.addMessage('user', ''));
+  });
+
   void it('fails to add an assistant message without params', () => {
     assert.throws(() => {
       // @ts-expect-error
@@ -295,7 +300,21 @@ void describe('Session', () => {
 
     session.addSummary(summary);
 
-    expectEvent('SummaryAdded', { summary });
+    expectEvent('SummaryGenerated', { summary });
+  });
+
+  void it('ends an reopens a session', () => {
+    session.end();
+
+    assert.strictEqual(session.ended, true);
+    expectEvent('SessionEnded', {});
+    assert.throws(() => session.end());
+
+    session.reopen();
+
+    assert.strictEqual(session.ended, false);
+    expectEvent('SessionReopened', {});
+    assert.throws(() => session.reopen());
   });
 
   void describe('replay', () => {

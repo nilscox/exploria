@@ -5,6 +5,7 @@ import type { Shared } from '../../shared.ts';
 import type { Note, Posture, PostureMode, SessionEvent, Topic } from '../session.ts';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
+  let ended = false;
   let model = '';
   let language: Shared.Language = 'en';
   let subject = '';
@@ -19,6 +20,14 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
       case 'SessionCreated':
         model = event.model;
         language = event.language;
+        break;
+
+      case 'SessionEnded':
+        ended = true;
+        break;
+
+      case 'SessionReopened':
+        ended = false;
         break;
 
       case 'ModelChanged':
@@ -102,6 +111,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
 
   return {
     id,
+    ended,
     model,
     language,
     subject,
@@ -116,6 +126,8 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
 
 const timelineEventTypes = new Set<SessionEvent['type']>([
   'MessageAdded',
+  'SessionEnded',
+  'SessionReopened',
   'ModelChanged',
   'SubjectChanged',
   'TopicAdded',
@@ -133,7 +145,7 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'DiscussionPathSelected',
   'PostureChanged',
   'SearchPerformed',
-  'SummaryAdded',
+  'SummaryGenerated',
 ]);
 
 export function affectsTimeline(type: SessionEvent['type']): boolean {
@@ -181,6 +193,14 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
 
         break;
       }
+
+      case 'SessionEnded':
+        items.push({ kind: 'session-ended' });
+        break;
+
+      case 'SessionReopened':
+        items.push({ kind: 'session-reopened' });
+        break;
 
       case 'ModelChanged':
         items.push({ kind: 'model-changed', model: event.model });
@@ -289,7 +309,7 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         items.push({ kind: 'web-searched', query: event.query, resultCount: event.resultCount });
         break;
 
-      case 'SummaryAdded':
+      case 'SummaryGenerated':
         items.push({ kind: 'summary', summary: event.summary });
         break;
     }

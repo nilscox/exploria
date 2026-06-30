@@ -8,7 +8,9 @@ import {
   ClipboardListIcon,
   DramaIcon,
   ListIcon,
+  LockKeyholeIcon,
   PencilIcon,
+  RefreshCcwIcon,
   SearchIcon,
   StickyNoteIcon,
   StickyNoteXIcon,
@@ -70,6 +72,18 @@ function TimelineEntry({
 const components: {
   [Item in TimelineItem as Exclude<Item['kind'], 'message' | 'summary'>]: React.ComponentType<{ item: Item }>;
 } = {
+  'session-ended': () => (
+    <Notification Icon={LockKeyholeIcon}>
+      <Trans>Session ended</Trans>
+    </Notification>
+  ),
+
+  'session-reopened': () => (
+    <Notification Icon={RefreshCcwIcon}>
+      <Trans>Session reopened</Trans>
+    </Notification>
+  ),
+
   'model-changed': ({ item }) => (
     <Notification Icon={BotIcon}>
       <Trans>Model changed: {item.model}</Trans>

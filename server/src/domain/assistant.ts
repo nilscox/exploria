@@ -4,24 +4,39 @@ import { assert, hasKey } from '../utils.ts';
 import { toChatMessages } from './projections/chat-context.ts';
 
 import type { AiClient } from '../adapters/ai-client.ts';
-import type { Clock } from '../adapters/clock.ts';
 import type { I18n } from '../adapters/i18n.ts';
 import type { AssistantTools, Tool, Tools } from './assistant-tools.ts';
 import type { Session, ToolCall } from './session.ts';
+import type { SummaryGenerator } from './summary-generator.ts';
+import type { Summary } from './summary.ts';
 import type { UiEvent, UiNotifier } from './ui-notifier.ts';
 
 export type AssistantUiEvent = UiEvent<'Chunk', { text: string }>;
 
-export class Assistant {
+export interface IAssistant {
+  run(session: Session, message?: string, commit?: () => Promise<void>): Promise<void>;
+  generateDemo(session: Session, commit?: () => Promise<void>): Promise<void>;
+  generateSummary(session: Session): Promise<Summary>;
+}
+
+export class Assistant implements IAssistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
   private readonly aiClient: AiClient;
   private readonly i18n: I18n;
+  private readonly summaryGenerator: SummaryGenerator;
   private readonly assistantTools: AssistantTools;
 
-  constructor(_clock: Clock, uiNotifier: UiNotifier, aiClient: AiClient, i18n: I18n, assistantTools: AssistantTools) {
+  constructor(
+    uiNotifier: UiNotifier,
+    aiClient: AiClient,
+    i18n: I18n,
+    summaryGenerator: SummaryGenerator,
+    assistantTools: AssistantTools,
+  ) {
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
     this.i18n = i18n;
+    this.summaryGenerator = summaryGenerator;
     this.assistantTools = assistantTools;
   }
 
@@ -91,6 +106,14 @@ export class Assistant {
 
       await this.run(session, content, commit);
     }
+  }
+
+  async generateSummary(session: Session) {
+    const summary = await this.summaryGenerator.generate(session);
+
+    session.addSummary(summary);
+
+    return summary;
   }
 
   private buildMessages(session: Session) {

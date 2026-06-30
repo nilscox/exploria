@@ -1,8 +1,9 @@
-import type { Assistant, AssistantUiEvent } from './assistant.ts';
+import type { Assistant, AssistantUiEvent, IAssistant } from './assistant.ts';
 import type { Session } from './session.ts';
+import type { Summary } from './summary.ts';
 import type { UiNotifier } from './ui-notifier.ts';
 
-export class TestAssistant {
+export class TestAssistant implements IAssistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
 
   constructor(uiNotifier: UiNotifier) {
@@ -23,6 +24,20 @@ export class TestAssistant {
 
     await handler?.();
   };
+
+  async generateDemo(): Promise<void> {}
+
+  async generateSummary(): Promise<Summary> {
+    return {
+      summary: '',
+      keyPoints: [],
+      biases: [],
+      blindSpots: [],
+      tensions: [],
+      openQuestions: [],
+      conclusion: null,
+    };
+  }
 
   private async stream(
     session: Session,

@@ -17,11 +17,16 @@ void describe('toSessionView', () => {
     session = new Session(new StubGenerator(), clock);
   });
 
-  void it('reconstructs model and subject', () => {
+  void it('reconstructs ended, model and subject', () => {
     session.setModel('gpt-4o');
     session.setSubject('My subject');
+    session.end();
 
-    assert.partialDeepStrictEqual(view(), { id: session.id, model: 'gpt-4o', subject: 'My subject' });
+    assert.partialDeepStrictEqual(view(), { id: session.id, ended: true, model: 'gpt-4o', subject: 'My subject' });
+
+    session.reopen();
+
+    assert.partialDeepStrictEqual(view(), { ended: false });
   });
 
   void it('reconstructs topics', () => {
@@ -102,6 +107,13 @@ void describe('toTimeline', () => {
       { kind: 'timer-started', duration: 60 },
       { kind: 'message', date, role: 'assistant', content: 'Hi', toolCalls: undefined },
     ]);
+  });
+
+  void it('emits session-ended and session-reopened', () => {
+    session.end();
+    session.reopen();
+
+    assert.deepStrictEqual(timeline(), [{ kind: 'session-ended' }, { kind: 'session-reopened' }]);
   });
 
   void it('emits subject-changed', () => {

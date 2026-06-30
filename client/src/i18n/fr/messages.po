@@ -335,6 +335,14 @@ msgstr "Recherche : \"{0}\" ({1} résultat(s))"
 msgid "Send"
 msgstr "Envoyer"
 
+#: src/session/session-timeline.tsx
+msgid "Session ended"
+msgstr "Session terminée"
+
+#: src/session/session-timeline.tsx
+msgid "Session reopened"
+msgstr "Session rouverte"
+
 #: src/session/create/create-session.tsx
 msgid "Session subject"
 msgstr "Sujet de la session"

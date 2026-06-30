@@ -8,7 +8,7 @@ import { MustacheI18n, type I18n } from './adapters/i18n.ts';
 import { TavilySearchClient, type SearchClient } from './adapters/search-client.ts';
 import { createDatabase, SessionRepository, UserRepository } from './database/index.ts';
 import { createTools, type AssistantTools } from './domain/assistant-tools.ts';
-import { Assistant } from './domain/assistant.ts';
+import { Assistant, type IAssistant } from './domain/assistant.ts';
 import { EvalAssistant } from './domain/eval-assistant.ts';
 import { SummaryGenerator } from './domain/summary-generator.ts';
 import { TestAssistant } from './domain/test-assistant.ts';
@@ -28,12 +28,12 @@ function searchClientFactory(config: Config): SearchClient | null {
 
 function assistantFactory(
   config: Config,
-  clock: Clock,
   uiNotifier: UiNotifier,
   aiClient: AiClient,
   i18n: I18n,
+  summaryGenerator: SummaryGenerator,
   assistantTools: AssistantTools,
-) {
+): IAssistant {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
   }
@@ -42,7 +42,7 @@ function assistantFactory(
     return new EvalAssistant(uiNotifier, assistantTools);
   }
 
-  return new Assistant(clock, uiNotifier, aiClient, i18n, assistantTools);
+  return new Assistant(uiNotifier, aiClient, i18n, summaryGenerator, assistantTools);
 }
 
 export const container = createContainer({
@@ -64,7 +64,7 @@ export const container = createContainer({
   aiClient: asClass<AiClient>(OpenAiClient),
   searchClient: asFunction(searchClientFactory),
   assistantTools: asFunction(createTools),
-  assistant: asFunction(assistantFactory),
+  assistant: asFunction<IAssistant>(assistantFactory),
   summaryGenerator: asClass(SummaryGenerator),
   server: asClass(Server),
 });

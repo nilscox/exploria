@@ -100,8 +100,8 @@ const sessions = {
     });
   },
 
-  async generateSummary(id: string): Promise<Shared.Summary> {
-    const res = await fetchApi(`/session/${id}/summary`, { method: 'POST' });
+  async end(id: string): Promise<Shared.Summary> {
+    const res = await fetchApi(`/session/${id}/end`, { method: 'PUT' });
 
     return res.json();
   },

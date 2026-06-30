@@ -94,7 +94,7 @@ export const options = {
 
     generateSummary(id: string) {
       return mutationOptions({
-        mutationFn: () => api.sessions.generateSummary(id),
+        mutationFn: () => api.sessions.end(id),
       });
     },
 

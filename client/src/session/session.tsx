@@ -48,7 +48,7 @@ export function SessionPage() {
         <>
           <DocumentTitle title={state.session.subject} />
           <MainSection session={state.session} stream={state.stream} onSelectPath={selectPath} />
-          <MessageForm loading={state.loading} postMessage={postMessage} />
+          {!state.session.ended && <MessageForm loading={state.loading} postMessage={postMessage} />}
         </>
       }
     />

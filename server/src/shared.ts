@@ -33,6 +33,8 @@ export namespace Shared {
   export type TimelineItem =
     | { kind: 'message'; role: Role; date: string; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }
     | { kind: 'model-changed'; model: string }
+    | { kind: 'session-ended' }
+    | { kind: 'session-reopened' }
     | { kind: 'subject-changed'; subject: string }
     | { kind: 'topic-added'; label: string }
     | { kind: 'topic-removed'; label: string }
@@ -52,6 +54,7 @@ export namespace Shared {
 
   export type Session = {
     id: string;
+    ended: boolean;
     model: string;
     language: Language;
     subject: string;
