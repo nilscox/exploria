@@ -14,6 +14,7 @@ import { ConfigProvider } from './config-context';
 import { Home } from './home';
 import { messages } from './i18n/en/messages';
 import { getPreferredLanguage, setLanguage } from './i18n/i18n';
+import { MatomoProvider } from './matomo-context';
 import { SessionPage } from './session/session';
 
 i18n.load('en', messages);
@@ -67,16 +68,18 @@ function App() {
     <ErrorBoundary>
       <I18nProvider i18n={i18n}>
         <QueryClientProvider client={client}>
-          <ConfigProvider>
-            <Toaster position="top-right" />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/session/:sessionId" element={<SessionPage />} />
-              </Routes>
-            </BrowserRouter>
-          </ConfigProvider>
+          <BrowserRouter>
+            <ConfigProvider>
+              <MatomoProvider>
+                <Toaster position="top-right" />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/auth/login" element={<LoginPage />} />
+                  <Route path="/session/:sessionId" element={<SessionPage />} />
+                </Routes>
+              </MatomoProvider>
+            </ConfigProvider>
+          </BrowserRouter>
         </QueryClientProvider>
       </I18nProvider>
     </ErrorBoundary>
