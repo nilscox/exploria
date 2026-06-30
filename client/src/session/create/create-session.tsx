@@ -11,7 +11,6 @@ import { Field, FieldLabel } from 'src/components/field';
 import { Input } from 'src/components/input';
 import { Settings } from 'src/components/settings';
 import { isLanguage } from 'src/i18n/i18n';
-import { assert } from 'src/utils';
 
 import { ModelSelector } from '../model-selector';
 import { SessionsList } from './sessions-list';
@@ -51,15 +50,6 @@ export function CreateSession() {
     },
     [createSession, user, t],
   );
-
-  const loadDemo = useCallback(() => {
-    assert(formRef.current);
-
-    const data = new FormData(formRef.current);
-    const model = data.get('model') as string;
-
-    createSession({ model, demo: true });
-  }, [createSession]);
 
   const [model, setModel] = useState(import.meta.env.VITE_DEFAULT_MODEL);
 
@@ -106,9 +96,6 @@ export function CreateSession() {
           </Field>
 
           <div className="col sm:row gap-2 sm:[&>button]:flex-1">
-            <Button variant="outlined" size="large" loading={creatingSession && variables.demo} onClick={loadDemo}>
-              <Trans>Load demo</Trans>
-            </Button>
             <Button type="submit" size="large" loading={creatingSession && !variables.demo}>
               <Trans>Start session</Trans>
               <ArrowRightIcon className="size-4" />

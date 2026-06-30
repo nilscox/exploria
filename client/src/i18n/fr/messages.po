@@ -239,10 +239,6 @@ msgstr "Repartez avec un compte-rendu clair, prêt à relire ou partager."
 msgid "Light"
 msgstr "Clair"
 
-#: src/session/create/create-session.tsx
-msgid "Load demo"
-msgstr "Voir une démo"
-
 #: src/home.tsx
 msgid "Make a structuring decision"
 msgstr "Prendre une décision structurante"

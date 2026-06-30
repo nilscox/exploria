@@ -239,10 +239,6 @@ msgstr "Leave with a clear write-up, ready to reread or share."
 msgid "Light"
 msgstr "Light"
 
-#: src/session/create/create-session.tsx
-msgid "Load demo"
-msgstr "Load demo"
-
 #: src/home.tsx
 msgid "Make a structuring decision"
 msgstr "Make a structuring decision"
