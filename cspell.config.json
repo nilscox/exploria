@@ -1,0 +1,31 @@
+{
+  "version": "0.2",
+  "language": "en,fr",
+  "import": ["@cspell/dict-fr-fr/cspell-ext.json"],
+  "dictionaries": ["typescript", "node", "css", "html", "fr-fr"],
+  "ignorePaths": ["data", "node_modules", "dist", "pnpm-lock.yaml", "client/src/i18n/*/messages.ts"],
+  "words": [
+    "awilix",
+    "behaviour",
+    "dequal",
+    "eventsource",
+    "explor",
+    "exploria",
+    "fkey",
+    "fontsource",
+    "jetbrains",
+    "journaling",
+    "lingui",
+    "matomo",
+    "openai",
+    "oxlint",
+    "pglite",
+    "pkey",
+    "postgres",
+    "socratic",
+    "tailwindcss",
+    "tavily",
+    "tsgolint",
+    "varchar"
+  ]
+}

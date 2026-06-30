@@ -23,6 +23,7 @@ export function ModelSelector({
   );
 }
 
+// cspell:disable
 const models = [
   { id: 'claude-opus-4-8', provider: 'Anthropic' },
   { id: 'claude-opus-4-7', provider: 'Anthropic' },
@@ -47,3 +48,4 @@ const models = [
   { id: 'qwen3.7-max', provider: 'Alibaba' },
   { id: 'qwen3.5-397b-a17b', provider: 'Alibaba' },
 ];
+// cspell:enabled

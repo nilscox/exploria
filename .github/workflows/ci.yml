@@ -6,6 +6,15 @@ on:
   pull_request:
 
 jobs:
+  spell-check:
+    name: Spell check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm exec cspell lint --quiet '**/*.{ts,tsx,js,jsx,md,json,css}'
+
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest

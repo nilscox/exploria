@@ -8,7 +8,9 @@
     "fmt": "oxfmt"
   },
   "devDependencies": {
+    "@cspell/dict-fr-fr": "^2.3.2",
     "@types/node": "^26.0.1",
+    "cspell": "^10.0.1",
     "oxfmt": "^0.56.0",
     "oxlint": "^1.71.0",
     "oxlint-tsgolint": "^0.23.0",

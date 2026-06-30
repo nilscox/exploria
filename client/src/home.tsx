@@ -21,6 +21,8 @@ import { LinkButton } from 'src/components/button';
 import { DocumentTitle } from 'src/components/document-title';
 import { setLanguage } from 'src/i18n/i18n';
 
+// cspell:words pushback timebox
+
 export function Home() {
   return (
     <div className="min-h-full">
