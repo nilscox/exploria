@@ -16,12 +16,12 @@ import {
 } from 'lucide-react';
 import type { SVGProps } from 'react';
 
+import { Details } from 'src/components/details';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { Markdown } from 'src/components/markdown';
-import { config } from 'src/config-context';
-import { Details } from 'src/details';
+import { config } from 'src/contexts/config';
 
-import { PostureLabel } from './posture';
+import { PostureLabel } from './info/posture';
 import { SessionSummaryDialog } from './session-summary';
 
 type TimelineItem = Shared.TimelineItem;

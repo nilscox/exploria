@@ -1,7 +1,7 @@
 import type { Shared } from '@exploria/server/shared';
 import { infiniteQueryOptions, mutationOptions, queryOptions } from '@tanstack/react-query';
 
-import { api } from './api';
+import { api } from './endpoints';
 
 export const options = {
   auth: {

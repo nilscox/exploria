@@ -3,17 +3,17 @@ import { Trans } from '@lingui/react/macro';
 import { useMutation } from '@tanstack/react-query';
 import { BotIcon, MessageSquareTextIcon } from 'lucide-react';
 
+import { options } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
 import { Markdown } from 'src/components/markdown';
-import { options } from 'src/options';
 
-import { ModelSelector } from './model-selector';
+import { ModelSelector } from '../model-selector';
 import { PostureSection } from './posture';
 import { SidebarSection } from './sidebar-section';
 import { Timer } from './timer';
 import { TopicsListSection } from './topics-list';
 
-export function SessionSidebar({ session }: { session: Shared.Session }) {
+export function SessionInfo({ session }: { session: Shared.Session }) {
   const { mutate: setPosture } = useMutation(options.sessions.setPosture(session.id));
   const { mutate: addTopic } = useMutation(options.sessions.addTopic(session.id));
   const { mutate: startTimer } = useMutation(options.sessions.timer.start(session.id));

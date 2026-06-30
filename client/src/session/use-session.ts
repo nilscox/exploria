@@ -4,8 +4,7 @@ import { current, produce } from 'immer';
 import { useEffect, useReducer } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { ApiError, api } from 'src/api';
-import { options } from 'src/options';
+import { api, ApiError, options } from 'src/api';
 import { assert, exhaustiveArray } from 'src/utils';
 
 const sessionUiEventTypes = exhaustiveArray<Shared.AssistantUiEvent['type'] | Shared.SessionUiEvent['type']>()([

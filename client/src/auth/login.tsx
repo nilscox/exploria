@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
-import { Spinner } from '../components/spinner';
-import { options } from '../options';
+import { options } from 'src/api';
+import { Spinner } from 'src/components/spinner';
 
 export function LoginPage() {
   const [params] = useSearchParams();

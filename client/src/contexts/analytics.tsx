@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 
 const context = createContext<MatomoClient>(null as never);
 
-export function MatomoProvider({ children }: { children: React.ReactNode }) {
+export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const client = useMemo(() => new MatomoClient(), []);
 
   useInjectScript(client);

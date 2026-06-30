@@ -9,13 +9,14 @@ import './index.css';
 
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
 
+import { options } from './api';
 import { LoginPage } from './auth/login';
 import { Spinner } from './components/spinner';
-import { ConfigProvider } from './config-context';
+import { AnalyticsProvider } from './contexts/analytics';
+import { ConfigProvider } from './contexts/config';
 import { Home } from './home';
 import { getPreferredLanguage, setLanguage } from './i18n/i18n';
-import { MatomoProvider } from './matomo-context';
-import { options } from './options';
+import { CreateSession } from './session/create/create-session';
 import { SessionPage } from './session/session';
 
 const queryClient = new QueryClient({
@@ -64,10 +65,10 @@ function Providers() {
     <I18nProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
         <ConfigProvider>
-          <MatomoProvider>
+          <AnalyticsProvider>
             <Toaster position="top-right" />
             <Outlet />
-          </MatomoProvider>
+          </AnalyticsProvider>
         </ConfigProvider>
       </QueryClientProvider>
     </I18nProvider>
@@ -110,13 +111,17 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
-        async loader() {
-          await queryClient.ensureInfiniteQueryData(options.sessions.list());
-        },
       },
       {
         path: 'auth/login',
         element: <LoginPage />,
+      },
+      {
+        path: 'session',
+        element: <CreateSession />,
+        async loader() {
+          await queryClient.ensureInfiniteQueryData(options.sessions.list());
+        },
       },
       {
         path: 'session/:sessionId',

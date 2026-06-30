@@ -7,17 +7,17 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router';
 
+import { options } from 'src/api';
 import { Button, LinkButton } from 'src/components/button';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { DocumentTitle } from 'src/components/document-title';
 import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
-import { config } from 'src/config-context';
-import { options } from 'src/options';
+import { config } from 'src/contexts/config';
 
+import { SessionInfo } from './info/session-info';
 import { MessageForm } from './message-form';
-import { SessionSidebar } from './session-sidebar';
 import { SessionSummaryDialog } from './session-summary';
 import { Timeline } from './session-timeline';
 import { useSession } from './use-session';
@@ -43,7 +43,7 @@ export function SessionPage() {
     <Layout
       view={view}
       header={<Header session={state.session} view={view} onViewChanged={setView} />}
-      aside={<SessionSidebar session={state.session} />}
+      aside={<SessionInfo session={state.session} />}
       main={
         <>
           <DocumentTitle title={state.session.subject} />

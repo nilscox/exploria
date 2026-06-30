@@ -3,7 +3,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { config, useSetConfig } from 'src/config-context';
+import { config, useSetConfig } from 'src/contexts/config';
 import { setLanguage } from 'src/i18n/i18n';
 
 import { Button } from './button';
