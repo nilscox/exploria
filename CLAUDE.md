@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Exploria** is a full-stack web application for guided deep-thinking and reflection sessions powered by an AI assistant. The assistant acts as a thinking facilitator — it poses questions, challenges reasoning, and identifies cognitive biases — rather than providing direct answers. The system prompt is in French (`server/src/domain/instructions.md`).
+**Exploria** is a full-stack web application for guided deep-thinking and reflection sessions powered by an AI assistant. The assistant acts as a thinking facilitator — it poses questions, challenges reasoning, and identifies cognitive biases — rather than providing direct answers. The system prompt lives in `server/templates/instructions.{en,fr}.md`, rendered per-session via the i18n adapter.
 
 ## Monorepo Structure
 
@@ -53,7 +53,8 @@ server/src/
 │   ├── timer.ts     # Timer value object (domain calculations)
 │   ├── assistant.ts # AI interaction logic
 │   ├── projections/ # Read models: session-view (UI), chat-context (LLM)
-│   └── tools/       # AI tools (initPlan, saveNote, startTimer, etc.)
+│   ├── assistant-tools.ts  # AI tools (setSubject, addTopics, saveNote, startTimer, setPosture, etc.)
+│   └── summary-generator.ts # Generates the exportable end-of-session summary
 ├── database/        # Drizzle schema + SessionRepository
 ├── http/            # Express routes + SSE notifier
 ├── di.ts            # Awilix container wiring
@@ -74,7 +75,8 @@ server/src/
 
 - **Database schema**: `server/src/database/schema.ts`
 - **API endpoints**: `server/src/http/` (one file per route group)
-- **AI tools**: `server/src/domain/tools/` (one file per tool)
+- **AI tools**: `server/src/domain/assistant-tools.ts` (all tools in one file, built by `createTools`)
+- **System prompt & templates**: `server/templates/*.{en,fr}.md`
 
 ## Client/Server Communication
 
