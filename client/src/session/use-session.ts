@@ -1,10 +1,11 @@
 import type { Shared } from '@exploria/server/shared';
-import { mutationOptions, queryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { current, produce } from 'immer';
 import { useEffect, useReducer } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { ApiError, api } from 'src/api';
+import { options } from 'src/options';
 import { assert, exhaustiveArray } from 'src/utils';
 
 const sessionUiEventTypes = exhaustiveArray<Shared.AssistantUiEvent['type'] | Shared.SessionUiEvent['type']>()([
@@ -20,9 +21,19 @@ export function useSession(sessionId: string) {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const sessionQuery = useQuery(getSessionOptions(sessionId));
-  const { mutate: postMessage } = useMutation(postMessageOptions(sessionId, dispatch));
-  const { mutate: selectPath } = useMutation(selectPathOptions(sessionId, dispatch));
+  const sessionQuery = useQuery(options.sessions.get(sessionId));
+
+  const { mutate: postMessage } = useMutation({
+    ...options.sessions.postMessage(sessionId),
+    onMutate: () => dispatch({ type: 'PostingMessage' }),
+    onSettled: () => dispatch({ type: 'MessagePosted' }),
+  });
+
+  const { mutate: selectPath } = useMutation({
+    ...options.sessions.selectDiscussionPath(sessionId),
+    onMutate: () => dispatch({ type: 'PostingMessage' }),
+    onSettled: () => dispatch({ type: 'MessagePosted' }),
+  });
 
   useEffect(() => {
     if (ApiError.is(sessionQuery.error) && sessionQuery.error.status === 404) {
@@ -78,35 +89,6 @@ export function useSession(sessionId: string) {
   }, [state.connected, location.state, postMessage, navigate]);
 
   return [state, postMessage, selectPath] as const;
-}
-
-function getSessionOptions(sessionId: string) {
-  return queryOptions({
-    queryKey: ['getSession', sessionId],
-    queryFn: () => api.sessions.get(sessionId),
-  });
-}
-
-function postMessageOptions(
-  sessionId: string,
-  dispatch: React.ActionDispatch<[{ type: 'PostingMessage' | 'MessagePosted' }]>,
-) {
-  return mutationOptions({
-    mutationFn: (text: string) => api.sessions.postMessage(sessionId, text),
-    onMutate: () => dispatch({ type: 'PostingMessage' }),
-    onSettled: () => dispatch({ type: 'MessagePosted' }),
-  });
-}
-
-function selectPathOptions(
-  sessionId: string,
-  dispatch: React.ActionDispatch<[{ type: 'PostingMessage' | 'MessagePosted' }]>,
-) {
-  return mutationOptions({
-    mutationFn: (pathId: string) => api.sessions.selectDiscussionPath(sessionId, pathId),
-    onMutate: () => dispatch({ type: 'PostingMessage' }),
-    onSettled: () => dispatch({ type: 'MessagePosted' }),
-  });
 }
 
 type State = {

@@ -7,7 +7,6 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router';
 
-import { api } from 'src/api';
 import { Button, LinkButton } from 'src/components/button';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { DocumentTitle } from 'src/components/document-title';
@@ -15,6 +14,7 @@ import { Markdown } from 'src/components/markdown';
 import { Settings } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
 import { config } from 'src/config-context';
+import { options } from 'src/options';
 
 import { MessageForm } from './message-form';
 import { SessionSidebar } from './session-sidebar';
@@ -81,8 +81,7 @@ function Layout({
 
 function generateSummaryOptions(sessionId: string, { onError }: { onError: (error: Error) => void }) {
   return mutationOptions({
-    mutationKey: ['generateSummary', sessionId],
-    mutationFn: () => api.sessions.generateSummary(sessionId),
+    ...options.sessions.generateSummary(sessionId),
     onError,
   });
 }

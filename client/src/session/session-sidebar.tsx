@@ -1,11 +1,11 @@
 import { type Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
-import { mutationOptions, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { BotIcon, MessageSquareTextIcon } from 'lucide-react';
 
-import { api } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
 import { Markdown } from 'src/components/markdown';
+import { options } from 'src/options';
 
 import { ModelSelector } from './model-selector';
 import { PostureSection } from './posture';
@@ -14,12 +14,12 @@ import { Timer } from './timer';
 import { TopicsListSection } from './topics-list';
 
 export function SessionSidebar({ session }: { session: Shared.Session }) {
-  const { mutate: setPosture } = useMutation(setPostureOptions(session.id));
-  const { mutate: addTopic } = useMutation(addTopicOptions(session.id));
-  const { mutate: startTimer } = useMutation(startTimerOptions(session.id));
-  const { mutate: clearTimer } = useMutation(clearTimerOptions(session.id));
-  const { mutate: pauseTimer } = useMutation(pauseTimerOptions(session.id));
-  const { mutate: resumeTimer } = useMutation(resumeTimerOptions(session.id));
+  const { mutate: setPosture } = useMutation(options.sessions.setPosture(session.id));
+  const { mutate: addTopic } = useMutation(options.sessions.addTopic(session.id));
+  const { mutate: startTimer } = useMutation(options.sessions.timer.start(session.id));
+  const { mutate: clearTimer } = useMutation(options.sessions.timer.clear(session.id));
+  const { mutate: pauseTimer } = useMutation(options.sessions.timer.pause(session.id));
+  const { mutate: resumeTimer } = useMutation(options.sessions.timer.resume(session.id));
 
   return (
     <div className="col gap-6 p-2">
@@ -39,7 +39,7 @@ export function SessionSidebar({ session }: { session: Shared.Session }) {
 }
 
 function ModelSelectorSection({ session }: { session: Shared.Session }) {
-  const { mutate: setModel } = useMutation(setModelOptions(session.id));
+  const { mutate: setModel } = useMutation(options.sessions.setModel(session.id));
 
   return (
     <SidebarSection Icon={BotIcon} title={<Trans>Model</Trans>}>
@@ -69,46 +69,4 @@ function NotesSection({ session }: { session: Shared.Session }) {
       </ul>
     </SidebarSection>
   );
-}
-
-function setPostureOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: (posture: string) => api.sessions.setPosture(sessionId, posture),
-  });
-}
-
-function setModelOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: (model: string) => api.sessions.setModel(sessionId, model),
-  });
-}
-
-function addTopicOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: (label: string) => api.sessions.addTopic(sessionId, label),
-  });
-}
-
-function startTimerOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: (duration: number) => api.sessions.timer.start(sessionId, duration),
-  });
-}
-
-function clearTimerOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: () => api.sessions.timer.clear(sessionId),
-  });
-}
-
-function pauseTimerOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: () => api.sessions.timer.pause(sessionId),
-  });
-}
-
-function resumeTimerOptions(sessionId: string) {
-  return mutationOptions({
-    mutationFn: () => api.sessions.timer.resume(sessionId),
-  });
 }

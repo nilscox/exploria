@@ -1,26 +1,17 @@
-import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
-import type { QueryClient } from '@tanstack/react-query';
-import {
-  infiniteQueryOptions,
-  mutationOptions,
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDownIcon, ArrowRightIcon } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, type NavigateFunction } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import { defined } from '../../server/src/utils';
-import { api } from './api';
 import { Button } from './components/button';
 import { DocumentTitle } from './components/document-title';
 import { Field, FieldLabel } from './components/field';
 import { Input } from './components/input';
 import { Settings } from './components/settings';
-import { useCurrentUser } from './hooks/use-current-user';
 import { isLanguage } from './i18n/i18n';
+import { options } from './options';
 import { ModelSelector } from './session/model-selector';
 
 export function Home() {
@@ -32,7 +23,12 @@ export function Home() {
     mutate: createSession,
     isPending: creatingSession,
     variables,
-  } = useMutation(createSessionOptions(navigate, language));
+  } = useMutation({
+    ...options.sessions.create(language),
+    async onSuccess(sessionId, { message }) {
+      await navigate(`/session/${sessionId}`, { state: { message } });
+    },
+  });
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -118,9 +114,15 @@ export function Home() {
 }
 
 function UserInfo() {
-  const user = useCurrentUser();
+  const { data: user } = useQuery(options.auth.me());
   const queryClient = useQueryClient();
-  const { mutate: logout, isPending } = useMutation(logoutMutationOptions(queryClient));
+
+  const { mutate: logout, isPending } = useMutation({
+    ...options.auth.logout(),
+    async onSuccess() {
+      await queryClient.invalidateQueries();
+    },
+  });
 
   if (!user) {
     return null;
@@ -137,11 +139,12 @@ function UserInfo() {
 }
 
 function SessionsList() {
-  const listSessionsQuery = useInfiniteQuery(listSessionsOptions());
   const { i18n } = useLingui();
   const dateFormatter = useMemo(() => new Intl.DateTimeFormat(i18n.locale), [i18n.locale]);
 
-  if (!listSessionsQuery.isSuccess || listSessionsQuery.data.length === 0) {
+  const { data, isSuccess, hasNextPage, fetchNextPage } = useInfiniteQuery(options.sessions.list());
+
+  if (!isSuccess || data.length === 0) {
     return null;
   }
 
@@ -152,7 +155,7 @@ function SessionsList() {
       </h2>
 
       <ul className="col gap-2">
-        {listSessionsQuery.data.map((session) => (
+        {data.map((session) => (
           <li key={session.id}>
             <Link
               to={`/session/${session.id}`}
@@ -165,52 +168,12 @@ function SessionsList() {
         ))}
       </ul>
 
-      {listSessionsQuery.hasNextPage && (
-        <button
-          type="button"
-          className="text-dim row mt-1 items-center gap-1 text-xs"
-          onClick={() => listSessionsQuery.fetchNextPage()}
-        >
+      {hasNextPage && (
+        <button type="button" className="text-dim row mt-1 items-center gap-1 text-xs" onClick={() => fetchNextPage()}>
           <Trans>More</Trans>
           <ArrowDownIcon className="size-3 shrink-0" />
         </button>
       )}
     </section>
   );
-}
-
-function createSessionOptions(navigate: NavigateFunction, language: Shared.Language) {
-  return mutationOptions({
-    async mutationFn({ model, demo }: { model: string; demo?: boolean; message?: string }) {
-      return api.sessions.create({ model, language, demo });
-    },
-    async onSuccess(sessionId, { message }) {
-      await navigate(`/session/${sessionId}`, { state: { message } });
-    },
-  });
-}
-
-function listSessionsOptions() {
-  return infiniteQueryOptions({
-    queryKey: ['listSessions'],
-    async queryFn({ pageParam }) {
-      return api.sessions.list({ page: pageParam, limit: 4 });
-    },
-    initialPageParam: 1,
-    getNextPageParam({ nextPage }) {
-      return nextPage;
-    },
-    select({ pages }) {
-      return pages.flatMap((page) => page.items);
-    },
-  });
-}
-
-function logoutMutationOptions(queryClient: QueryClient) {
-  return mutationOptions({
-    mutationFn: () => api.auth.logout(),
-    async onSuccess() {
-      await queryClient.invalidateQueries();
-    },
-  });
 }

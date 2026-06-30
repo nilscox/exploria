@@ -13,7 +13,7 @@ export function PostureSection({
   onSetPosture,
 }: {
   session: Shared.Session;
-  onSetPosture: (posture: string) => void;
+  onSetPosture: (posture: Shared.Posture | 'auto') => void;
 }) {
   const isAuto = session.postureMode === 'auto';
 

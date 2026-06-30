@@ -2,9 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
-import { api } from '../api';
 import { Spinner } from '../components/spinner';
-import { currentUserQueryOptions } from '../hooks/use-current-user';
+import { options } from '../options';
 
 export function LoginPage() {
   const [params] = useSearchParams();
@@ -12,9 +11,9 @@ export function LoginPage() {
   const queryClient = useQueryClient();
 
   const { mutate: login } = useMutation({
-    mutationFn: (token: string) => api.auth.login(token),
+    ...options.auth.login(),
     async onSuccess() {
-      await queryClient.invalidateQueries(currentUserQueryOptions());
+      await queryClient.invalidateQueries(options.auth.me());
     },
     async onSettled() {
       await navigate('/', { replace: true });
