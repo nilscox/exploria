@@ -33,10 +33,15 @@ export function CreateSession() {
   });
 
   const formRef = useRef<HTMLFormElement>(null);
+  const { data: user } = useQuery(options.auth.me());
 
   const handleSubmit = useCallback<React.SubmitEventHandler<HTMLFormElement>>(
     (event) => {
       event.preventDefault();
+
+      if (!user && !confirm(t`This session will be publicly available. Do not share sensitive information.`)) {
+        return;
+      }
 
       const data = new FormData(event.target);
       const model = data.get('model') as string;
@@ -44,7 +49,7 @@ export function CreateSession() {
 
       createSession({ model, message });
     },
-    [createSession],
+    [createSession, user, t],
   );
 
   const loadDemo = useCallback(() => {
@@ -69,11 +74,13 @@ export function CreateSession() {
 
       <div className="col mx-auto w-full max-w-lg flex-1 justify-center gap-8">
         <div className="text-center">
-          <h1 className="my-2 text-2xl font-medium">
-            <Trans>Exploria</Trans>
+          <h1 className="my-2 text-3xl font-semibold">
+            <Trans>
+              Explor<span className="text-primary">ia</span>
+            </Trans>
           </h1>
           <div className="text-dim">
-            <Trans>Deep thoughts with AI.</Trans>
+            <Trans>Thinking assistant</Trans>
           </div>
         </div>
 
