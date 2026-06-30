@@ -126,10 +126,6 @@ msgstr "Date"
 msgid "Debug"
 msgstr "Debug"
 
-#: src/session/create/create-session.tsx
-msgid "Deep thoughts with AI."
-msgstr "L'IA au service de la réflexion."
-
 #: src/session/info/posture.tsx
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Pression exigeante, ex. préparation d'entretien"
@@ -167,8 +163,8 @@ msgid "Examiner"
 msgstr "Examinateur"
 
 #: src/session/create/create-session.tsx
-msgid "Exploria"
-msgstr "Exploria"
+msgid "Explor<0>ia</0>"
+msgstr "Explor<0>ia</0>"
 
 #: src/home.tsx
 msgid "Exploria probes your reasoning and names the biases that distort it, so you move forward on your own."
@@ -384,10 +380,6 @@ msgstr "Posture"
 msgid "Stance forced: <0/>"
 msgstr "Posture forcée : <0/>"
 
-#: src/home.tsx
-msgid "Start a session"
-msgstr "Démarrer une session"
-
 #: src/session/create/create-session.tsx
 msgid "Start session"
 msgstr "Démarrer la session"
@@ -447,8 +439,13 @@ msgid "Think, better."
 msgstr "Penser, mieux."
 
 #: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Thinking assistant"
 msgstr "Assistant de réflexion"
+
+#: src/session/create/create-session.tsx
+msgid "This session will be publicly available. Do not share sensitive information."
+msgstr "Cette session sera visible publiquement. Ne partagez pas d'informations sensibles."
 
 #: src/home.tsx
 msgid "Timebox"
@@ -513,6 +510,10 @@ msgstr "Sujets"
 #: src/session/summary.ts
 msgid "Transcript"
 msgstr "Transcription"
+
+#: src/home.tsx
+msgid "Try it"
+msgstr "Essayer"
 
 #: src/session/message-form.tsx
 msgid "Type a message..."

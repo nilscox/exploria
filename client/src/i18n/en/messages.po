@@ -126,10 +126,6 @@ msgstr "Date"
 msgid "Debug"
 msgstr "Debug"
 
-#: src/session/create/create-session.tsx
-msgid "Deep thoughts with AI."
-msgstr "Deep thoughts with AI."
-
 #: src/session/info/posture.tsx
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Demanding pressure, e.g. interview prep"
@@ -167,8 +163,8 @@ msgid "Examiner"
 msgstr "Examiner"
 
 #: src/session/create/create-session.tsx
-msgid "Exploria"
-msgstr "Exploria"
+msgid "Explor<0>ia</0>"
+msgstr "Explor<0>ia</0>"
 
 #: src/home.tsx
 msgid "Exploria probes your reasoning and names the biases that distort it, so you move forward on your own."
@@ -384,10 +380,6 @@ msgstr "Stance"
 msgid "Stance forced: <0/>"
 msgstr "Stance forced: <0/>"
 
-#: src/home.tsx
-msgid "Start a session"
-msgstr "Start a session"
-
 #: src/session/create/create-session.tsx
 msgid "Start session"
 msgstr "Start session"
@@ -447,8 +439,13 @@ msgid "Think, better."
 msgstr "Think, better."
 
 #: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Thinking assistant"
 msgstr "Thinking assistant"
+
+#: src/session/create/create-session.tsx
+msgid "This session will be publicly available. Do not share sensitive information."
+msgstr "This session will be publicly available. Do not share sensitive information."
 
 #: src/home.tsx
 msgid "Timebox"
@@ -513,6 +510,10 @@ msgstr "Topics"
 #: src/session/summary.ts
 msgid "Transcript"
 msgstr "Transcript"
+
+#: src/home.tsx
+msgid "Try it"
+msgstr "Try it"
 
 #: src/session/message-form.tsx
 msgid "Type a message..."

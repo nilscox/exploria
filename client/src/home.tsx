@@ -36,12 +36,10 @@ export function Home() {
   );
 }
 
-const darkBand = 'bg-[radial-gradient(120%_120%_at_50%_0%,#2a2723_0%,#171717_55%)] text-orange-100';
-
 function Hero() {
   return (
-    <header className={darkBand}>
-      <div className="mx-auto max-w-4xl px-8">
+    <header className="bg-[radial-gradient(120%_120%_at_50%_0%,#2a2723_0%,#171717_55%)] text-orange-100">
+      <div className="mx-auto max-w-4xl px-4 md:px-8">
         <nav className="row h-16 items-center justify-between">
           <Link to="/" className="rounded-md px-2 text-lg font-bold">
             Explor<span className="text-amber-400">ia</span>
@@ -54,7 +52,7 @@ function Hero() {
             <Trans>Thinking assistant</Trans>
           </div>
 
-          <h1 className="mt-6 text-4xl leading-[1.05] font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="mt-6 text-3xl leading-[1.05] font-extrabold tracking-tight sm:text-5xl md:text-6xl">
             <Trans>
               Exploria thinks <span className="text-amber-400">with you</span>,
               <br />
@@ -62,7 +60,7 @@ function Hero() {
             </Trans>
           </h1>
 
-          <p className="mt-6 max-w-2xl text-lg text-orange-100/70">
+          <p className="mt-6 max-w-xl text-lg text-orange-100/70">
             <Trans>
               A thinking assistant that asks the right questions, surfaces your blind spots, and structures your
               reflection.
@@ -72,7 +70,7 @@ function Hero() {
           <div className="col mx-auto mt-9 w-fit items-start gap-4">
             <div className="row flex-wrap gap-3">
               <LinkButton to="/session" size="large">
-                <Trans>Start a session</Trans>
+                <Trans>Try it</Trans>
                 <ArrowRight className="size-4" aria-hidden />
               </LinkButton>
 
@@ -103,7 +101,7 @@ function LanguageSelect() {
       aria-label="Language"
       value={i18n.locale}
       onChange={(event) => void setLanguage(i18n, event.target.value as Shared.Language)}
-      className="cursor-pointer rounded-md border border-orange-100/25 bg-stone-800 px-2.5 py-1.5 text-sm text-orange-100/80 scheme-dark transition-colors hover:bg-stone-900"
+      className="cursor-pointer rounded-md bg-transparent px-2.5 py-1.5 text-sm text-orange-100/80 scheme-dark transition-colors hover:bg-stone-900"
     >
       <option value="en">🇺🇸 English</option>
       <option value="fr">🇫🇷 Français</option>
@@ -114,8 +112,8 @@ function LanguageSelect() {
 function Tension() {
   return (
     <section className="bg-[#1c1917] text-orange-100">
-      <div className="mx-auto h-px max-w-5xl bg-linear-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_16px_2px_rgba(251,191,36,0.5)]" />
-      <div className="mx-auto max-w-4xl py-16">
+      <div className="mx-auto h-px max-w-lg bg-linear-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_16px_2px_rgba(251,191,36,0.5)] md:max-w-5xl" />
+      <div className="mx-auto max-w-4xl px-4 py-16">
         <p className="mx-auto my-4 max-w-xl text-2xl leading-snug tracking-tight text-orange-100/85">
           <Trans>
             Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward
@@ -197,7 +195,7 @@ function UseCases() {
   return (
     <section className="bg-accent">
       <div className="mx-auto max-w-4xl px-8 py-20">
-        <h2 className="mx-auto mb-9 max-w-[22em] text-center text-2xl font-semibold tracking-tight">
+        <h2 className="mx-auto mb-9 max-w-sm text-center text-2xl font-semibold tracking-tight">
           <Trans>For the decisions and questions worth pausing on.</Trans>
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -287,7 +285,7 @@ function ClosingCta() {
         </p>
         <div className="row justify-center">
           <LinkButton to="/session" size="large">
-            <Trans>Start a session</Trans>
+            <Trans>Try it</Trans>
             <ArrowRight className="size-4" aria-hidden />
           </LinkButton>
         </div>
