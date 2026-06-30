@@ -18,29 +18,73 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/>: {0}"
 
-#: src/session/topics-list.tsx
+#: src/home.tsx
+msgid "A career move, a pivot, a commitment that stays with you."
+msgstr "A career move, a pivot, a commitment that stays with you."
+
+#: src/home.tsx
+msgid "A conviction you take for granted: what if you really examined it?"
+msgstr "A conviction you take for granted: what if you really examined it?"
+
+#: src/home.tsx
+msgid "A feature in mind? <0>Tell us about it</0>."
+msgstr "A feature in mind? <0>Tell us about it</0>."
+
+#: src/home.tsx
+msgid "A method, not just a conversation"
+msgstr "A method, not just a conversation"
+
+#: src/home.tsx
+msgid "A subject you don't know which way to approach."
+msgstr "A subject you don't know which way to approach."
+
+#: src/home.tsx
+msgid "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
+msgstr "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
+
+#: src/session/info/topics-list.tsx
 msgid "Add a topic..."
 msgstr "Add a topic..."
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "Add topic"
 msgstr "Add topic"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Advisor"
 msgstr "Advisor"
+
+#: src/home.tsx
+msgid "All your past sessions, to pick up whenever you want."
+msgstr "All your past sessions, to pick up whenever you want."
+
+#: src/home.tsx
+msgid "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
+msgstr "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
+
+#: src/home.tsx
+msgid "An argument or hypothesis to solidify before you defend it."
+msgstr "An argument or hypothesis to solidify before you defend it."
+
+#: src/home.tsx
+msgid "As the conversation unfolds, a mind map takes shape: the topics covered, their links, what's left to explore. At a glance, you know where you stand."
+msgstr "As the conversation unfolds, a mind map takes shape: the topics covered, their links, what's left to explore. At a glance, you know where you stand."
 
 #: src/session/summary.ts
 msgid "Assistant"
 msgstr "Assistant"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Attack ideas to test them"
 msgstr "Attack ideas to test them"
 
 #: src/session/session-timeline.tsx
 msgid "Back to automatic stance"
 msgstr "Back to automatic stance"
+
+#: src/home.tsx
+msgid "Beyond the conversation"
+msgstr "Beyond the conversation"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -52,7 +96,7 @@ msgstr "Biases"
 msgid "Blind spots"
 msgstr "Blind spots"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Clear the timer?"
 msgstr "Clear the timer?"
 
@@ -60,6 +104,10 @@ msgstr "Clear the timer?"
 #: src/session/session-summary.tsx
 msgid "Close"
 msgstr "Close"
+
+#: src/home.tsx
+msgid "Coming soon"
+msgstr "Coming soon"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -78,19 +126,23 @@ msgstr "Date"
 msgid "Debug"
 msgstr "Debug"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Deep thoughts with AI."
 msgstr "Deep thoughts with AI."
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Demanding pressure, e.g. interview prep"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Devil's advocate"
 msgstr "Devil's advocate"
 
-#: src/session/topics-list.tsx
+#: src/home.tsx
+msgid "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
+msgstr "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
+
+#: src/session/info/topics-list.tsx
 msgid "Done"
 msgstr "Done"
 
@@ -98,7 +150,7 @@ msgstr "Done"
 msgid "Download"
 msgstr "Download"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Duration (minutes):"
 msgstr "Duration (minutes):"
 
@@ -110,23 +162,59 @@ msgstr "End session"
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Enter to send • Shift+Enter for new line"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Examiner"
 msgstr "Examiner"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Exploria"
 msgstr "Exploria"
 
-#: src/session/posture.tsx
+#: src/home.tsx
+msgid "Exploria probes your reasoning and names the biases that distort it, so you move forward on your own."
+msgstr "Exploria probes your reasoning and names the biases that distort it, so you move forward on your own."
+
+#: src/home.tsx
+msgid "Exploria thinks <0>with you</0>,<1/>not for you."
+msgstr "Exploria thinks <0>with you</0>,<1/>not for you."
+
+#: src/home.tsx
+msgid "Exportable summary"
+msgstr "Exportable summary"
+
+#: src/home.tsx
+msgid "For the decisions and questions worth pausing on."
+msgstr "For the decisions and questions worth pausing on."
+
+#: src/home.tsx
+msgid "Frame a research problem"
+msgstr "Frame a research problem"
+
+#: src/home.tsx
+msgid "Free, no signup needed."
+msgstr "Free, no signup needed."
+
+#: src/home.tsx
+msgid "Give your thinking a time frame."
+msgstr "Give your thinking a time frame."
+
+#: src/home.tsx
+msgid "Ground your reflection in facts, when it helps."
+msgstr "Ground your reflection in facts, when it helps."
+
+#: src/session/info/posture.tsx
 msgid "Help structure a decision"
 msgstr "Help structure a decision"
 
-#: src/session/topics-list.tsx
+#: src/home.tsx
+msgid "History"
+msgstr "History"
+
+#: src/session/info/topics-list.tsx
 msgid "In progress"
 msgstr "In progress"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Invalid input."
 msgstr "Invalid input."
 
@@ -143,24 +231,36 @@ msgstr "Key points"
 msgid "Language"
 msgstr "Language"
 
+#: src/home.tsx
+msgid "Learn more"
+msgstr "Learn more"
+
+#: src/home.tsx
+msgid "Leave with a clear write-up, ready to reread or share."
+msgstr "Leave with a clear write-up, ready to reread or share."
+
 #: src/components/settings.tsx
 msgid "Light"
 msgstr "Light"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Load demo"
 msgstr "Load demo"
+
+#: src/home.tsx
+msgid "Make a structuring decision"
+msgstr "Make a structuring decision"
 
 #: src/session/message-form.tsx
 msgid "Message"
 msgstr "Message"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Mirror"
 msgstr "Mirror"
 
-#: src/home.tsx
-#: src/session/session-sidebar.tsx
+#: src/session/create/create-session.tsx
+#: src/session/info/session-info.tsx
 msgid "Model"
 msgstr "Model"
 
@@ -170,10 +270,14 @@ msgid "Model changed: {0}"
 msgstr "Model changed: {0}"
 
 #: src/home.tsx
+msgid "Model choice"
+msgstr "Model choice"
+
+#: src/session/create/sessions-list.tsx
 msgid "More"
 msgstr "More"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "No Topic"
 msgstr "No Topic"
 
@@ -192,7 +296,7 @@ msgstr "Note removed: {0}"
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
 
-#: src/session/session-sidebar.tsx
+#: src/session/info/session-info.tsx
 msgid "Notes"
 msgstr "Notes"
 
@@ -201,23 +305,31 @@ msgstr "Notes"
 msgid "Open questions"
 msgstr "Open questions"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Pause"
 msgstr "Pause"
 
 #: src/home.tsx
+msgid "Pre-mortem, inversion, opportunity cost… it draws on proven thinking methods, matched to your situation."
+msgstr "Pre-mortem, inversion, opportunity cost… it draws on proven thinking methods, matched to your situation."
+
+#: src/session/create/sessions-list.tsx
 msgid "Previous sessions"
 msgstr "Previous sessions"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Question to deepen thinking"
 msgstr "Question to deepen thinking"
 
-#: src/session/posture.tsx
+#: src/home.tsx
+msgid "Questions, not answers"
+msgstr "Questions, not answers"
+
+#: src/session/info/posture.tsx
 msgid "Reflect and welcome, without challenging"
 msgstr "Reflect and welcome, without challenging"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Resume"
 msgstr "Resume"
 
@@ -231,7 +343,7 @@ msgstr "Search: \"{0}\" ({1} result(s))"
 msgid "Send"
 msgstr "Send"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Session subject"
 msgstr "Session subject"
 
@@ -240,7 +352,7 @@ msgstr "Session subject"
 msgid "Session summary"
 msgstr "Session summary"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Session timer"
 msgstr "Session timer"
 
@@ -256,15 +368,15 @@ msgstr "Show timeline actions"
 msgid "Show timeline dates"
 msgstr "Show timeline dates"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Sign out"
 msgstr "Sign out"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Socratic"
 msgstr "Socratic"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Stance"
 msgstr "Stance"
 
@@ -273,16 +385,28 @@ msgid "Stance forced: <0/>"
 msgstr "Stance forced: <0/>"
 
 #: src/home.tsx
+msgid "Start a session"
+msgstr "Start a session"
+
+#: src/session/create/create-session.tsx
 msgid "Start session"
 msgstr "Start session"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Start timer"
 msgstr "Start timer"
 
-#: src/session/timer.tsx
+#: src/home.tsx
+msgid "Start whenever you want. One session is enough to see if it speaks to you."
+msgstr "Start whenever you want. One session is enough to see if it speaks to you."
+
+#: src/session/info/timer.tsx
 msgid "Stop"
 msgstr "Stop"
+
+#: src/home.tsx
+msgid "Stress-test an idea"
+msgstr "Stress-test an idea"
 
 #. placeholder {0}: item.subject
 #: src/session/session-timeline.tsx
@@ -293,7 +417,7 @@ msgstr "Subject changed: {0}"
 msgid "Subject to be defined"
 msgstr "Subject to be defined"
 
-#: src/home.tsx
+#: src/session/create/sessions-list.tsx
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
@@ -306,9 +430,29 @@ msgstr "Summary"
 msgid "Tensions & contradictions"
 msgstr "Tensions & contradictions"
 
+#: src/home.tsx
+msgid "Test a belief"
+msgstr "Test a belief"
+
+#: src/home.tsx
+msgid "The right angle at the right moment"
+msgstr "The right angle at the right moment"
+
 #: src/components/settings.tsx
 msgid "Theme"
 msgstr "Theme"
+
+#: src/home.tsx
+msgid "Think, better."
+msgstr "Think, better."
+
+#: src/home.tsx
+msgid "Thinking assistant"
+msgstr "Thinking assistant"
+
+#: src/home.tsx
+msgid "Timebox"
+msgstr "Timebox"
 
 #: src/session/session-timeline.tsx
 msgid "Timer cleared"
@@ -327,7 +471,7 @@ msgstr "Timer resumed"
 msgid "Timer started: {0} minutes"
 msgstr "Timer started: {0} minutes"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "To do"
 msgstr "To do"
 
@@ -362,7 +506,7 @@ msgstr "Topic removed: {0}"
 msgid "Topic renamed: {0} <0/> {1}"
 msgstr "Topic renamed: {0} <0/> {1}"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "Topics"
 msgstr "Topics"
 
@@ -375,9 +519,29 @@ msgid "Type a message..."
 msgstr "Type a message..."
 
 #: src/home.tsx
+msgid "Web search"
+msgstr "Web search"
+
+#: src/session/create/create-session.tsx
 msgid "What do you need to think about?"
 msgstr "What do you need to think about?"
+
+#: src/home.tsx
+msgid "What's often missing is <0>someone to ask the right questions</0>."
+msgstr "What's often missing is <0>someone to ask the right questions</0>."
+
+#: src/home.tsx
+msgid "Work with the AI model that suits you."
+msgstr "Work with the AI model that suits you."
 
 #: src/session/summary.ts
 msgid "You"
 msgstr "You"
+
+#: src/home.tsx
+msgid "Your ideas"
+msgstr "Your ideas"
+
+#: src/home.tsx
+msgid "Your thinking, structured"
+msgstr "Your thinking, structured"

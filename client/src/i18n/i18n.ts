@@ -27,5 +27,6 @@ export async function setLanguage(i18n: I18n, lang: Shared.Language) {
   i18n.load(lang, messages);
   i18n.activate(lang);
 
+  document.documentElement.lang = lang;
   localStorage.setItem('lang', lang);
 }

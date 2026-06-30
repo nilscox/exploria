@@ -18,29 +18,73 @@ msgstr ""
 msgid "<0/>: {0}"
 msgstr "<0/> : {0}"
 
-#: src/session/topics-list.tsx
+#: src/home.tsx
+msgid "A career move, a pivot, a commitment that stays with you."
+msgstr "Un choix de carrière, un pivot, un engagement qui vous suit longtemps."
+
+#: src/home.tsx
+msgid "A conviction you take for granted: what if you really examined it?"
+msgstr "Une conviction que vous tenez pour acquise : et si vous l'examiniez vraiment ?"
+
+#: src/home.tsx
+msgid "A feature in mind? <0>Tell us about it</0>."
+msgstr "Une idée en tête ? <0>Dites-la nous</0>."
+
+#: src/home.tsx
+msgid "A method, not just a conversation"
+msgstr "Une méthode, pas juste une conversation"
+
+#: src/home.tsx
+msgid "A subject you don't know which way to approach."
+msgstr "Un sujet que vous ne savez pas par quel bout prendre."
+
+#: src/home.tsx
+msgid "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
+msgstr "Un assistant IA qui pose les bonnes questions, révèle vos angles morts et structure votre réflexion."
+
+#: src/session/info/topics-list.tsx
 msgid "Add a topic..."
 msgstr "Ajouter un sujet…"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "Add topic"
 msgstr "Ajouter un sujet"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Advisor"
 msgstr "Conseiller"
+
+#: src/home.tsx
+msgid "All your past sessions, to pick up whenever you want."
+msgstr "Toutes vos sessions passées, à reprendre quand vous voulez."
+
+#: src/home.tsx
+msgid "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
+msgstr "Seul face à une décision qui compte, on tourne vite en rond. On s'attache à une option, on évite les questions gênantes, on oublie des angles."
+
+#: src/home.tsx
+msgid "An argument or hypothesis to solidify before you defend it."
+msgstr "Un argument ou une hypothèse à solidifier avant de le défendre."
+
+#: src/home.tsx
+msgid "As the conversation unfolds, a mind map takes shape: the topics covered, their links, what's left to explore. At a glance, you know where you stand."
+msgstr "Au fil de l'échange, une carte mentale se construit : les sujets abordés, leurs liens, ce qu'il reste à explorer. D'un coup d'œil, vous savez où vous en êtes."
 
 #: src/session/summary.ts
 msgid "Assistant"
 msgstr "Assistant"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Attack ideas to test them"
 msgstr "Attaquer les idées pour les tester"
 
 #: src/session/session-timeline.tsx
 msgid "Back to automatic stance"
 msgstr "Retour à la posture automatique"
+
+#: src/home.tsx
+msgid "Beyond the conversation"
+msgstr "Au-delà de la conversation"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -52,7 +96,7 @@ msgstr "Biais"
 msgid "Blind spots"
 msgstr "Angles morts"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Clear the timer?"
 msgstr "Annuler le minuteur ?"
 
@@ -60,6 +104,10 @@ msgstr "Annuler le minuteur ?"
 #: src/session/session-summary.tsx
 msgid "Close"
 msgstr "Fermer"
+
+#: src/home.tsx
+msgid "Coming soon"
+msgstr "À venir"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -78,19 +126,23 @@ msgstr "Date"
 msgid "Debug"
 msgstr "Debug"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Deep thoughts with AI."
 msgstr "L'IA au service de la réflexion."
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Pression exigeante, ex. préparation d'entretien"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Devil's advocate"
 msgstr "Avocat du diable"
 
-#: src/session/topics-list.tsx
+#: src/home.tsx
+msgid "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
+msgstr "Avocat du diable, écoute, mise à l'épreuve : il ajuste sa posture selon ce dont votre réflexion a besoin."
+
+#: src/session/info/topics-list.tsx
 msgid "Done"
 msgstr "Traité"
 
@@ -98,7 +150,7 @@ msgstr "Traité"
 msgid "Download"
 msgstr "Télécharger"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
@@ -110,23 +162,59 @@ msgstr "Terminer la session"
 msgid "Enter to send • Shift+Enter for new line"
 msgstr "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Examiner"
 msgstr "Examinateur"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Exploria"
 msgstr "Exploria"
 
-#: src/session/posture.tsx
+#: src/home.tsx
+msgid "Exploria probes your reasoning and names the biases that distort it, so you move forward on your own."
+msgstr "Exploria interroge votre raisonnement et nomme les biais qui le faussent, pour vous faire avancer par vous-même."
+
+#: src/home.tsx
+msgid "Exploria thinks <0>with you</0>,<1/>not for you."
+msgstr "Exploria pense <0>avec vous</0>,<1/> pas à votre place."
+
+#: src/home.tsx
+msgid "Exportable summary"
+msgstr "Synthèse exportable"
+
+#: src/home.tsx
+msgid "For the decisions and questions worth pausing on."
+msgstr "Pour les décisions et les questions qui méritent qu'on s'y arrête."
+
+#: src/home.tsx
+msgid "Frame a research problem"
+msgstr "Cadrer un problème de recherche"
+
+#: src/home.tsx
+msgid "Free, no signup needed."
+msgstr "Gratuit, sans inscription."
+
+#: src/home.tsx
+msgid "Give your thinking a time frame."
+msgstr "Donnez un cadre temporel à votre réflexion."
+
+#: src/home.tsx
+msgid "Ground your reflection in facts, when it helps."
+msgstr "Ancrez la réflexion dans des faits, quand c'est utile."
+
+#: src/session/info/posture.tsx
 msgid "Help structure a decision"
 msgstr "Aide neutre à structurer une décision"
 
-#: src/session/topics-list.tsx
+#: src/home.tsx
+msgid "History"
+msgstr "Historique"
+
+#: src/session/info/topics-list.tsx
 msgid "In progress"
 msgstr "En cours"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Invalid input."
 msgstr "Entrée invalide."
 
@@ -143,24 +231,36 @@ msgstr "Points clés"
 msgid "Language"
 msgstr "Langue"
 
+#: src/home.tsx
+msgid "Learn more"
+msgstr "En savoir plus"
+
+#: src/home.tsx
+msgid "Leave with a clear write-up, ready to reread or share."
+msgstr "Repartez avec un compte-rendu clair, prêt à relire ou partager."
+
 #: src/components/settings.tsx
 msgid "Light"
 msgstr "Clair"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Load demo"
 msgstr "Voir une démo"
+
+#: src/home.tsx
+msgid "Make a structuring decision"
+msgstr "Prendre une décision structurante"
 
 #: src/session/message-form.tsx
 msgid "Message"
 msgstr "Message"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Mirror"
 msgstr "Miroir"
 
-#: src/home.tsx
-#: src/session/session-sidebar.tsx
+#: src/session/create/create-session.tsx
+#: src/session/info/session-info.tsx
 msgid "Model"
 msgstr "Modèle"
 
@@ -170,10 +270,14 @@ msgid "Model changed: {0}"
 msgstr "Modèle changé : {0}"
 
 #: src/home.tsx
+msgid "Model choice"
+msgstr "Choix du modèle"
+
+#: src/session/create/sessions-list.tsx
 msgid "More"
 msgstr "Plus"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "No Topic"
 msgstr "Aucun sujet"
 
@@ -192,7 +296,7 @@ msgstr "Note supprimée : {0}"
 msgid "Note updated: {0}"
 msgstr "Note modifiée : {0}"
 
-#: src/session/session-sidebar.tsx
+#: src/session/info/session-info.tsx
 msgid "Notes"
 msgstr "Notes"
 
@@ -201,23 +305,31 @@ msgstr "Notes"
 msgid "Open questions"
 msgstr "Questions ouvertes"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Pause"
 msgstr "Pause"
 
 #: src/home.tsx
+msgid "Pre-mortem, inversion, opportunity cost… it draws on proven thinking methods, matched to your situation."
+msgstr "Pre-mortem, inversion, coûts d'opportunité… Il mobilise des méthodes de réflexion éprouvées, adaptées à votre situation."
+
+#: src/session/create/sessions-list.tsx
 msgid "Previous sessions"
 msgstr "Sessions précédentes"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Question to deepen thinking"
 msgstr "Questionner pour approfondir la pensée"
 
-#: src/session/posture.tsx
+#: src/home.tsx
+msgid "Questions, not answers"
+msgstr "Des questions, pas des réponses"
+
+#: src/session/info/posture.tsx
 msgid "Reflect and welcome, without challenging"
 msgstr "Refléter et accueillir, sans challenger"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Resume"
 msgstr "Reprendre"
 
@@ -231,7 +343,7 @@ msgstr "Recherche : \"{0}\" ({1} résultat(s))"
 msgid "Send"
 msgstr "Envoyer"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Session subject"
 msgstr "Sujet de la session"
 
@@ -240,7 +352,7 @@ msgstr "Sujet de la session"
 msgid "Session summary"
 msgstr "Bilan de session"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Session timer"
 msgstr "Minuteur de session"
 
@@ -256,15 +368,15 @@ msgstr "Afficher les actions"
 msgid "Show timeline dates"
 msgstr "Afficher les dates des messages"
 
-#: src/home.tsx
+#: src/session/create/create-session.tsx
 msgid "Sign out"
 msgstr "Déconnexion"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Socratic"
 msgstr "Socratique"
 
-#: src/session/posture.tsx
+#: src/session/info/posture.tsx
 msgid "Stance"
 msgstr "Posture"
 
@@ -273,16 +385,28 @@ msgid "Stance forced: <0/>"
 msgstr "Posture forcée : <0/>"
 
 #: src/home.tsx
+msgid "Start a session"
+msgstr "Démarrer une session"
+
+#: src/session/create/create-session.tsx
 msgid "Start session"
 msgstr "Démarrer la session"
 
-#: src/session/timer.tsx
+#: src/session/info/timer.tsx
 msgid "Start timer"
 msgstr "Démarrer un minuteur"
 
-#: src/session/timer.tsx
+#: src/home.tsx
+msgid "Start whenever you want. One session is enough to see if it speaks to you."
+msgstr "Commencez quand vous voulez. Une session suffit pour voir si ça vous parle."
+
+#: src/session/info/timer.tsx
 msgid "Stop"
 msgstr "Arrêter"
+
+#: src/home.tsx
+msgid "Stress-test an idea"
+msgstr "Éprouver une idée"
 
 #. placeholder {0}: item.subject
 #: src/session/session-timeline.tsx
@@ -293,7 +417,7 @@ msgstr "Sujet modifié : {0}"
 msgid "Subject to be defined"
 msgstr "Sujet à définir"
 
-#: src/home.tsx
+#: src/session/create/sessions-list.tsx
 msgid "Sujet à définir"
 msgstr "Sujet à définir"
 
@@ -306,9 +430,29 @@ msgstr "Bilan"
 msgid "Tensions & contradictions"
 msgstr "Tensions et contradictions"
 
+#: src/home.tsx
+msgid "Test a belief"
+msgstr "Tester une croyance"
+
+#: src/home.tsx
+msgid "The right angle at the right moment"
+msgstr "Le bon angle au bon moment"
+
 #: src/components/settings.tsx
 msgid "Theme"
 msgstr "Thème"
+
+#: src/home.tsx
+msgid "Think, better."
+msgstr "Penser, mieux."
+
+#: src/home.tsx
+msgid "Thinking assistant"
+msgstr "Assistant de réflexion"
+
+#: src/home.tsx
+msgid "Timebox"
+msgstr "Timebox"
 
 #: src/session/session-timeline.tsx
 msgid "Timer cleared"
@@ -327,7 +471,7 @@ msgstr "Minuteur redémarré"
 msgid "Timer started: {0} minutes"
 msgstr "Minuteur démarré : {0} minutes"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "To do"
 msgstr "À traiter"
 
@@ -362,7 +506,7 @@ msgstr "Sujet supprimé : {0}"
 msgid "Topic renamed: {0} <0/> {1}"
 msgstr "Sujet renommé: {0} <0/> {1}"
 
-#: src/session/topics-list.tsx
+#: src/session/info/topics-list.tsx
 msgid "Topics"
 msgstr "Sujets"
 
@@ -375,9 +519,29 @@ msgid "Type a message..."
 msgstr "Entrez un message..."
 
 #: src/home.tsx
+msgid "Web search"
+msgstr "Recherche web"
+
+#: src/session/create/create-session.tsx
 msgid "What do you need to think about?"
 msgstr "A quel sujet souhaitez-vous réfléchir ?"
+
+#: src/home.tsx
+msgid "What's often missing is <0>someone to ask the right questions</0>."
+msgstr "Ce qui manque, c'est souvent <0>quelqu'un pour poser les bonnes questions</0>."
+
+#: src/home.tsx
+msgid "Work with the AI model that suits you."
+msgstr "Travaillez avec le modèle d'IA qui vous convient."
 
 #: src/session/summary.ts
 msgid "You"
 msgstr "Vous"
+
+#: src/home.tsx
+msgid "Your ideas"
+msgstr "Vos idées"
+
+#: src/home.tsx
+msgid "Your thinking, structured"
+msgstr "Votre réflexion, structurée"
