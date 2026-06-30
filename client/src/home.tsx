@@ -1,6 +1,13 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
-import { infiniteQueryOptions, mutationOptions, useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
+import {
+  infiniteQueryOptions,
+  mutationOptions,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { ArrowDownIcon, ArrowRightIcon } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, type NavigateFunction } from 'react-router';
@@ -12,12 +19,14 @@ import { DocumentTitle } from './components/document-title';
 import { Field, FieldLabel } from './components/field';
 import { Input } from './components/input';
 import { Settings } from './components/settings';
+import { useCurrentUser } from './hooks/use-current-user';
 import { isLanguage } from './i18n/i18n';
 import { ModelSelector } from './session/model-selector';
 
 export function Home() {
   const { t, i18n } = useLingui();
   const language = isLanguage(i18n.locale) ? i18n.locale : 'en';
+  const user = useCurrentUser();
 
   const navigate = useNavigate();
 
@@ -55,7 +64,8 @@ export function Home() {
     <div className="col min-h-full flex-1 gap-4 p-4">
       <DocumentTitle />
 
-      <header className="row w-full justify-end">
+      <header className="row w-full items-center justify-end gap-3">
+        {user && <UserInfo email={user.email} />}
         <Settings />
       </header>
 
@@ -105,6 +115,20 @@ export function Home() {
       </div>
 
       <footer className="h-32" />
+    </div>
+  );
+}
+
+function UserInfo({ email }: { email: string }) {
+  const queryClient = useQueryClient();
+  const { mutate: logout, isPending } = useMutation(logoutMutationOptions(queryClient));
+
+  return (
+    <div className="row items-center gap-2">
+      <span className="text-dim text-sm">{email}</span>
+      <Button variant="outlined" size="small" loading={isPending} onClick={() => logout()}>
+        <Trans>Sign out</Trans>
+      </Button>
     </div>
   );
 }
@@ -175,6 +199,15 @@ function listSessionsOptions() {
     },
     select({ pages }) {
       return pages.flatMap((page) => page.items);
+    },
+  });
+}
+
+function logoutMutationOptions(queryClient: QueryClient) {
+  return mutationOptions({
+    mutationFn: () => api.auth.logout(),
+    async onSuccess() {
+      await queryClient.invalidateQueries();
     },
   });
 }

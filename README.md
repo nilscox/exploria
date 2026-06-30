@@ -45,6 +45,8 @@ Server env (`server/.env`)
 - `OPEN_AI_API_KEY` - Chat completion API key
 - `DATABASE_URL` - Postgres database URL
 - `TAVILY_API_KEY` - Tavily API key (optional)
+- `COOKIE_SECRET` - Random string to sign cookies
+- `CLIENT_URL` - Client URL
 
 Client env (`client/.env`)
 

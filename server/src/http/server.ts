@@ -1,5 +1,6 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { type ErrorRequestHandler } from 'express';
+import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
 import type { Server as HttpServer } from 'node:http';
 import { promisify } from 'node:util';
 import z from 'zod';
@@ -8,7 +9,9 @@ import { SseUiNotifier } from './sse';
 
 import type { Config } from '../adapters/config';
 import type { Logger } from '../adapters/logger';
+import type { UserRepository } from '../database/user-repository';
 import type { UiNotifier } from '../domain/ui-notifier';
+import type { AuthController } from './auth-controller';
 import type { SessionController } from './session-controller';
 
 export class Server {
@@ -19,7 +22,14 @@ export class Server {
   private app = express();
   private server?: HttpServer;
 
-  constructor(config: Config, logger: Logger, uiNotifier: UiNotifier, sessionController: SessionController) {
+  constructor(
+    config: Config,
+    logger: Logger,
+    uiNotifier: UiNotifier,
+    userRepository: UserRepository,
+    authController: AuthController,
+    sessionController: SessionController,
+  ) {
     this.config = config;
     this.logger = logger;
     this.uiNotifier = uiNotifier;
@@ -30,12 +40,36 @@ export class Server {
 
     this.app.use(api);
 
-    api.use(cors({ exposedHeaders: ['X-Page', 'X-Total-Pages'] }));
+    if (config.env === 'development') {
+      api.use(cors({ origin: true, credentials: true, exposedHeaders: ['X-Page', 'X-Total-Pages'] }));
+    }
+
     api.use(express.json());
-    api.use('/health', (req, res) => res.status(204).end());
+    api.use(cookieParser(config.auth.cookieSecret));
+    api.use(this.authMiddleware(userRepository));
+    api.use('/health', (_req, res) => res.status(204).end());
+    api.use('/auth', authController.router);
     api.use('/session', sessionController.router);
-    api.use((req, res) => res.status(404).end());
+    api.use((_req, res) => res.status(404).end());
     api.use(this.errorHandler);
+  }
+
+  private authMiddleware(userRepository: UserRepository): RequestHandler {
+    return async (req, res, next) => {
+      const uid = req.signedCookies?.['uid'];
+
+      if (uid) {
+        const user = await userRepository.findById(uid);
+
+        if (user) {
+          req.user = user;
+        } else {
+          res.clearCookie('uid');
+        }
+      }
+
+      next();
+    };
   }
 
   async start() {

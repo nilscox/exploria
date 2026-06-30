@@ -26,7 +26,7 @@ export function useSession(sessionId: string) {
 
   useEffect(() => {
     if (ApiError.is(sessionQuery.error) && sessionQuery.error.status === 404) {
-      void navigate('/');
+      void navigate('/', { replace: true });
     }
   }, [sessionQuery.error, navigate]);
 

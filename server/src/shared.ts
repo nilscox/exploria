@@ -4,6 +4,8 @@ import type * as session from './domain/session';
 import type * as summary from './domain/summary';
 
 export namespace Shared {
+  export type User = { id: string; email: string; name: string | null };
+
   export type Summary = summary.Summary;
 
   export type AssistantUiEvent = assistant.AssistantUiEvent;

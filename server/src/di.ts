@@ -6,13 +6,14 @@ import { EnvConfig, type Config } from './adapters/config';
 import { NanoIdGenerator, type Generator } from './adapters/generator';
 import { MustacheI18n, type I18n } from './adapters/i18n';
 import { TavilySearchClient, type SearchClient } from './adapters/search-client';
-import { createDatabase, SessionRepository } from './database';
+import { createDatabase, SessionRepository, UserRepository } from './database';
 import { Assistant } from './domain/assistant';
 import { createTools, type AssistantTools } from './domain/assistant-tools';
 import { EvalAssistant } from './domain/eval-assistant';
 import { SummaryGenerator } from './domain/summary-generator';
 import { TestAssistant } from './domain/test-assistant';
 import { EventBus } from './event-bus';
+import { AuthController } from './http/auth-controller';
 import { Server } from './http/server';
 import { SessionController } from './http/session-controller';
 import { SseUiNotifier } from './http/sse';
@@ -56,6 +57,8 @@ export const container = createContainer({
   uiNotifier: asClass<UiNotifier>(SseUiNotifier).singleton(),
   database: asFunction(createDatabase),
   i18n: asClass<I18n>(MustacheI18n).singleton(),
+  userRepository: asClass(UserRepository),
+  authController: asClass(AuthController),
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
   aiClient: asClass<AiClient>(OpenAiClient),

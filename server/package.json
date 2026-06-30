@@ -11,10 +11,12 @@
     "fmt": "oxfmt",
     "dev": "nodemon -w src -w .env -w package.json -e ts -x 'tsx src/main.ts'",
     "build": "tsup",
-    "start": "tsx src/main.ts"
+    "start": "tsx src/main.ts",
+    "create-user": "tsx src/cli/create-user.ts"
   },
   "dependencies": {
     "awilix": "^13.0.5",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "date-fns": "^4.4.0",
     "dequal": "^2.0.3",
@@ -29,6 +31,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.3",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/mustache": "^4.2.6",

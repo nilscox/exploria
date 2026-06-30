@@ -9,6 +9,7 @@ import './index.css';
 
 import { BrowserRouter, Route, Routes } from 'react-router';
 
+import { LoginPage } from './auth/login';
 import { ConfigProvider } from './config-context';
 import { Home } from './home';
 import { messages } from './i18n/en/messages';
@@ -71,6 +72,7 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/session/:sessionId" element={<SessionPage />} />
               </Routes>
             </BrowserRouter>

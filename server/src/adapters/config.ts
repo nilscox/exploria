@@ -1,4 +1,6 @@
 export interface Config {
+  env: 'development' | 'production' | 'test';
+
   server: {
     host: string;
     port: number;
@@ -14,15 +16,20 @@ export interface Config {
     debug: boolean;
   };
 
+  auth: {
+    cookieSecret: string;
+    clientUrl: string;
+  };
+
   assistant?: 'test' | 'eval';
 
   tavilyApiKey?: string;
 }
 
 export class EnvConfig implements Config {
-  private env(name: string): string | undefined;
-  private env(name: string, required: true): string;
-  private env(name: string, required?: true) {
+  private read(name: string): string | undefined;
+  private read(name: string, required: true): string;
+  private read(name: string, required?: true) {
     const value = process.env[name];
 
     if (value === undefined && required) {
@@ -32,29 +39,46 @@ export class EnvConfig implements Config {
     return value;
   }
 
+  get env(): Config['env'] {
+    const value = this.read('NODE_ENV');
+
+    if (value === 'production' || value === 'test') {
+      return value;
+    }
+
+    return 'development';
+  }
+
   get server() {
     return {
-      host: this.env('HOST') ?? 'localhost',
-      port: Number.parseInt(this.env('PORT') ?? '3000'),
+      host: this.read('HOST') ?? 'localhost',
+      port: Number.parseInt(this.read('PORT') ?? '3000'),
     };
   }
 
   get openAi() {
     return {
-      baseUrl: this.env('OPEN_AI_BASE_URL', true),
-      apiKey: this.env('OPEN_AI_API_KEY', true),
+      baseUrl: this.read('OPEN_AI_BASE_URL', true),
+      apiKey: this.read('OPEN_AI_API_KEY', true),
     };
   }
 
   get database() {
     return {
-      url: this.env('DATABASE_URL', true),
-      debug: this.env('DATABASE_DEBUG') === 'true',
+      url: this.read('DATABASE_URL', true),
+      debug: this.read('DATABASE_DEBUG') === 'true',
+    };
+  }
+
+  get auth() {
+    return {
+      cookieSecret: this.read('COOKIE_SECRET', true),
+      clientUrl: this.read('CLIENT_URL', true),
     };
   }
 
   get assistant() {
-    const value = this.env('ASSISTANT');
+    const value = this.read('ASSISTANT');
 
     if (value === 'test' || value === 'eval') {
       return value;
@@ -62,6 +86,6 @@ export class EnvConfig implements Config {
   }
 
   get tavilyApiKey() {
-    return this.env('TAVILY_API_KEY');
+    return this.read('TAVILY_API_KEY');
   }
 }

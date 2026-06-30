@@ -57,14 +57,24 @@ export class SessionController {
 
       if (!session) {
         res.status(404).end();
-      } else {
-        this.sessionContext.run(session, next);
+        return;
       }
+
+      const isPublic = session.ownerId === null;
+      const isOwner = session.ownerId === req.user?.id;
+
+      if (!isPublic && !isOwner) {
+        res.status(404).end();
+        return;
+      }
+
+      this.sessionContext.run(session, next);
     });
 
     this.router.get('/', async (req, res) => {
       const { page, limit, offset } = parsePagination(req.query);
-      const [total, sessions] = await this.listSessions({ offset, limit });
+      const ownerId = req.user?.id ?? null;
+      const [total, sessions] = await this.listSessions({ offset, limit, ownerId });
 
       res.setHeader('X-Page', page);
       res.setHeader('X-Total-Pages', Math.ceil(total / limit));
@@ -80,7 +90,9 @@ export class SessionController {
         })
         .parse(req.body);
 
-      res.status(201).send(await this.createSession({ model, language, demo }));
+      const ownerId = req.user?.id ?? null;
+
+      res.status(201).send(await this.createSession({ model, language, demo, ownerId }));
     });
 
     this.router.get('/:id', async (req, res) => {
@@ -189,9 +201,9 @@ export class SessionController {
     });
   }
 
-  private async listSessions({ offset, limit }: { offset: number; limit: number }) {
-    const total = await this.sessionRepository.count();
-    const sessions = await this.sessionRepository.findMany({ offset, limit });
+  private async listSessions({ offset, limit, ownerId }: { offset: number; limit: number; ownerId: string | null }) {
+    const total = await this.sessionRepository.count({ ownerId });
+    const sessions = await this.sessionRepository.findMany({ offset, limit, ownerId });
 
     return [
       total,
@@ -203,8 +215,18 @@ export class SessionController {
     ] as const;
   }
 
-  private async createSession({ model, language, demo }: { model: string; language: Shared.Language; demo?: boolean }) {
-    const session = Session.create(this.generator, this.clock, { model, language });
+  private async createSession({
+    model,
+    language,
+    demo,
+    ownerId,
+  }: {
+    model: string;
+    language: Shared.Language;
+    demo?: boolean;
+    ownerId: string | null;
+  }) {
+    const session = Session.create(this.generator, this.clock, { model, language, ownerId });
 
     await this.sessionRepository.insert(session);
     const committed = await this.sessionRepository.save(session);

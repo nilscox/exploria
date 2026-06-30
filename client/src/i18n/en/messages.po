@@ -252,6 +252,10 @@ msgstr "Show timeline actions"
 msgid "Show timeline dates"
 msgstr "Show timeline dates"
 
+#: src/home.tsx
+msgid "Sign out"
+msgstr "Sign out"
+
 #: src/session/posture.tsx
 msgid "Socratic"
 msgstr "Socratic"

@@ -54,7 +54,7 @@ export type DiscussionPath = {
 type SessionDomainEvent<Type extends string, Payload = {}> = DomainEvent<'Session', Type> & Payload;
 
 export type SessionEvent =
-  | SessionDomainEvent<'SessionCreated', { model: string; language: Language }>
+  | SessionDomainEvent<'SessionCreated', { model: string; language: Language; ownerId: string | null }>
   | SessionDomainEvent<'ModelChanged', { model: string }>
   | SessionDomainEvent<'SubjectChanged', { subject: string }>
   | SessionDomainEvent<'TopicAdded', { topic: Topic }>
@@ -83,6 +83,12 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get id(): string {
     return this._id;
+  }
+
+  private _ownerId: string | null = null;
+
+  get ownerId(): string | null {
+    return this._ownerId;
   }
 
   private _model: string = '';
@@ -145,7 +151,11 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._events;
   }
 
-  static create(generator: Generator, clock: Clock, params: { model: string; language: Language }) {
+  static create(
+    generator: Generator,
+    clock: Clock,
+    params: { model: string; language: Language; ownerId: string | null },
+  ) {
     const session = new Session(generator, clock);
 
     session.emit('SessionCreated', params);
@@ -167,7 +177,8 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   protected apply(event: SessionEvent) {
     const handle: Partial<{ [Event in SessionEvent as Event['type']]: (event: Event) => void }> = {
-      SessionCreated: ({ model, language }) => {
+      SessionCreated: ({ model, language, ownerId }) => {
+        this._ownerId = ownerId;
         this._model = model;
         this._language = language;
       },

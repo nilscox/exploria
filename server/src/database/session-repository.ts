@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 
 import { Session, type SessionEvent } from '../domain/session';
 import { domainEvents, sessions } from './schema';
@@ -22,6 +22,7 @@ export class SessionRepository {
   async insert(session: Session) {
     await this.db.insert(sessions).values({
       id: session.id,
+      ownerId: session.ownerId,
       model: session.model,
       subject: session.subject,
     });
@@ -74,12 +75,21 @@ export class SessionRepository {
     return Session.replay(this.generator, this.clock, id, dbEvents.map(SessionRepository.mapEvent));
   }
 
-  async findMany({ offset, limit }: { offset: number; limit: number }) {
-    return this.db.query.sessions.findMany({ offset, limit, orderBy: { createdAt: 'desc' } });
+  async findMany({ offset, limit, ownerId }: { offset: number; limit: number; ownerId: string | null }) {
+    return this.db.query.sessions.findMany({
+      where: {
+        ownerId: ownerId ?? { isNull: true },
+      },
+      offset,
+      limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
-  async count() {
-    return this.db.$count(sessions);
+  async count({ ownerId }: { ownerId: string | null }) {
+    return this.db.$count(sessions, ownerId === null ? isNull(sessions.ownerId) : eq(sessions.ownerId, ownerId));
   }
 
   async delete(id: string) {

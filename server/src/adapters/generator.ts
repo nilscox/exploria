@@ -1,17 +1,28 @@
+import { randomBytes } from 'node:crypto';
 import { customAlphabet } from 'nanoid';
 
 export interface Generator {
   id(): string;
+  token(): string;
 }
 
 export class NanoIdGenerator implements Generator {
   id = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 8);
+
+  token(): string {
+    return randomBytes(24).toString('base64url');
+  }
 }
 
 export class StubGenerator implements Generator {
-  private count = 0;
+  private idCount = 0;
+  private tokenCount = 0;
 
   id(): string {
-    return `id-${++this.count}`;
+    return `id-${++this.idCount}`;
+  }
+
+  token(): string {
+    return `token-${++this.tokenCount}`;
   }
 }

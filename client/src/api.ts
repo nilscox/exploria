@@ -2,6 +2,35 @@ import type { Shared } from '@exploria/server/shared';
 
 import { type Assign } from './utils';
 
+const auth = {
+  async login(token: string): Promise<Shared.User> {
+    const res = await fetchApi('/auth/login', {
+      method: 'POST',
+      body: { token },
+    });
+
+    return res.json();
+  },
+
+  async me(): Promise<Shared.User | null> {
+    try {
+      const res = await fetchApi('/auth/me');
+
+      return res.json();
+    } catch (err) {
+      if (ApiError.is(err) && err.status === 404) {
+        return null;
+      }
+
+      throw err;
+    }
+  },
+
+  async logout(): Promise<void> {
+    await fetchApi('/auth/logout', { method: 'POST' });
+  },
+};
+
 const sessions = {
   async list({ page, limit }: PaginationParams): Promise<Paginated<{ id: string; date: string; subject: string }>> {
     const res = await fetchApi('/session', {
@@ -76,7 +105,7 @@ const sessions = {
   },
 
   stream(id: string): EventSource {
-    return new EventSource(apiUrl(`/session/${id}/stream`));
+    return new EventSource(apiUrl(`/session/${id}/stream`), { withCredentials: true });
   },
 
   timer: {
@@ -108,6 +137,7 @@ const sessions = {
 };
 
 export const api = {
+  auth,
   sessions,
 };
 
@@ -140,7 +170,7 @@ async function fetchApi(
     body = JSON.stringify(init.body);
   }
 
-  const res = await fetch(url, { ...init, headers, body });
+  const res = await fetch(url, { ...init, headers, body, credentials: 'include' });
 
   if (!res.ok) {
     throw await ApiError.from(res);

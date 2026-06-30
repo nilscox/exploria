@@ -1,4 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
+import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import { pushSchema } from 'drizzle-kit/api-postgres';
 import { drizzle } from 'drizzle-orm/pglite';
@@ -7,22 +8,27 @@ import type { Server } from 'node:http';
 import { promisify } from 'node:util';
 
 import { schema } from './database';
+import { assert } from './utils';
 
 import type { Database } from './database/database';
+import type { UserRepository } from './database/user-repository';
 
-type Assign<A, B> = Omit<A, keyof B> & B;
-export type TestDatabase = Assign<Database, { $client: PGlite }>;
+export interface TestDatabase extends Database {
+  $testClient: PGlite;
+}
 
-export async function createTestDatabase() {
+export async function createTestDatabase(): Promise<TestDatabase> {
   const db = drizzle({
     client: new PGlite(),
     relations: schema.relations,
-  } as { client: PGlite }) as unknown as TestDatabase;
+  });
 
-  const { apply } = await pushSchema(schema, db as any);
+  const { apply } = await pushSchema(schema, db);
   await apply();
 
-  return db;
+  Object.assign(db, { $testClient: db.$client });
+
+  return db as unknown as TestDatabase;
 }
 
 export async function waitFor(callback: () => unknown, { interval = 50, timeout = 1000 } = {}): Promise<void> {
@@ -42,13 +48,34 @@ export async function waitFor(callback: () => unknown, { interval = 50, timeout 
   throw lastError;
 }
 
-export class ExpressFetcher {
+export class ServerFetcher {
+  static readonly cookieSecret = 'secret';
+
   private app = express();
   private server?: Server;
+  private cookie: string | null = null;
 
-  constructor(router: express.Router) {
+  constructor(userRepository: UserRepository, configure: (app: express.Router) => void) {
     this.app.use(express.json());
-    this.app.use(router);
+
+    this.app.use(cookieParser(ServerFetcher.cookieSecret));
+
+    this.app.use(async (req, _res, next) => {
+      const cookies: Record<string, string | undefined> = req.signedCookies;
+      const uid = cookies['uid'];
+
+      if (uid) {
+        const user = await userRepository.findById(uid);
+
+        if (user) {
+          req.user = user;
+        }
+      }
+
+      next();
+    });
+
+    configure(this.app);
   }
 
   get port() {
@@ -72,7 +99,44 @@ export class ExpressFetcher {
     }
   }
 
-  fetch(endpoint: string, init?: RequestInit) {
-    return fetch(new URL(endpoint, this.baseUrl), init);
+  setCookie(cookie: string | null) {
+    this.cookie = cookie;
+  }
+
+  fetch(endpoint: string, init: RequestInit = {}) {
+    const headers = new Headers(init.headers);
+
+    if (this.cookie) {
+      headers.set('Cookie', this.cookie);
+    }
+
+    return fetch(new URL(endpoint, this.baseUrl), { ...init, headers });
+  }
+
+  async login(token: string) {
+    const res = await this.fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    assert(res.ok, new Error(await res.text()));
+
+    const cookie = ServerFetcher.extractSignedCookie(res);
+
+    assert(cookie !== null);
+    this.setCookie(cookie);
+  }
+
+  static extractSignedCookie(res: Response): string | null {
+    const setCookie = res.headers.get('Set-Cookie');
+
+    if (!setCookie) {
+      return null;
+    }
+
+    const match = setCookie.match(/^uid=([^;]+)/);
+
+    return match ? `uid=${match[1]}` : null;
   }
 }
