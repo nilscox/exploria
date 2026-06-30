@@ -26,8 +26,6 @@ import { ModelSelector } from './session/model-selector';
 export function Home() {
   const { t, i18n } = useLingui();
   const language = isLanguage(i18n.locale) ? i18n.locale : 'en';
-  const user = useCurrentUser();
-
   const navigate = useNavigate();
 
   const {
@@ -65,7 +63,7 @@ export function Home() {
       <DocumentTitle />
 
       <header className="row w-full items-center justify-end gap-3">
-        {user && <UserInfo email={user.email} />}
+        <UserInfo />
         <Settings />
       </header>
 
@@ -119,13 +117,18 @@ export function Home() {
   );
 }
 
-function UserInfo({ email }: { email: string }) {
+function UserInfo() {
+  const user = useCurrentUser();
   const queryClient = useQueryClient();
   const { mutate: logout, isPending } = useMutation(logoutMutationOptions(queryClient));
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="row items-center gap-2">
-      <span className="text-dim text-sm">{email}</span>
+      <span className="text-dim text-sm">{user.name ?? user.email}</span>
       <Button variant="outlined" size="small" loading={isPending} onClick={() => logout()}>
         <Trans>Sign out</Trans>
       </Button>

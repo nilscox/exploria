@@ -39,10 +39,10 @@ export function MessageForm({ loading, postMessage }: { loading?: boolean; postM
   };
 
   return (
-    <section className="max-w-x4l sticky bottom-0 mx-auto w-full max-w-4xl px-4 pb-8">
+    <section className="sticky bottom-0 mx-auto w-full max-w-4xl px-2 pb-2 sm:px-4 sm:pb-8">
       <form
         onSubmit={handleSubmit}
-        className="col bg-neutral items-stretch rounded-lg border shadow-2xl has-focus-visible:outline"
+        className="col bg-neutral items-stretch rounded-lg border shadow-xl has-focus-visible:outline"
       >
         <textarea
           ref={textAreaRef}

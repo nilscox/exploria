@@ -12,6 +12,12 @@ import { SidebarSection } from './sidebar-section';
 export function TopicsListSection({ topics, onAdd }: { topics: Shared.Topic[]; onAdd: (label: string) => void }) {
   return (
     <SidebarSection Icon={ListChecksIcon} title={<Trans>Topics</Trans>}>
+      {topics.length === 0 && (
+        <div className="text-dim p-4 text-center text-sm font-medium">
+          <Trans>No Topic</Trans>
+        </div>
+      )}
+
       {topics.length > 0 && (
         <ul className="col gap-1.5">
           {topics.map((topic) => (

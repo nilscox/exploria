@@ -67,12 +67,12 @@ function Layout({
   main: React.ReactNode;
 }) {
   return (
-    <div className="grid h-full grid-cols-1 overflow-hidden lg:grid-cols-[24rem_1fr] lg:grid-rows-[auto_1fr]">
+    <div className="grid h-full grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[24rem_1fr]">
       <header className="col-span-2">{header}</header>
       <aside className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'sidebar' && 'max-lg:hidden')}>
         {aside}
       </aside>
-      <main className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'main' && 'max-lg:hidden')}>
+      <main className={clsx('scrollbar-thin col relative min-h-0 overflow-y-auto', view !== 'main' && 'max-lg:hidden')}>
         {main}
       </main>
     </div>
@@ -108,7 +108,7 @@ function Header({
   );
 
   return (
-    <div className="row flex-wrap items-center gap-4 border-b px-4 py-2">
+    <div className="row flex-wrap items-center gap-x-4 gap-y-0.5 border-b px-4 py-2">
       <div className="row items-center gap-2">
         <LinkButton to="/" variant="ghost" size="icon" className="shrink-0">
           <ArrowLeftIcon className="size-4" />
@@ -165,7 +165,7 @@ function MainSection({
 
   return (
     <>
-      <div className="col relative mx-auto w-full max-w-4xl gap-4 p-6">
+      <div className="col relative mx-auto w-full max-w-4xl grow gap-4 p-4 sm:p-8">
         <Timeline session={session} onSelectPath={onSelectPath} />
         {stream && <Markdown markdown={stream} />}
       </div>

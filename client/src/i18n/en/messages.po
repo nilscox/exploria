@@ -173,6 +173,10 @@ msgstr "Model changed: {0}"
 msgid "More"
 msgstr "More"
 
+#: src/session/topics-list.tsx
+msgid "No Topic"
+msgstr "No Topic"
+
 #. placeholder {0}: item.content
 #: src/session/session-timeline.tsx
 msgid "Note added: {0}"
