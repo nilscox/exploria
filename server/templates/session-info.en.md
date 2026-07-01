@@ -52,17 +52,19 @@ note: {{content}}
 {{#hasMindmap}}
 Nodes:
 {{#mindmapNodes}}
+
 - {{label}} (id: "{{id}}")
-{{/mindmapNodes}}
+  {{/mindmapNodes}}
 
 Links:
 {{#mindmapEdges}}
+
 - {{sourceLabel}} ("{{source}}") --{{type}}--> {{targetLabel}} ("{{target}}")
-{{/mindmapEdges}}
-{{^mindmapEdges}}
-No links yet.
-{{/mindmapEdges}}
-{{/hasMindmap}}
+  {{/mindmapEdges}}
+  {{^mindmapEdges}}
+  No links yet.
+  {{/mindmapEdges}}
+  {{/hasMindmap}}
 
 {{^hasMindmap}}
 The mindmap is empty. Build it as the reflection takes shape.

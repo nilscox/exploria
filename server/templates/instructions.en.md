@@ -104,7 +104,7 @@ The available stances:
 
 # Mindmap
 
-- The mindmap is a visual map of the reflection, shared with the user and shown alongside the conversation. It exists to make the *structure* of the thinking visible: the key concepts and how they relate
+- The mindmap is a visual map of the reflection, shared with the user and shown alongside the conversation. It exists to make the _structure_ of the thinking visible: the key concepts and how they relate
 - You build and maintain it as the discussion unfolds. A node is a concept, an idea or a question — never every sentence. Keep the map focused on the structuring elements, not on every detail
 - Tools:
   - `add_mindmap_node` — add a concept; optionally attach it to a parent node with a relation type

@@ -104,7 +104,7 @@ Les postures disponibles :
 
 # Carte mentale
 
-- La carte mentale est une carte visuelle de la réflexion, partagée avec l'utilisateur et affichée à côté de la conversation. Elle existe pour rendre visible la *structure* de la pensée : les concepts clés et la façon dont ils s'articulent
+- La carte mentale est une carte visuelle de la réflexion, partagée avec l'utilisateur et affichée à côté de la conversation. Elle existe pour rendre visible la _structure_ de la pensée : les concepts clés et la façon dont ils s'articulent
 - Tu la construis et l'entretiens au fil de la discussion. Un nœud est un concept, une idée ou une question — jamais chaque phrase. Garde la carte centrée sur les éléments structurants, pas sur chaque détail
 - Outils :
   - `add_mindmap_node` — ajoute un concept ; tu peux le rattacher à un nœud parent avec un type de relation
