@@ -87,6 +87,9 @@ export class MustacheI18n implements I18n {
 
     const inProgressCount = session.topics.filter((topic) => topic.status === 'in_progress').length;
 
+    const { nodes, edges } = session.mindmap;
+    const labelOf = (nodeId: string) => nodes.find((node) => node.id === nodeId)?.label ?? nodeId;
+
     return {
       hasPlan: session.topics.length > 0,
       topics: session.topics.map(({ id, label, status }) => ({ id, label, status: statusLabels[status] })),
@@ -97,6 +100,15 @@ export class MustacheI18n implements I18n {
       notes: session.notes,
       posture: session.posture,
       auto: session.postureMode === 'auto',
+      hasMindmap: nodes.length > 0,
+      mindmapNodes: nodes.map(({ id, label }) => ({ id, label })),
+      mindmapEdges: edges.map(({ source, target, type }) => ({
+        source,
+        target,
+        type,
+        sourceLabel: labelOf(source),
+        targetLabel: labelOf(target),
+      })),
       date: this.date(lang, new Date()),
     };
   };

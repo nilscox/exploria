@@ -4,6 +4,7 @@ import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
 import { languages } from '../domain/i18n/index.ts';
+import { mindmapEdgeTypes } from '../domain/mindmap.ts';
 import { toSessionView } from '../domain/projections/session-view.ts';
 import { Session, postures, type TopicStatus } from '../domain/session.ts';
 import { defined } from '../utils.ts';
@@ -14,6 +15,7 @@ import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
 import type { SessionRepository } from '../database/session-repository.ts';
 import type { IAssistant } from '../domain/assistant.ts';
+import type { MindmapEdgeType } from '../domain/mindmap.ts';
 import type { EventBus } from '../event-bus.ts';
 import type { Shared } from '../shared.ts';
 
@@ -142,6 +144,52 @@ export class SessionController {
         .parse(req.body);
 
       await this.updateTopic(req.params.topicId, { label, status });
+      res.status(204).end();
+    });
+
+    this.router.post('/:id/mindmap/node', async (req, res) => {
+      const { label, parentId, edgeType } = z
+        .object({
+          label: z.string().min(1).max(64),
+          parentId: z.string().optional(),
+          edgeType: z.enum(mindmapEdgeTypes).optional(),
+        })
+        .parse(req.body);
+
+      await this.addMindmapNode({ label, parentId, edgeType });
+
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/mindmap/node/:nodeId', async (req, res) => {
+      const { label } = z.object({ label: z.string().min(1).max(64) }).parse(req.body);
+
+      await this.updateMindmapNode(req.params.nodeId, label);
+
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/mindmap/node/:nodeId', async (req, res) => {
+      await this.removeMindmapNode(req.params.nodeId);
+      res.status(204).end();
+    });
+
+    this.router.post('/:id/mindmap/edge', async (req, res) => {
+      const { source, target, type } = z
+        .object({
+          source: z.string(),
+          target: z.string(),
+          type: z.enum(mindmapEdgeTypes),
+        })
+        .parse(req.body);
+
+      await this.connectMindmapNodes(source, target, type);
+
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/mindmap/edge/:edgeId', async (req, res) => {
+      await this.removeMindmapEdge(req.params.edgeId);
       res.status(204).end();
     });
 
@@ -315,6 +363,56 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     session.updateTopic(topicId, changes);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async addMindmapNode(params: { label: string; parentId?: string; edgeType?: MindmapEdgeType }) {
+    const session = this.getSessionInstance();
+
+    session.addMindmapNode(params);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async updateMindmapNode(nodeId: string, label: string) {
+    const session = this.getSessionInstance();
+
+    session.updateMindmapNode(nodeId, { label });
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async removeMindmapNode(nodeId: string) {
+    const session = this.getSessionInstance();
+
+    session.removeMindmapNode(nodeId);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async connectMindmapNodes(source: string, target: string, type: MindmapEdgeType) {
+    const session = this.getSessionInstance();
+
+    session.connectMindmapNodes(source, target, type);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async removeMindmapEdge(edgeId: string) {
+    const session = this.getSessionInstance();
+
+    session.removeMindmapEdge(edgeId);
 
     const committed = await this.sessionRepository.save(session);
 

@@ -47,6 +47,27 @@ note: {{content}}
 {{/notes}}
 {{/hasNotes}}
 
+# Carte mentale
+
+{{#hasMindmap}}
+Nœuds :
+{{#mindmapNodes}}
+- {{label}} (id: "{{id}}")
+{{/mindmapNodes}}
+
+Liens :
+{{#mindmapEdges}}
+- {{sourceLabel}} ("{{source}}") --{{type}}--> {{targetLabel}} ("{{target}}")
+{{/mindmapEdges}}
+{{^mindmapEdges}}
+Aucun lien pour l'instant.
+{{/mindmapEdges}}
+{{/hasMindmap}}
+
+{{^hasMindmap}}
+La carte mentale est vide. Construis-la au fur et à mesure que la réflexion se structure.
+{{/hasMindmap}}
+
 # Date
 
 Current date: {{date}}

@@ -78,6 +78,24 @@ void describe('toSessionView', () => {
 
     assert.strictEqual(view().postureMode, 'auto');
   });
+
+  void it('reconstructs the mindmap and cascades edge removal', () => {
+    session.addMindmapNode({ label: 'A' });
+    session.addMindmapNode({ label: 'B' });
+
+    const [a, b] = [session.mindmap.nodes[0]!.id, session.mindmap.nodes[1]!.id];
+
+    session.connectMindmapNodes(a, b, 'supports');
+    session.removeMindmapNode(a);
+
+    assert.deepStrictEqual(view().mindmap, { nodes: [{ id: b, label: 'B' }], edges: [] });
+  });
+
+  void it('keeps mindmap changes out of the timeline', () => {
+    session.addMindmapNode({ label: 'A' });
+
+    assert.deepStrictEqual(view().timeline, []);
+  });
 });
 
 void describe('toTimeline', () => {

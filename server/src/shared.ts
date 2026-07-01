@@ -1,5 +1,6 @@
 import type * as assistant from './domain/assistant.ts';
 import type { Language as DomainLanguage } from './domain/i18n/index.ts';
+import type * as mindmap from './domain/mindmap.ts';
 import type * as session from './domain/session.ts';
 import type * as summary from './domain/summary.ts';
 
@@ -27,6 +28,10 @@ export namespace Shared {
   export type DiscussionPath = session.DiscussionPath;
   export type Posture = session.Posture;
   export type PostureMode = session.PostureMode;
+  export type MindmapEdgeType = mindmap.MindmapEdgeType;
+  export type MindmapNode = mindmap.MindmapNode;
+  export type MindmapEdge = mindmap.MindmapEdge;
+  export type Mindmap = { nodes: MindmapNode[]; edges: MindmapEdge[] };
 
   export type SelectablePath = DiscussionPath & { selected?: boolean };
 
@@ -63,6 +68,7 @@ export namespace Shared {
     timer: Timer | null;
     postureMode: PostureMode;
     posture: Posture;
+    mindmap: Mindmap;
     timeline: TimelineItem[];
   };
 }

@@ -1,4 +1,5 @@
 import { assert, hasId } from '../../utils.ts';
+import { Mindmap } from '../mindmap.ts';
 import { Timer } from '../timer.ts';
 
 import type { Shared } from '../../shared.ts';
@@ -14,6 +15,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   let timer: Timer | null = null;
   let postureMode: PostureMode = 'auto';
   let posture: Posture = 'socratic';
+  let mindmap = Mindmap.empty();
 
   for (const event of events) {
     switch (event.type) {
@@ -106,6 +108,26 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
           postureMode = event.posture === 'auto' ? 'auto' : 'forced';
         }
         break;
+
+      case 'MindmapNodeAdded':
+        mindmap = mindmap.withNode(structuredClone(event.node));
+        break;
+
+      case 'MindmapNodeLabelChanged':
+        mindmap = mindmap.withNodeLabel(event.nodeId, event.label);
+        break;
+
+      case 'MindmapNodeRemoved':
+        mindmap = mindmap.withoutNode(event.nodeId);
+        break;
+
+      case 'MindmapEdgeAdded':
+        mindmap = mindmap.withEdge(structuredClone(event.edge));
+        break;
+
+      case 'MindmapEdgeRemoved':
+        mindmap = mindmap.withoutEdge(event.edgeId);
+        break;
     }
   }
 
@@ -120,6 +142,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     timer,
     postureMode,
     posture,
+    mindmap: { nodes: mindmap.nodes, edges: mindmap.edges },
     timeline: toTimeline(events),
   };
 }

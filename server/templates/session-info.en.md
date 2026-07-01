@@ -47,6 +47,27 @@ note: {{content}}
 {{/notes}}
 {{/hasNotes}}
 
+# Mindmap
+
+{{#hasMindmap}}
+Nodes:
+{{#mindmapNodes}}
+- {{label}} (id: "{{id}}")
+{{/mindmapNodes}}
+
+Links:
+{{#mindmapEdges}}
+- {{sourceLabel}} ("{{source}}") --{{type}}--> {{targetLabel}} ("{{target}}")
+{{/mindmapEdges}}
+{{^mindmapEdges}}
+No links yet.
+{{/mindmapEdges}}
+{{/hasMindmap}}
+
+{{^hasMindmap}}
+The mindmap is empty. Build it as the reflection takes shape.
+{{/hasMindmap}}
+
 # Date
 
 Date actuelle : {{date}}

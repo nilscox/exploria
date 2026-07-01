@@ -1,10 +1,12 @@
 import { AggregateRoot, type DomainEvent } from '../aggregate-root.ts';
 import { assert, hasId } from '../utils.ts';
+import { Mindmap } from './mindmap.ts';
 import { Timer } from './timer.ts';
 
 import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
 import type { Language } from './i18n/index.ts';
+import type { MindmapEdge, MindmapEdgeType, MindmapNode } from './mindmap.ts';
 import type { Summary } from './summary.ts';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
@@ -76,6 +78,11 @@ export type SessionEvent =
   | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>
   | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
   | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>
+  | SessionDomainEvent<'MindmapNodeAdded', { node: MindmapNode }>
+  | SessionDomainEvent<'MindmapNodeLabelChanged', { nodeId: string; label: string }>
+  | SessionDomainEvent<'MindmapNodeRemoved', { nodeId: string }>
+  | SessionDomainEvent<'MindmapEdgeAdded', { edge: MindmapEdge }>
+  | SessionDomainEvent<'MindmapEdgeRemoved', { edgeId: string }>
   | SessionDomainEvent<'SummaryGenerated', { summary: Summary }>;
 
 export type GetSessionEvent<Type extends SessionEvent['type']> = Extract<SessionEvent, { type: Type }>;
@@ -151,6 +158,12 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get posture(): Posture {
     return this._posture;
+  }
+
+  private _mindmap: Mindmap = Mindmap.empty();
+
+  get mindmap(): Mindmap {
+    return this._mindmap;
   }
 
   private _events: SessionEvent[] = [];
@@ -276,6 +289,26 @@ export class Session extends AggregateRoot<SessionEvent> {
           this._postureMode = posture === 'auto' ? 'auto' : 'forced';
         }
       },
+
+      MindmapNodeAdded: ({ node }) => {
+        this._mindmap = this._mindmap.withNode(node);
+      },
+
+      MindmapNodeLabelChanged: ({ nodeId, label }) => {
+        this._mindmap = this._mindmap.withNodeLabel(nodeId, label);
+      },
+
+      MindmapNodeRemoved: ({ nodeId }) => {
+        this._mindmap = this._mindmap.withoutNode(nodeId);
+      },
+
+      MindmapEdgeAdded: ({ edge }) => {
+        this._mindmap = this._mindmap.withEdge(edge);
+      },
+
+      MindmapEdgeRemoved: ({ edgeId }) => {
+        this._mindmap = this._mindmap.withoutEdge(edgeId);
+      },
     };
 
     if (event.type in handle) {
@@ -356,6 +389,69 @@ export class Session extends AggregateRoot<SessionEvent> {
     if (content) {
       this.emit('NoteContentChanged', { noteId, content });
     }
+  }
+
+  addMindmapNode({ label, parentId, edgeType }: { label: string; parentId?: string; edgeType?: MindmapEdgeType }) {
+    if (parentId !== undefined) {
+      assert(this._mindmap.hasNode(parentId), new Error(`Cannot find mindmap node "${parentId}"`));
+    }
+
+    const node: MindmapNode = {
+      id: this.generator.id(),
+      label,
+    };
+
+    this.emit('MindmapNodeAdded', { node });
+
+    if (parentId !== undefined) {
+      this.connectMindmapNodes(parentId, node.id, edgeType ?? 'elaborates');
+    }
+  }
+
+  updateMindmapNode(nodeId: string, { label }: { label: string }) {
+    assert(this._mindmap.hasNode(nodeId), new Error(`Cannot find mindmap node "${nodeId}"`));
+
+    this.emit('MindmapNodeLabelChanged', { nodeId, label });
+  }
+
+  removeMindmapNode(nodeId: string) {
+    assert(this._mindmap.hasNode(nodeId), new Error(`Cannot find mindmap node "${nodeId}"`));
+
+    for (const edge of this._mindmap.edgesConnectedTo(nodeId)) {
+      this.emit('MindmapEdgeRemoved', { edgeId: edge.id });
+    }
+
+    this.emit('MindmapNodeRemoved', { nodeId });
+  }
+
+  connectMindmapNodes(source: string, target: string, type: MindmapEdgeType) {
+    assert(this._mindmap.hasNode(source), new Error(`Cannot find mindmap node "${source}"`));
+    assert(this._mindmap.hasNode(target), new Error(`Cannot find mindmap node "${target}"`));
+    assert(source !== target, new Error('Cannot connect a mindmap node to itself'));
+    assert(!this._mindmap.edgeBetween(source, target), new Error('These mindmap nodes are already connected'));
+
+    const edge: MindmapEdge = {
+      id: this.generator.id(),
+      source,
+      target,
+      type,
+    };
+
+    this.emit('MindmapEdgeAdded', { edge });
+  }
+
+  disconnectMindmapNodes(source: string, target: string) {
+    const edge = this._mindmap.edgeBetween(source, target);
+
+    assert(edge, new Error(`Cannot find mindmap edge from "${source}" to "${target}"`));
+
+    this.emit('MindmapEdgeRemoved', { edgeId: edge.id });
+  }
+
+  removeMindmapEdge(edgeId: string) {
+    assert(this._mindmap.edges.some(hasId(edgeId)), new Error(`Cannot find mindmap edge "${edgeId}"`));
+
+    this.emit('MindmapEdgeRemoved', { edgeId });
   }
 
   // use error codes
