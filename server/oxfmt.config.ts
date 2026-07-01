@@ -4,4 +4,5 @@ import baseConfig from '../oxfmt.config.ts';
 
 export default defineConfig({
   ...baseConfig,
+  ignorePatterns: ['drizzle/**'],
 });
