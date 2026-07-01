@@ -32,7 +32,7 @@ export type AiClientToolCall = {
 type CreateCompletionParams = {
   model: string;
   messages: AiClientMessage[];
-  tools?: Record<string, Tool>;
+  tools?: Partial<Record<string, Tool>>;
 };
 
 type CreateCompletionStreamingParams = CreateCompletionParams & {
@@ -230,8 +230,10 @@ export class OpenAiClient implements AiClient {
     return schema.parse(JSON.parse(result.choices[0].message.content));
   }
 
-  private static mapTools = (tools?: Record<string, Tool>): OpenAI.Chat.Completions.ChatCompletionTool[] => {
-    return Object.entries(tools ?? {}).map(([name, tool]) => this.mapTool(name, tool));
+  private static mapTools = (tools?: Partial<Record<string, Tool>>): OpenAI.Chat.Completions.ChatCompletionTool[] => {
+    return Object.entries(tools ?? {})
+      .filter((entry): entry is [string, Tool] => Boolean(entry[1]))
+      .map(([name, tool]) => this.mapTool(name, tool));
   };
 
   private static mapTool = (name: string, tool: Tool): OpenAI.Chat.Completions.ChatCompletionTool => {
