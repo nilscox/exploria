@@ -62,9 +62,21 @@ msgstr "All your past sessions, to pick up whenever you want."
 msgid "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
 msgstr "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
 
+#: src/session/create/create-session.tsx
+msgid "Am I afraid of failure or of success?"
+msgstr "Am I afraid of failure or of success?"
+
+#: src/session/create/create-session.tsx
+msgid "Am I running from my career or moving toward something else?"
+msgstr "Am I running from my career or moving toward something else?"
+
 #: src/home.tsx
 msgid "An argument or hypothesis to solidify before you defend it."
 msgstr "An argument or hypothesis to solidify before you defend it."
+
+#: src/session/create/create-session.tsx
+msgid "Are my political beliefs really my own?"
+msgstr "Are my political beliefs really my own?"
 
 #: src/home.tsx
 msgid "As the conversation unfolds, a mind map takes shape: the topics covered, their links, what's left to explore. At a glance, you know where you stand."
@@ -95,6 +107,10 @@ msgstr "Biases"
 #: src/session/summary.ts
 msgid "Blind spots"
 msgstr "Blind spots"
+
+#: src/session/create/create-session.tsx
+msgid "Can I stay friends with someone whose choices I disapprove of?"
+msgstr "Can I stay friends with someone whose choices I disapprove of?"
 
 #: src/session/info/timer.tsx
 msgid "Clear the timer?"
@@ -137,6 +153,14 @@ msgstr "Devil's advocate"
 #: src/home.tsx
 msgid "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
 msgstr "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
+
+#: src/session/create/create-session.tsx
+msgid "Do we have a duty to tell the truth?"
+msgstr "Do we have a duty to tell the truth?"
+
+#: src/session/create/create-session.tsx
+msgid "Do we have a responsibility to future generations?"
+msgstr "Do we have a responsibility to future generations?"
 
 #: src/session/info/topics-list.tsx
 msgid "Done"
@@ -206,6 +230,86 @@ msgstr "Help structure a decision"
 msgid "History"
 msgstr "History"
 
+#: src/session/create/create-session.tsx
+msgid "How do I know if it's the right time to have a child?"
+msgstr "How do I know if it's the right time to have a child?"
+
+#: src/session/create/create-session.tsx
+msgid "How far am I willing to change my lifestyle for the planet?"
+msgstr "How far am I willing to change my lifestyle for the planet?"
+
+#: src/session/create/create-session.tsx
+msgid "I don't know what to think about nuclear energy"
+msgstr "I don't know what to think about nuclear energy"
+
+#: src/session/create/create-session.tsx
+msgid "I don't know where I stand on immigration"
+msgstr "I don't know where I stand on immigration"
+
+#: src/session/create/create-session.tsx
+msgid "I have a stable job but I'm deeply bored"
+msgstr "I have a stable job but I'm deeply bored"
+
+#: src/session/create/create-session.tsx
+msgid "I have to convince a committee but I doubt my argument"
+msgstr "I have to convince a committee but I doubt my argument"
+
+#: src/session/create/create-session.tsx
+msgid "I have two job offers and I need help choosing one"
+msgstr "I have two job offers and I need help choosing one"
+
+#: src/session/create/create-session.tsx
+msgid "I hesitate to accept an acquisition offer"
+msgstr "I hesitate to accept an acquisition offer"
+
+#: src/session/create/create-session.tsx
+msgid "I need to clarify a product vision"
+msgstr "I need to clarify a product vision"
+
+#: src/session/create/create-session.tsx
+msgid "I need to decide who to vote for in the next election"
+msgstr "I need to decide who to vote for in the next election"
+
+#: src/session/create/create-session.tsx
+msgid "I need to find ways to acquire more qualified users"
+msgstr "I need to find ways to acquire more qualified users"
+
+#: src/session/create/create-session.tsx
+msgid "I should confront my manager over their behavior"
+msgstr "I should confront my manager over their behavior"
+
+#: src/session/create/create-session.tsx
+msgid "I want to pressure-test my recommendation before I present it"
+msgstr "I want to pressure-test my recommendation before I present it"
+
+#: src/session/create/create-session.tsx
+msgid "I want to understand why I say yes to everything"
+msgstr "I want to understand why I say yes to everything"
+
+#: src/session/create/create-session.tsx
+msgid "I'm afraid of regretting a choice I haven't even made yet"
+msgstr "I'm afraid of regretting a choice I haven't even made yet"
+
+#: src/session/create/create-session.tsx
+msgid "I'm hesitating about adopting a cat"
+msgstr "I'm hesitating about adopting a cat"
+
+#: src/session/create/create-session.tsx
+msgid "I'm hesitating about moving to London"
+msgstr "I'm hesitating about moving to London"
+
+#: src/session/create/create-session.tsx
+msgid "I'm stuck on the central thesis of my essay"
+msgstr "I'm stuck on the central thesis of my essay"
+
+#: src/session/create/create-session.tsx
+msgid "I'm trying to untangle what I really think about freedom"
+msgstr "I'm trying to untangle what I really think about freedom"
+
+#: src/session/create/create-session.tsx
+msgid "I'm wondering whether now is the right time to raise funds"
+msgstr "I'm wondering whether now is the right time to raise funds"
+
 #: src/session/info/topics-list.tsx
 msgid "In progress"
 msgstr "In progress"
@@ -213,6 +317,10 @@ msgstr "In progress"
 #: src/session/info/timer.tsx
 msgid "Invalid input."
 msgstr "Invalid input."
+
+#: src/session/create/create-session.tsx
+msgid "Is it selfish not to want children?"
+msgstr "Is it selfish not to want children?"
 
 #: src/session/session-summary.tsx
 msgid "JSON"
@@ -268,6 +376,10 @@ msgstr "Model choice"
 #: src/session/create/sessions-list.tsx
 msgid "More"
 msgstr "More"
+
+#: src/session/create/create-session.tsx
+msgid "My co-founder and I are no longer aligned on the vision"
+msgstr "My co-founder and I are no longer aligned on the vision"
 
 #: src/session/info/topics-list.tsx
 msgid "No Topic"
@@ -359,6 +471,22 @@ msgstr "Session timer"
 #: src/components/settings.tsx
 msgid "Settings"
 msgstr "Settings"
+
+#: src/session/create/create-session.tsx
+msgid "Should I forgive someone who won't apologize?"
+msgstr "Should I forgive someone who won't apologize?"
+
+#: src/session/create/create-session.tsx
+msgid "Should I go back to school at 40?"
+msgstr "Should I go back to school at 40?"
+
+#: src/session/create/create-session.tsx
+msgid "Should I pivot or stick with my current product?"
+msgstr "Should I pivot or stick with my current product?"
+
+#: src/session/create/create-session.tsx
+msgid "Should I tell a friend a truth that will hurt them?"
+msgstr "Should I tell a friend a truth that will hurt them?"
 
 #: src/components/settings.tsx
 msgid "Show timeline actions"
@@ -528,12 +656,16 @@ msgid "Web search"
 msgstr "Web search"
 
 #: src/session/create/create-session.tsx
-msgid "What do you need to think about?"
-msgstr "What do you need to think about?"
+msgid "What should I really think about artificial intelligence?"
+msgstr "What should I really think about artificial intelligence?"
 
 #: src/home.tsx
 msgid "What's often missing is <0>someone to ask the right questions</0>."
 msgstr "What's often missing is <0>someone to ask the right questions</0>."
+
+#: src/session/create/create-session.tsx
+msgid "Why do I procrastinate so much?"
+msgstr "Why do I procrastinate so much?"
 
 #: src/home.tsx
 msgid "Work with the AI model that suits you."
