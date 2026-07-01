@@ -145,6 +145,50 @@ export class SessionController {
       res.status(204).end();
     });
 
+    this.router.post('/:id/mindmap/node', async (req, res) => {
+      const { label, parentId } = z
+        .object({
+          label: z.string().min(1).max(64),
+          parentId: z.string().optional(),
+        })
+        .parse(req.body);
+
+      await this.addMindmapNode({ label, parentId });
+
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/mindmap/node/:nodeId', async (req, res) => {
+      const { label } = z.object({ label: z.string().min(1).max(64) }).parse(req.body);
+
+      await this.updateMindmapNode(req.params.nodeId, label);
+
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/mindmap/node/:nodeId', async (req, res) => {
+      await this.removeMindmapNode(req.params.nodeId);
+      res.status(204).end();
+    });
+
+    this.router.post('/:id/mindmap/edge', async (req, res) => {
+      const { source, target } = z
+        .object({
+          source: z.string(),
+          target: z.string(),
+        })
+        .parse(req.body);
+
+      await this.connectMindmapNodes(source, target);
+
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/mindmap/edge/:edgeId', async (req, res) => {
+      await this.removeMindmapEdge(req.params.edgeId);
+      res.status(204).end();
+    });
+
     this.router.post('/:id/message', async (req, res) => {
       const { message } = z.object({ message: z.string().min(1) }).parse(req.body);
 
@@ -315,6 +359,56 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     session.updateTopic(topicId, changes);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async addMindmapNode(params: { label: string; parentId?: string }) {
+    const session = this.getSessionInstance();
+
+    session.addMindmapNode(params);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async updateMindmapNode(nodeId: string, label: string) {
+    const session = this.getSessionInstance();
+
+    session.updateMindmapNode(nodeId, { label });
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async removeMindmapNode(nodeId: string) {
+    const session = this.getSessionInstance();
+
+    session.removeMindmapNode(nodeId);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async connectMindmapNodes(source: string, target: string) {
+    const session = this.getSessionInstance();
+
+    session.connectMindmapNodes(source, target);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async removeMindmapEdge(edgeId: string) {
+    const session = this.getSessionInstance();
+
+    session.removeMindmapEdge(edgeId);
 
     const committed = await this.sessionRepository.save(session);
 

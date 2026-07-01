@@ -163,6 +163,70 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
     },
   }),
 
+  addMindmapNode: tool({
+    description: t('add-mindmap-node.description'),
+    param: z.object({
+      label: z.string().min(1).max(64),
+      parentId: z.string().optional(),
+    }),
+    execute: (session, { label, parentId }) => {
+      session.addMindmapNode({ label, parentId });
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  updateMindmapNode: tool({
+    description: t('update-mindmap-node.description'),
+    param: z.object({
+      id: z.string(),
+      label: z.string().min(1).max(64),
+    }),
+    execute: (session, { id, label }) => {
+      session.updateMindmapNode(id, { label });
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  removeMindmapNode: tool({
+    description: t('remove-mindmap-node.description'),
+    param: z.object({
+      id: z.string(),
+    }),
+    execute: (session, { id }) => {
+      session.removeMindmapNode(id);
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  connectMindmapNodes: tool({
+    description: t('connect-mindmap-nodes.description'),
+    param: z.object({
+      source: z.string(),
+      target: z.string(),
+    }),
+    execute: (session, { source, target }) => {
+      session.connectMindmapNodes(source, target);
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  disconnectMindmapNodes: tool({
+    description: t('disconnect-mindmap-nodes.description'),
+    param: z.object({
+      source: z.string(),
+      target: z.string(),
+    }),
+    execute: (session, { source, target }) => {
+      session.disconnectMindmapNodes(source, target);
+
+      return t('tool.result.ok');
+    },
+  }),
+
   setPosture: tool({
     description: t('set-posture.description'),
     param: z.object({

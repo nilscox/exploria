@@ -36,6 +36,12 @@ export type Messages = {
 
   'update-topic.description': string;
 
+  'add-mindmap-node.description': string;
+  'update-mindmap-node.description': string;
+  'remove-mindmap-node.description': string;
+  'connect-mindmap-nodes.description': string;
+  'disconnect-mindmap-nodes.description': string;
+
   'web-search.description': string;
   'web-search.query-param': string;
   'web-search.no-results': (p: { query: string }) => string;
@@ -103,6 +109,17 @@ const en: Messages = {
   'update-topic.description':
     'Updates a topic of the plan (label or status). Call it as soon as you start addressing a topic ("in progress") or have covered it sufficiently ("done").',
 
+  'add-mindmap-node.description':
+    'Adds a node to the mindmap, an evolving tree of the reflection shared with the user. A node is a concept, an idea or a question — not every sentence. Optionally attach it under a parent node. Keep the map focused on the structuring elements.',
+  'update-mindmap-node.description':
+    'Renames a mindmap node, referenced by its id (from the mindmap state). Use it when a concept is better phrased or its meaning shifts.',
+  'remove-mindmap-node.description':
+    'Removes a mindmap node, referenced by its id. Its children become roots. Use it when a concept becomes irrelevant or was added by mistake.',
+  'connect-mindmap-nodes.description':
+    'Attaches the target node under the source node as its child, both referenced by their ids. The mindmap is a tree: a node has at most one parent, so this moves the target if it already had one.',
+  'disconnect-mindmap-nodes.description':
+    'Detaches the target node from its parent (the source), both referenced by their ids, making the target a root. Use it when a node no longer belongs under its parent.',
+
   'session-info.status.pending': 'to address',
   'session-info.status.in_progress': 'in progress',
   'session-info.status.done': 'done',
@@ -167,6 +184,17 @@ const fr: Messages = {
 
   'update-topic.description':
     "Met à jour un sujet du plan (intitulé ou statut). À appeler dès que tu commences à aborder un sujet (« en cours ») ou que tu l'as suffisamment traité (« traité »).",
+
+  'add-mindmap-node.description':
+    "Ajoute un nœud à la carte mentale, un arbre évolutif de la réflexion partagé avec l'utilisateur. Un nœud est un concept, une idée ou une question — pas chaque phrase. Tu peux optionnellement le rattacher sous un nœud parent. Garde la carte centrée sur les éléments structurants.",
+  'update-mindmap-node.description':
+    "Renomme un nœud de la carte mentale, référencé par son id (depuis l'état de la carte). À utiliser quand un concept se formule mieux ou que son sens évolue.",
+  'remove-mindmap-node.description':
+    'Supprime un nœud de la carte mentale, référencé par son id. Ses enfants deviennent des racines. À utiliser quand un concept devient hors-sujet ou a été ajouté par erreur.',
+  'connect-mindmap-nodes.description':
+    'Rattache le nœud cible sous le nœud source comme son enfant, tous deux référencés par leurs ids. La carte est un arbre : un nœud a au plus un parent, donc cela déplace la cible si elle en avait déjà un.',
+  'disconnect-mindmap-nodes.description':
+    "Détache le nœud cible de son parent (la source), tous deux référencés par leurs ids, faisant de la cible une racine. À utiliser quand un nœud n'a plus sa place sous son parent.",
 
   'session-info.status.pending': 'à traiter',
   'session-info.status.in_progress': 'en cours',
