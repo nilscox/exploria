@@ -80,6 +80,39 @@ export const options = {
       });
     },
 
+    addMindmapNode(id: string) {
+      return mutationOptions({
+        mutationFn: (node: { label: string; parentId?: string; edgeType?: Shared.MindmapEdgeType }) =>
+          api.sessions.addMindmapNode(id, node),
+      });
+    },
+
+    updateMindmapNode(id: string) {
+      return mutationOptions({
+        mutationFn: ({ nodeId, label }: { nodeId: string; label: string }) =>
+          api.sessions.updateMindmapNode(id, nodeId, label),
+      });
+    },
+
+    removeMindmapNode(id: string) {
+      return mutationOptions({
+        mutationFn: (nodeId: string) => api.sessions.removeMindmapNode(id, nodeId),
+      });
+    },
+
+    connectMindmapNodes(id: string) {
+      return mutationOptions({
+        mutationFn: (edge: { source: string; target: string; type: Shared.MindmapEdgeType }) =>
+          api.sessions.connectMindmapNodes(id, edge),
+      });
+    },
+
+    removeMindmapEdge(id: string) {
+      return mutationOptions({
+        mutationFn: (edgeId: string) => api.sessions.removeMindmapEdge(id, edgeId),
+      });
+    },
+
     postMessage(id: string) {
       return mutationOptions({
         mutationFn: (message: string) => api.sessions.postMessage(id, message),

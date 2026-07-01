@@ -42,9 +42,17 @@ msgstr "A subject you don't know which way to approach."
 msgid "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
 msgstr "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
 
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "Add a node..."
+msgstr "Add a node..."
+
 #: src/session/info/topics-list.tsx
 msgid "Add a topic..."
 msgstr "Add a topic..."
+
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "Add node"
+msgstr "Add node"
 
 #: src/session/info/topics-list.tsx
 msgid "Add topic"
@@ -331,6 +339,10 @@ msgstr "Make a structuring decision"
 msgid "Message"
 msgstr "Message"
 
+#: src/session/session.tsx
+msgid "Mindmap"
+msgstr "Mindmap"
+
 #: src/session/info/posture.tsx
 msgid "Mirror"
 msgstr "Mirror"
@@ -422,6 +434,10 @@ msgstr "Send"
 #: src/session/session-timeline.tsx
 msgid "Session ended"
 msgstr "Session ended"
+
+#: src/session/session.tsx
+msgid "Session info"
+msgstr "Session info"
 
 #: src/session/session-timeline.tsx
 msgid "Session reopened"
@@ -529,6 +545,10 @@ msgstr "Tensions & contradictions"
 #: src/home.tsx
 msgid "Test a belief"
 msgstr "Test a belief"
+
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "The mindmap is empty. It fills in as the reflection takes shape."
+msgstr "The mindmap is empty. It fills in as the reflection takes shape."
 
 #: src/home.tsx
 msgid "The right angle at the right moment"

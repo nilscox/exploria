@@ -18,11 +18,12 @@ import { config } from 'src/contexts/config';
 
 import { SessionInfo } from './info/session-info';
 import { MessageForm } from './message-form';
+import { MindmapPanel } from './mindmap/mindmap-panel';
 import { SessionSummaryDialog } from './session-summary';
 import { Timeline } from './session-timeline';
 import { useSession } from './use-session';
 
-type View = 'main' | 'sidebar';
+type View = 'main' | 'sidebar' | 'mindmap';
 
 export function SessionPage() {
   const params = useParams<'sessionId'>();
@@ -51,6 +52,7 @@ export function SessionPage() {
           {!state.session.ended && <MessageForm loading={state.loading} postMessage={postMessage} />}
         </>
       }
+      mindmap={<MindmapPanel session={state.session} />}
     />
   );
 }
@@ -60,21 +62,24 @@ function Layout({
   header,
   aside,
   main,
+  mindmap,
 }: {
   view: View;
   header: React.ReactNode;
   aside: React.ReactNode;
   main: React.ReactNode;
+  mindmap: React.ReactNode;
 }) {
   return (
-    <div className="grid h-full grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[24rem_1fr]">
-      <header className="col-span-2">{header}</header>
+    <div className="grid h-full grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[24rem_1fr_28rem]">
+      <header className="lg:col-span-3">{header}</header>
       <aside className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'sidebar' && 'max-lg:hidden')}>
         {aside}
       </aside>
       <main className={clsx('scrollbar-thin col relative min-h-0 overflow-y-auto', view !== 'main' && 'max-lg:hidden')}>
         {main}
       </main>
+      <section className={clsx('relative min-h-0 border-l', view !== 'mindmap' && 'max-lg:hidden')}>{mindmap}</section>
     </div>
   );
 }
@@ -122,10 +127,19 @@ function Header({
         <Button
           variant={view === 'sidebar' ? 'secondary' : 'ghost'}
           size="small"
-          onClick={() => onViewChanged({ main: 'sidebar' as const, sidebar: 'main' as const }[view])}
+          onClick={() => onViewChanged(view === 'sidebar' ? 'main' : 'sidebar')}
           className="lg:hidden"
         >
-          Session info
+          <Trans>Session info</Trans>
+        </Button>
+
+        <Button
+          variant={view === 'mindmap' ? 'secondary' : 'ghost'}
+          size="small"
+          onClick={() => onViewChanged(view === 'mindmap' ? 'main' : 'mindmap')}
+          className="lg:hidden"
+        >
+          <Trans>Mindmap</Trans>
         </Button>
 
         <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>

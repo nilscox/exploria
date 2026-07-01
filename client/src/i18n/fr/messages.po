@@ -42,9 +42,17 @@ msgstr "Un sujet que vous ne savez pas par quel bout prendre."
 msgid "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
 msgstr "Un assistant IA qui pose les bonnes questions, révèle vos angles morts et structure votre réflexion."
 
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "Add a node..."
+msgstr "Ajouter un nœud…"
+
 #: src/session/info/topics-list.tsx
 msgid "Add a topic..."
 msgstr "Ajouter un sujet…"
+
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "Add node"
+msgstr "Ajouter un nœud"
 
 #: src/session/info/topics-list.tsx
 msgid "Add topic"
@@ -331,6 +339,10 @@ msgstr "Prendre une décision structurante"
 msgid "Message"
 msgstr "Message"
 
+#: src/session/session.tsx
+msgid "Mindmap"
+msgstr "Carte mentale"
+
 #: src/session/info/posture.tsx
 msgid "Mirror"
 msgstr "Miroir"
@@ -422,6 +434,10 @@ msgstr "Envoyer"
 #: src/session/session-timeline.tsx
 msgid "Session ended"
 msgstr "Session terminée"
+
+#: src/session/session.tsx
+msgid "Session info"
+msgstr "Infos de session"
 
 #: src/session/session-timeline.tsx
 msgid "Session reopened"
@@ -529,6 +545,10 @@ msgstr "Tensions et contradictions"
 #: src/home.tsx
 msgid "Test a belief"
 msgstr "Tester une croyance"
+
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "The mindmap is empty. It fills in as the reflection takes shape."
+msgstr "La carte mentale est vide. Elle se remplit au fil de la réflexion."
 
 #: src/home.tsx
 msgid "The right angle at the right moment"

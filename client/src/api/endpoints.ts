@@ -87,6 +87,45 @@ const sessions = {
     });
   },
 
+  async addMindmapNode(
+    id: string,
+    node: { label: string; parentId?: string; edgeType?: Shared.MindmapEdgeType },
+  ): Promise<void> {
+    await fetchApi(`/session/${id}/mindmap/node`, {
+      method: 'POST',
+      body: node,
+    });
+  },
+
+  async updateMindmapNode(id: string, nodeId: string, label: string): Promise<void> {
+    await fetchApi(`/session/${id}/mindmap/node/${nodeId}`, {
+      method: 'PUT',
+      body: { label },
+    });
+  },
+
+  async removeMindmapNode(id: string, nodeId: string): Promise<void> {
+    await fetchApi(`/session/${id}/mindmap/node/${nodeId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async connectMindmapNodes(
+    id: string,
+    edge: { source: string; target: string; type: Shared.MindmapEdgeType },
+  ): Promise<void> {
+    await fetchApi(`/session/${id}/mindmap/edge`, {
+      method: 'POST',
+      body: edge,
+    });
+  },
+
+  async removeMindmapEdge(id: string, edgeId: string): Promise<void> {
+    await fetchApi(`/session/${id}/mindmap/edge/${edgeId}`, {
+      method: 'DELETE',
+    });
+  },
+
   async postMessage(id: string, message: string): Promise<void> {
     await fetchApi(`/session/${id}/message`, {
       method: 'POST',
