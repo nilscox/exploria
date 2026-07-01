@@ -82,8 +82,7 @@ export const options = {
 
     addMindmapNode(id: string) {
       return mutationOptions({
-        mutationFn: (node: { label: string; parentId?: string; edgeType?: Shared.MindmapEdgeType }) =>
-          api.sessions.addMindmapNode(id, node),
+        mutationFn: (node: { label: string; parentId?: string }) => api.sessions.addMindmapNode(id, node),
       });
     },
 
@@ -102,8 +101,7 @@ export const options = {
 
     connectMindmapNodes(id: string) {
       return mutationOptions({
-        mutationFn: (edge: { source: string; target: string; type: Shared.MindmapEdgeType }) =>
-          api.sessions.connectMindmapNodes(id, edge),
+        mutationFn: (edge: { source: string; target: string }) => api.sessions.connectMindmapNodes(id, edge),
       });
     },
 

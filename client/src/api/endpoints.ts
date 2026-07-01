@@ -87,10 +87,7 @@ const sessions = {
     });
   },
 
-  async addMindmapNode(
-    id: string,
-    node: { label: string; parentId?: string; edgeType?: Shared.MindmapEdgeType },
-  ): Promise<void> {
+  async addMindmapNode(id: string, node: { label: string; parentId?: string }): Promise<void> {
     await fetchApi(`/session/${id}/mindmap/node`, {
       method: 'POST',
       body: node,
@@ -110,10 +107,7 @@ const sessions = {
     });
   },
 
-  async connectMindmapNodes(
-    id: string,
-    edge: { source: string; target: string; type: Shared.MindmapEdgeType },
-  ): Promise<void> {
+  async connectMindmapNodes(id: string, edge: { source: string; target: string }): Promise<void> {
     await fetchApi(`/session/${id}/mindmap/edge`, {
       method: 'POST',
       body: edge,

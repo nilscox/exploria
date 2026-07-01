@@ -365,6 +365,10 @@ msgstr "Model choice"
 msgid "More"
 msgstr "More"
 
+#: src/session/mindmap/mindmap-panel.tsx
+msgid "New node"
+msgstr "New node"
+
 #: src/session/info/topics-list.tsx
 msgid "No Topic"
 msgstr "No Topic"

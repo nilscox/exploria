@@ -1,5 +1,5 @@
 import type { Shared } from '@exploria/server/shared';
-import { type Edge, MarkerType, type Node, Position } from '@xyflow/react';
+import { type Edge, type Node, Position } from '@xyflow/react';
 import dagre from 'dagre';
 import { useMemo } from 'react';
 
@@ -8,13 +8,6 @@ const NODE_HEIGHT = 44;
 
 export type MindmapNodeData = { label: string };
 export type MindmapFlowNode = Node<MindmapNodeData, 'mindmap'>;
-
-const edgeColors: Record<Shared.MindmapEdgeType, string> = {
-  elaborates: '#64748b',
-  supports: '#16a34a',
-  opposes: '#dc2626',
-  relates: '#2563eb',
-};
 
 export function useMindmapLayout(mindmap: Shared.Mindmap) {
   return useMemo(() => layout(mindmap), [mindmap]);
@@ -53,10 +46,6 @@ function layout({ nodes, edges }: Shared.Mindmap): { nodes: MindmapFlowNode[]; e
     id: edge.id,
     source: edge.source,
     target: edge.target,
-    label: edge.type,
-    style: { stroke: edgeColors[edge.type], strokeWidth: 1.5 },
-    labelStyle: { fill: edgeColors[edge.type], fontSize: 11 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: edgeColors[edge.type] },
   }));
 
   return { nodes: flowNodes, edges: flowEdges };

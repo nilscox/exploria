@@ -6,11 +6,13 @@ import {
   type Connection,
   Controls,
   type Edge,
+  type FinalConnectionState,
   Handle,
   type NodeProps,
   Position,
   ReactFlow,
   ReactFlowProvider,
+  useConnection,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -22,11 +24,8 @@ import '@xyflow/react/dist/style.css';
 import { options } from 'src/api';
 import { Button } from 'src/components/button';
 import { Input } from 'src/components/input';
-import { Select, SelectItem } from 'src/components/select';
 
 import { type MindmapFlowNode, useMindmapLayout } from './use-mindmap-layout';
-
-const edgeTypes: Shared.MindmapEdgeType[] = ['elaborates', 'supports', 'opposes', 'relates'];
 
 type MindmapActions = {
   onRename: (nodeId: string, label: string) => void;
@@ -45,12 +44,12 @@ export function MindmapPanel({ session }: { session: Shared.Session }) {
 }
 
 function MindmapFlow({ session }: { session: Shared.Session }) {
+  const { t } = useLingui();
   const layout = useMindmapLayout(session.mindmap);
   const reactFlow = useReactFlow();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layout.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(layout.edges);
-  const [edgeType, setEdgeType] = useState<Shared.MindmapEdgeType>('relates');
 
   const { mutate: addNode } = useMutation(options.sessions.addMindmapNode(session.id));
   const { mutate: renameNode } = useMutation(options.sessions.updateMindmapNode(session.id));
@@ -70,8 +69,16 @@ function MindmapFlow({ session }: { session: Shared.Session }) {
   }, [nodeIds, reactFlow]);
 
   const onConnect = (connection: Connection) => {
-    if (connection.source && connection.target && connection.source !== connection.target) {
-      connectNodes({ source: connection.source, target: connection.target, type: edgeType });
+    if (connection.source !== connection.target) {
+      connectNodes({ source: connection.source, target: connection.target });
+    }
+  };
+
+  const onConnectEnd = (_event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
+    const parentId = connectionState.fromNode?.id;
+
+    if (!connectionState.isValid && parentId) {
+      addNode({ label: t`New node`, parentId });
     }
   };
 
@@ -93,6 +100,7 @@ function MindmapFlow({ session }: { session: Shared.Session }) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onConnectEnd={onConnectEnd}
           onNodesDelete={onNodesDelete}
           onEdgesDelete={onEdgesDelete}
           fitView
@@ -108,21 +116,13 @@ function MindmapFlow({ session }: { session: Shared.Session }) {
           </div>
         )}
 
-        <MindmapToolbar edgeType={edgeType} onEdgeTypeChange={setEdgeType} onAddNode={(label) => addNode({ label })} />
+        <MindmapToolbar onAddNode={(label) => addNode({ label })} />
       </div>
     </MindmapActionsContext.Provider>
   );
 }
 
-function MindmapToolbar({
-  edgeType,
-  onEdgeTypeChange,
-  onAddNode,
-}: {
-  edgeType: Shared.MindmapEdgeType;
-  onEdgeTypeChange: (type: Shared.MindmapEdgeType) => void;
-  onAddNode: (label: string) => void;
-}) {
+function MindmapToolbar({ onAddNode }: { onAddNode: (label: string) => void }) {
   const { t } = useLingui();
   const [value, setValue] = useState('');
 
@@ -136,44 +136,33 @@ function MindmapToolbar({
   };
 
   return (
-    <div className="row bg-neutral/90 absolute top-2 left-2 z-10 items-stretch gap-1 rounded-md border p-1 backdrop-blur">
-      <form onSubmit={handleSubmit} className="row items-stretch gap-1">
-        <Input
-          name="label"
-          aria-label={t`Add node`}
-          placeholder={t`Add a node...`}
-          value={value}
-          autoComplete="off"
-          onChange={(event) => setValue(event.target.value)}
-          className="h-9 w-40 text-sm"
-        />
-        <Button type="submit" variant="outlined" size="icon" disabled={value.trim() === ''}>
-          +
-        </Button>
-      </form>
-
-      <Select<Shared.MindmapEdgeType>
-        value={edgeType}
-        onValueChange={(type) => {
-          if (type) {
-            onEdgeTypeChange(type);
-          }
-        }}
-      >
-        {edgeTypes.map((type) => (
-          <SelectItem key={type} value={type}>
-            {type}
-          </SelectItem>
-        ))}
-      </Select>
-    </div>
+    <form
+      onSubmit={handleSubmit}
+      className="row bg-neutral/90 absolute top-2 left-2 z-10 items-stretch gap-1 rounded-md border p-1 backdrop-blur"
+    >
+      <Input
+        name="label"
+        aria-label={t`Add node`}
+        placeholder={t`Add a node...`}
+        value={value}
+        autoComplete="off"
+        onChange={(event) => setValue(event.target.value)}
+        className="h-9 w-40 text-sm"
+      />
+      <Button type="submit" variant="outlined" size="icon" disabled={value.trim() === ''}>
+        +
+      </Button>
+    </form>
   );
 }
 
 function MindmapNodeView({ id, data }: NodeProps<MindmapFlowNode>) {
   const actions = use(MindmapActionsContext);
+  const connection = useConnection();
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const isConnecting = connection.inProgress;
 
   useEffect(() => {
     if (editing) {
@@ -194,10 +183,22 @@ function MindmapNodeView({ id, data }: NodeProps<MindmapFlowNode>) {
 
   return (
     <div
-      className="bg-neutral row max-w-52 min-w-40 items-center justify-center rounded-lg border px-3 py-2 text-center text-sm font-medium shadow-sm"
+      className="bg-neutral row relative max-w-52 min-w-40 items-center justify-center rounded-lg border px-3 py-2 text-center text-sm font-medium shadow-sm"
       onDoubleClick={() => setEditing(true)}
     >
-      <Handle type="target" position={Position.Top} />
+      {!editing && !isConnecting && (
+        <Handle type="source" position={Position.Bottom} className="bg-primary! size-3! border-2! border-white!" />
+      )}
+
+      {!editing && (
+        <Handle
+          type="target"
+          position={Position.Top}
+          isConnectableStart={false}
+          className="inset-0! size-full! translate-x-0! translate-y-0! rounded-lg! border-0! bg-transparent! opacity-0!"
+          style={{ pointerEvents: 'none' }}
+        />
+      )}
 
       {editing ? (
         <input
@@ -217,8 +218,6 @@ function MindmapNodeView({ id, data }: NodeProps<MindmapFlowNode>) {
       ) : (
         <span className="line-clamp-3">{data.label}</span>
       )}
-
-      <Handle type="source" position={Position.Bottom} />
     </div>
   );
 }
