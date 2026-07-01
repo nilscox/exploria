@@ -102,10 +102,9 @@ export class MustacheI18n implements I18n {
       auto: session.postureMode === 'auto',
       hasMindmap: nodes.length > 0,
       mindmapNodes: nodes.map(({ id, label }) => ({ id, label })),
-      mindmapEdges: edges.map(({ source, target, type }) => ({
+      mindmapEdges: edges.map(({ source, target }) => ({
         source,
         target,
-        type,
         sourceLabel: labelOf(source),
         targetLabel: labelOf(target),
       })),

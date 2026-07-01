@@ -28,7 +28,6 @@ export namespace Shared {
   export type DiscussionPath = session.DiscussionPath;
   export type Posture = session.Posture;
   export type PostureMode = session.PostureMode;
-  export type MindmapEdgeType = mindmap.MindmapEdgeType;
   export type MindmapNode = mindmap.MindmapNode;
   export type MindmapEdge = mindmap.MindmapEdge;
   export type Mindmap = { nodes: MindmapNode[]; edges: MindmapEdge[] };

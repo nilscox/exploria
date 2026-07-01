@@ -6,7 +6,7 @@ import { Timer } from './timer.ts';
 import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
 import type { Language } from './i18n/index.ts';
-import type { MindmapEdge, MindmapEdgeType, MindmapNode } from './mindmap.ts';
+import type { MindmapEdge, MindmapNode } from './mindmap.ts';
 import type { Summary } from './summary.ts';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
@@ -391,7 +391,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
   }
 
-  addMindmapNode({ label, parentId, edgeType }: { label: string; parentId?: string; edgeType?: MindmapEdgeType }) {
+  addMindmapNode({ label, parentId }: { label: string; parentId?: string }) {
     if (parentId !== undefined) {
       assert(this._mindmap.hasNode(parentId), new Error(`Cannot find mindmap node "${parentId}"`));
     }
@@ -404,7 +404,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit('MindmapNodeAdded', { node });
 
     if (parentId !== undefined) {
-      this.connectMindmapNodes(parentId, node.id, edgeType ?? 'elaborates');
+      this.connectMindmapNodes(parentId, node.id);
     }
   }
 
@@ -424,17 +424,26 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit('MindmapNodeRemoved', { nodeId });
   }
 
-  connectMindmapNodes(source: string, target: string, type: MindmapEdgeType) {
+  connectMindmapNodes(source: string, target: string) {
     assert(this._mindmap.hasNode(source), new Error(`Cannot find mindmap node "${source}"`));
     assert(this._mindmap.hasNode(target), new Error(`Cannot find mindmap node "${target}"`));
     assert(source !== target, new Error('Cannot connect a mindmap node to itself'));
-    assert(!this._mindmap.edgeBetween(source, target), new Error('These mindmap nodes are already connected'));
+    assert(!this._mindmap.isAncestor(target, source), new Error('This connection would create a cycle'));
+
+    const currentParent = this._mindmap.parentEdgeOf(target);
+
+    if (currentParent?.source === source) {
+      return;
+    }
+
+    if (currentParent !== undefined) {
+      this.emit('MindmapEdgeRemoved', { edgeId: currentParent.id });
+    }
 
     const edge: MindmapEdge = {
       id: this.generator.id(),
       source,
       target,
-      type,
     };
 
     this.emit('MindmapEdgeAdded', { edge });

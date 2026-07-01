@@ -332,7 +332,7 @@ void describe('Session', () => {
       expectEvent('MindmapNodeAdded', { node: { id, label: 'Concept' } });
     });
 
-    void it('adds a node attached to a parent with a default relation', () => {
+    void it('adds a node attached under a parent', () => {
       const parentId = addNode('Parent');
 
       session.addMindmapNode({ label: 'Child', parentId });
@@ -340,9 +340,7 @@ void describe('Session', () => {
       const child = session.mindmap.nodes.at(-1)!;
       const edge = session.mindmap.edges[0]!;
 
-      assert.deepStrictEqual(session.mindmap.edges, [
-        { id: edge.id, source: parentId, target: child.id, type: 'elaborates' },
-      ]);
+      assert.deepStrictEqual(session.mindmap.edges, [{ id: edge.id, source: parentId, target: child.id }]);
     });
 
     void it('does not emit anything when the parent is unknown', () => {
@@ -364,69 +362,85 @@ void describe('Session', () => {
       assert.throws(() => session.updateMindmapNode('missing', { label: 'New' }));
     });
 
-    void it('connects two nodes', () => {
+    void it('attaches a node under a parent', () => {
       const a = addNode('A');
       const b = addNode('B');
 
-      session.connectMindmapNodes(a, b, 'supports');
+      session.connectMindmapNodes(a, b);
 
       const edge = session.mindmap.edges[0]!;
 
-      assert.deepStrictEqual(session.mindmap.edges, [{ id: edge.id, source: a, target: b, type: 'supports' }]);
-      expectEvent('MindmapEdgeAdded', { edge: { id: edge.id, source: a, target: b, type: 'supports' } });
+      assert.deepStrictEqual(session.mindmap.edges, [{ id: edge.id, source: a, target: b }]);
+      expectEvent('MindmapEdgeAdded', { edge: { id: edge.id, source: a, target: b } });
     });
 
-    void it('rejects invalid connections', () => {
+    void it('rejects connecting an unknown node or a node to itself', () => {
+      const a = addNode('A');
+
+      assert.throws(() => session.connectMindmapNodes(a, 'missing'));
+      assert.throws(() => session.connectMindmapNodes(a, a));
+    });
+
+    void it('rejects a connection that would create a cycle', () => {
       const a = addNode('A');
       const b = addNode('B');
 
-      assert.throws(() => session.connectMindmapNodes(a, 'missing', 'relates'));
-      assert.throws(() => session.connectMindmapNodes(a, a, 'relates'));
+      session.connectMindmapNodes(a, b);
 
-      session.connectMindmapNodes(a, b, 'relates');
-      assert.throws(() => session.connectMindmapNodes(a, b, 'opposes'));
+      assert.throws(() => session.connectMindmapNodes(b, a));
     });
 
-    void it('allows both directions of a pair', () => {
-      const a = addNode('A');
-      const b = addNode('B');
-
-      session.connectMindmapNodes(a, b, 'supports');
-      session.connectMindmapNodes(b, a, 'opposes');
-
-      assert.strictEqual(session.mindmap.edges.length, 2);
-    });
-
-    void it('cascades edge removal when a node is removed', () => {
+    void it('reparents a node that already has a parent', () => {
       const a = addNode('A');
       const b = addNode('B');
       const c = addNode('C');
 
-      session.connectMindmapNodes(a, b, 'relates');
-      session.connectMindmapNodes(c, a, 'relates');
-      session.connectMindmapNodes(b, c, 'relates');
+      session.connectMindmapNodes(a, c);
+      session.connectMindmapNodes(b, c);
 
-      session.removeMindmapNode(a);
+      const edge = session.mindmap.edges[0]!;
+
+      assert.deepStrictEqual(session.mindmap.edges, [{ id: edge.id, source: b, target: c }]);
+    });
+
+    void it('is a no-op when reconnecting to the same parent', () => {
+      const a = addNode('A');
+      const b = addNode('B');
+
+      session.connectMindmapNodes(a, b);
+      const before = session.peekDomainEvents().length;
+
+      session.connectMindmapNodes(a, b);
+
+      assert.strictEqual(session.peekDomainEvents().length, before);
+    });
+
+    void it('orphans children as roots when a node is removed', () => {
+      const a = addNode('A');
+      const b = addNode('B');
+      const c = addNode('C');
+
+      session.connectMindmapNodes(a, b);
+      session.connectMindmapNodes(b, c);
+
+      session.removeMindmapNode(b);
 
       assert.deepStrictEqual(
         session.mindmap.nodes.map(({ id }) => id),
-        [b, c],
+        [a, c],
       );
-      assert.deepStrictEqual(
-        session.mindmap.edges.map(({ source, target }) => [source, target]),
-        [[b, c]],
-      );
+      assert.deepStrictEqual(session.mindmap.edges, []);
     });
 
     void it('throws when removing an unknown node', () => {
       assert.throws(() => session.removeMindmapNode('missing'));
     });
 
-    void it('disconnects nodes by oriented pair', () => {
+    void it('disconnects a node from its parent', () => {
       const a = addNode('A');
       const b = addNode('B');
 
-      session.connectMindmapNodes(a, b, 'relates');
+      session.connectMindmapNodes(a, b);
       session.disconnectMindmapNodes(a, b);
 
       assert.deepStrictEqual(session.mindmap.edges, []);
@@ -437,7 +451,7 @@ void describe('Session', () => {
       const a = addNode('A');
       const b = addNode('B');
 
-      session.connectMindmapNodes(a, b, 'relates');
+      session.connectMindmapNodes(a, b);
 
       const { id } = session.mindmap.edges[0]!;
 
@@ -451,7 +465,7 @@ void describe('Session', () => {
       const a = addNode('A');
       const b = addNode('B');
 
-      session.connectMindmapNodes(a, b, 'supports');
+      session.connectMindmapNodes(a, b);
 
       const replayed = Session.replay(generator, clock, session.id, session.peekDomainEvents());
 

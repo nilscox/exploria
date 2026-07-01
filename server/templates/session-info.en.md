@@ -56,10 +56,10 @@ Nodes:
 - {{label}} (id: "{{id}}")
   {{/mindmapNodes}}
 
-Links:
+Parent → child:
 {{#mindmapEdges}}
 
-- {{sourceLabel}} ("{{source}}") --{{type}}--> {{targetLabel}} ("{{target}}")
+- {{sourceLabel}} ("{{source}}") → {{targetLabel}} ("{{target}}")
   {{/mindmapEdges}}
   {{^mindmapEdges}}
   No links yet.

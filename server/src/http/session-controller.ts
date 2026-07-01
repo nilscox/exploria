@@ -4,7 +4,6 @@ import type { OutgoingMessage } from 'node:http';
 import z from 'zod';
 
 import { languages } from '../domain/i18n/index.ts';
-import { mindmapEdgeTypes } from '../domain/mindmap.ts';
 import { toSessionView } from '../domain/projections/session-view.ts';
 import { Session, postures, type TopicStatus } from '../domain/session.ts';
 import { defined } from '../utils.ts';
@@ -15,7 +14,6 @@ import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
 import type { SessionRepository } from '../database/session-repository.ts';
 import type { IAssistant } from '../domain/assistant.ts';
-import type { MindmapEdgeType } from '../domain/mindmap.ts';
 import type { EventBus } from '../event-bus.ts';
 import type { Shared } from '../shared.ts';
 
@@ -148,15 +146,14 @@ export class SessionController {
     });
 
     this.router.post('/:id/mindmap/node', async (req, res) => {
-      const { label, parentId, edgeType } = z
+      const { label, parentId } = z
         .object({
           label: z.string().min(1).max(64),
           parentId: z.string().optional(),
-          edgeType: z.enum(mindmapEdgeTypes).optional(),
         })
         .parse(req.body);
 
-      await this.addMindmapNode({ label, parentId, edgeType });
+      await this.addMindmapNode({ label, parentId });
 
       res.status(204).end();
     });
@@ -175,15 +172,14 @@ export class SessionController {
     });
 
     this.router.post('/:id/mindmap/edge', async (req, res) => {
-      const { source, target, type } = z
+      const { source, target } = z
         .object({
           source: z.string(),
           target: z.string(),
-          type: z.enum(mindmapEdgeTypes),
         })
         .parse(req.body);
 
-      await this.connectMindmapNodes(source, target, type);
+      await this.connectMindmapNodes(source, target);
 
       res.status(204).end();
     });
@@ -369,7 +365,7 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async addMindmapNode(params: { label: string; parentId?: string; edgeType?: MindmapEdgeType }) {
+  private async addMindmapNode(params: { label: string; parentId?: string }) {
     const session = this.getSessionInstance();
 
     session.addMindmapNode(params);
@@ -399,10 +395,10 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async connectMindmapNodes(source: string, target: string, type: MindmapEdgeType) {
+  private async connectMindmapNodes(source: string, target: string) {
     const session = this.getSessionInstance();
 
-    session.connectMindmapNodes(source, target, type);
+    session.connectMindmapNodes(source, target);
 
     const committed = await this.sessionRepository.save(session);
 

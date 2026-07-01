@@ -5,7 +5,7 @@ import { Mindmap, type MindmapEdge, type MindmapNode } from './mindmap.ts';
 
 void describe('Mindmap', () => {
   const node = (id: string, label = id): MindmapNode => ({ id, label });
-  const edge = (id: string, source: string, target: string): MindmapEdge => ({ id, source, target, type: 'relates' });
+  const edge = (id: string, source: string, target: string): MindmapEdge => ({ id, source, target });
 
   void it('starts empty', () => {
     const mindmap = Mindmap.empty();
@@ -34,6 +34,18 @@ void describe('Mindmap', () => {
       );
 
       assert.deepStrictEqual(mindmap.edgesConnectedTo('a'), [edge('e1', 'a', 'b'), edge('e2', 'c', 'a')]);
+    });
+
+    void it('finds the incoming (parent) edge of a node', () => {
+      assert.deepStrictEqual(mindmap.parentEdgeOf('b'), edge('e1', 'a', 'b'));
+      assert.strictEqual(mindmap.parentEdgeOf('a'), undefined);
+    });
+
+    void it('walks up the parent chain to detect ancestors', () => {
+      const mindmap = new Mindmap([node('a'), node('b'), node('c')], [edge('e1', 'a', 'b'), edge('e2', 'b', 'c')]);
+
+      assert.strictEqual(mindmap.isAncestor('a', 'c'), true);
+      assert.strictEqual(mindmap.isAncestor('c', 'a'), false);
     });
   });
 

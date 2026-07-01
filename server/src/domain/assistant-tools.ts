@@ -1,6 +1,5 @@
 import z from 'zod';
 
-import { mindmapEdgeTypes } from './mindmap.ts';
 import { postures } from './session.ts';
 
 import type { I18n } from '../adapters/i18n.ts';
@@ -169,10 +168,9 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
     param: z.object({
       label: z.string().min(1).max(64),
       parentId: z.string().optional(),
-      edgeType: z.enum(mindmapEdgeTypes).optional(),
     }),
-    execute: (session, { label, parentId, edgeType }) => {
-      session.addMindmapNode({ label, parentId, edgeType });
+    execute: (session, { label, parentId }) => {
+      session.addMindmapNode({ label, parentId });
 
       return t('tool.result.ok');
     },
@@ -208,10 +206,9 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
     param: z.object({
       source: z.string(),
       target: z.string(),
-      type: z.enum(mindmapEdgeTypes).describe(t('connect-mindmap-nodes.type-param')),
     }),
-    execute: (session, { source, target, type }) => {
-      session.connectMindmapNodes(source, target, type);
+    execute: (session, { source, target }) => {
+      session.connectMindmapNodes(source, target);
 
       return t('tool.result.ok');
     },

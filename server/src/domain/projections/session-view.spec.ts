@@ -85,7 +85,7 @@ void describe('toSessionView', () => {
 
     const [a, b] = [session.mindmap.nodes[0]!.id, session.mindmap.nodes[1]!.id];
 
-    session.connectMindmapNodes(a, b, 'supports');
+    session.connectMindmapNodes(a, b);
     session.removeMindmapNode(a);
 
     assert.deepStrictEqual(view().mindmap, { nodes: [{ id: b, label: 'B' }], edges: [] });

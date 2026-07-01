@@ -56,10 +56,10 @@ Nœuds :
 - {{label}} (id: "{{id}}")
   {{/mindmapNodes}}
 
-Liens :
+Parent → enfant :
 {{#mindmapEdges}}
 
-- {{sourceLabel}} ("{{source}}") --{{type}}--> {{targetLabel}} ("{{target}}")
+- {{sourceLabel}} ("{{source}}") → {{targetLabel}} ("{{target}}")
   {{/mindmapEdges}}
   {{^mindmapEdges}}
   Aucun lien pour l'instant.

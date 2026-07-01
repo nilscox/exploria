@@ -1,7 +1,3 @@
-export const mindmapEdgeTypes = ['elaborates', 'supports', 'opposes', 'relates'] as const;
-
-export type MindmapEdgeType = (typeof mindmapEdgeTypes)[number];
-
 export type MindmapNode = {
   id: string;
   label: string;
@@ -11,7 +7,6 @@ export type MindmapEdge = {
   id: string;
   source: string;
   target: string;
-  type: MindmapEdgeType;
 };
 
 export class Mindmap {
@@ -45,6 +40,26 @@ export class Mindmap {
 
   edgesConnectedTo(nodeId: string): MindmapEdge[] {
     return this._edges.filter((edge) => edge.source === nodeId || edge.target === nodeId);
+  }
+
+  parentEdgeOf(nodeId: string): MindmapEdge | undefined {
+    return this._edges.find((edge) => edge.target === nodeId);
+  }
+
+  isAncestor(ancestorId: string, nodeId: string): boolean {
+    const seen = new Set<string>();
+    let current = this.parentEdgeOf(nodeId)?.source;
+
+    while (current !== undefined && !seen.has(current)) {
+      if (current === ancestorId) {
+        return true;
+      }
+
+      seen.add(current);
+      current = this.parentEdgeOf(current)?.source;
+    }
+
+    return false;
   }
 
   withNode(node: MindmapNode): Mindmap {
