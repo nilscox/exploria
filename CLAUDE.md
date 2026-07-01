@@ -142,6 +142,15 @@ pnpm --filter @exploria/server test 'src/**/*.spec.ts'      # run the server's u
 pnpm --filter @exploria/server test 'src/**/*.e2e-spec.ts'  # run the server's end-to-end tests
 ```
 
+### Test architecture
+
+- **Unit tests** (`*.spec.ts`): drive the domain / adapters directly with stub adapters (`StubAiClient`, `StubClock`, `StubGenerator`). Fresh instances per test.
+- **E2E tests** (`*.e2e-spec.ts`): use the `E2eTest` harness in `server/src/test-utils.ts`. `E2eTest.create(configure, config?)` spins up a PGlite database, registers the stub adapters in the Awilix container, and starts an Express app wired by the `configure` callback (e.g. `(app) => app.use('/auth', container.resolve('authController').router)`). `config` is a `Partial<Config>` merged over sensible test defaults.
+  - Data: `test.users` / `test.sessions` (repositories), `test.build(Session)` (DI-built aggregate), `test.clock` / `test.generator` / `test.aiClient` (stubs).
+  - HTTP: `test.fetch(endpoint, init)`, `test.login(token)` (logs in and stores the signed cookie), `test.fetcher.setCookie(...)`, `TestFetcher.extractSignedCookie(res)`.
+  - **Isolation**: build the harness in `beforeEach`, call `test.cleanup()` in `afterEach` — one fresh DB per test, so tests may reuse the same literal fixture values without collisions.
+  - **Factor arrange**: lift repeated setup into small helpers scoped _inside_ the `describe` block, with defaults + `Partial` overrides (e.g. `createUser(values = {}) => test.users.create({ email: 'user@test.dev', loginToken: 'token', ...values })`). Each test states only what its assertion cares about; give irrelevant fields a trivial value.
+
 ### i18n (Lingui)
 
 After adding or modifying `<Trans>` tags in the client, update translations:
@@ -170,4 +179,12 @@ Source language is English. Translation files live in `client/src/i18n/{locale}/
 - **Always use braces** for `if` blocks, even single-line returns: `if (x) { return; }` not `if (x) return;`
 - **Blank line between `const` declarations and surrounding instructions**: separate declaration blocks from imperative statements with an empty line above and below. Exception: there may be no empty line between a const declaration and an assertion on this value.
 - **Private static helpers** on a class (e.g. `private static mapEvent`) are preferred over module-level functions when the helper is only used by that class. Add `this: void` to the signature when passing it as a callback (e.g. `.map(MyClass.helper)`) to satisfy the linter.
+- **Private helpers carry meaning, not mechanics**: a private method should be a domain operation or a mapper, not a 1:1 extraction of a route-handler body. Keep HTTP concerns (status codes, cookies, `res.json`) in the handler; a private like `login(token): Promise<User>` returns a domain object.
+- **Extract a mapper once a projection repeats** (e.g. a `toSharedUser(user): Shared.User` rather than inline `{ id, email, name }` in several handlers).
+- **Naming without abbreviation**: full descriptive names (`repository`, not `repo`).
+- **YAGNI on configuration**: don't add config knobs you don't strictly need (e.g. `cors({ origin: true })` in dev rather than an unused `CORS_ORIGIN` env var).
+- **Prefer the relational query builder** (`db.query.*` with object-style `where`/`orderBy`) over the core SQL builder; express a null filter as `{ isNull: true }`.
+- **Design types to avoid casts at call sites** (e.g. a `TestDatabase extends Database` with a renamed field instead of `as unknown as` in every caller).
+- **`onSettled` over duplication**: put logic common to success and error paths in `onSettled` rather than repeating it in `onSuccess`/`onError`.
+- **Reuse shared types**: expose domain types the client needs in the `Shared` namespace (`server/src/shared.ts`) and import them client-side instead of redefining them.
 - **Commit messages**: one short imperative line, no bullet list, no `Co-Authored-By` trailer.
