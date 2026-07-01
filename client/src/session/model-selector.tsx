@@ -10,7 +10,12 @@ export function ModelSelector({
   onChange?: (value: string) => void;
 }) {
   return (
-    <Select name={name} value={value} onValueChange={onChange} renderValue={() => value}>
+    <Select
+      name={name}
+      value={value}
+      onValueChange={(value) => value !== null && onChange?.(value)}
+      renderValue={() => value}
+    >
       {models.map(({ id, provider }) => (
         <SelectItem key={id} value={id}>
           <div className="col gap-0.5">

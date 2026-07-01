@@ -53,17 +53,16 @@ export function Settings() {
 export function LanguageSelector() {
   const { i18n } = useLingui();
 
-  const handleChange = (lang: string) => {
-    setLanguage(i18n, lang as Shared.Language).catch(console.error);
-  };
-
   return (
     <Field>
       <FieldLabel>
         <Trans>Language</Trans>
       </FieldLabel>
 
-      <Select value={i18n.locale} onValueChange={handleChange}>
+      <Select<Shared.Language>
+        value={i18n.locale as Shared.Language}
+        onValueChange={(lang) => lang !== null && setLanguage(i18n, lang).catch(console.error)}
+      >
         <SelectItem value="en">
           <span className="me-2">🇺🇸</span>
           English
@@ -86,7 +85,7 @@ export function ThemeModeSelector() {
         <Trans>Theme</Trans>
       </FieldLabel>
 
-      <Select value={theme} onValueChange={setTheme}>
+      <Select<'light' | 'dark'> value={theme} onValueChange={(theme) => theme !== null && setTheme(theme)}>
         <SelectItem value="light">
           <span className="me-2 inline-block size-3 rounded-sm border bg-white" />
           <Trans>Light</Trans>
@@ -101,10 +100,10 @@ export function ThemeModeSelector() {
 }
 
 function useTheme() {
-  const [theme, setTheme] = useState(() => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const theme = localStorage.getItem('theme');
 
-    if (theme && ['light', 'dark'].includes(theme)) {
+    if (theme && (theme === 'light' || theme === 'dark')) {
       return theme;
     }
 

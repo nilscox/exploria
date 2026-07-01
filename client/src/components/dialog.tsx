@@ -5,17 +5,9 @@ export const Dialog = D.Root;
 export const DialogTrigger = D.Trigger;
 export const DialogClose = D.Close;
 
-export function DialogContent({
-  container,
-  className,
-  children,
-}: {
-  container?: HTMLElement | null;
-  className?: string;
-  children?: React.ReactNode;
-}) {
+export function DialogContent({ className, children }: { className?: string; children?: React.ReactNode }) {
   return (
-    <D.Portal container={container ?? document.getElementById('root')}>
+    <D.Portal container={document.getElementById('root')}>
       <D.Backdrop className="fixed inset-0 bg-black/50 transition-opacity data-ending-style:opacity-0 data-starting-style:opacity-0" />
       <D.Viewport className="fixed inset-0 grid scrollbar-thin place-items-center overflow-y-auto p-4">
         <D.Popup

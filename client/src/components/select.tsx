@@ -1,26 +1,10 @@
-import {
-  Content,
-  Icon,
-  Item,
-  ItemIndicator,
-  ItemText,
-  Portal,
-  Root,
-  ScrollDownButton,
-  ScrollUpButton,
-  Trigger,
-  Value,
-  Viewport,
-  type SelectItemProps,
-  type SelectProps,
-} from '@radix-ui/react-select';
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { Select as S } from '@base-ui/react/select';
+import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 
 import { fieldProps } from './field';
 
-export function Select({
+export function Select<Value = string>({
   ref,
-  container,
   placeholder,
   renderValue,
   children,
@@ -29,39 +13,32 @@ export function Select({
   ref?: React.Ref<HTMLButtonElement>;
   container?: HTMLElement | null;
   placeholder?: React.ReactNode;
-  renderValue?: () => React.ReactNode;
+  renderValue?: (value: Value) => React.ReactNode;
   children: React.ReactNode;
-} & SelectProps) {
+} & S.Root.Props<Value>) {
   return (
-    <Root {...props}>
-      <Trigger
+    <S.Root {...props}>
+      <S.Trigger
         ref={ref}
-        className="group bg-neutral row h-10 w-full items-center justify-between gap-2 overflow-hidden rounded-md border px-4 text-start"
+        className="bg-neutral row h-10 w-full items-center justify-between gap-2 overflow-hidden rounded-md border px-4 text-start"
         {...fieldProps()}
       >
         <span className="truncate">
-          <Value placeholder={placeholder}>{renderValue?.()}</Value>
+          <S.Value placeholder={placeholder}>{renderValue}</S.Value>
         </span>
-        <Icon>
-          <ChevronDownIcon className="size-4 group-data-[state=open]:-scale-y-100" />
-        </Icon>
-      </Trigger>
-      <Portal container={container ?? document.getElementById('root')}>
-        <Content
-          position="popper"
-          sideOffset={8}
-          className="bg-neutral ring-border max-h-(--radix-select-content-available-height) w-(--radix-select-trigger-width) overflow-hidden rounded-md shadow-xl ring-1"
-        >
-          <ScrollUpButton className="row items-center justify-center py-1">
-            <ChevronUpIcon className="size-4" />
-          </ScrollUpButton>
-          <Viewport>{children}</Viewport>
-          <ScrollDownButton className="row items-center justify-center py-1">
-            <ChevronDownIcon className="size-4" />
-          </ScrollDownButton>
-        </Content>
-      </Portal>
-    </Root>
+        <S.Icon className="data-popup-open:-scale-y-100">
+          <ChevronDownIcon className="size-4" />
+        </S.Icon>
+      </S.Trigger>
+
+      <S.Portal container={document.getElementById('root')}>
+        <S.Positioner alignItemWithTrigger={false} sideOffset={8} className="w-(--anchor-width)">
+          <S.Popup className="bg-neutral ring-border max-h-(--available-height) overflow-hidden rounded-md border shadow-xl outline-none">
+            <S.List className="max-h-(--available-height) scrollbar-thin overflow-y-auto">{children}</S.List>
+          </S.Popup>
+        </S.Positioner>
+      </S.Portal>
+    </S.Root>
   );
 }
 
@@ -69,17 +46,17 @@ export function SelectItem({
   ref,
   children,
   ...props
-}: { ref?: React.Ref<HTMLDivElement>; children: React.ReactNode } & SelectItemProps) {
+}: { ref?: React.Ref<HTMLDivElement>; children: React.ReactNode } & S.Item.Props) {
   return (
-    <Item
+    <S.Item
       ref={ref}
       className="row data-highlighted:bg-accent cursor-pointer items-center justify-between px-3 py-2 text-sm outline-none"
       {...props}
     >
-      <ItemText>{children}</ItemText>
-      <ItemIndicator>
+      <S.ItemText>{children}</S.ItemText>
+      <S.ItemIndicator>
         <CheckIcon className="size-4" />
-      </ItemIndicator>
-    </Item>
+      </S.ItemIndicator>
+    </S.Item>
   );
 }
