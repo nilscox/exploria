@@ -62,21 +62,9 @@ msgstr "Toutes vos sessions passées, à reprendre quand vous voulez."
 msgid "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
 msgstr "Seul face à une décision qui compte, on tourne vite en rond. On s'attache à une option, on évite les questions gênantes, on oublie des angles."
 
-#: src/session/create/create-session.tsx
-msgid "Am I afraid of failure or of success?"
-msgstr "Ai-je peur de l'échec ou peur de réussir ?"
-
-#: src/session/create/create-session.tsx
-msgid "Am I running from my career or moving toward something else?"
-msgstr "Est-ce que je fuis mon métier ou est-ce que je vais vers autre chose ?"
-
 #: src/home.tsx
 msgid "An argument or hypothesis to solidify before you defend it."
 msgstr "Un argument ou une hypothèse à solidifier avant de le défendre."
-
-#: src/session/create/create-session.tsx
-msgid "Are my political beliefs really my own?"
-msgstr "Mes convictions politiques sont-elles vraiment les miennes ?"
 
 #: src/home.tsx
 msgid "As the conversation unfolds, a mind map takes shape: the topics covered, their links, what's left to explore. At a glance, you know where you stand."
@@ -243,10 +231,6 @@ msgid "I don't know what to think about nuclear energy"
 msgstr "Je ne sais pas quoi penser de l'énergie nucléaire"
 
 #: src/session/create/create-session.tsx
-msgid "I don't know where I stand on immigration"
-msgstr "Je ne sais pas quelle position adopter sur l'immigration"
-
-#: src/session/create/create-session.tsx
 msgid "I have a stable job but I'm deeply bored"
 msgstr "J'ai un poste stable mais je m'ennuie profondément"
 
@@ -271,10 +255,6 @@ msgid "I need to decide who to vote for in the next election"
 msgstr "J'ai besoin de décider pour qui voter aux prochaines élections"
 
 #: src/session/create/create-session.tsx
-msgid "I need to find ways to acquire more qualified users"
-msgstr "J'ai besoin de trouver des moyens d'acquérir plus d'utilisateurs qualifiés"
-
-#: src/session/create/create-session.tsx
 msgid "I should confront my manager over their behavior"
 msgstr "Je devrais confronter mon manager sur son comportement"
 
@@ -289,10 +269,6 @@ msgstr "Je veux comprendre pourquoi je dis oui à tout"
 #: src/session/create/create-session.tsx
 msgid "I'm afraid of regretting a choice I haven't even made yet"
 msgstr "J'ai peur de regretter un choix que je n'ai pas encore fait"
-
-#: src/session/create/create-session.tsx
-msgid "I'm hesitating about adopting a cat"
-msgstr "J'hésite à adopter un chat"
 
 #: src/session/create/create-session.tsx
 msgid "I'm hesitating about moving to London"
@@ -376,10 +352,6 @@ msgstr "Choix du modèle"
 #: src/session/create/sessions-list.tsx
 msgid "More"
 msgstr "Plus"
-
-#: src/session/create/create-session.tsx
-msgid "My co-founder and I are no longer aligned on the vision"
-msgstr "Mon associé et moi ne sommes plus alignés sur la vision"
 
 #: src/session/info/topics-list.tsx
 msgid "No Topic"

@@ -62,21 +62,9 @@ msgstr "All your past sessions, to pick up whenever you want."
 msgid "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
 msgstr "Alone with a decision that matters, you quickly go in circles. You latch onto one option, dodge the awkward questions, miss whole angles."
 
-#: src/session/create/create-session.tsx
-msgid "Am I afraid of failure or of success?"
-msgstr "Am I afraid of failure or of success?"
-
-#: src/session/create/create-session.tsx
-msgid "Am I running from my career or moving toward something else?"
-msgstr "Am I running from my career or moving toward something else?"
-
 #: src/home.tsx
 msgid "An argument or hypothesis to solidify before you defend it."
 msgstr "An argument or hypothesis to solidify before you defend it."
-
-#: src/session/create/create-session.tsx
-msgid "Are my political beliefs really my own?"
-msgstr "Are my political beliefs really my own?"
 
 #: src/home.tsx
 msgid "As the conversation unfolds, a mind map takes shape: the topics covered, their links, what's left to explore. At a glance, you know where you stand."
@@ -243,10 +231,6 @@ msgid "I don't know what to think about nuclear energy"
 msgstr "I don't know what to think about nuclear energy"
 
 #: src/session/create/create-session.tsx
-msgid "I don't know where I stand on immigration"
-msgstr "I don't know where I stand on immigration"
-
-#: src/session/create/create-session.tsx
 msgid "I have a stable job but I'm deeply bored"
 msgstr "I have a stable job but I'm deeply bored"
 
@@ -271,10 +255,6 @@ msgid "I need to decide who to vote for in the next election"
 msgstr "I need to decide who to vote for in the next election"
 
 #: src/session/create/create-session.tsx
-msgid "I need to find ways to acquire more qualified users"
-msgstr "I need to find ways to acquire more qualified users"
-
-#: src/session/create/create-session.tsx
 msgid "I should confront my manager over their behavior"
 msgstr "I should confront my manager over their behavior"
 
@@ -289,10 +269,6 @@ msgstr "I want to understand why I say yes to everything"
 #: src/session/create/create-session.tsx
 msgid "I'm afraid of regretting a choice I haven't even made yet"
 msgstr "I'm afraid of regretting a choice I haven't even made yet"
-
-#: src/session/create/create-session.tsx
-msgid "I'm hesitating about adopting a cat"
-msgstr "I'm hesitating about adopting a cat"
 
 #: src/session/create/create-session.tsx
 msgid "I'm hesitating about moving to London"
@@ -376,10 +352,6 @@ msgstr "Model choice"
 #: src/session/create/sessions-list.tsx
 msgid "More"
 msgstr "More"
-
-#: src/session/create/create-session.tsx
-msgid "My co-founder and I are no longer aligned on the vision"
-msgstr "My co-founder and I are no longer aligned on the vision"
 
 #: src/session/info/topics-list.tsx
 msgid "No Topic"
