@@ -6,6 +6,8 @@ export type Messages = {
   'tool.result.ok': string;
 
   'save-note.description': string;
+  'save-note.title-param': string;
+  'save-note.content-param': string;
   'save-note.node-param': string;
 
   'start-timer.description': string;
@@ -15,6 +17,7 @@ export type Messages = {
   'add-nodes.parent-param': string;
 
   'update-node.description': string;
+  'update-node.summary-param': string;
 
   'remove-node.description': string;
 
@@ -68,6 +71,8 @@ const en: Messages = {
 
   'save-note.description':
     'Saves an important element of the conversation (key point, user position, insight, identified tension). Use it whenever something is worth retaining for the final summary.',
+  'save-note.title-param': 'A short title for the note.',
+  'save-note.content-param': 'The body of the note: the element worth retaining, in one or a few sentences.',
   'save-note.node-param': 'Id of the mind map node to attach the note to. Omit to attach it to the subject (root).',
 
   'start-timer.description':
@@ -80,7 +85,9 @@ const en: Messages = {
     'Id of the parent node to attach the new nodes to. Omit to add them at the top level, directly under the subject.',
 
   'update-node.description':
-    'Updates a mind map node (label or status). Set the status to "in_progress" as soon as you start addressing a node, and "done" once it has been sufficiently covered.',
+    'Updates a mind map node (label, status or summary). Set the status to "in_progress" as soon as you start addressing a node, and "done" once it has been sufficiently covered.',
+  'update-node.summary-param':
+    'A summary of the discussion about this topic, kept up to date as it unfolds. Distinct from the label.',
 
   'remove-node.description': 'Removes a node from the mind map, along with its descendants and their attached notes.',
 
@@ -145,6 +152,8 @@ const fr: Messages = {
 
   'save-note.description':
     "Sauvegarde un élément important de la conversation (point clé, position de l'utilisateur, insight, tension identifiée). À utiliser dès qu'un élément mérite d'être retenu pour la synthèse finale.",
+  'save-note.title-param': 'Un titre court pour la note.',
+  'save-note.content-param': "Le corps de la note : l'élément à retenir, en une ou quelques phrases.",
   'save-note.node-param':
     'Id du noeud de la carte mentale auquel rattacher la note. À omettre pour la rattacher au sujet (racine).',
 
@@ -158,7 +167,9 @@ const fr: Messages = {
     'Id du noeud parent auquel rattacher les nouveaux noeuds. À omettre pour les ajouter au premier niveau, directement sous le sujet.',
 
   'update-node.description':
-    "Met à jour un noeud de la carte mentale (intitulé ou statut). Passe le statut à « en cours » dès que tu commences à aborder un noeud, et « traité » une fois qu'il a été suffisamment couvert.",
+    "Met à jour un noeud de la carte mentale (intitulé, statut ou résumé). Passe le statut à « en cours » dès que tu commences à aborder un noeud, et « traité » une fois qu'il a été suffisamment couvert.",
+  'update-node.summary-param':
+    "Un résumé de la discussion sur ce sujet, tenu à jour au fil de l'échange. Distinct de l'intitulé.",
 
   'remove-node.description':
     'Supprime un noeud de la carte mentale, ainsi que ses descendants et leurs notes rattachées.',

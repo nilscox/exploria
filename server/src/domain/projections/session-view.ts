@@ -1,22 +1,22 @@
-import { assert, hasId } from '../../utils.ts';
+import { assert } from '../../utils.ts';
+import { Mindmap } from '../mindmap.ts';
 import { Timer } from '../timer.ts';
 
 import type { Shared } from '../../shared.ts';
-import type { MindmapNode } from '../mindmap.ts';
-import type { Note, Posture, PostureMode, SessionEvent, Topic } from '../session.ts';
+import type { Posture, PostureMode, SessionEvent, Topic } from '../session.ts';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let ended = false;
   let model = '';
   let language: Shared.Language = 'en';
-  let subject = '';
-  let nodes: MindmapNode[] = [];
-  let notes: Note[] = [];
+  let mindmap = new Mindmap();
   let timer: Timer | null = null;
   let postureMode: PostureMode = 'auto';
   let posture: Posture = 'socratic';
 
   for (const event of events) {
+    mindmap = mindmap.apply(event);
+
     switch (event.type) {
       case 'SessionCreated':
         model = event.model;
@@ -34,77 +34,6 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
       case 'ModelChanged':
         model = event.model;
         break;
-
-      case 'SubjectChanged':
-        subject = event.subject;
-        break;
-
-      case 'MindmapNodeAdded':
-        nodes.push(structuredClone(event.node));
-        break;
-
-      case 'MindmapNodeRemoved':
-        nodes = nodes.filter(({ id }) => id !== event.nodeId);
-        break;
-
-      case 'MindmapNodeLabelChanged': {
-        const node = nodes.find(hasId(event.nodeId));
-
-        assert(node);
-        node.label = event.label;
-
-        break;
-      }
-
-      case 'MindmapNodeStatusChanged': {
-        const node = nodes.find(hasId(event.nodeId));
-
-        assert(node);
-        node.status = event.status;
-
-        break;
-      }
-
-      case 'MindmapNodeMoved': {
-        const node = nodes.find(hasId(event.nodeId));
-
-        assert(node);
-        node.parentId = event.parentId;
-
-        if (event.parentId === null) {
-          node.status ??= 'pending';
-        } else {
-          delete node.status;
-        }
-
-        break;
-      }
-
-      case 'NoteAdded':
-        notes.push(structuredClone(event.note));
-        break;
-
-      case 'NoteRemoved':
-        notes = notes.filter(({ id }) => id !== event.noteId);
-        break;
-
-      case 'NoteContentChanged': {
-        const note = notes.find(hasId(event.noteId));
-
-        assert(note);
-        note.content = event.content;
-
-        break;
-      }
-
-      case 'NoteMoved': {
-        const note = notes.find(hasId(event.noteId));
-
-        assert(note);
-        note.parentId = event.parentId;
-
-        break;
-      }
 
       case 'TimerStarted':
         timer = Timer.start(event.duration, event.occurredAt);
@@ -140,10 +69,10 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     ended,
     model,
     language,
-    subject,
-    topics: toTopics(nodes),
-    notes,
-    mindmap: { nodes },
+    subject: mindmap.subject,
+    topics: toTopics(mindmap),
+    notes: mindmap.notes,
+    mindmap: { nodes: mindmap.nodes },
     timer,
     postureMode,
     posture,
@@ -151,10 +80,8 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   };
 }
 
-function toTopics(nodes: MindmapNode[]): Topic[] {
-  return nodes
-    .filter((node) => node.parentId === null)
-    .map((node) => ({ id: node.id, label: node.label, status: node.status ?? 'pending' }));
+function toTopics(mindmap: Mindmap): Topic[] {
+  return mindmap.topics().map((node) => ({ id: node.id, label: node.label, status: node.status ?? 'pending' }));
 }
 
 const timelineEventTypes = new Set<SessionEvent['type']>([
@@ -167,9 +94,11 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'MindmapNodeRemoved',
   'MindmapNodeLabelChanged',
   'MindmapNodeStatusChanged',
+  'MindmapNodeSummaryChanged',
   'MindmapNodeMoved',
   'NoteAdded',
   'NoteRemoved',
+  'NoteTitleChanged',
   'NoteContentChanged',
   'NoteMoved',
   'TimerStarted',
@@ -276,6 +205,14 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         break;
       }
 
+      case 'MindmapNodeSummaryChanged': {
+        const label = nodes.get(event.nodeId);
+
+        assert(label !== undefined);
+        items.push({ kind: 'node-summary-changed', label });
+        break;
+      }
+
       case 'MindmapNodeMoved': {
         const label = nodes.get(event.nodeId);
 
@@ -285,31 +222,41 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
       }
 
       case 'NoteAdded':
-        notes.set(event.note.id, event.note.content);
-        items.push({ kind: 'note-added', content: event.note.content });
+        notes.set(event.note.id, event.note.title);
+        items.push({ kind: 'note-added', title: event.note.title });
         break;
 
       case 'NoteRemoved': {
-        const content = notes.get(event.noteId);
+        const title = notes.get(event.noteId);
 
-        assert(content !== undefined);
+        assert(title !== undefined);
         notes.delete(event.noteId);
-        items.push({ kind: 'note-removed', content });
+        items.push({ kind: 'note-removed', title });
+        break;
+      }
+
+      case 'NoteTitleChanged': {
+        const oldTitle = notes.get(event.noteId);
+
+        assert(oldTitle !== undefined);
+        notes.set(event.noteId, event.title);
+        items.push({ kind: 'note-title-changed', oldTitle, newTitle: event.title });
         break;
       }
 
       case 'NoteContentChanged': {
-        assert(notes.has(event.noteId));
-        notes.set(event.noteId, event.content);
-        items.push({ kind: 'note-content-changed', content: event.content });
+        const title = notes.get(event.noteId);
+
+        assert(title !== undefined);
+        items.push({ kind: 'note-content-changed', title });
         break;
       }
 
       case 'NoteMoved': {
-        const content = notes.get(event.noteId);
+        const title = notes.get(event.noteId);
 
-        assert(content !== undefined);
-        items.push({ kind: 'note-moved', content });
+        assert(title !== undefined);
+        items.push({ kind: 'note-moved', title });
         break;
       }
 

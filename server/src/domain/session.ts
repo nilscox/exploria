@@ -24,8 +24,9 @@ export type Topic = {
 
 export type Note = {
   id: string;
-  content: string;
   parentId: string | null;
+  title: string;
+  content: string;
 };
 
 export type Message =
@@ -65,9 +66,11 @@ export type SessionEvent =
   | SessionDomainEvent<'MindmapNodeRemoved', { nodeId: string }>
   | SessionDomainEvent<'MindmapNodeLabelChanged', { nodeId: string; label: string }>
   | SessionDomainEvent<'MindmapNodeStatusChanged', { nodeId: string; status: TopicStatus }>
+  | SessionDomainEvent<'MindmapNodeSummaryChanged', { nodeId: string; summary: string }>
   | SessionDomainEvent<'MindmapNodeMoved', { nodeId: string; parentId: string | null }>
   | SessionDomainEvent<'NoteAdded', { note: Note }>
   | SessionDomainEvent<'NoteRemoved', { noteId: string }>
+  | SessionDomainEvent<'NoteTitleChanged', { noteId: string; title: string }>
   | SessionDomainEvent<'NoteContentChanged', { noteId: string; content: string }>
   | SessionDomainEvent<'NoteMoved', { noteId: string; parentId: string | null }>
   | SessionDomainEvent<'TimerStarted', { duration: number }>
@@ -115,26 +118,22 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._language;
   }
 
-  private _subject: string = '';
-
-  get subject(): string {
-    return this._subject;
-  }
-
-  private _nodes: MindmapNode[] = [];
-
-  get nodes() {
-    return this._nodes;
-  }
+  private _mindmap = new Mindmap();
 
   get mindmap() {
-    return new Mindmap(this._nodes);
+    return this._mindmap;
   }
 
-  private _notes: Note[] = [];
+  get subject(): string {
+    return this._mindmap.subject;
+  }
+
+  get nodes() {
+    return this._mindmap.nodes;
+  }
 
   get notes() {
-    return this._notes;
+    return this._mindmap.notes;
   }
 
   private _timer: Timer | null = null;
@@ -211,62 +210,6 @@ export class Session extends AggregateRoot<SessionEvent> {
         this._model = model;
       },
 
-      SubjectChanged: ({ subject }) => {
-        this._subject = subject;
-      },
-
-      MindmapNodeAdded: ({ node }) => {
-        this._nodes.push(node);
-      },
-
-      MindmapNodeRemoved: ({ nodeId }) => {
-        this._nodes = this._nodes.filter(({ id }) => id !== nodeId);
-      },
-
-      MindmapNodeLabelChanged: ({ nodeId, label }) => {
-        const node = this._nodes.find(hasId(nodeId));
-        assert(node);
-        node.label = label;
-      },
-
-      MindmapNodeStatusChanged: ({ nodeId, status }) => {
-        const node = this._nodes.find(hasId(nodeId));
-        assert(node);
-        node.status = status;
-      },
-
-      MindmapNodeMoved: ({ nodeId, parentId }) => {
-        const node = this._nodes.find(hasId(nodeId));
-        assert(node);
-        node.parentId = parentId;
-
-        if (parentId === null) {
-          node.status ??= 'pending';
-        } else {
-          delete node.status;
-        }
-      },
-
-      NoteAdded: ({ note }) => {
-        this._notes.push(note);
-      },
-
-      NoteRemoved: ({ noteId }) => {
-        this._notes = this._notes.filter(({ id }) => id !== noteId);
-      },
-
-      NoteContentChanged: ({ noteId, content }) => {
-        const note = this._notes.find(hasId(noteId));
-        assert(note);
-        note.content = content;
-      },
-
-      NoteMoved: ({ noteId, parentId }) => {
-        const note = this._notes.find(hasId(noteId));
-        assert(note);
-        note.parentId = parentId;
-      },
-
       TimerStarted: ({ occurredAt, duration }) => {
         this._timer = Timer.start(duration, occurredAt);
       },
@@ -308,6 +251,7 @@ export class Session extends AggregateRoot<SessionEvent> {
       (handle[event.type] as (event: SessionEvent) => void)(event);
     }
 
+    this._mindmap = this._mindmap.apply(event);
     this._events.push(event);
   }
 
@@ -321,7 +265,7 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   addNode({ label, parentId = null }: { label: string; parentId?: string | null }): string {
     if (parentId !== null) {
-      assert(this.mindmap.has(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(this.mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
     }
 
     const node: MindmapNode = {
@@ -345,7 +289,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     }
   }
 
-  updateNode(nodeId: string, { label, status }: { label?: string; status?: TopicStatus }) {
+  updateNode(nodeId: string, { label, status, summary }: { label?: string; status?: TopicStatus; summary?: string }) {
     const node = this.mindmap.get(nodeId);
 
     assert(node, new Error(`Cannot find node "${nodeId}"`));
@@ -359,19 +303,23 @@ export class Session extends AggregateRoot<SessionEvent> {
 
       this.emit('MindmapNodeStatusChanged', { nodeId, status });
     }
+
+    if (summary !== undefined) {
+      this.emit('MindmapNodeSummaryChanged', { nodeId, summary });
+    }
   }
 
   removeNode(nodeId: string) {
     const mindmap = this.mindmap;
 
-    if (!mindmap.has(nodeId)) {
+    if (!mindmap.hasNode(nodeId)) {
       return;
     }
 
     const subtree = mindmap.subtree(nodeId);
     const removedIds = new Set(subtree.map((node) => node.id));
 
-    const orphanedNotes = this._notes.filter((note) => note.parentId !== null && removedIds.has(note.parentId));
+    const orphanedNotes = mindmap.notes.filter((note) => note.parentId !== null && removedIds.has(note.parentId));
 
     for (const note of orphanedNotes) {
       this.emit('NoteRemoved', { noteId: note.id });
@@ -385,26 +333,27 @@ export class Session extends AggregateRoot<SessionEvent> {
   moveNode(nodeId: string, parentId: string | null) {
     const mindmap = this.mindmap;
 
-    assert(mindmap.has(nodeId), new Error(`Cannot find node "${nodeId}"`));
+    assert(mindmap.hasNode(nodeId), new Error(`Cannot find node "${nodeId}"`));
     assert(nodeId !== parentId, new Error('A node cannot be its own parent'));
 
     if (parentId !== null) {
-      assert(mindmap.has(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
       assert(!mindmap.isDescendant(parentId, nodeId), new Error('Cannot move a node into its own subtree'));
     }
 
     this.emit('MindmapNodeMoved', { nodeId, parentId });
   }
 
-  addNote({ content, parentId = null }: { content: string; parentId?: string | null }): string {
+  addNote({ title, content, parentId = null }: { title: string; content: string; parentId?: string | null }): string {
     if (parentId !== null) {
-      assert(this.mindmap.has(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(this.mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
     }
 
     const note: Note = {
       id: this.generator.id(),
-      content,
       parentId,
+      title,
+      content,
     };
 
     this.emit('NoteAdded', { note });
@@ -413,17 +362,21 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   removeNote(noteId: string) {
-    if (!this._notes.some(hasId(noteId))) {
+    if (!this.mindmap.notes.some(hasId(noteId))) {
       return;
     }
 
     this.emit('NoteRemoved', { noteId });
   }
 
-  updateNote(noteId: string, { content }: { content?: string }) {
-    const note = this._notes.find(hasId(noteId));
+  updateNote(noteId: string, { title, content }: { title?: string; content?: string }) {
+    const note = this.mindmap.getNote(noteId);
 
     assert(note, new Error(`Cannot find note "${noteId}"`));
+
+    if (title) {
+      this.emit('NoteTitleChanged', { noteId, title });
+    }
 
     if (content) {
       this.emit('NoteContentChanged', { noteId, content });
@@ -431,12 +384,12 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   moveNote(noteId: string, parentId: string | null) {
-    const note = this._notes.find(hasId(noteId));
+    const note = this.mindmap.getNote(noteId);
 
     assert(note, new Error(`Cannot find note "${noteId}"`));
 
     if (parentId !== null) {
-      assert(this.mindmap.has(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(this.mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
     }
 
     this.emit('NoteMoved', { noteId, parentId });

@@ -53,13 +53,23 @@ void describe('toSessionView', () => {
   void it('reconstructs notes with their attachment', () => {
     const nodeId = session.addNode({ label: 'Node' });
 
-    session.addNote({ content: 'Note A', parentId: nodeId });
+    session.addNote({ title: 'Note A', content: 'Note A body', parentId: nodeId });
 
     const { id: noteId } = session.notes[0]!;
 
     session.updateNote(noteId, { content: 'Note A updated' });
 
-    assert.deepStrictEqual(view().notes, [{ id: noteId, content: 'Note A updated', parentId: nodeId }]);
+    assert.deepStrictEqual(view().notes, [
+      { id: noteId, parentId: nodeId, title: 'Note A', content: 'Note A updated' },
+    ]);
+  });
+
+  void it('reconstructs a topic summary', () => {
+    const nodeId = session.addNode({ label: 'Topic' });
+
+    session.updateNode(nodeId, { summary: 'A recap.' });
+
+    assert.partialDeepStrictEqual(view().mindmap.nodes, [{ id: nodeId, summary: 'A recap.' }]);
   });
 
   void it('reconstructs the timer across pause and resume', () => {
@@ -183,46 +193,56 @@ void describe('toTimeline', () => {
     ]);
   });
 
-  void it('emits note-added with note content', () => {
-    session.addNote({ content: 'My note' });
+  void it('emits note-added with the note title', () => {
+    session.addNote({ title: 'My note', content: 'body' });
 
-    assert.deepStrictEqual(timeline(), [{ kind: 'note-added', content: 'My note' }]);
+    assert.deepStrictEqual(timeline(), [{ kind: 'note-added', title: 'My note' }]);
   });
 
-  void it('emits note-removed with the note content at time of removal', () => {
-    session.addNote({ content: 'Initial content' });
+  void it('emits note-removed with the note title at time of removal', () => {
+    session.addNote({ title: 'Initial title', content: 'body' });
     const noteId = session.notes[0]!.id;
-    session.updateNote(noteId, { content: 'Updated content' });
+    session.updateNote(noteId, { title: 'Updated title' });
     session.removeNote(noteId);
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'note-added', content: 'Initial content' },
-      { kind: 'note-content-changed', content: 'Updated content' },
-      { kind: 'note-removed', content: 'Updated content' },
+      { kind: 'note-added', title: 'Initial title' },
+      { kind: 'note-title-changed', oldTitle: 'Initial title', newTitle: 'Updated title' },
+      { kind: 'note-removed', title: 'Updated title' },
     ]);
   });
 
-  void it('emits note-content-changed with the new content', () => {
-    session.addNote({ content: 'Original' });
+  void it('emits note-content-changed with the note title', () => {
+    session.addNote({ title: 'My note', content: 'Original' });
     const noteId = session.notes[0]!.id;
     session.updateNote(noteId, { content: 'Updated' });
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'note-added', content: 'Original' },
-      { kind: 'note-content-changed', content: 'Updated' },
+      { kind: 'note-added', title: 'My note' },
+      { kind: 'note-content-changed', title: 'My note' },
     ]);
   });
 
-  void it('emits note-moved with the note content', () => {
+  void it('emits note-moved with the note title', () => {
     const nodeId = session.addNode({ label: 'Node' });
-    session.addNote({ content: 'My note' });
+    session.addNote({ title: 'My note', content: 'body' });
     const noteId = session.notes[0]!.id;
     session.moveNote(noteId, nodeId);
 
     assert.deepStrictEqual(timeline(), [
       { kind: 'node-added', label: 'Node' },
-      { kind: 'note-added', content: 'My note' },
-      { kind: 'note-moved', content: 'My note' },
+      { kind: 'note-added', title: 'My note' },
+      { kind: 'note-moved', title: 'My note' },
+    ]);
+  });
+
+  void it('emits node-summary-changed with the node label', () => {
+    const nodeId = session.addNode({ label: 'Topic' });
+    session.updateNode(nodeId, { summary: 'A recap.' });
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'node-added', label: 'Topic' },
+      { kind: 'node-summary-changed', label: 'Topic' },
     ]);
   });
 

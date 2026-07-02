@@ -62,9 +62,9 @@ export class E2eTest {
     server: { host: '', port: 0 },
     database: { url: '', debug: false },
     openAi: { baseUrl: '', apiKey: '' },
+    tavily: { apiKey: undefined },
     auth: { cookieSecret: 'secret', clientUrl: 'http://localhost' },
     assistant: undefined,
-    tavilyApiKey: undefined,
   };
 
   readonly db: TestDatabase;

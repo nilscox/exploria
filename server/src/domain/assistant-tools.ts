@@ -55,11 +55,13 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
       id: z.string(),
       label: z.string().min(1).max(64).optional(),
       status: z.enum(['pending', 'in_progress', 'done']).optional(),
+      summary: z.string().optional().describe(t('update-node.summary-param')),
     }),
-    execute: (session, { id, label, status }) => {
+    execute: (session, { id, label, status, summary }) => {
       session.updateNode(id, {
         label,
         status,
+        summary,
       });
 
       return t('tool.result.ok');
@@ -94,12 +96,14 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
   saveNote: tool({
     description: t('save-note.description'),
     param: z.object({
-      note: z.string().min(1),
+      title: z.string().min(1).max(64).describe(t('save-note.title-param')),
+      content: z.string().min(1).describe(t('save-note.content-param')),
       nodeId: z.string().nullish().describe(t('save-note.node-param')),
     }),
-    execute: (session, { note, nodeId }) => {
+    execute: (session, { title, content, nodeId }) => {
       session.addNote({
-        content: note,
+        title,
+        content,
         parentId: nodeId ?? null,
       });
 
@@ -128,7 +132,7 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
         return t('get-saved-notes.empty');
       }
 
-      const list = session.notes.map((note, i) => `${i + 1}. ${note.content}`).join('\n');
+      const list = session.notes.map((note, i) => `${i + 1}. ${note.title}: ${note.content}`).join('\n');
 
       return `${t('get-saved-notes.heading')}\n${list}`;
     },

@@ -43,11 +43,13 @@ export namespace Shared {
     | { kind: 'node-removed'; label: string }
     | { kind: 'node-label-changed'; oldLabel: string; newLabel: string }
     | { kind: 'node-status-changed'; label: string; status: TopicStatus }
+    | { kind: 'node-summary-changed'; label: string }
     | { kind: 'node-moved'; label: string }
-    | { kind: 'note-added'; content: string }
-    | { kind: 'note-removed'; content: string }
-    | { kind: 'note-content-changed'; content: string }
-    | { kind: 'note-moved'; content: string }
+    | { kind: 'note-added'; title: string }
+    | { kind: 'note-removed'; title: string }
+    | { kind: 'note-title-changed'; oldTitle: string; newTitle: string }
+    | { kind: 'note-content-changed'; title: string }
+    | { kind: 'note-moved'; title: string }
     | { kind: 'timer-started'; duration: number }
     | { kind: 'timer-cleared' }
     | { kind: 'timer-paused' }

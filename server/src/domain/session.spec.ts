@@ -109,7 +109,7 @@ void describe('Session', () => {
     const parentId = session.addNode({ label: 'Parent' });
     const childId = session.addNode({ label: 'Child', parentId });
 
-    session.addNote({ content: 'note', parentId: childId });
+    session.addNote({ title: 'note', content: 'note', parentId: childId });
 
     session.removeNode(parentId);
 
@@ -182,26 +182,36 @@ void describe('Session', () => {
     assert.strictEqual(session.nodes[1]!.status, 'pending');
   });
 
+  void it("sets a topic's summary", () => {
+    const nodeId = session.addNode({ label: 'Node' });
+
+    session.updateNode(nodeId, { summary: 'A recap of the discussion.' });
+
+    assert.strictEqual(session.nodes[0]!.summary, 'A recap of the discussion.');
+
+    expectEvent('MindmapNodeSummaryChanged', { nodeId, summary: 'A recap of the discussion.' });
+  });
+
   void it('adds a note attached to a node', () => {
     const nodeId = session.addNode({ label: 'Node' });
 
-    session.addNote({ content: 'content', parentId: nodeId });
+    session.addNote({ title: 'Title', content: 'content', parentId: nodeId });
 
     const { id: noteId } = session.notes[0]!;
 
-    assert.deepStrictEqual(session.notes, [{ id: noteId, content: 'content', parentId: nodeId }]);
+    assert.deepStrictEqual(session.notes, [{ id: noteId, parentId: nodeId, title: 'Title', content: 'content' }]);
 
-    expectEvent('NoteAdded', { note: { id: noteId, content: 'content', parentId: nodeId } });
+    expectEvent('NoteAdded', { note: { id: noteId, parentId: nodeId, title: 'Title', content: 'content' } });
   });
 
   void it('adds a note attached to the root by default', () => {
-    session.addNote({ content: 'content' });
+    session.addNote({ title: 'Title', content: 'content' });
 
     assert.strictEqual(session.notes[0]!.parentId, null);
   });
 
   void it('removes a note', () => {
-    session.addNote({ content: 'content' });
+    session.addNote({ title: 'Title', content: 'content' });
 
     const { id: noteId } = session.notes[0]!;
 
@@ -212,22 +222,24 @@ void describe('Session', () => {
     expectEvent('NoteRemoved', { noteId });
   });
 
-  void it("changes a note's content", () => {
-    session.addNote({ content: 'initial' });
+  void it("changes a note's title and content", () => {
+    session.addNote({ title: 'initial title', content: 'initial' });
 
     const { id: noteId } = session.notes[0]!;
 
-    session.updateNote(noteId, { content: 'updated' });
+    session.updateNote(noteId, { title: 'updated title', content: 'updated' });
 
+    assert.strictEqual(session.notes[0]!.title, 'updated title');
     assert.strictEqual(session.notes[0]!.content, 'updated');
 
+    expectEvent('NoteTitleChanged', { noteId, title: 'updated title' });
     expectEvent('NoteContentChanged', { noteId, content: 'updated' });
   });
 
   void it('moves a note to another node', () => {
     const nodeId = session.addNode({ label: 'Node' });
 
-    session.addNote({ content: 'content' });
+    session.addNote({ title: 'Title', content: 'content' });
 
     const { id: noteId } = session.notes[0]!;
 
@@ -441,13 +453,13 @@ void describe('Session', () => {
     void it('reconstructs notes from events', () => {
       const source = new Session(new StubGenerator(), clock);
       const nodeId = source.addNode({ label: 'Node' });
-      source.addNote({ content: 'Note A', parentId: nodeId });
-      source.addNote({ content: 'Note B' });
+      source.addNote({ title: 'Note A', content: 'Note A body', parentId: nodeId });
+      source.addNote({ title: 'Note B', content: 'Note B body' });
 
       const noteAId = source.notes[0]!.id;
       const noteBId = source.notes[1]!.id;
 
-      source.updateNote(noteAId, { content: 'Note A updated' });
+      source.updateNote(noteAId, { title: 'Note A renamed', content: 'Note A updated' });
       source.moveNote(noteAId, null);
       source.removeNote(noteBId);
 

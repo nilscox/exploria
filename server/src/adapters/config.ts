@@ -26,7 +26,6 @@ export interface Config {
   };
 
   assistant?: 'test' | 'eval';
-  templatesPath: string;
 }
 
 export class EnvConfig implements Config {
@@ -92,9 +91,5 @@ export class EnvConfig implements Config {
     if (value === 'test' || value === 'eval') {
       return value;
     }
-  }
-
-  get templatesPath() {
-    return this.read('TEMPLATES_PATH', true);
   }
 }

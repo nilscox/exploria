@@ -224,13 +224,13 @@ void describe('SessionController', () => {
       const parentId = (await view(id)).mindmap.nodes[0]!.id;
 
       await send(id, '/node', 'POST', { label: 'Child', parentId });
-      await send(id, '/note', 'POST', { content: 'A note', nodeId: parentId });
+      await send(id, '/note', 'POST', { title: 'Note', content: 'A note', nodeId: parentId });
 
       const session = await view(id);
 
       assert.strictEqual(session.mindmap.nodes.length, 2);
       assert.strictEqual(session.topics.length, 1);
-      assert.partialDeepStrictEqual(session.notes, [{ content: 'A note', parentId }]);
+      assert.partialDeepStrictEqual(session.notes, [{ title: 'Note', content: 'A note', parentId }]);
     });
 
     void it('updates a top-level node, then clears its status when nested via move', async () => {
@@ -256,6 +256,19 @@ void describe('SessionController', () => {
       assert.deepStrictEqual(node, { id: nodeId, label: 'Renamed', parentId });
     });
 
+    void it('sets a topic summary', async () => {
+      const id = await createSession();
+
+      await send(id, '/node', 'POST', { label: 'Topic' });
+      const nodeId = (await view(id)).mindmap.nodes[0]!.id;
+
+      await send(id, `/node/${nodeId}`, 'PUT', { summary: 'A recap of the discussion.' });
+
+      const node = (await view(id)).mindmap.nodes.find((node) => node.id === nodeId);
+
+      assert.partialDeepStrictEqual(node, { summary: 'A recap of the discussion.' });
+    });
+
     void it('removes a node with its descendants and their notes', async () => {
       const id = await createSession();
 
@@ -263,7 +276,7 @@ void describe('SessionController', () => {
       const parentId = (await view(id)).mindmap.nodes[0]!.id;
 
       await send(id, '/node', 'POST', { label: 'Child', parentId });
-      await send(id, '/note', 'POST', { content: 'A note', nodeId: parentId });
+      await send(id, '/note', 'POST', { title: 'Note', content: 'A note', nodeId: parentId });
 
       await send(id, `/node/${parentId}`, 'DELETE', {});
 

@@ -357,17 +357,64 @@ msgstr "More"
 msgid "No Topic"
 msgstr "No Topic"
 
-#. placeholder {0}: item.content
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Node \"{0}\" done"
+msgstr "Node \"{0}\" done"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Node \"{0}\" in progress"
+msgstr "Node \"{0}\" in progress"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Node \"{0}\" is pending"
+msgstr "Node \"{0}\" is pending"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Node added: {0}"
+msgstr "Node added: {0}"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Node moved: {0}"
+msgstr "Node moved: {0}"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Node removed: {0}"
+msgstr "Node removed: {0}"
+
+#. placeholder {0}: item.oldLabel
+#. placeholder {1}: item.newLabel
+#: src/session/session-timeline.tsx
+msgid "Node renamed: {0} <0/> {1}"
+msgstr "Node renamed: {0} <0/> {1}"
+
+#. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
 msgid "Note added: {0}"
 msgstr "Note added: {0}"
 
-#. placeholder {0}: item.content
+#. placeholder {0}: item.title
+#: src/session/session-timeline.tsx
+msgid "Note moved: {0}"
+msgstr "Note moved: {0}"
+
+#. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
 msgid "Note removed: {0}"
 msgstr "Note removed: {0}"
 
-#. placeholder {0}: item.content
+#. placeholder {0}: item.oldTitle
+#. placeholder {1}: item.newTitle
+#: src/session/session-timeline.tsx
+msgid "Note renamed: {0} <0/> {1}"
+msgstr "Note renamed: {0} <0/> {1}"
+
+#. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
@@ -422,6 +469,10 @@ msgstr "Send"
 #: src/session/session-timeline.tsx
 msgid "Session ended"
 msgstr "Session ended"
+
+#: src/session/session.tsx
+msgid "Session info"
+msgstr "Session info"
 
 #: src/session/session-timeline.tsx
 msgid "Session reopened"
@@ -509,6 +560,7 @@ msgstr "Stress-test an idea"
 msgid "Subject changed: {0}"
 msgstr "Subject changed: {0}"
 
+#: src/session/mind-map/session-mind-map.tsx
 #: src/session/session.tsx
 msgid "Subject to be defined"
 msgstr "Subject to be defined"
@@ -520,6 +572,11 @@ msgstr "Sujet à définir"
 #: src/session/summary.ts
 msgid "Summary"
 msgstr "Summary"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Summary updated: {0}"
+msgstr "Summary updated: {0}"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -575,37 +632,6 @@ msgstr "Timer started: {0} minutes"
 #: src/session/info/topics-list.tsx
 msgid "To do"
 msgstr "To do"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Topic \"{0}\" done"
-msgstr "Topic \"{0}\" done"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Topic \"{0}\" in progress"
-msgstr "Topic \"{0}\" in progress"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Topic \"{0}\" is pending"
-msgstr "Topic \"{0}\" is pending"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Topic added: {0}"
-msgstr "Topic added: {0}"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Topic removed: {0}"
-msgstr "Topic removed: {0}"
-
-#. placeholder {0}: item.oldLabel
-#. placeholder {1}: item.newLabel
-#: src/session/session-timeline.tsx
-msgid "Topic renamed: {0} <0/> {1}"
-msgstr "Topic renamed: {0} <0/> {1}"
 
 #: src/session/info/topics-list.tsx
 msgid "Topics"

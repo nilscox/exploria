@@ -131,14 +131,15 @@ export class SessionController {
     });
 
     this.router.put('/:id/node/:nodeId', async (req, res) => {
-      const { label, status } = z
+      const { label, status, summary } = z
         .object({
           label: z.string().min(1).max(64).optional(),
           status: z.enum(['pending', 'in_progress', 'done']).optional(),
+          summary: z.string().optional(),
         })
         .parse(req.body);
 
-      await this.updateNode(req.params.nodeId, { label, status });
+      await this.updateNode(req.params.nodeId, { label, status, summary });
       res.status(204).end();
     });
 
@@ -155,19 +156,21 @@ export class SessionController {
     });
 
     this.router.post('/:id/note', async (req, res) => {
-      const { content, nodeId } = z
-        .object({ content: z.string().min(1), nodeId: z.string().nullish() })
+      const { title, content, nodeId } = z
+        .object({ title: z.string().min(1).max(64), content: z.string().min(1), nodeId: z.string().nullish() })
         .parse(req.body);
 
-      await this.addNote(content, nodeId ?? null);
+      await this.addNote(title, content, nodeId ?? null);
 
       res.status(204).end();
     });
 
     this.router.put('/:id/note/:noteId', async (req, res) => {
-      const { content } = z.object({ content: z.string().min(1) }).parse(req.body);
+      const { title, content } = z
+        .object({ title: z.string().min(1).max(64).optional(), content: z.string().min(1).optional() })
+        .parse(req.body);
 
-      await this.updateNote(req.params.noteId, { content });
+      await this.updateNote(req.params.noteId, { title, content });
       res.status(204).end();
     });
 
@@ -339,7 +342,7 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async updateNode(nodeId: string, changes: { label?: string; status?: TopicStatus }) {
+  private async updateNode(nodeId: string, changes: { label?: string; status?: TopicStatus; summary?: string }) {
     const session = this.getSessionInstance();
 
     session.updateNode(nodeId, changes);
@@ -369,17 +372,17 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async addNote(content: string, parentId: string | null) {
+  private async addNote(title: string, content: string, parentId: string | null) {
     const session = this.getSessionInstance();
 
-    session.addNote({ content, parentId });
+    session.addNote({ title, content, parentId });
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
   }
 
-  private async updateNote(noteId: string, changes: { content?: string }) {
+  private async updateNote(noteId: string, changes: { title?: string; content?: string }) {
     const session = this.getSessionInstance();
 
     session.updateNote(noteId, changes);

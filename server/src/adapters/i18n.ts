@@ -10,7 +10,6 @@ import type { MindmapNode } from '../domain/mindmap.ts';
 import type { Session, TopicStatus } from '../domain/session.ts';
 import type { Timer } from '../domain/timer.ts';
 import type { Clock } from './clock.ts';
-import type { Config } from './config.ts';
 
 type Templates = {
   instructions: {};
@@ -31,20 +30,20 @@ export class MustacheI18n implements I18n {
 
   private readonly templates: Record<Template, Record<Language, string>>;
 
-  constructor(config: Config, clock: Clock) {
+  constructor(clock: Clock) {
     this.clock = clock;
 
     this.templates = {
-      instructions: MustacheI18n.loadTemplates(config.templatesPath, 'instructions'),
-      'session-info': MustacheI18n.loadTemplates(config.templatesPath, 'session-info'),
-      'timer-info': MustacheI18n.loadTemplates(config.templatesPath, 'timer-info'),
-      summary: MustacheI18n.loadTemplates(config.templatesPath, 'summary'),
+      instructions: MustacheI18n.loadTemplates('instructions'),
+      'session-info': MustacheI18n.loadTemplates('session-info'),
+      'timer-info': MustacheI18n.loadTemplates('timer-info'),
+      summary: MustacheI18n.loadTemplates('summary'),
     };
   }
 
-  private static loadTemplates(templatesPath: string, name: Template) {
+  private static loadTemplates(name: Template) {
     return Object.fromEntries(
-      languages.map((lang) => [lang, fs.readFileSync(`${templatesPath}/${name}.${lang}.md`, 'utf-8')]),
+      languages.map((lang) => [lang, fs.readFileSync(`templates/${name}.${lang}.md`, 'utf-8')]),
     ) as Record<Language, string>;
   }
 
@@ -101,12 +100,12 @@ export class MustacheI18n implements I18n {
   };
 
   private static renderMindmap(session: Session, statusLabels: Record<TopicStatus, string>): string {
-    const { mindmap, notes } = session;
+    const { mindmap } = session;
     const lines: string[] = [`- ${session.subject || '(no subject yet)'}`];
 
     const renderNotes = (parentId: string | null, indent: string) => {
-      for (const note of notes.filter((note) => note.parentId === parentId)) {
-        lines.push(`${indent}- note: ${note.content} (id: "${note.id}")`);
+      for (const note of mindmap.notesOf(parentId)) {
+        lines.push(`${indent}- note: ${note.title}: ${note.content} (id: "${note.id}")`);
       }
     };
 
@@ -115,6 +114,11 @@ export class MustacheI18n implements I18n {
       const status = node.status ? `, ${statusLabels[node.status]}` : '';
 
       lines.push(`${indent}- ${node.label} (id: "${node.id}"${status})`);
+
+      if (node.summary) {
+        lines.push(`${indent}  summary: ${node.summary}`);
+      }
+
       renderNotes(node.id, `${indent}  `);
 
       for (const child of mindmap.children(node.id)) {

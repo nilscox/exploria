@@ -128,6 +128,12 @@ const components: {
     </Notification>
   ),
 
+  'node-summary-changed': ({ item }) => (
+    <Notification Icon={ListIcon}>
+      <Trans>Summary updated: {item.label}</Trans>
+    </Notification>
+  ),
+
   'node-moved': ({ item }) => (
     <Notification Icon={ListIcon}>
       <Trans>Node moved: {item.label}</Trans>
@@ -136,25 +142,33 @@ const components: {
 
   'note-added': ({ item }) => (
     <Notification Icon={StickyNoteIcon}>
-      <Trans>Note added: {item.content}</Trans>
+      <Trans>Note added: {item.title}</Trans>
     </Notification>
   ),
 
   'note-removed': ({ item }) => (
     <Notification Icon={StickyNoteXIcon}>
-      <Trans>Note removed: {item.content}</Trans>
+      <Trans>Note removed: {item.title}</Trans>
+    </Notification>
+  ),
+
+  'note-title-changed': ({ item }) => (
+    <Notification Icon={StickyNoteIcon}>
+      <Trans>
+        Note renamed: {item.oldTitle} <ArrowRightIcon className="mb-0.5 inline-block size-3.5" /> {item.newTitle}
+      </Trans>
     </Notification>
   ),
 
   'note-content-changed': ({ item }) => (
     <Notification Icon={StickyNoteIcon}>
-      <Trans>Note updated: {item.content}</Trans>
+      <Trans>Note updated: {item.title}</Trans>
     </Notification>
   ),
 
   'note-moved': ({ item }) => (
     <Notification Icon={StickyNoteIcon}>
-      <Trans>Note moved: {item.content}</Trans>
+      <Trans>Note moved: {item.title}</Trans>
     </Notification>
   ),
 
