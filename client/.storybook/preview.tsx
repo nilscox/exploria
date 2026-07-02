@@ -3,15 +3,16 @@ import { I18nProvider } from '@lingui/react';
 import type { Preview } from '@storybook/react-vite';
 import { useEffect } from 'react';
 
+import { messages } from '../src/i18n/en/messages';
+
 import '../src/index.css';
-import { messages } from '../src/locales/en/messages';
 
 i18n.load('en', messages);
 i18n.activate('en');
 
 function IntlDecorator({ locale, children }: { locale: string; children: React.ReactNode }) {
   useEffect(() => {
-    import(`../src/locales/${locale}/messages`)
+    import(`../src/i18n/${locale}/messages`)
       .then(({ messages }) => {
         i18n.load(locale, messages);
         i18n.activate(locale);
