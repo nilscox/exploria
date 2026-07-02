@@ -80,8 +80,8 @@ const sessions = {
     });
   },
 
-  async addNode(id: string, label: string): Promise<void> {
-    await fetchApi(`/session/${id}/node`, {
+  async addTopic(id: string, label: string): Promise<void> {
+    await fetchApi(`/session/${id}/topic`, {
       method: 'POST',
       body: { label },
     });

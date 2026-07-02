@@ -29,47 +29,33 @@ void describe('toSessionView', () => {
     assert.partialDeepStrictEqual(view(), { ended: false });
   });
 
-  void it('derives topics from the top-level mind map nodes', () => {
-    const topicAId = session.addNode({ label: 'Topic A' });
-    const topicBId = session.addNode({ label: 'Topic B' });
+  void it('exposes all topics of the tree with parent, status and summary', () => {
+    const topicAId = session.addTopic({ label: 'Topic A' });
+    const topicBId = session.addTopic({ label: 'Topic B' });
+    const subId = session.addTopic({ label: 'Sub', parentId: topicAId });
 
-    session.addNode({ label: 'Sub', parentId: topicAId });
-    session.updateNode(topicAId, { status: 'in_progress' });
-    session.removeNode(topicBId);
+    session.updateTopic(topicAId, { status: 'in_progress' });
+    session.updateTopic(topicAId, { summary: 'A recap.' });
+    session.removeTopic(topicBId);
 
-    assert.deepStrictEqual(view().topics, [{ id: topicAId, label: 'Topic A', status: 'in_progress' }]);
-  });
-
-  void it('reconstructs the mind map nodes', () => {
-    const parentId = session.addNode({ label: 'Parent' });
-    const childId = session.addNode({ label: 'Child', parentId });
-
-    assert.deepStrictEqual(view().mindmap.nodes, [
-      { id: parentId, parentId: null, label: 'Parent', status: 'pending' },
-      { id: childId, parentId, label: 'Child' },
+    assert.deepStrictEqual(view().topics, [
+      { id: topicAId, parentId: null, label: 'Topic A', status: 'in_progress', summary: 'A recap.' },
+      { id: subId, parentId: topicAId, label: 'Sub' },
     ]);
   });
 
   void it('reconstructs notes with their attachment', () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const topicId = session.addTopic({ label: 'Topic' });
 
-    session.addNote({ title: 'Note A', content: 'Note A body', parentId: nodeId });
+    session.addNote({ title: 'Note A', content: 'Note A body', parentId: topicId });
 
     const { id: noteId } = session.notes[0]!;
 
     session.updateNote(noteId, { content: 'Note A updated' });
 
     assert.deepStrictEqual(view().notes, [
-      { id: noteId, parentId: nodeId, title: 'Note A', content: 'Note A updated' },
+      { id: noteId, parentId: topicId, title: 'Note A', content: 'Note A updated' },
     ]);
-  });
-
-  void it('reconstructs a topic summary', () => {
-    const nodeId = session.addNode({ label: 'Topic' });
-
-    session.updateNode(nodeId, { summary: 'A recap.' });
-
-    assert.partialDeepStrictEqual(view().mindmap.nodes, [{ id: nodeId, summary: 'A recap.' }]);
   });
 
   void it('reconstructs the timer across pause and resume', () => {
@@ -118,13 +104,13 @@ void describe('toTimeline', () => {
     const date = clock.date.toISOString();
 
     session.addMessage('user', 'Hello');
-    session.addNode({ label: 'Node' });
+    session.addTopic({ label: 'Node' });
     session.startTimer(60);
     session.addMessage('assistant', 'Hi', { model: 'model', toolCalls: [] });
 
     assert.deepStrictEqual(timeline(), [
       { kind: 'message', date, role: 'user', content: 'Hello', toolCalls: undefined },
-      { kind: 'node-added', label: 'Node' },
+      { kind: 'topic-added', label: 'Node' },
       { kind: 'timer-started', duration: 60 },
       { kind: 'message', date, role: 'assistant', content: 'Hi', toolCalls: undefined },
     ]);
@@ -152,44 +138,44 @@ void describe('toTimeline', () => {
   });
 
   void it('emits node-removed with the node label', () => {
-    const nodeId = session.addNode({ label: 'Node A' });
-    session.removeNode(nodeId);
+    const nodeId = session.addTopic({ label: 'Node A' });
+    session.removeTopic(nodeId);
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'node-added', label: 'Node A' },
-      { kind: 'node-removed', label: 'Node A' },
+      { kind: 'topic-added', label: 'Node A' },
+      { kind: 'topic-removed', label: 'Node A' },
     ]);
   });
 
   void it('emits node-label-changed with old and new labels', () => {
-    const nodeId = session.addNode({ label: 'Old label' });
-    session.updateNode(nodeId, { label: 'New label' });
+    const nodeId = session.addTopic({ label: 'Old label' });
+    session.updateTopic(nodeId, { label: 'New label' });
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'node-added', label: 'Old label' },
-      { kind: 'node-label-changed', oldLabel: 'Old label', newLabel: 'New label' },
+      { kind: 'topic-added', label: 'Old label' },
+      { kind: 'topic-label-changed', oldLabel: 'Old label', newLabel: 'New label' },
     ]);
   });
 
   void it('emits node-status-changed with node label and new status', () => {
-    const nodeId = session.addNode({ label: 'Node A' });
-    session.updateNode(nodeId, { status: 'in_progress' });
+    const nodeId = session.addTopic({ label: 'Node A' });
+    session.updateTopic(nodeId, { status: 'in_progress' });
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'node-added', label: 'Node A' },
-      { kind: 'node-status-changed', label: 'Node A', status: 'in_progress' },
+      { kind: 'topic-added', label: 'Node A' },
+      { kind: 'topic-status-changed', label: 'Node A', status: 'in_progress' },
     ]);
   });
 
   void it('emits node-moved with the node label', () => {
-    const nodeId = session.addNode({ label: 'Node A' });
-    const parentId = session.addNode({ label: 'Parent' });
-    session.moveNode(nodeId, parentId);
+    const nodeId = session.addTopic({ label: 'Node A' });
+    const parentId = session.addTopic({ label: 'Parent' });
+    session.moveTopic(nodeId, parentId);
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'node-added', label: 'Node A' },
-      { kind: 'node-added', label: 'Parent' },
-      { kind: 'node-moved', label: 'Node A' },
+      { kind: 'topic-added', label: 'Node A' },
+      { kind: 'topic-added', label: 'Parent' },
+      { kind: 'topic-moved', label: 'Node A' },
     ]);
   });
 
@@ -224,25 +210,25 @@ void describe('toTimeline', () => {
   });
 
   void it('emits note-moved with the note title', () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const nodeId = session.addTopic({ label: 'Node' });
     session.addNote({ title: 'My note', content: 'body' });
     const noteId = session.notes[0]!.id;
     session.moveNote(noteId, nodeId);
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'node-added', label: 'Node' },
+      { kind: 'topic-added', label: 'Node' },
       { kind: 'note-added', title: 'My note' },
       { kind: 'note-moved', title: 'My note' },
     ]);
   });
 
   void it('emits node-summary-changed with the node label', () => {
-    const nodeId = session.addNode({ label: 'Topic' });
-    session.updateNode(nodeId, { summary: 'A recap.' });
+    const nodeId = session.addTopic({ label: 'Topic' });
+    session.updateTopic(nodeId, { summary: 'A recap.' });
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'node-added', label: 'Topic' },
-      { kind: 'node-summary-changed', label: 'Topic' },
+      { kind: 'topic-added', label: 'Topic' },
+      { kind: 'topic-summary-changed', label: 'Topic' },
     ]);
   });
 

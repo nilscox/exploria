@@ -1,6 +1,6 @@
 import { AggregateRoot, type DomainEvent } from '../aggregate-root.ts';
 import { assert, hasId } from '../utils.ts';
-import { Mindmap, type MindmapNode } from './mindmap.ts';
+import { Mindmap, type Topic } from './mindmap.ts';
 import { Timer } from './timer.ts';
 
 import type { Clock } from '../adapters/clock.ts';
@@ -15,12 +15,6 @@ export const postures = ['socratic', 'devils_advocate', 'examiner', 'advisor', '
 export type Posture = (typeof postures)[number];
 
 export type PostureMode = 'auto' | 'forced';
-
-export type Topic = {
-  id: string;
-  label: string;
-  status: TopicStatus;
-};
 
 export type Note = {
   id: string;
@@ -62,12 +56,12 @@ export type SessionEvent =
   | SessionDomainEvent<'SessionReopened'>
   | SessionDomainEvent<'ModelChanged', { model: string }>
   | SessionDomainEvent<'SubjectChanged', { subject: string }>
-  | SessionDomainEvent<'MindmapNodeAdded', { node: MindmapNode }>
-  | SessionDomainEvent<'MindmapNodeRemoved', { nodeId: string }>
-  | SessionDomainEvent<'MindmapNodeLabelChanged', { nodeId: string; label: string }>
-  | SessionDomainEvent<'MindmapNodeStatusChanged', { nodeId: string; status: TopicStatus }>
-  | SessionDomainEvent<'MindmapNodeSummaryChanged', { nodeId: string; summary: string }>
-  | SessionDomainEvent<'MindmapNodeMoved', { nodeId: string; parentId: string | null }>
+  | SessionDomainEvent<'TopicAdded', { topic: Topic }>
+  | SessionDomainEvent<'TopicRemoved', { topicId: string }>
+  | SessionDomainEvent<'TopicLabelChanged', { topicId: string; label: string }>
+  | SessionDomainEvent<'TopicStatusChanged', { topicId: string; status: TopicStatus }>
+  | SessionDomainEvent<'TopicSummaryChanged', { topicId: string; summary: string }>
+  | SessionDomainEvent<'TopicMoved', { topicId: string; parentId: string | null }>
   | SessionDomainEvent<'NoteAdded', { note: Note }>
   | SessionDomainEvent<'NoteRemoved', { noteId: string }>
   | SessionDomainEvent<'NoteTitleChanged', { noteId: string; title: string }>
@@ -128,8 +122,8 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._mindmap.subject;
   }
 
-  get nodes() {
-    return this._mindmap.nodes;
+  get topics() {
+    return this._mindmap.topics;
   }
 
   get notes() {
@@ -263,61 +257,61 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit('SubjectChanged', { subject });
   }
 
-  addNode({ label, parentId = null }: { label: string; parentId?: string | null }): string {
+  addTopic({ label, parentId = null }: { label: string; parentId?: string | null }): string {
     if (parentId !== null) {
-      assert(this.mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(this.mindmap.hasTopic(parentId), new Error(`Cannot find topic "${parentId}"`));
     }
 
-    const node: MindmapNode = {
+    const topic: Topic = {
       id: this.generator.id(),
       parentId,
       label,
     };
 
     if (parentId === null) {
-      node.status = 'pending';
+      topic.status = 'pending';
     }
 
-    this.emit('MindmapNodeAdded', { node });
+    this.emit('TopicAdded', { topic });
 
-    return node.id;
+    return topic.id;
   }
 
-  addNodes(labels: string[], parentId: string | null = null) {
+  addTopics(labels: string[], parentId: string | null = null) {
     for (const label of labels) {
-      this.addNode({ label, parentId });
+      this.addTopic({ label, parentId });
     }
   }
 
-  updateNode(nodeId: string, { label, status, summary }: { label?: string; status?: TopicStatus; summary?: string }) {
-    const node = this.mindmap.get(nodeId);
+  updateTopic(topicId: string, { label, status, summary }: { label?: string; status?: TopicStatus; summary?: string }) {
+    const topic = this.mindmap.getTopic(topicId);
 
-    assert(node, new Error(`Cannot find node "${nodeId}"`));
+    assert(topic, new Error(`Cannot find topic "${topicId}"`));
 
     if (label) {
-      this.emit('MindmapNodeLabelChanged', { nodeId, label });
+      this.emit('TopicLabelChanged', { topicId, label });
     }
 
     if (status) {
-      assert(node.parentId === null, new Error('Only top-level nodes can have a status'));
+      assert(topic.parentId === null, new Error('Only top-level topics can have a status'));
 
-      this.emit('MindmapNodeStatusChanged', { nodeId, status });
+      this.emit('TopicStatusChanged', { topicId, status });
     }
 
     if (summary !== undefined) {
-      this.emit('MindmapNodeSummaryChanged', { nodeId, summary });
+      this.emit('TopicSummaryChanged', { topicId, summary });
     }
   }
 
-  removeNode(nodeId: string) {
+  removeTopic(topicId: string) {
     const mindmap = this.mindmap;
 
-    if (!mindmap.hasNode(nodeId)) {
+    if (!mindmap.hasTopic(topicId)) {
       return;
     }
 
-    const subtree = mindmap.subtree(nodeId);
-    const removedIds = new Set(subtree.map((node) => node.id));
+    const subtree = mindmap.subtree(topicId);
+    const removedIds = new Set(subtree.map((topic) => topic.id));
 
     const orphanedNotes = mindmap.notes.filter((note) => note.parentId !== null && removedIds.has(note.parentId));
 
@@ -325,28 +319,28 @@ export class Session extends AggregateRoot<SessionEvent> {
       this.emit('NoteRemoved', { noteId: note.id });
     }
 
-    for (const node of subtree) {
-      this.emit('MindmapNodeRemoved', { nodeId: node.id });
+    for (const topic of subtree) {
+      this.emit('TopicRemoved', { topicId: topic.id });
     }
   }
 
-  moveNode(nodeId: string, parentId: string | null) {
+  moveTopic(topicId: string, parentId: string | null) {
     const mindmap = this.mindmap;
 
-    assert(mindmap.hasNode(nodeId), new Error(`Cannot find node "${nodeId}"`));
-    assert(nodeId !== parentId, new Error('A node cannot be its own parent'));
+    assert(mindmap.hasTopic(topicId), new Error(`Cannot find topic "${topicId}"`));
+    assert(topicId !== parentId, new Error('A topic cannot be its own parent'));
 
     if (parentId !== null) {
-      assert(mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
-      assert(!mindmap.isDescendant(parentId, nodeId), new Error('Cannot move a node into its own subtree'));
+      assert(mindmap.hasTopic(parentId), new Error(`Cannot find topic "${parentId}"`));
+      assert(!mindmap.isDescendant(parentId, topicId), new Error('Cannot move a topic into its own subtree'));
     }
 
-    this.emit('MindmapNodeMoved', { nodeId, parentId });
+    this.emit('TopicMoved', { topicId, parentId });
   }
 
   addNote({ title, content, parentId = null }: { title: string; content: string; parentId?: string | null }): string {
     if (parentId !== null) {
-      assert(this.mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(this.mindmap.hasTopic(parentId), new Error(`Cannot find topic "${parentId}"`));
     }
 
     const note: Note = {
@@ -389,7 +383,7 @@ export class Session extends AggregateRoot<SessionEvent> {
     assert(note, new Error(`Cannot find note "${noteId}"`));
 
     if (parentId !== null) {
-      assert(this.mindmap.hasNode(parentId), new Error(`Cannot find node "${parentId}"`));
+      assert(this.mindmap.hasTopic(parentId), new Error(`Cannot find topic "${parentId}"`));
     }
 
     this.emit('NoteMoved', { noteId, parentId });

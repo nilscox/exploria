@@ -6,7 +6,7 @@ import { languages } from '../domain/i18n/index.ts';
 import { messages } from '../domain/i18n/messages.ts';
 
 import type { Language, Translate } from '../domain/i18n/index.ts';
-import type { MindmapNode } from '../domain/mindmap.ts';
+import type { Topic } from '../domain/mindmap.ts';
 import type { Session, TopicStatus } from '../domain/session.ts';
 import type { Timer } from '../domain/timer.ts';
 import type { Clock } from './clock.ts';
@@ -86,11 +86,11 @@ export class MustacheI18n implements I18n {
       done: t('session-info.status.done'),
     };
 
-    const inProgressCount = session.nodes.filter((node) => node.status === 'in_progress').length;
+    const inProgressCount = session.topics.filter((topic) => topic.status === 'in_progress').length;
 
     return {
       mindmap: MustacheI18n.renderMindmap(session, statusLabels),
-      noNodeInProgress: inProgressCount !== 1,
+      noTopicInProgress: inProgressCount !== 1,
       mapUpToDate: inProgressCount === 1,
       timerInfo: this.render(lang, 'timer-info', { timer: session.timer }),
       posture: session.posture,
@@ -109,27 +109,27 @@ export class MustacheI18n implements I18n {
       }
     };
 
-    const renderNode = (node: MindmapNode, depth: number) => {
+    const renderTopic = (topic: Topic, depth: number) => {
       const indent = '  '.repeat(depth);
-      const status = node.status ? `, ${statusLabels[node.status]}` : '';
+      const status = topic.status ? `, ${statusLabels[topic.status]}` : '';
 
-      lines.push(`${indent}- ${node.label} (id: "${node.id}"${status})`);
+      lines.push(`${indent}- ${topic.label} (id: "${topic.id}"${status})`);
 
-      if (node.summary) {
-        lines.push(`${indent}  summary: ${node.summary}`);
+      if (topic.summary) {
+        lines.push(`${indent}  summary: ${topic.summary}`);
       }
 
-      renderNotes(node.id, `${indent}  `);
+      renderNotes(topic.id, `${indent}  `);
 
-      for (const child of mindmap.children(node.id)) {
-        renderNode(child, depth + 1);
+      for (const child of mindmap.children(topic.id)) {
+        renderTopic(child, depth + 1);
       }
     };
 
     renderNotes(null, '  ');
 
-    for (const topic of mindmap.topics()) {
-      renderNode(topic, 1);
+    for (const topic of mindmap.children(null)) {
+      renderTopic(topic, 1);
     }
 
     return lines.join('\n');

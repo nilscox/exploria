@@ -1,12 +1,12 @@
 # Mind map
 
-The current mind map (root = subject, its children = topics, deeper nodes = sub-topics, with attached notes):
+The current mind map (root = subject, its children = topics, deeper ones = sub-topics, with attached notes):
 
 {{{mindmap}}}
 
-{{#noNodeInProgress}}
-No node is in progress. Should one be updated?
-{{/noNodeInProgress}}
+{{#noTopicInProgress}}
+No topic is in progress. Should one be updated?
+{{/noTopicInProgress}}
 
 {{#mapUpToDate}}
 Is the mind map up to date with the discussion?

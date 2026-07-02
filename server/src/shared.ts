@@ -19,10 +19,8 @@ export namespace Shared {
   export type Language = DomainLanguage;
 
   export type TopicStatus = session.TopicStatus;
-  export type Topic = session.Topic;
+  export type Topic = mindmap.Topic;
   export type Note = session.Note;
-  export type MindmapNode = mindmap.MindmapNode;
-  export type Mindmap = { nodes: MindmapNode[] };
   export type Timer = { duration: number; startedAt: Date; pausedAt?: Date };
   export type Message = session.Message;
   export type Role = session.Role;
@@ -39,12 +37,12 @@ export namespace Shared {
     | { kind: 'session-ended' }
     | { kind: 'session-reopened' }
     | { kind: 'subject-changed'; subject: string }
-    | { kind: 'node-added'; label: string }
-    | { kind: 'node-removed'; label: string }
-    | { kind: 'node-label-changed'; oldLabel: string; newLabel: string }
-    | { kind: 'node-status-changed'; label: string; status: TopicStatus }
-    | { kind: 'node-summary-changed'; label: string }
-    | { kind: 'node-moved'; label: string }
+    | { kind: 'topic-added'; label: string }
+    | { kind: 'topic-removed'; label: string }
+    | { kind: 'topic-label-changed'; oldLabel: string; newLabel: string }
+    | { kind: 'topic-status-changed'; label: string; status: TopicStatus }
+    | { kind: 'topic-summary-changed'; label: string }
+    | { kind: 'topic-moved'; label: string }
     | { kind: 'note-added'; title: string }
     | { kind: 'note-removed'; title: string }
     | { kind: 'note-title-changed'; oldTitle: string; newTitle: string }
@@ -67,7 +65,6 @@ export namespace Shared {
     subject: string;
     topics: Topic[];
     notes: Note[];
-    mindmap: Mindmap;
     timer: Timer | null;
     postureMode: PostureMode;
     posture: Posture;

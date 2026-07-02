@@ -1,12 +1,12 @@
 # Carte mentale
 
-La carte mentale actuelle (racine = sujet, ses enfants = les axes, noeuds plus profonds = sous-axes, avec leurs notes rattachées) :
+La carte mentale actuelle (racine = sujet global, ses enfants = les sujets, plus profonds = sous-sujets, avec leurs notes rattachées) :
 
 {{{mindmap}}}
 
-{{#noNodeInProgress}}
-Aucun noeud en cours. Faut-il en mettre un à jour ?
-{{/noNodeInProgress}}
+{{#noTopicInProgress}}
+Aucun sujet en cours. Faut-il en mettre un à jour ?
+{{/noTopicInProgress}}
 
 {{#mapUpToDate}}
 La carte mentale est-elle à jour par rapport à la discussion ?

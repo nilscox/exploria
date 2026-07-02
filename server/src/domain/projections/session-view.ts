@@ -3,7 +3,7 @@ import { Mindmap } from '../mindmap.ts';
 import { Timer } from '../timer.ts';
 
 import type { Shared } from '../../shared.ts';
-import type { Posture, PostureMode, SessionEvent, Topic } from '../session.ts';
+import type { Posture, PostureMode, SessionEvent } from '../session.ts';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let ended = false;
@@ -70,18 +70,13 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     model,
     language,
     subject: mindmap.subject,
-    topics: toTopics(mindmap),
+    topics: mindmap.topics,
     notes: mindmap.notes,
-    mindmap: { nodes: mindmap.nodes },
     timer,
     postureMode,
     posture,
     timeline: toTimeline(events),
   };
-}
-
-function toTopics(mindmap: Mindmap): Topic[] {
-  return mindmap.topics().map((node) => ({ id: node.id, label: node.label, status: node.status ?? 'pending' }));
 }
 
 const timelineEventTypes = new Set<SessionEvent['type']>([
@@ -90,12 +85,12 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'SessionReopened',
   'ModelChanged',
   'SubjectChanged',
-  'MindmapNodeAdded',
-  'MindmapNodeRemoved',
-  'MindmapNodeLabelChanged',
-  'MindmapNodeStatusChanged',
-  'MindmapNodeSummaryChanged',
-  'MindmapNodeMoved',
+  'TopicAdded',
+  'TopicRemoved',
+  'TopicLabelChanged',
+  'TopicStatusChanged',
+  'TopicSummaryChanged',
+  'TopicMoved',
   'NoteAdded',
   'NoteRemoved',
   'NoteTitleChanged',
@@ -118,7 +113,7 @@ export function affectsTimeline(type: SessionEvent['type']): boolean {
 
 export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
   const items: Shared.TimelineItem[] = [];
-  const nodes = new Map<string, string>();
+  const topics = new Map<string, string>();
   const notes = new Map<string, string>();
 
   let pendingPaths: Shared.SelectablePath[] | null = null;
@@ -174,50 +169,50 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         items.push({ kind: 'subject-changed', subject: event.subject });
         break;
 
-      case 'MindmapNodeAdded':
-        nodes.set(event.node.id, event.node.label);
-        items.push({ kind: 'node-added', label: event.node.label });
+      case 'TopicAdded':
+        topics.set(event.topic.id, event.topic.label);
+        items.push({ kind: 'topic-added', label: event.topic.label });
         break;
 
-      case 'MindmapNodeRemoved': {
-        const label = nodes.get(event.nodeId);
+      case 'TopicRemoved': {
+        const label = topics.get(event.topicId);
 
         assert(label !== undefined);
-        nodes.delete(event.nodeId);
-        items.push({ kind: 'node-removed', label });
+        topics.delete(event.topicId);
+        items.push({ kind: 'topic-removed', label });
         break;
       }
 
-      case 'MindmapNodeLabelChanged': {
-        const oldLabel = nodes.get(event.nodeId);
+      case 'TopicLabelChanged': {
+        const oldLabel = topics.get(event.topicId);
 
         assert(oldLabel !== undefined);
-        nodes.set(event.nodeId, event.label);
-        items.push({ kind: 'node-label-changed', oldLabel, newLabel: event.label });
+        topics.set(event.topicId, event.label);
+        items.push({ kind: 'topic-label-changed', oldLabel, newLabel: event.label });
         break;
       }
 
-      case 'MindmapNodeStatusChanged': {
-        const label = nodes.get(event.nodeId);
+      case 'TopicStatusChanged': {
+        const label = topics.get(event.topicId);
 
         assert(label !== undefined);
-        items.push({ kind: 'node-status-changed', label, status: event.status });
+        items.push({ kind: 'topic-status-changed', label, status: event.status });
         break;
       }
 
-      case 'MindmapNodeSummaryChanged': {
-        const label = nodes.get(event.nodeId);
+      case 'TopicSummaryChanged': {
+        const label = topics.get(event.topicId);
 
         assert(label !== undefined);
-        items.push({ kind: 'node-summary-changed', label });
+        items.push({ kind: 'topic-summary-changed', label });
         break;
       }
 
-      case 'MindmapNodeMoved': {
-        const label = nodes.get(event.nodeId);
+      case 'TopicMoved': {
+        const label = topics.get(event.topicId);
 
         assert(label !== undefined);
-        items.push({ kind: 'node-moved', label });
+        items.push({ kind: 'topic-moved', label });
         break;
       }
 

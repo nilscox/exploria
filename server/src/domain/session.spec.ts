@@ -52,156 +52,156 @@ void describe('Session', () => {
   });
 
   void it('adds a top-level node', () => {
-    session.addNode({ label: 'Node' });
+    session.addTopic({ label: 'Node' });
 
-    const { id: nodeId } = session.nodes[0]!;
+    const { id: topicId } = session.topics[0]!;
 
-    assert.deepStrictEqual(session.nodes, [{ id: nodeId, parentId: null, label: 'Node', status: 'pending' }]);
+    assert.deepStrictEqual(session.topics, [{ id: topicId, parentId: null, label: 'Node', status: 'pending' }]);
 
-    expectEvent('MindmapNodeAdded', { node: { id: nodeId, parentId: null, label: 'Node', status: 'pending' } });
+    expectEvent('TopicAdded', { topic: { id: topicId, parentId: null, label: 'Node', status: 'pending' } });
   });
 
   void it('adds multiple nodes at once', () => {
-    session.addNodes(['Node A', 'Node B']);
+    session.addTopics(['Node A', 'Node B']);
 
-    const [nodeA, nodeB] = session.nodes;
+    const [nodeA, nodeB] = session.topics;
 
-    assert.deepStrictEqual(session.nodes, [
+    assert.deepStrictEqual(session.topics, [
       { id: nodeA!.id, parentId: null, label: 'Node A', status: 'pending' },
       { id: nodeB!.id, parentId: null, label: 'Node B', status: 'pending' },
     ]);
   });
 
   void it('adds a nested node without a status', () => {
-    const parentId = session.addNode({ label: 'Parent' });
-    const childId = session.addNode({ label: 'Child', parentId });
+    const parentId = session.addTopic({ label: 'Parent' });
+    const childId = session.addTopic({ label: 'Child', parentId });
 
-    assert.deepStrictEqual(session.nodes[1], { id: childId, parentId, label: 'Child' });
+    assert.deepStrictEqual(session.topics[1], { id: childId, parentId, label: 'Child' });
 
-    expectEvent('MindmapNodeAdded', { node: { id: childId, parentId, label: 'Child' } });
+    expectEvent('TopicAdded', { topic: { id: childId, parentId, label: 'Child' } });
   });
 
   void it('fails to add a node under a missing parent', () => {
-    assert.throws(() => session.addNode({ label: 'Child', parentId: 'missing' }));
+    assert.throws(() => session.addTopic({ label: 'Child', parentId: 'missing' }));
   });
 
   void it('derives the top-level nodes as the mind map topics', () => {
-    const topicId = session.addNode({ label: 'Topic' });
-    session.addNode({ label: 'Sub', parentId: topicId });
+    const topicId = session.addTopic({ label: 'Topic' });
+    session.addTopic({ label: 'Sub', parentId: topicId });
 
     assert.deepStrictEqual(
-      session.mindmap.topics().map((node) => node.id),
+      session.mindmap.children(null).map((node) => node.id),
       [topicId],
     );
   });
 
   void it('removes a node', () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const topicId = session.addTopic({ label: 'Node' });
 
-    session.removeNode(nodeId);
+    session.removeTopic(topicId);
 
-    assert.deepStrictEqual(session.nodes, []);
+    assert.deepStrictEqual(session.topics, []);
 
-    expectEvent('MindmapNodeRemoved', { nodeId });
+    expectEvent('TopicRemoved', { topicId });
   });
 
   void it('removes a node with its descendants and their notes', () => {
-    const parentId = session.addNode({ label: 'Parent' });
-    const childId = session.addNode({ label: 'Child', parentId });
+    const parentId = session.addTopic({ label: 'Parent' });
+    const childId = session.addTopic({ label: 'Child', parentId });
 
     session.addNote({ title: 'note', content: 'note', parentId: childId });
 
-    session.removeNode(parentId);
+    session.removeTopic(parentId);
 
-    assert.deepStrictEqual(session.nodes, []);
+    assert.deepStrictEqual(session.topics, []);
     assert.deepStrictEqual(session.notes, []);
   });
 
   void it("changes a node's label", () => {
-    const nodeId = session.addNode({ label: 'Initial' });
+    const topicId = session.addTopic({ label: 'Initial' });
 
-    session.updateNode(nodeId, { label: 'Changed' });
+    session.updateTopic(topicId, { label: 'Changed' });
 
-    assert.strictEqual(session.nodes[0]!.label, 'Changed');
+    assert.strictEqual(session.topics[0]!.label, 'Changed');
 
-    expectEvent('MindmapNodeLabelChanged', { nodeId, label: 'Changed' });
+    expectEvent('TopicLabelChanged', { topicId, label: 'Changed' });
   });
 
   void it("changes a node's status", () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const topicId = session.addTopic({ label: 'Node' });
 
-    session.updateNode(nodeId, { status: 'in_progress' });
+    session.updateTopic(topicId, { status: 'in_progress' });
 
-    assert.strictEqual(session.nodes[0]!.status, 'in_progress');
+    assert.strictEqual(session.topics[0]!.status, 'in_progress');
 
-    expectEvent('MindmapNodeStatusChanged', { nodeId, status: 'in_progress' });
+    expectEvent('TopicStatusChanged', { topicId, status: 'in_progress' });
   });
 
   void it('moves a node under another parent', () => {
-    const nodeId = session.addNode({ label: 'Node' });
-    const parentId = session.addNode({ label: 'Parent' });
+    const topicId = session.addTopic({ label: 'Node' });
+    const parentId = session.addTopic({ label: 'Parent' });
 
-    session.moveNode(nodeId, parentId);
+    session.moveTopic(topicId, parentId);
 
-    assert.strictEqual(session.nodes[0]!.parentId, parentId);
+    assert.strictEqual(session.topics[0]!.parentId, parentId);
 
-    expectEvent('MindmapNodeMoved', { nodeId, parentId });
+    expectEvent('TopicMoved', { topicId, parentId });
   });
 
   void it('fails to move a node into its own subtree', () => {
-    const parentId = session.addNode({ label: 'Parent' });
-    const childId = session.addNode({ label: 'Child', parentId });
+    const parentId = session.addTopic({ label: 'Parent' });
+    const childId = session.addTopic({ label: 'Child', parentId });
 
-    assert.throws(() => session.moveNode(parentId, childId));
-    assert.throws(() => session.moveNode(parentId, parentId));
+    assert.throws(() => session.moveTopic(parentId, childId));
+    assert.throws(() => session.moveTopic(parentId, parentId));
   });
 
   void it('fails to set a status on a nested node', () => {
-    const parentId = session.addNode({ label: 'Parent' });
-    const childId = session.addNode({ label: 'Child', parentId });
+    const parentId = session.addTopic({ label: 'Parent' });
+    const childId = session.addTopic({ label: 'Child', parentId });
 
-    assert.throws(() => session.updateNode(childId, { status: 'in_progress' }));
+    assert.throws(() => session.updateTopic(childId, { status: 'in_progress' }));
   });
 
   void it('clears the status when a top-level node is nested', () => {
-    const nodeId = session.addNode({ label: 'Node' });
-    const parentId = session.addNode({ label: 'Parent' });
+    const topicId = session.addTopic({ label: 'Node' });
+    const parentId = session.addTopic({ label: 'Parent' });
 
-    session.updateNode(nodeId, { status: 'in_progress' });
-    session.moveNode(nodeId, parentId);
+    session.updateTopic(topicId, { status: 'in_progress' });
+    session.moveTopic(topicId, parentId);
 
-    assert.strictEqual(session.nodes[0]!.status, undefined);
+    assert.strictEqual(session.topics[0]!.status, undefined);
   });
 
   void it('restores a status when a nested node is promoted to top level', () => {
-    const parentId = session.addNode({ label: 'Parent' });
-    const childId = session.addNode({ label: 'Child', parentId });
+    const parentId = session.addTopic({ label: 'Parent' });
+    const childId = session.addTopic({ label: 'Child', parentId });
 
-    session.moveNode(childId, null);
+    session.moveTopic(childId, null);
 
-    assert.strictEqual(session.nodes[1]!.status, 'pending');
+    assert.strictEqual(session.topics[1]!.status, 'pending');
   });
 
   void it("sets a topic's summary", () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const topicId = session.addTopic({ label: 'Node' });
 
-    session.updateNode(nodeId, { summary: 'A recap of the discussion.' });
+    session.updateTopic(topicId, { summary: 'A recap of the discussion.' });
 
-    assert.strictEqual(session.nodes[0]!.summary, 'A recap of the discussion.');
+    assert.strictEqual(session.topics[0]!.summary, 'A recap of the discussion.');
 
-    expectEvent('MindmapNodeSummaryChanged', { nodeId, summary: 'A recap of the discussion.' });
+    expectEvent('TopicSummaryChanged', { topicId, summary: 'A recap of the discussion.' });
   });
 
   void it('adds a note attached to a node', () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const topicId = session.addTopic({ label: 'Node' });
 
-    session.addNote({ title: 'Title', content: 'content', parentId: nodeId });
+    session.addNote({ title: 'Title', content: 'content', parentId: topicId });
 
     const { id: noteId } = session.notes[0]!;
 
-    assert.deepStrictEqual(session.notes, [{ id: noteId, parentId: nodeId, title: 'Title', content: 'content' }]);
+    assert.deepStrictEqual(session.notes, [{ id: noteId, parentId: topicId, title: 'Title', content: 'content' }]);
 
-    expectEvent('NoteAdded', { note: { id: noteId, parentId: nodeId, title: 'Title', content: 'content' } });
+    expectEvent('NoteAdded', { note: { id: noteId, parentId: topicId, title: 'Title', content: 'content' } });
   });
 
   void it('adds a note attached to the root by default', () => {
@@ -237,17 +237,17 @@ void describe('Session', () => {
   });
 
   void it('moves a note to another node', () => {
-    const nodeId = session.addNode({ label: 'Node' });
+    const topicId = session.addTopic({ label: 'Node' });
 
     session.addNote({ title: 'Title', content: 'content' });
 
     const { id: noteId } = session.notes[0]!;
 
-    session.moveNote(noteId, nodeId);
+    session.moveNote(noteId, topicId);
 
-    assert.strictEqual(session.notes[0]!.parentId, nodeId);
+    assert.strictEqual(session.notes[0]!.parentId, topicId);
 
-    expectEvent('NoteMoved', { noteId, parentId: nodeId });
+    expectEvent('NoteMoved', { noteId, parentId: topicId });
   });
 
   void it('starts and clears the timer', () => {
@@ -437,23 +437,23 @@ void describe('Session', () => {
 
     void it('reconstructs mind map nodes from events', () => {
       const source = new Session(new StubGenerator(), clock);
-      const nodeAId = source.addNode({ label: 'Node A' });
-      const nodeBId = source.addNode({ label: 'Node B' });
-      const childId = source.addNode({ label: 'Child', parentId: nodeAId });
+      const topicAId = source.addTopic({ label: 'Node A' });
+      const topicBId = source.addTopic({ label: 'Node B' });
+      const childId = source.addTopic({ label: 'Child', parentId: topicAId });
 
-      source.updateNode(nodeAId, { status: 'in_progress' });
-      source.updateNode(nodeBId, { label: 'Node B updated' });
-      source.moveNode(childId, nodeBId);
+      source.updateTopic(topicAId, { status: 'in_progress' });
+      source.updateTopic(topicBId, { label: 'Node B updated' });
+      source.moveTopic(childId, topicBId);
 
       const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
-      assert.deepStrictEqual(replayed.nodes, source.nodes);
+      assert.deepStrictEqual(replayed.topics, source.topics);
     });
 
     void it('reconstructs notes from events', () => {
       const source = new Session(new StubGenerator(), clock);
-      const nodeId = source.addNode({ label: 'Node' });
-      source.addNote({ title: 'Note A', content: 'Note A body', parentId: nodeId });
+      const topicId = source.addTopic({ label: 'Node' });
+      source.addNote({ title: 'Note A', content: 'Note A body', parentId: topicId });
       source.addNote({ title: 'Note B', content: 'Note B body' });
 
       const noteAId = source.notes[0]!.id;

@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { Mindmap, type MindmapNode } from './mindmap.ts';
+import { Mindmap, type Topic } from './mindmap.ts';
 
 import type { Note } from './session.ts';
 
-function node(id: string, parentId: string | null, label = id): MindmapNode {
+function topic(id: string, parentId: string | null, label = id): Topic {
   return { id, parentId, label };
 }
 
@@ -19,36 +19,36 @@ void describe('Mindmap', () => {
   //   │  ├─ a1
   //   │  └─ a2
   //   └─ b
-  const nodes = [node('a', null), node('a1', 'a'), node('a2', 'a'), node('b', null)];
-  const mindmap = new Mindmap({ nodes });
+  const topics = [topic('a', null), topic('a1', 'a'), topic('a2', 'a'), topic('b', null)];
+  const mindmap = new Mindmap({ topics });
 
-  void it('tells whether a node exists', () => {
-    assert.strictEqual(mindmap.hasNode('a1'), true);
-    assert.strictEqual(mindmap.hasNode('missing'), false);
+  void it('tells whether a topic exists', () => {
+    assert.strictEqual(mindmap.hasTopic('a1'), true);
+    assert.strictEqual(mindmap.hasTopic('missing'), false);
   });
 
-  void it('lists the children of a node', () => {
+  void it('lists the children of a topic', () => {
     assert.deepStrictEqual(
-      mindmap.children('a').map((node) => node.id),
+      mindmap.children('a').map((topic) => topic.id),
       ['a1', 'a2'],
     );
   });
 
-  void it('lists the topics as the top-level nodes', () => {
+  void it('lists the top-level topics as the children of the root', () => {
     assert.deepStrictEqual(
-      mindmap.topics().map((node) => node.id),
+      mindmap.children(null).map((topic) => topic.id),
       ['a', 'b'],
     );
   });
 
-  void it('returns a subtree with descendants deepest-first and the node last', () => {
+  void it('returns a subtree with descendants deepest-first and the topic last', () => {
     assert.deepStrictEqual(
-      mindmap.subtree('a').map((node) => node.id),
+      mindmap.subtree('a').map((topic) => topic.id),
       ['a1', 'a2', 'a'],
     );
   });
 
-  void it('returns an empty subtree for a missing node', () => {
+  void it('returns an empty subtree for a missing topic', () => {
     assert.deepStrictEqual(mindmap.subtree('missing'), []);
   });
 
@@ -58,8 +58,8 @@ void describe('Mindmap', () => {
     assert.strictEqual(mindmap.isDescendant('a', 'a1'), false);
   });
 
-  void it('lists the notes attached to a node', () => {
-    const withNotes = new Mindmap({ nodes, notes: [note('n1', 'a'), note('n2', null), note('n3', 'a')] });
+  void it('lists the notes attached to a topic', () => {
+    const withNotes = new Mindmap({ topics, notes: [note('n1', 'a'), note('n2', null), note('n3', 'a')] });
 
     assert.deepStrictEqual(
       withNotes.notesOf('a').map((note) => note.id),
@@ -69,39 +69,39 @@ void describe('Mindmap', () => {
 
   void describe('folds', () => {
     void it('applies an event without mutating the source', () => {
-      const before = new Mindmap({ subject: 'Subject', nodes: [node('a', null)] });
+      const before = new Mindmap({ subject: 'Subject', topics: [topic('a', null)] });
       const after = before.apply({
         aggregateType: 'Session',
         aggregateId: 's',
         occurredAt: new Date(),
-        type: 'MindmapNodeLabelChanged',
-        nodeId: 'a',
+        type: 'TopicLabelChanged',
+        topicId: 'a',
         label: 'Renamed',
       });
 
       assert.notStrictEqual(after, before);
-      assert.strictEqual(before.get('a')!.label, 'a');
-      assert.strictEqual(after.get('a')!.label, 'Renamed');
+      assert.strictEqual(before.getTopic('a')!.label, 'a');
+      assert.strictEqual(after.getTopic('a')!.label, 'Renamed');
     });
 
-    void it('clears the status when a node is nested and restores it when promoted', () => {
+    void it('clears the status when a topic is nested and restores it when promoted', () => {
       const base = new Mindmap({
-        nodes: [{ id: 'a', parentId: null, label: 'a', status: 'in_progress' }, node('b', null)],
+        topics: [{ id: 'a', parentId: null, label: 'a', status: 'in_progress' }, topic('b', null)],
       });
 
-      const nested = base.withNodeMoved('a', 'b');
-      assert.strictEqual(nested.get('a')!.status, undefined);
+      const nested = base.withTopicMoved('a', 'b');
+      assert.strictEqual(nested.getTopic('a')!.status, undefined);
 
-      const promoted = nested.withNodeMoved('a', null);
-      assert.strictEqual(promoted.get('a')!.status, 'pending');
+      const promoted = nested.withTopicMoved('a', null);
+      assert.strictEqual(promoted.getTopic('a')!.status, 'pending');
     });
 
     void it('keeps a summary across a move', () => {
       const base = new Mindmap({
-        nodes: [{ id: 'a', parentId: null, label: 'a', summary: 'kept' }, node('b', null)],
+        topics: [{ id: 'a', parentId: null, label: 'a', summary: 'kept' }, topic('b', null)],
       });
 
-      assert.strictEqual(base.withNodeMoved('a', 'b').get('a')!.summary, 'kept');
+      assert.strictEqual(base.withTopicMoved('a', 'b').getTopic('a')!.summary, 'kept');
     });
 
     void it('returns itself for unrelated events', () => {

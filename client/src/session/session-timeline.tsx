@@ -96,47 +96,47 @@ const components: {
     </Notification>
   ),
 
-  'node-added': ({ item }) => (
+  'topic-added': ({ item }) => (
     <Notification Icon={ListIcon}>
-      <Trans>Node added: {item.label}</Trans>
+      <Trans>Topic added: {item.label}</Trans>
     </Notification>
   ),
 
-  'node-removed': ({ item }) => (
+  'topic-removed': ({ item }) => (
     <Notification Icon={ListIcon}>
-      <Trans>Node removed: {item.label}</Trans>
+      <Trans>Topic removed: {item.label}</Trans>
     </Notification>
   ),
 
-  'node-label-changed': ({ item }) => (
+  'topic-label-changed': ({ item }) => (
     <Notification Icon={ListIcon}>
       <Trans>
-        Node renamed: {item.oldLabel} <ArrowRightIcon className="mb-0.5 inline-block size-3.5" /> {item.newLabel}
+        Topic renamed: {item.oldLabel} <ArrowRightIcon className="mb-0.5 inline-block size-3.5" /> {item.newLabel}
       </Trans>
     </Notification>
   ),
 
-  'node-status-changed': ({ item }) => (
+  'topic-status-changed': ({ item }) => (
     <Notification Icon={item.status === 'done' ? CheckIcon : ListIcon}>
       {
         {
-          pending: <Trans>Node "{item.label}" is pending</Trans>,
-          in_progress: <Trans>Node "{item.label}" in progress</Trans>,
-          done: <Trans>Node "{item.label}" done</Trans>,
+          pending: <Trans>Topic "{item.label}" is pending</Trans>,
+          in_progress: <Trans>Topic "{item.label}" in progress</Trans>,
+          done: <Trans>Topic "{item.label}" done</Trans>,
         }[item.status]
       }
     </Notification>
   ),
 
-  'node-summary-changed': ({ item }) => (
+  'topic-summary-changed': ({ item }) => (
     <Notification Icon={ListIcon}>
       <Trans>Summary updated: {item.label}</Trans>
     </Notification>
   ),
 
-  'node-moved': ({ item }) => (
+  'topic-moved': ({ item }) => (
     <Notification Icon={ListIcon}>
-      <Trans>Node moved: {item.label}</Trans>
+      <Trans>Topic moved: {item.label}</Trans>
     </Notification>
   ),
 

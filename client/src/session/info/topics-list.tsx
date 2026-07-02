@@ -34,26 +34,28 @@ export function TopicsListSection({ topics, onAdd }: { topics: Shared.Topic[]; o
 }
 
 function TopicItem({ topic }: { topic: Shared.Topic }) {
+  const status = topic.status ?? 'pending';
+
   return (
     <div
       id={topic.id}
       className={clsx(
         'row bg-neutral items-center gap-2.5 rounded-lg border px-3 py-2',
-        topic.status === 'in_progress' && 'shadow-sm',
+        status === 'in_progress' && 'shadow-sm',
       )}
     >
-      <TopicDot status={topic.status} />
+      <TopicDot status={status} />
 
       <span
         className={clsx(
           'flex-1 text-sm font-medium',
-          topic.status === 'done' && 'text-dim decoration-foreground/20 line-through',
+          status === 'done' && 'text-dim decoration-foreground/20 line-through',
         )}
       >
         {topic.label}
       </span>
 
-      <TopicStatusBadge status={topic.status} />
+      <TopicStatusBadge status={status} />
     </div>
   );
 }

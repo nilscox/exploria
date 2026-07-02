@@ -19,8 +19,8 @@ export default {
   ],
 } satisfies Meta<typeof TopicsListSection>;
 
-function topic(label: string, status: Shared.TopicStatus = 'pending') {
-  return { id: label, label, status };
+function topic(label: string, status: Shared.TopicStatus = 'pending'): Shared.Topic {
+  return { id: label, parentId: null, label, status };
 }
 
 export const noTopic: StoryObj<typeof TopicsListSection> = {

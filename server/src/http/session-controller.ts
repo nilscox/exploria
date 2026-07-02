@@ -120,17 +120,17 @@ export class SessionController {
       res.status(204).end();
     });
 
-    this.router.post('/:id/node', async (req, res) => {
+    this.router.post('/:id/topic', async (req, res) => {
       const { label, parentId } = z
         .object({ label: z.string().min(1).max(64), parentId: z.string().nullish() })
         .parse(req.body);
 
-      await this.addNode(label, parentId ?? null);
+      await this.addTopic(label, parentId ?? null);
 
       res.status(204).end();
     });
 
-    this.router.put('/:id/node/:nodeId', async (req, res) => {
+    this.router.put('/:id/topic/:topicId', async (req, res) => {
       const { label, status, summary } = z
         .object({
           label: z.string().min(1).max(64).optional(),
@@ -139,28 +139,28 @@ export class SessionController {
         })
         .parse(req.body);
 
-      await this.updateNode(req.params.nodeId, { label, status, summary });
+      await this.updateTopic(req.params.topicId, { label, status, summary });
       res.status(204).end();
     });
 
-    this.router.delete('/:id/node/:nodeId', async (req, res) => {
-      await this.removeNode(req.params.nodeId);
+    this.router.delete('/:id/topic/:topicId', async (req, res) => {
+      await this.removeTopic(req.params.topicId);
       res.status(204).end();
     });
 
-    this.router.put('/:id/node/:nodeId/move', async (req, res) => {
+    this.router.put('/:id/topic/:topicId/move', async (req, res) => {
       const { parentId } = z.object({ parentId: z.string().nullable() }).parse(req.body);
 
-      await this.moveNode(req.params.nodeId, parentId);
+      await this.moveTopic(req.params.topicId, parentId);
       res.status(204).end();
     });
 
     this.router.post('/:id/note', async (req, res) => {
-      const { title, content, nodeId } = z
-        .object({ title: z.string().min(1).max(64), content: z.string().min(1), nodeId: z.string().nullish() })
+      const { title, content, topicId } = z
+        .object({ title: z.string().min(1).max(64), content: z.string().min(1), topicId: z.string().nullish() })
         .parse(req.body);
 
-      await this.addNote(title, content, nodeId ?? null);
+      await this.addNote(title, content, topicId ?? null);
 
       res.status(204).end();
     });
@@ -180,9 +180,9 @@ export class SessionController {
     });
 
     this.router.put('/:id/note/:noteId/move', async (req, res) => {
-      const { nodeId } = z.object({ nodeId: z.string().nullable() }).parse(req.body);
+      const { topicId } = z.object({ topicId: z.string().nullable() }).parse(req.body);
 
-      await this.moveNote(req.params.noteId, nodeId);
+      await this.moveNote(req.params.noteId, topicId);
       res.status(204).end();
     });
 
@@ -332,40 +332,40 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async addNode(label: string, parentId: string | null) {
+  private async addTopic(label: string, parentId: string | null) {
     const session = this.getSessionInstance();
 
-    session.addNode({ label, parentId });
+    session.addTopic({ label, parentId });
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
   }
 
-  private async updateNode(nodeId: string, changes: { label?: string; status?: TopicStatus; summary?: string }) {
+  private async updateTopic(topicId: string, changes: { label?: string; status?: TopicStatus; summary?: string }) {
     const session = this.getSessionInstance();
 
-    session.updateNode(nodeId, changes);
+    session.updateTopic(topicId, changes);
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
   }
 
-  private async removeNode(nodeId: string) {
+  private async removeTopic(topicId: string) {
     const session = this.getSessionInstance();
 
-    session.removeNode(nodeId);
+    session.removeTopic(topicId);
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
   }
 
-  private async moveNode(nodeId: string, parentId: string | null) {
+  private async moveTopic(topicId: string, parentId: string | null) {
     const session = this.getSessionInstance();
 
-    session.moveNode(nodeId, parentId);
+    session.moveTopic(topicId, parentId);
 
     const committed = await this.sessionRepository.save(session);
 

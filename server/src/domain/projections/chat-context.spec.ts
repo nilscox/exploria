@@ -53,7 +53,7 @@ void describe('toChatMessages', () => {
   });
 
   void it('ignores events that are not messages or tool-call results', () => {
-    session.addNode({ label: 'Node' });
+    session.addTopic({ label: 'Node' });
     session.startTimer(60);
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);

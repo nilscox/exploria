@@ -357,42 +357,6 @@ msgstr "More"
 msgid "No Topic"
 msgstr "No Topic"
 
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Node \"{0}\" done"
-msgstr "Node \"{0}\" done"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Node \"{0}\" in progress"
-msgstr "Node \"{0}\" in progress"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Node \"{0}\" is pending"
-msgstr "Node \"{0}\" is pending"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Node added: {0}"
-msgstr "Node added: {0}"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Node moved: {0}"
-msgstr "Node moved: {0}"
-
-#. placeholder {0}: item.label
-#: src/session/session-timeline.tsx
-msgid "Node removed: {0}"
-msgstr "Node removed: {0}"
-
-#. placeholder {0}: item.oldLabel
-#. placeholder {1}: item.newLabel
-#: src/session/session-timeline.tsx
-msgid "Node renamed: {0} <0/> {1}"
-msgstr "Node renamed: {0} <0/> {1}"
-
 #. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
 msgid "Note added: {0}"
@@ -632,6 +596,42 @@ msgstr "Timer started: {0} minutes"
 #: src/session/info/topics-list.tsx
 msgid "To do"
 msgstr "To do"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic \"{0}\" done"
+msgstr "Topic \"{0}\" done"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic \"{0}\" in progress"
+msgstr "Topic \"{0}\" in progress"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic \"{0}\" is pending"
+msgstr "Topic \"{0}\" is pending"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic added: {0}"
+msgstr "Topic added: {0}"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic moved: {0}"
+msgstr "Topic moved: {0}"
+
+#. placeholder {0}: item.label
+#: src/session/session-timeline.tsx
+msgid "Topic removed: {0}"
+msgstr "Topic removed: {0}"
+
+#. placeholder {0}: item.oldLabel
+#. placeholder {1}: item.newLabel
+#: src/session/session-timeline.tsx
+msgid "Topic renamed: {0} <0/> {1}"
+msgstr "Topic renamed: {0} <0/> {1}"
 
 #: src/session/info/topics-list.tsx
 msgid "Topics"

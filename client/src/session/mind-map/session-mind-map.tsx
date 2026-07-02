@@ -10,19 +10,19 @@ export function SessionMindMap({ session, className }: { session: Shared.Session
   const rootLabel = session.subject || t`Subject to be defined`;
 
   const { nodes, edges } = useMemo(() => {
-    return toGraph(session.mindmap, rootLabel);
-  }, [session.mindmap, rootLabel]);
+    return toGraph(session.topics, rootLabel);
+  }, [session.topics, rootLabel]);
 
   return <MindMap nodes={nodes} edges={edges} className={className} />;
 }
 
-function toGraph(mindmap: Shared.Mindmap, rootLabel: string): { nodes: Node[]; edges: Edge[] } {
+function toGraph(topics: Shared.Topic[], rootLabel: string): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [{ id: 'root', data: { label: rootLabel } }];
   const edges: Edge[] = [];
 
-  for (const node of mindmap.nodes) {
-    nodes.push({ id: node.id, data: { label: node.label } });
-    edges.push({ id: node.id, source: node.parentId ?? 'root', target: node.id });
+  for (const topic of topics) {
+    nodes.push({ id: topic.id, data: { label: topic.label } });
+    edges.push({ id: topic.id, source: topic.parentId ?? 'root', target: topic.id });
   }
 
   return { nodes, edges };

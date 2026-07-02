@@ -1,6 +1,6 @@
 import type { Note, SessionEvent, TopicStatus } from './session.ts';
 
-export type MindmapNode = {
+export type Topic = {
   id: string;
   parentId: string | null;
   label: string;
@@ -10,35 +10,31 @@ export type MindmapNode = {
 
 type MindmapState = {
   subject: string;
-  nodes: MindmapNode[];
+  topics: Topic[];
   notes: Note[];
 };
 
 export class Mindmap {
   readonly subject: string;
-  readonly nodes: MindmapNode[];
+  readonly topics: Topic[];
   readonly notes: Note[];
 
   constructor(state: Partial<MindmapState> = {}) {
     this.subject = state.subject ?? '';
-    this.nodes = state.nodes ?? [];
+    this.topics = state.topics ?? [];
     this.notes = state.notes ?? [];
   }
 
-  hasNode(nodeId: string): boolean {
-    return this.nodes.some((node) => node.id === nodeId);
+  hasTopic(topicId: string): boolean {
+    return this.topics.some((topic) => topic.id === topicId);
   }
 
-  get(nodeId: string): MindmapNode | undefined {
-    return this.nodes.find((node) => node.id === nodeId);
+  getTopic(topicId: string): Topic | undefined {
+    return this.topics.find((topic) => topic.id === topicId);
   }
 
-  children(parentId: string | null): MindmapNode[] {
-    return this.nodes.filter((node) => node.parentId === parentId);
-  }
-
-  topics(): MindmapNode[] {
-    return this.children(null);
+  children(parentId: string | null): Topic[] {
+    return this.topics.filter((topic) => topic.parentId === parentId);
   }
 
   getNote(noteId: string): Note | undefined {
@@ -49,16 +45,16 @@ export class Mindmap {
     return this.notes.filter((note) => note.parentId === parentId);
   }
 
-  subtree(nodeId: string): MindmapNode[] {
-    const node = this.get(nodeId);
+  subtree(topicId: string): Topic[] {
+    const topic = this.getTopic(topicId);
 
-    if (!node) {
+    if (!topic) {
       return [];
     }
 
-    const result: MindmapNode[] = [];
+    const result: Topic[] = [];
 
-    const walk = (current: MindmapNode) => {
+    const walk = (current: Topic) => {
       for (const child of this.children(current.id)) {
         walk(child);
       }
@@ -66,96 +62,111 @@ export class Mindmap {
       result.push(current);
     };
 
-    walk(node);
+    walk(topic);
 
     return result;
   }
 
-  isDescendant(nodeId: string, ancestorId: string): boolean {
-    let current = this.get(nodeId);
+  isDescendant(topicId: string, ancestorId: string): boolean {
+    let current = this.getTopic(topicId);
 
     while (current?.parentId != null) {
       if (current.parentId === ancestorId) {
         return true;
       }
 
-      current = this.get(current.parentId);
+      current = this.getTopic(current.parentId);
     }
 
     return false;
   }
 
   apply(event: SessionEvent): Mindmap {
-    switch (event.type) {
-      case 'SubjectChanged':
-        return this.withSubject(event.subject);
+    type Handler<Event extends SessionEvent> = (event: Event) => Mindmap;
 
-      case 'MindmapNodeAdded':
-        return this.withNodeAdded(event.node);
+    const handlers: Partial<{ [Event in SessionEvent as Event['type']]: Handler<Event> }> = {
+      SubjectChanged: (event) => {
+        return this.withState({
+          subject: event.subject,
+        });
+      },
 
-      case 'MindmapNodeRemoved':
-        return this.withNodeRemoved(event.nodeId);
+      TopicAdded: (event) => {
+        return this.withState({
+          topics: [...this.topics, event.topic],
+        });
+      },
 
-      case 'MindmapNodeLabelChanged':
-        return this.withNodeLabel(event.nodeId, event.label);
+      TopicRemoved: (event) => {
+        return this.withState({
+          topics: this.topics.filter((topic) => topic.id !== event.topicId),
+        });
+      },
 
-      case 'MindmapNodeStatusChanged':
-        return this.withNodeStatus(event.nodeId, event.status);
+      TopicLabelChanged: (event) => {
+        return this.withState({
+          topics: this.mapTopic(event.topicId, (topic) => ({ ...topic, label: event.label })),
+        });
+      },
 
-      case 'MindmapNodeSummaryChanged':
-        return this.withNodeSummary(event.nodeId, event.summary);
+      TopicStatusChanged: (event) => {
+        return this.withState({
+          topics: this.mapTopic(event.topicId, (topic) => ({ ...topic, status: event.status })),
+        });
+      },
 
-      case 'MindmapNodeMoved':
-        return this.withNodeMoved(event.nodeId, event.parentId);
+      TopicSummaryChanged: (event) => {
+        return this.withState({
+          topics: this.mapTopic(event.topicId, (topic) => ({ ...topic, summary: event.summary })),
+        });
+      },
 
-      case 'NoteAdded':
-        return this.withNoteAdded(event.note);
+      TopicMoved: (event) => {
+        return this.withTopicMoved(event.topicId, event.parentId);
+      },
 
-      case 'NoteRemoved':
-        return this.withNoteRemoved(event.noteId);
+      NoteAdded: (event) => {
+        return this.withState({
+          notes: [...this.notes, event.note],
+        });
+      },
 
-      case 'NoteTitleChanged':
-        return this.withNoteTitle(event.noteId, event.title);
+      NoteRemoved: (event) => {
+        return this.withState({
+          notes: this.notes.filter((note) => note.id !== event.noteId),
+        });
+      },
 
-      case 'NoteContentChanged':
-        return this.withNoteContent(event.noteId, event.content);
+      NoteTitleChanged: (event) => {
+        return this.withState({
+          notes: this.mapNote(event.noteId, (note) => ({ ...note, title: event.title })),
+        });
+      },
 
-      case 'NoteMoved':
-        return this.withNoteMoved(event.noteId, event.parentId);
+      NoteContentChanged: (event) => {
+        return this.withState({
+          notes: this.mapNote(event.noteId, (note) => ({ ...note, content: event.content })),
+        });
+      },
 
-      default:
-        return this;
+      NoteMoved: (event) => {
+        return this.withState({
+          notes: this.mapNote(event.noteId, (note) => ({ ...note, parentId: event.parentId })),
+        });
+      },
+    };
+
+    if (event.type in handlers) {
+      return (handlers[event.type] as Handler<SessionEvent>)(event);
     }
+
+    return this;
   }
 
-  withSubject(subject: string): Mindmap {
-    return this.withState({ subject });
-  }
-
-  withNodeAdded(node: MindmapNode): Mindmap {
-    return this.withState({ nodes: [...this.nodes, node] });
-  }
-
-  withNodeRemoved(nodeId: string): Mindmap {
-    return this.withState({ nodes: this.nodes.filter((node) => node.id !== nodeId) });
-  }
-
-  withNodeLabel(nodeId: string, label: string): Mindmap {
-    return this.withState({ nodes: this.mapNode(nodeId, (node) => ({ ...node, label })) });
-  }
-
-  withNodeStatus(nodeId: string, status: TopicStatus): Mindmap {
-    return this.withState({ nodes: this.mapNode(nodeId, (node) => ({ ...node, status })) });
-  }
-
-  withNodeSummary(nodeId: string, summary: string): Mindmap {
-    return this.withState({ nodes: this.mapNode(nodeId, (node) => ({ ...node, summary })) });
-  }
-
-  withNodeMoved(nodeId: string, parentId: string | null): Mindmap {
+  withTopicMoved(topicId: string, parentId: string | null): Mindmap {
     return this.withState({
-      nodes: this.mapNode(nodeId, (node) => {
-        const moved: MindmapNode = { ...node, parentId };
+      topics: this.mapTopic(topicId, (topic) => {
+        const moved: Topic = { ...topic, parentId };
 
         if (parentId === null) {
           moved.status ??= 'pending';
@@ -168,32 +179,12 @@ export class Mindmap {
     });
   }
 
-  withNoteAdded(note: Note): Mindmap {
-    return this.withState({ notes: [...this.notes, note] });
-  }
-
-  withNoteRemoved(noteId: string): Mindmap {
-    return this.withState({ notes: this.notes.filter((note) => note.id !== noteId) });
-  }
-
-  withNoteTitle(noteId: string, title: string): Mindmap {
-    return this.withState({ notes: this.mapNote(noteId, (note) => ({ ...note, title })) });
-  }
-
-  withNoteContent(noteId: string, content: string): Mindmap {
-    return this.withState({ notes: this.mapNote(noteId, (note) => ({ ...note, content })) });
-  }
-
-  withNoteMoved(noteId: string, parentId: string | null): Mindmap {
-    return this.withState({ notes: this.mapNote(noteId, (note) => ({ ...note, parentId })) });
-  }
-
   private withState(changes: Partial<MindmapState>): Mindmap {
-    return new Mindmap({ subject: this.subject, nodes: this.nodes, notes: this.notes, ...changes });
+    return new Mindmap({ subject: this.subject, topics: this.topics, notes: this.notes, ...changes });
   }
 
-  private mapNode(nodeId: string, fn: (node: MindmapNode) => MindmapNode): MindmapNode[] {
-    return this.nodes.map((node) => (node.id === nodeId ? fn(node) : node));
+  private mapTopic(topicId: string, fn: (topic: Topic) => Topic): Topic[] {
+    return this.topics.map((topic) => (topic.id === topicId ? fn(topic) : topic));
   }
 
   private mapNote(noteId: string, fn: (note: Note) => Note): Note[] {

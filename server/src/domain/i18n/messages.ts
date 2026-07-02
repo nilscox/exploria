@@ -8,24 +8,24 @@ export type Messages = {
   'save-note.description': string;
   'save-note.title-param': string;
   'save-note.content-param': string;
-  'save-note.node-param': string;
+  'save-note.topic-param': string;
 
   'start-timer.description': string;
   'start-timer.duration-param': string;
 
-  'add-nodes.description': string;
-  'add-nodes.parent-param': string;
+  'add-topics.description': string;
+  'add-topics.parent-param': string;
 
-  'update-node.description': string;
-  'update-node.summary-param': string;
+  'update-topic.description': string;
+  'update-topic.summary-param': string;
 
-  'remove-node.description': string;
+  'remove-topic.description': string;
 
-  'move-node.description': string;
-  'move-node.parent-param': string;
+  'move-topic.description': string;
+  'move-topic.parent-param': string;
 
   'move-note.description': string;
-  'move-note.node-param': string;
+  'move-note.topic-param': string;
 
   'clear-timer.description': string;
 
@@ -73,30 +73,30 @@ const en: Messages = {
     'Saves an important element of the conversation (key point, user position, insight, identified tension). Use it whenever something is worth retaining for the final summary.',
   'save-note.title-param': 'A short title for the note.',
   'save-note.content-param': 'The body of the note: the element worth retaining, in one or a few sentences.',
-  'save-note.node-param': 'Id of the mind map node to attach the note to. Omit to attach it to the subject (root).',
+  'save-note.topic-param': 'Id of the topic to attach the note to. Omit to attach it to the subject (root).',
 
   'start-timer.description':
     'Starts a timer to bound the session duration. Use it when the user sets or asks for a time limit.',
   'start-timer.duration-param': 'Session duration in minutes',
 
-  'add-nodes.description':
-    'Adds one or more nodes to the mind map. Each node captures an idea, angle or sub-topic. Attach them under an existing node via its id, or omit the parent to add them at the top level (directly under the subject).',
-  'add-nodes.parent-param':
-    'Id of the parent node to attach the new nodes to. Omit to add them at the top level, directly under the subject.',
+  'add-topics.description':
+    'Adds one or more topics to the mind map. Each topic captures an idea, angle or sub-topic. Attach them under an existing topic via its id, or omit the parent to add them at the top level (directly under the subject).',
+  'add-topics.parent-param':
+    'Id of the parent topic to attach the new topics to. Omit to add them at the top level, directly under the subject.',
 
-  'update-node.description':
-    'Updates a mind map node (label, status or summary). Set the status to "in_progress" as soon as you start addressing a node, and "done" once it has been sufficiently covered.',
-  'update-node.summary-param':
+  'update-topic.description':
+    'Updates a mind map topic (label, status or summary). Set the status to "in_progress" as soon as you start addressing a topic, and "done" once it has been sufficiently covered.',
+  'update-topic.summary-param':
     'A summary of the discussion about this topic, kept up to date as it unfolds. Distinct from the label.',
 
-  'remove-node.description': 'Removes a node from the mind map, along with its descendants and their attached notes.',
+  'remove-topic.description': 'Removes a topic from the mind map, along with its descendants and their attached notes.',
 
-  'move-node.description': 'Re-attaches a node under another parent node, reorganising the mind map.',
-  'move-node.parent-param':
-    'Id of the new parent node. Use null to move the node to the top level, directly under the subject.',
+  'move-topic.description': 'Re-attaches a topic under another parent topic, reorganising the mind map.',
+  'move-topic.parent-param':
+    'Id of the new parent topic. Use null to move the topic to the top level, directly under the subject.',
 
-  'move-note.description': 'Re-attaches a saved note to another node of the mind map.',
-  'move-note.node-param': 'Id of the node to attach the note to. Use null to attach it to the subject (root).',
+  'move-note.description': 'Re-attaches a saved note to another topic of the mind map.',
+  'move-note.topic-param': 'Id of the topic to attach the note to. Use null to attach it to the subject (root).',
 
   'clear-timer.description': 'Cancels the current timer.',
 
@@ -154,32 +154,33 @@ const fr: Messages = {
     "Sauvegarde un élément important de la conversation (point clé, position de l'utilisateur, insight, tension identifiée). À utiliser dès qu'un élément mérite d'être retenu pour la synthèse finale.",
   'save-note.title-param': 'Un titre court pour la note.',
   'save-note.content-param': "Le corps de la note : l'élément à retenir, en une ou quelques phrases.",
-  'save-note.node-param':
-    'Id du noeud de la carte mentale auquel rattacher la note. À omettre pour la rattacher au sujet (racine).',
+  'save-note.topic-param':
+    'Id du sujet auquel rattacher la note. À omettre pour la rattacher au sujet global (racine).',
 
   'start-timer.description':
     "Démarre un minuteur pour cadrer la durée de la session. À utiliser quand l'utilisateur fixe ou demande une limite de temps.",
   'start-timer.duration-param': 'Temps de la session en minutes',
 
-  'add-nodes.description':
-    'Ajoute un ou plusieurs noeuds à la carte mentale. Chaque noeud capture une idée, un axe ou un sous-sujet. Rattache-les sous un noeud existant via son id, ou omets le parent pour les ajouter au premier niveau (directement sous le sujet).',
-  'add-nodes.parent-param':
-    'Id du noeud parent auquel rattacher les nouveaux noeuds. À omettre pour les ajouter au premier niveau, directement sous le sujet.',
+  'add-topics.description':
+    'Ajoute un ou plusieurs sujets à la carte mentale. Chaque sujet capture une idée, un axe ou un sous-sujet. Rattache-les sous un sujet existant via son id, ou omets le parent pour les ajouter au premier niveau (directement sous le sujet global).',
+  'add-topics.parent-param':
+    'Id du sujet parent auquel rattacher les nouveaux sujets. À omettre pour les ajouter au premier niveau, directement sous le sujet global.',
 
-  'update-node.description':
-    "Met à jour un noeud de la carte mentale (intitulé, statut ou résumé). Passe le statut à « en cours » dès que tu commences à aborder un noeud, et « traité » une fois qu'il a été suffisamment couvert.",
-  'update-node.summary-param':
+  'update-topic.description':
+    "Met à jour un sujet de la carte mentale (intitulé, statut ou résumé). Passe le statut à « en cours » dès que tu commences à aborder un sujet, et « traité » une fois qu'il a été suffisamment couvert.",
+  'update-topic.summary-param':
     "Un résumé de la discussion sur ce sujet, tenu à jour au fil de l'échange. Distinct de l'intitulé.",
 
-  'remove-node.description':
-    'Supprime un noeud de la carte mentale, ainsi que ses descendants et leurs notes rattachées.',
+  'remove-topic.description':
+    'Supprime un sujet de la carte mentale, ainsi que ses descendants et leurs notes rattachées.',
 
-  'move-node.description': 'Rattache un noeud sous un autre noeud parent, pour réorganiser la carte mentale.',
-  'move-node.parent-param':
-    'Id du nouveau noeud parent. Utilise null pour déplacer le noeud au premier niveau, directement sous le sujet.',
+  'move-topic.description': 'Rattache un sujet sous un autre sujet parent, pour réorganiser la carte mentale.',
+  'move-topic.parent-param':
+    'Id du nouveau sujet parent. Utilise null pour déplacer le sujet au premier niveau, directement sous le sujet global.',
 
-  'move-note.description': 'Rattache une note sauvegardée à un autre noeud de la carte mentale.',
-  'move-note.node-param': 'Id du noeud auquel rattacher la note. Utilise null pour la rattacher au sujet (racine).',
+  'move-note.description': 'Rattache une note sauvegardée à un autre sujet de la carte mentale.',
+  'move-note.topic-param':
+    'Id du sujet auquel rattacher la note. Utilise null pour la rattacher au sujet global (racine).',
 
   'clear-timer.description': 'Annule le minuteur en cours.',
 
