@@ -2,6 +2,7 @@ import { assert, hasId } from '../../utils.ts';
 import { Timer } from '../timer.ts';
 
 import type { Shared } from '../../shared.ts';
+import type { MindmapNode } from '../mindmap.ts';
 import type { Note, Posture, PostureMode, SessionEvent, Topic } from '../session.ts';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
@@ -9,7 +10,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   let model = '';
   let language: Shared.Language = 'en';
   let subject = '';
-  let topics: Topic[] = [];
+  let nodes: MindmapNode[] = [];
   let notes: Note[] = [];
   let timer: Timer | null = null;
   let postureMode: PostureMode = 'auto';
@@ -38,28 +39,43 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
         subject = event.subject;
         break;
 
-      case 'TopicAdded':
-        topics.push(structuredClone(event.topic));
+      case 'MindmapNodeAdded':
+        nodes.push(structuredClone(event.node));
         break;
 
-      case 'TopicRemoved':
-        topics = topics.filter(({ id }) => id !== event.topicId);
+      case 'MindmapNodeRemoved':
+        nodes = nodes.filter(({ id }) => id !== event.nodeId);
         break;
 
-      case 'TopicLabelChanged': {
-        const topic = topics.find(hasId(event.topicId));
+      case 'MindmapNodeLabelChanged': {
+        const node = nodes.find(hasId(event.nodeId));
 
-        assert(topic);
-        topic.label = event.label;
+        assert(node);
+        node.label = event.label;
 
         break;
       }
 
-      case 'TopicStatusChanged': {
-        const topic = topics.find(hasId(event.topicId));
+      case 'MindmapNodeStatusChanged': {
+        const node = nodes.find(hasId(event.nodeId));
 
-        assert(topic);
-        topic.status = event.status;
+        assert(node);
+        node.status = event.status;
+
+        break;
+      }
+
+      case 'MindmapNodeMoved': {
+        const node = nodes.find(hasId(event.nodeId));
+
+        assert(node);
+        node.parentId = event.parentId;
+
+        if (event.parentId === null) {
+          node.status ??= 'pending';
+        } else {
+          delete node.status;
+        }
 
         break;
       }
@@ -72,13 +88,23 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
         notes = notes.filter(({ id }) => id !== event.noteId);
         break;
 
-      case 'NoteContentChanged':
+      case 'NoteContentChanged': {
         const note = notes.find(hasId(event.noteId));
 
         assert(note);
         note.content = event.content;
 
         break;
+      }
+
+      case 'NoteMoved': {
+        const note = notes.find(hasId(event.noteId));
+
+        assert(note);
+        note.parentId = event.parentId;
+
+        break;
+      }
 
       case 'TimerStarted':
         timer = Timer.start(event.duration, event.occurredAt);
@@ -115,13 +141,20 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     model,
     language,
     subject,
-    topics,
+    topics: toTopics(nodes),
     notes,
+    mindmap: { nodes },
     timer,
     postureMode,
     posture,
     timeline: toTimeline(events),
   };
+}
+
+function toTopics(nodes: MindmapNode[]): Topic[] {
+  return nodes
+    .filter((node) => node.parentId === null)
+    .map((node) => ({ id: node.id, label: node.label, status: node.status ?? 'pending' }));
 }
 
 const timelineEventTypes = new Set<SessionEvent['type']>([
@@ -130,13 +163,15 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'SessionReopened',
   'ModelChanged',
   'SubjectChanged',
-  'TopicAdded',
-  'TopicRemoved',
-  'TopicLabelChanged',
-  'TopicStatusChanged',
+  'MindmapNodeAdded',
+  'MindmapNodeRemoved',
+  'MindmapNodeLabelChanged',
+  'MindmapNodeStatusChanged',
+  'MindmapNodeMoved',
   'NoteAdded',
   'NoteRemoved',
   'NoteContentChanged',
+  'NoteMoved',
   'TimerStarted',
   'TimerCleared',
   'TimerPaused',
@@ -154,7 +189,7 @@ export function affectsTimeline(type: SessionEvent['type']): boolean {
 
 export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
   const items: Shared.TimelineItem[] = [];
-  const topics = new Map<string, string>();
+  const nodes = new Map<string, string>();
   const notes = new Map<string, string>();
 
   let pendingPaths: Shared.SelectablePath[] | null = null;
@@ -210,34 +245,42 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         items.push({ kind: 'subject-changed', subject: event.subject });
         break;
 
-      case 'TopicAdded':
-        topics.set(event.topic.id, event.topic.label);
-        items.push({ kind: 'topic-added', label: event.topic.label });
+      case 'MindmapNodeAdded':
+        nodes.set(event.node.id, event.node.label);
+        items.push({ kind: 'node-added', label: event.node.label });
         break;
 
-      case 'TopicRemoved': {
-        const label = topics.get(event.topicId);
+      case 'MindmapNodeRemoved': {
+        const label = nodes.get(event.nodeId);
 
         assert(label !== undefined);
-        topics.delete(event.topicId);
-        items.push({ kind: 'topic-removed', label });
+        nodes.delete(event.nodeId);
+        items.push({ kind: 'node-removed', label });
         break;
       }
 
-      case 'TopicLabelChanged': {
-        const oldLabel = topics.get(event.topicId);
+      case 'MindmapNodeLabelChanged': {
+        const oldLabel = nodes.get(event.nodeId);
 
         assert(oldLabel !== undefined);
-        topics.set(event.topicId, event.label);
-        items.push({ kind: 'topic-label-changed', oldLabel, newLabel: event.label });
+        nodes.set(event.nodeId, event.label);
+        items.push({ kind: 'node-label-changed', oldLabel, newLabel: event.label });
         break;
       }
 
-      case 'TopicStatusChanged': {
-        const label = topics.get(event.topicId);
+      case 'MindmapNodeStatusChanged': {
+        const label = nodes.get(event.nodeId);
 
         assert(label !== undefined);
-        items.push({ kind: 'topic-status-changed', label, status: event.status });
+        items.push({ kind: 'node-status-changed', label, status: event.status });
+        break;
+      }
+
+      case 'MindmapNodeMoved': {
+        const label = nodes.get(event.nodeId);
+
+        assert(label !== undefined);
+        items.push({ kind: 'node-moved', label });
         break;
       }
 
@@ -259,6 +302,14 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         assert(notes.has(event.noteId));
         notes.set(event.noteId, event.content);
         items.push({ kind: 'note-content-changed', content: event.content });
+        break;
+      }
+
+      case 'NoteMoved': {
+        const content = notes.get(event.noteId);
+
+        assert(content !== undefined);
+        items.push({ kind: 'note-moved', content });
         break;
       }
 

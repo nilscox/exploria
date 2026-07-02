@@ -112,6 +112,10 @@ function MindMapFlow({
       return;
     }
 
+    if (initialNodes.some((node) => !sizes.has(node.id))) {
+      return;
+    }
+
     const positions = layoutMindMap(initialNodes, initialEdges, sizes);
 
     setNodes((snapshot) => snapshot.map((node) => ({ ...node, position: positions.get(node.id) ?? node.position })));

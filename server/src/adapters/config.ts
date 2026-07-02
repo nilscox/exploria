@@ -6,14 +6,18 @@ export interface Config {
     port: number;
   };
 
+  database: {
+    url: string;
+    debug: boolean;
+  };
+
   openAi: {
     baseUrl: string;
     apiKey: string;
   };
 
-  database: {
-    url: string;
-    debug: boolean;
+  tavily: {
+    apiKey?: string;
   };
 
   auth: {
@@ -22,8 +26,7 @@ export interface Config {
   };
 
   assistant?: 'test' | 'eval';
-
-  tavilyApiKey?: string;
+  templatesPath: string;
 }
 
 export class EnvConfig implements Config {
@@ -56,6 +59,13 @@ export class EnvConfig implements Config {
     };
   }
 
+  get database() {
+    return {
+      url: this.read('DATABASE_URL', true),
+      debug: this.read('DATABASE_DEBUG') === 'true',
+    };
+  }
+
   get openAi() {
     return {
       baseUrl: this.read('OPEN_AI_BASE_URL', true),
@@ -63,10 +73,9 @@ export class EnvConfig implements Config {
     };
   }
 
-  get database() {
+  get tavily() {
     return {
-      url: this.read('DATABASE_URL', true),
-      debug: this.read('DATABASE_DEBUG') === 'true',
+      apiKey: this.read('TAVILY_API_KEY'),
     };
   }
 
@@ -85,7 +94,7 @@ export class EnvConfig implements Config {
     }
   }
 
-  get tavilyApiKey() {
-    return this.read('TAVILY_API_KEY');
+  get templatesPath() {
+    return this.read('TEMPLATES_PATH', true);
   }
 }

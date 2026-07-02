@@ -120,20 +120,17 @@ export class SessionController {
       res.status(204).end();
     });
 
-    this.router.post('/:id/topic', async (req, res) => {
-      const { topic } = z.object({ topic: z.string().min(1).max(64) }).parse(req.body);
+    this.router.post('/:id/node', async (req, res) => {
+      const { label, parentId } = z
+        .object({ label: z.string().min(1).max(64), parentId: z.string().nullish() })
+        .parse(req.body);
 
-      await this.addTopic(topic);
+      await this.addNode(label, parentId ?? null);
 
       res.status(204).end();
     });
 
-    this.router.delete('/:id/topic/:topicId', async (req, res) => {
-      await this.removeTopic(req.params.topicId);
-      res.status(204).end();
-    });
-
-    this.router.put('/:id/topic/:topicId', async (req, res) => {
+    this.router.put('/:id/node/:nodeId', async (req, res) => {
       const { label, status } = z
         .object({
           label: z.string().min(1).max(64).optional(),
@@ -141,7 +138,48 @@ export class SessionController {
         })
         .parse(req.body);
 
-      await this.updateTopic(req.params.topicId, { label, status });
+      await this.updateNode(req.params.nodeId, { label, status });
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/node/:nodeId', async (req, res) => {
+      await this.removeNode(req.params.nodeId);
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/node/:nodeId/move', async (req, res) => {
+      const { parentId } = z.object({ parentId: z.string().nullable() }).parse(req.body);
+
+      await this.moveNode(req.params.nodeId, parentId);
+      res.status(204).end();
+    });
+
+    this.router.post('/:id/note', async (req, res) => {
+      const { content, nodeId } = z
+        .object({ content: z.string().min(1), nodeId: z.string().nullish() })
+        .parse(req.body);
+
+      await this.addNote(content, nodeId ?? null);
+
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/note/:noteId', async (req, res) => {
+      const { content } = z.object({ content: z.string().min(1) }).parse(req.body);
+
+      await this.updateNote(req.params.noteId, { content });
+      res.status(204).end();
+    });
+
+    this.router.delete('/:id/note/:noteId', async (req, res) => {
+      await this.removeNote(req.params.noteId);
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/note/:noteId/move', async (req, res) => {
+      const { nodeId } = z.object({ nodeId: z.string().nullable() }).parse(req.body);
+
+      await this.moveNote(req.params.noteId, nodeId);
       res.status(204).end();
     });
 
@@ -291,30 +329,80 @@ export class SessionController {
     this.events.emit(...committed);
   }
 
-  private async addTopic(label: string) {
+  private async addNode(label: string, parentId: string | null) {
     const session = this.getSessionInstance();
 
-    session.addTopic({ label });
+    session.addNode({ label, parentId });
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
   }
 
-  private async removeTopic(topicId: string) {
+  private async updateNode(nodeId: string, changes: { label?: string; status?: TopicStatus }) {
     const session = this.getSessionInstance();
 
-    session.removeTopic(topicId);
+    session.updateNode(nodeId, changes);
 
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
   }
 
-  private async updateTopic(topicId: string, changes: { label?: string; status?: TopicStatus }) {
+  private async removeNode(nodeId: string) {
     const session = this.getSessionInstance();
 
-    session.updateTopic(topicId, changes);
+    session.removeNode(nodeId);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async moveNode(nodeId: string, parentId: string | null) {
+    const session = this.getSessionInstance();
+
+    session.moveNode(nodeId, parentId);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async addNote(content: string, parentId: string | null) {
+    const session = this.getSessionInstance();
+
+    session.addNote({ content, parentId });
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async updateNote(noteId: string, changes: { content?: string }) {
+    const session = this.getSessionInstance();
+
+    session.updateNote(noteId, changes);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async removeNote(noteId: string) {
+    const session = this.getSessionInstance();
+
+    session.removeNote(noteId);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async moveNote(noteId: string, parentId: string | null) {
+    const session = this.getSessionInstance();
+
+    session.moveNote(noteId, parentId);
 
     const committed = await this.sessionRepository.save(session);
 

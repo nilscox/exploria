@@ -23,7 +23,7 @@ import type { Logger } from './adapters/logger.ts';
 import type { UiNotifier } from './domain/ui-notifier.ts';
 
 function searchClientFactory(config: Config): SearchClient | null {
-  return config.tavilyApiKey ? new TavilySearchClient(config.tavilyApiKey) : null;
+  return config.tavily.apiKey ? new TavilySearchClient(config.tavily.apiKey) : null;
 }
 
 function assistantFactory(
@@ -49,7 +49,7 @@ export const container = createContainer({
   injectionMode: InjectionMode.CLASSIC,
   strict: true,
 }).register({
-  config: asClass<Config>(EnvConfig),
+  config: asClass<Config>(EnvConfig).singleton(),
   generator: asClass<Generator>(NanoIdGenerator),
   clock: asClass<Clock>(NativeDateClock).singleton(),
   logger: asValue<Logger>(console),

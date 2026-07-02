@@ -1,24 +1,16 @@
-# Discussion plan
+# Mind map
 
-{{#hasPlan}}
+The current mind map (root = subject, its children = topics, deeper nodes = sub-topics, with attached notes):
 
-{{#topics}}
-{{label}} (id: "{{id}}") : {{status}}
-{{/topics}}
+{{{mindmap}}}
 
-{{#noTopicInProgress}}
-No topic in progress. Should one be updated?
-{{/noTopicInProgress}}
+{{#noNodeInProgress}}
+No node is in progress. Should one be updated?
+{{/noNodeInProgress}}
 
-{{#planUpToDate}}
-Is the plan up to date with the discussion?
-{{/planUpToDate}}
-
-{{/hasPlan}}
-
-{{^hasPlan}}
-No plan defined.
-{{/hasPlan}}
+{{#mapUpToDate}}
+Is the mind map up to date with the discussion?
+{{/mapUpToDate}}
 
 # Stance
 
@@ -35,17 +27,6 @@ The user has locked this stance. Stay in it; do not call `set_posture`.
 # Time management
 
 {{{timerInfo}}}
-
-{{#hasNotes}}
-
-# Notes
-
-{{#notes}}
-id: {{id}}
-note: {{content}}
-
-{{/notes}}
-{{/hasNotes}}
 
 # Date
 

@@ -6,9 +6,11 @@ import { languages } from '../domain/i18n/index.ts';
 import { messages } from '../domain/i18n/messages.ts';
 
 import type { Language, Translate } from '../domain/i18n/index.ts';
+import type { MindmapNode } from '../domain/mindmap.ts';
 import type { Session, TopicStatus } from '../domain/session.ts';
 import type { Timer } from '../domain/timer.ts';
 import type { Clock } from './clock.ts';
+import type { Config } from './config.ts';
 
 type Templates = {
   instructions: {};
@@ -29,20 +31,20 @@ export class MustacheI18n implements I18n {
 
   private readonly templates: Record<Template, Record<Language, string>>;
 
-  constructor(clock: Clock) {
+  constructor(config: Config, clock: Clock) {
     this.clock = clock;
 
     this.templates = {
-      instructions: MustacheI18n.loadTemplates('instructions'),
-      'session-info': MustacheI18n.loadTemplates('session-info'),
-      'timer-info': MustacheI18n.loadTemplates('timer-info'),
-      summary: MustacheI18n.loadTemplates('summary'),
+      instructions: MustacheI18n.loadTemplates(config.templatesPath, 'instructions'),
+      'session-info': MustacheI18n.loadTemplates(config.templatesPath, 'session-info'),
+      'timer-info': MustacheI18n.loadTemplates(config.templatesPath, 'timer-info'),
+      summary: MustacheI18n.loadTemplates(config.templatesPath, 'summary'),
     };
   }
 
-  private static loadTemplates(name: Template) {
+  private static loadTemplates(templatesPath: string, name: Template) {
     return Object.fromEntries(
-      languages.map((lang) => [lang, fs.readFileSync(`templates/${name}.${lang}.md`, 'utf-8')]),
+      languages.map((lang) => [lang, fs.readFileSync(`${templatesPath}/${name}.${lang}.md`, 'utf-8')]),
     ) as Record<Language, string>;
   }
 
@@ -85,21 +87,49 @@ export class MustacheI18n implements I18n {
       done: t('session-info.status.done'),
     };
 
-    const inProgressCount = session.topics.filter((topic) => topic.status === 'in_progress').length;
+    const inProgressCount = session.nodes.filter((node) => node.status === 'in_progress').length;
 
     return {
-      hasPlan: session.topics.length > 0,
-      topics: session.topics.map(({ id, label, status }) => ({ id, label, status: statusLabels[status] })),
-      noTopicInProgress: inProgressCount !== 1,
-      planUpToDate: inProgressCount === 1,
+      mindmap: MustacheI18n.renderMindmap(session, statusLabels),
+      noNodeInProgress: inProgressCount !== 1,
+      mapUpToDate: inProgressCount === 1,
       timerInfo: this.render(lang, 'timer-info', { timer: session.timer }),
-      hasNotes: session.notes.length > 0,
-      notes: session.notes,
       posture: session.posture,
       auto: session.postureMode === 'auto',
       date: this.date(lang, new Date()),
     };
   };
+
+  private static renderMindmap(session: Session, statusLabels: Record<TopicStatus, string>): string {
+    const { mindmap, notes } = session;
+    const lines: string[] = [`- ${session.subject || '(no subject yet)'}`];
+
+    const renderNotes = (parentId: string | null, indent: string) => {
+      for (const note of notes.filter((note) => note.parentId === parentId)) {
+        lines.push(`${indent}- note: ${note.content} (id: "${note.id}")`);
+      }
+    };
+
+    const renderNode = (node: MindmapNode, depth: number) => {
+      const indent = '  '.repeat(depth);
+      const status = node.status ? `, ${statusLabels[node.status]}` : '';
+
+      lines.push(`${indent}- ${node.label} (id: "${node.id}"${status})`);
+      renderNotes(node.id, `${indent}  `);
+
+      for (const child of mindmap.children(node.id)) {
+        renderNode(child, depth + 1);
+      }
+    };
+
+    renderNotes(null, '  ');
+
+    for (const topic of mindmap.topics()) {
+      renderNode(topic, 1);
+    }
+
+    return lines.join('\n');
+  }
 
   private timerInfoView = (_lang: Language, { timer }: Templates['timer-info']) => {
     if (!timer) {

@@ -1,24 +1,16 @@
-# Plan de discussion
+# Carte mentale
 
-{{#hasPlan}}
+La carte mentale actuelle (racine = sujet, ses enfants = les axes, noeuds plus profonds = sous-axes, avec leurs notes rattachées) :
 
-{{#topics}}
-{{label}} (id: "{{id}}") : {{status}}
-{{/topics}}
+{{{mindmap}}}
 
-{{#noTopicInProgress}}
-Aucun sujet en cours. Faut-il en mettre un à jour ?
-{{/noTopicInProgress}}
+{{#noNodeInProgress}}
+Aucun noeud en cours. Faut-il en mettre un à jour ?
+{{/noNodeInProgress}}
 
-{{#planUpToDate}}
-Le plan est-il à jour par rapport à la discussion ?
-{{/planUpToDate}}
-
-{{/hasPlan}}
-
-{{^hasPlan}}
-Aucun plan défini.
-{{/hasPlan}}
+{{#mapUpToDate}}
+La carte mentale est-elle à jour par rapport à la discussion ?
+{{/mapUpToDate}}
 
 # Posture
 
@@ -35,17 +27,6 @@ L'utilisateur a verrouillé cette posture. Tu y restes ; tu n'appelles pas `set_
 # Gestion du temps
 
 {{{timerInfo}}}
-
-{{#hasNotes}}
-
-# Notes
-
-{{#notes}}
-id: {{id}}
-note: {{content}}
-
-{{/notes}}
-{{/hasNotes}}
 
 # Date
 

@@ -36,30 +36,56 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
     },
   }),
 
-  addTopics: tool({
-    description: t('add-topics.description'),
+  addNodes: tool({
+    description: t('add-nodes.description'),
     param: z.object({
       labels: z.array(z.string().min(1).max(64)).min(1),
+      parentId: z.string().nullish().describe(t('add-nodes.parent-param')),
     }),
-    execute: (session, { labels }) => {
-      session.addTopics(labels);
+    execute: (session, { labels, parentId }) => {
+      session.addNodes(labels, parentId ?? null);
 
       return t('tool.result.ok');
     },
   }),
 
-  updateTopic: tool({
-    description: t('update-topic.description'),
+  updateNode: tool({
+    description: t('update-node.description'),
     param: z.object({
       id: z.string(),
-      label: z.string().optional(),
+      label: z.string().min(1).max(64).optional(),
       status: z.enum(['pending', 'in_progress', 'done']).optional(),
     }),
     execute: (session, { id, label, status }) => {
-      session.updateTopic(id, {
+      session.updateNode(id, {
         label,
         status,
       });
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  removeNode: tool({
+    description: t('remove-node.description'),
+    param: z.object({
+      id: z.string(),
+    }),
+    execute: (session, { id }) => {
+      session.removeNode(id);
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  moveNode: tool({
+    description: t('move-node.description'),
+    param: z.object({
+      id: z.string(),
+      parentId: z.string().nullable().describe(t('move-node.parent-param')),
+    }),
+    execute: (session, { id, parentId }) => {
+      session.moveNode(id, parentId);
 
       return t('tool.result.ok');
     },
@@ -69,11 +95,26 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
     description: t('save-note.description'),
     param: z.object({
       note: z.string().min(1),
+      nodeId: z.string().nullish().describe(t('save-note.node-param')),
     }),
-    execute: (session, { note }) => {
+    execute: (session, { note, nodeId }) => {
       session.addNote({
         content: note,
+        parentId: nodeId ?? null,
       });
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  moveNote: tool({
+    description: t('move-note.description'),
+    param: z.object({
+      noteId: z.string(),
+      nodeId: z.string().nullable().describe(t('move-note.node-param')),
+    }),
+    execute: (session, { noteId, nodeId }) => {
+      session.moveNote(noteId, nodeId);
 
       return t('tool.result.ok');
     },

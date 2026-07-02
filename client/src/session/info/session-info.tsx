@@ -15,7 +15,7 @@ import { TopicsListSection } from './topics-list';
 
 export function SessionInfo({ session }: { session: Shared.Session }) {
   const { mutate: setPosture } = useMutation(options.sessions.setPosture(session.id));
-  const { mutate: addTopic } = useMutation(options.sessions.addTopic(session.id));
+  const { mutate: addNode } = useMutation(options.sessions.addNode(session.id));
   const { mutate: startTimer } = useMutation(options.sessions.timer.start(session.id));
   const { mutate: clearTimer } = useMutation(options.sessions.timer.clear(session.id));
   const { mutate: pauseTimer } = useMutation(options.sessions.timer.pause(session.id));
@@ -30,7 +30,7 @@ export function SessionInfo({ session }: { session: Shared.Session }) {
         onResume={resumeTimer}
         onClear={clearTimer}
       />
-      <TopicsListSection topics={session.topics} onAdd={addTopic} />
+      <TopicsListSection topics={session.topics} onAdd={addNode} />
       <PostureSection session={session} onSetPosture={setPosture} />
       <NotesSection session={session} />
       <ModelSelectorSection session={session} />

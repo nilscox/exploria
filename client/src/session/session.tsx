@@ -3,7 +3,7 @@ import { Trans } from '@lingui/react/macro';
 import { mutationOptions, useMutation } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { ArrowLeftIcon } from 'lucide-react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router';
 
@@ -18,11 +18,12 @@ import { config } from 'src/contexts/config';
 
 import { SessionInfo } from './info/session-info';
 import { MessageForm } from './message-form';
+import { SessionMindMap } from './mind-map/session-mind-map';
 import { SessionSummaryDialog } from './session-summary';
 import { Timeline } from './session-timeline';
 import { useSession } from './use-session';
 
-type View = 'main' | 'sidebar';
+type View = 'main' | 'info' | 'mind-map';
 
 export function SessionPage() {
   const params = useParams<'sessionId'>();
@@ -51,6 +52,7 @@ export function SessionPage() {
           {!state.session.ended && <MessageForm loading={state.loading} postMessage={postMessage} />}
         </>
       }
+      right={<SessionMindMap session={state.session} className="size-full" />}
     />
   );
 }
@@ -60,22 +62,99 @@ function Layout({
   header,
   aside,
   main,
+  right,
 }: {
   view: View;
   header: React.ReactNode;
   aside: React.ReactNode;
   main: React.ReactNode;
+  right: React.ReactNode;
 }) {
+  const { width, resizing, startResize } = useResizeColumn({
+    initial: (window.innerWidth - 24 * 16) / 3,
+    minimum: 16 * 16,
+  });
+
   return (
-    <div className="grid h-full grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[24rem_1fr]">
-      <header className="col-span-2">{header}</header>
-      <aside className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'sidebar' && 'max-lg:hidden')}>
+    <div
+      className="grid h-full grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[24rem_1fr_var(--right-col)]"
+      style={{ '--right-col': `${width}px` } as React.CSSProperties}
+    >
+      <header className="lg:col-span-3">{header}</header>
+
+      <aside className={clsx('scrollbar-thin relative min-h-0 overflow-y-auto', view !== 'info' && 'max-lg:hidden')}>
         {aside}
       </aside>
-      <main className={clsx('scrollbar-thin col relative min-h-0 overflow-y-auto', view !== 'main' && 'max-lg:hidden')}>
+
+      <main
+        className={clsx(
+          'min-w-sm scrollbar-thin col relative min-h-0 overflow-y-auto',
+          view !== 'main' && 'max-lg:hidden',
+        )}
+      >
         {main}
       </main>
+
+      <aside className={clsx('relative min-h-0 min-w-xs', view !== 'mind-map' && 'max-lg:hidden')}>
+        <ResizeHandle resizing={resizing} onPointerDown={startResize} />
+        {right}
+      </aside>
     </div>
+  );
+}
+
+function useResizeColumn({ initial, minimum }: { initial: number; minimum: number }) {
+  const [resizing, setResizing] = useState(false);
+  const [width, setWidth] = useState(Math.max(initial, minimum));
+
+  const startResize = useCallback(
+    (event: React.PointerEvent) => {
+      event.preventDefault();
+
+      setResizing(true);
+
+      const onMove = (moveEvent: PointerEvent) => {
+        const width = window.innerWidth - moveEvent.clientX;
+
+        setWidth(Math.min(Math.max(width, minimum), window.innerWidth * 0.6));
+      };
+
+      const onUp = () => {
+        setResizing(false);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        document.body.style.userSelect = '';
+      };
+
+      document.body.style.userSelect = 'none';
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    },
+    [minimum],
+  );
+
+  return {
+    width,
+    resizing,
+    startResize,
+  };
+}
+
+function ResizeHandle({
+  resizing,
+  onPointerDown,
+}: {
+  resizing: boolean;
+  onPointerDown: (event: React.PointerEvent) => void;
+}) {
+  return (
+    <div
+      onPointerDown={onPointerDown}
+      className={clsx(
+        'absolute inset-y-0 left-0 z-10 hidden w-1.5 -translate-x-1/2 cursor-col-resize transition-colors lg:block hover:bg-primary/40',
+        resizing && 'bg-primary/40',
+      )}
+    />
   );
 }
 
@@ -120,12 +199,12 @@ function Header({
 
       <div className="row ms-auto items-center gap-1">
         <Button
-          variant={view === 'sidebar' ? 'secondary' : 'ghost'}
+          variant={view === 'info' ? 'secondary' : 'ghost'}
           size="small"
-          onClick={() => onViewChanged({ main: 'sidebar' as const, sidebar: 'main' as const }[view])}
+          onClick={() => onViewChanged(view === 'main' ? 'info' : 'main')}
           className="lg:hidden"
         >
-          Session info
+          <Trans>Session info</Trans>
         </Button>
 
         <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>

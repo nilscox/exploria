@@ -1,5 +1,6 @@
 import type * as assistant from './domain/assistant.ts';
 import type { Language as DomainLanguage } from './domain/i18n/index.ts';
+import type * as mindmap from './domain/mindmap.ts';
 import type * as session from './domain/session.ts';
 import type * as summary from './domain/summary.ts';
 
@@ -20,6 +21,8 @@ export namespace Shared {
   export type TopicStatus = session.TopicStatus;
   export type Topic = session.Topic;
   export type Note = session.Note;
+  export type MindmapNode = mindmap.MindmapNode;
+  export type Mindmap = { nodes: MindmapNode[] };
   export type Timer = { duration: number; startedAt: Date; pausedAt?: Date };
   export type Message = session.Message;
   export type Role = session.Role;
@@ -36,13 +39,15 @@ export namespace Shared {
     | { kind: 'session-ended' }
     | { kind: 'session-reopened' }
     | { kind: 'subject-changed'; subject: string }
-    | { kind: 'topic-added'; label: string }
-    | { kind: 'topic-removed'; label: string }
-    | { kind: 'topic-label-changed'; oldLabel: string; newLabel: string }
-    | { kind: 'topic-status-changed'; label: string; status: TopicStatus }
+    | { kind: 'node-added'; label: string }
+    | { kind: 'node-removed'; label: string }
+    | { kind: 'node-label-changed'; oldLabel: string; newLabel: string }
+    | { kind: 'node-status-changed'; label: string; status: TopicStatus }
+    | { kind: 'node-moved'; label: string }
     | { kind: 'note-added'; content: string }
     | { kind: 'note-removed'; content: string }
     | { kind: 'note-content-changed'; content: string }
+    | { kind: 'note-moved'; content: string }
     | { kind: 'timer-started'; duration: number }
     | { kind: 'timer-cleared' }
     | { kind: 'timer-paused' }
@@ -60,6 +65,7 @@ export namespace Shared {
     subject: string;
     topics: Topic[];
     notes: Note[];
+    mindmap: Mindmap;
     timer: Timer | null;
     postureMode: PostureMode;
     posture: Posture;

@@ -96,35 +96,41 @@ const components: {
     </Notification>
   ),
 
-  'topic-added': ({ item }) => (
+  'node-added': ({ item }) => (
     <Notification Icon={ListIcon}>
-      <Trans>Topic added: {item.label}</Trans>
+      <Trans>Node added: {item.label}</Trans>
     </Notification>
   ),
 
-  'topic-removed': ({ item }) => (
+  'node-removed': ({ item }) => (
     <Notification Icon={ListIcon}>
-      <Trans>Topic removed: {item.label}</Trans>
+      <Trans>Node removed: {item.label}</Trans>
     </Notification>
   ),
 
-  'topic-label-changed': ({ item }) => (
+  'node-label-changed': ({ item }) => (
     <Notification Icon={ListIcon}>
       <Trans>
-        Topic renamed: {item.oldLabel} <ArrowRightIcon className="mb-0.5 inline-block size-3.5" /> {item.newLabel}
+        Node renamed: {item.oldLabel} <ArrowRightIcon className="mb-0.5 inline-block size-3.5" /> {item.newLabel}
       </Trans>
     </Notification>
   ),
 
-  'topic-status-changed': ({ item }) => (
+  'node-status-changed': ({ item }) => (
     <Notification Icon={item.status === 'done' ? CheckIcon : ListIcon}>
       {
         {
-          pending: <Trans>Topic "{item.label}" is pending</Trans>,
-          in_progress: <Trans>Topic "{item.label}" in progress</Trans>,
-          done: <Trans>Topic "{item.label}" done</Trans>,
+          pending: <Trans>Node "{item.label}" is pending</Trans>,
+          in_progress: <Trans>Node "{item.label}" in progress</Trans>,
+          done: <Trans>Node "{item.label}" done</Trans>,
         }[item.status]
       }
+    </Notification>
+  ),
+
+  'node-moved': ({ item }) => (
+    <Notification Icon={ListIcon}>
+      <Trans>Node moved: {item.label}</Trans>
     </Notification>
   ),
 
@@ -143,6 +149,12 @@ const components: {
   'note-content-changed': ({ item }) => (
     <Notification Icon={StickyNoteIcon}>
       <Trans>Note updated: {item.content}</Trans>
+    </Notification>
+  ),
+
+  'note-moved': ({ item }) => (
+    <Notification Icon={StickyNoteIcon}>
+      <Trans>Note moved: {item.content}</Trans>
     </Notification>
   ),
 

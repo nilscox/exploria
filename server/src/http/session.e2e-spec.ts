@@ -177,4 +177,100 @@ void describe('SessionController', () => {
       assert(res.ok);
     });
   });
+
+  void describe('mind map', () => {
+    async function createSession() {
+      const session = Session.create(test.generator, test.clock, { model: 'model', language: 'en', ownerId: null });
+
+      await test.sessions.insert(session);
+      await test.sessions.save(session);
+
+      return session.id;
+    }
+
+    async function view(id: string) {
+      const res = await test.fetch(`/session/${id}`);
+
+      assert(res.ok, `GET /session/${id} failed with status ${res.status}`);
+
+      return (await res.json()) as Shared.Session;
+    }
+
+    async function send(id: string, path: string, method: string, body: object) {
+      const res = await test.fetch(`/session/${id}${path}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      assert(res.ok, await res.text());
+    }
+
+    void it('adds a node exposed as a top-level topic', async () => {
+      const id = await createSession();
+
+      await send(id, '/node', 'POST', { label: 'Node A' });
+
+      const session = await view(id);
+
+      assert.partialDeepStrictEqual(session.mindmap.nodes, [{ parentId: null, label: 'Node A', status: 'pending' }]);
+      assert.partialDeepStrictEqual(session.topics, [{ label: 'Node A', status: 'pending' }]);
+    });
+
+    void it('nests a node and attaches a note to it', async () => {
+      const id = await createSession();
+
+      await send(id, '/node', 'POST', { label: 'Parent' });
+      const parentId = (await view(id)).mindmap.nodes[0]!.id;
+
+      await send(id, '/node', 'POST', { label: 'Child', parentId });
+      await send(id, '/note', 'POST', { content: 'A note', nodeId: parentId });
+
+      const session = await view(id);
+
+      assert.strictEqual(session.mindmap.nodes.length, 2);
+      assert.strictEqual(session.topics.length, 1);
+      assert.partialDeepStrictEqual(session.notes, [{ content: 'A note', parentId }]);
+    });
+
+    void it('updates a top-level node, then clears its status when nested via move', async () => {
+      const id = await createSession();
+
+      await send(id, '/node', 'POST', { label: 'Node' });
+      const nodeId = (await view(id)).mindmap.nodes[0]!.id;
+
+      await send(id, '/node', 'POST', { label: 'Parent' });
+      const parentId = (await view(id)).mindmap.nodes[1]!.id;
+
+      await send(id, `/node/${nodeId}`, 'PUT', { label: 'Renamed', status: 'in_progress' });
+
+      assert.partialDeepStrictEqual(
+        (await view(id)).mindmap.nodes.find((node) => node.id === nodeId),
+        { label: 'Renamed', status: 'in_progress', parentId: null },
+      );
+
+      await send(id, `/node/${nodeId}/move`, 'PUT', { parentId });
+
+      const node = (await view(id)).mindmap.nodes.find((node) => node.id === nodeId);
+
+      assert.deepStrictEqual(node, { id: nodeId, label: 'Renamed', parentId });
+    });
+
+    void it('removes a node with its descendants and their notes', async () => {
+      const id = await createSession();
+
+      await send(id, '/node', 'POST', { label: 'Parent' });
+      const parentId = (await view(id)).mindmap.nodes[0]!.id;
+
+      await send(id, '/node', 'POST', { label: 'Child', parentId });
+      await send(id, '/note', 'POST', { content: 'A note', nodeId: parentId });
+
+      await send(id, `/node/${parentId}`, 'DELETE', {});
+
+      const session = await view(id);
+
+      assert.deepStrictEqual(session.mindmap.nodes, []);
+      assert.deepStrictEqual(session.notes, []);
+    });
+  });
 });

@@ -74,9 +74,9 @@ export const options = {
       });
     },
 
-    addTopic(id: string) {
+    addNode(id: string) {
       return mutationOptions({
-        mutationFn: (topic: string) => api.sessions.addTopic(id, topic),
+        mutationFn: (label: string) => api.sessions.addNode(id, label),
       });
     },
 
