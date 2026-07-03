@@ -1,32 +1,15 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
-import { SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { config, useSetConfig } from 'src/contexts/config';
 import { setLanguage } from 'src/i18n/i18n';
 
 import { Button } from './button';
-import { Dialog, DialogActions, DialogClose, DialogContent, DialogHeader, DialogTrigger } from './dialog';
+import { DialogActions, DialogClose, DialogContent, DialogHeader } from './dialog';
 import { Field, FieldLabel, FieldProvider } from './field';
 import { Select, SelectItem } from './select';
 import { Switch } from './switch';
-
-export function Settings() {
-  return (
-    <Dialog>
-      <DialogTrigger
-        render={
-          <Button variant="ghost" size="icon">
-            <SettingsIcon className="size-4" />
-          </Button>
-        }
-      />
-
-      <SettingsDialog />
-    </Dialog>
-  );
-}
 
 export function SettingsDialog() {
   return (

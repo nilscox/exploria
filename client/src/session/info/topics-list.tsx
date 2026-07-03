@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { Button } from 'src/components/button';
 import { Input } from 'src/components/input';
+import { assert } from 'src/utils';
 
 import { SidebarSection } from './sidebar-section';
 
@@ -34,28 +35,28 @@ export function TopicsListSection({ topics, onAdd }: { topics: Shared.Topic[]; o
 }
 
 function TopicItem({ topic }: { topic: Shared.Topic }) {
-  const status = topic.status ?? 'pending';
+  assert(topic.status);
 
   return (
     <div
       id={topic.id}
       className={clsx(
         'row bg-neutral items-center gap-2.5 rounded-lg border px-3 py-2',
-        status === 'in_progress' && 'shadow-sm',
+        topic.status === 'in_progress' && 'shadow-sm',
       )}
     >
-      <TopicDot status={status} />
+      <TopicDot status={topic.status} />
 
       <span
         className={clsx(
           'flex-1 text-sm font-medium',
-          status === 'done' && 'text-dim decoration-foreground/20 line-through',
+          topic.status === 'done' && 'text-dim decoration-foreground/20 line-through',
         )}
       >
         {topic.label}
       </span>
 
-      <TopicStatusBadge status={status} />
+      <TopicStatusBadge status={topic.status} />
     </div>
   );
 }

@@ -1,15 +1,16 @@
 import { Trans, useLingui } from '@lingui/react/macro';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRightIcon } from 'lucide-react';
+import { ArrowRightIcon, SettingsIcon } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { options } from 'src/api';
 import { Button } from 'src/components/button';
+import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { DocumentTitle } from 'src/components/document-title';
 import { Field, FieldLabel } from 'src/components/field';
 import { Textarea } from 'src/components/input';
-import { Settings } from 'src/components/settings';
+import { SettingsDialog } from 'src/components/settings';
 import { isLanguage } from 'src/i18n/i18n';
 
 import { ModelSelector } from '../model-selector';
@@ -60,7 +61,17 @@ export function CreateSession() {
 
       <header className="row w-full items-center justify-end gap-3">
         <UserInfo />
-        <Settings />
+
+        <Dialog>
+          <DialogTrigger
+            render={
+              <Button variant="ghost" size="icon">
+                <SettingsIcon className="size-4" />
+              </Button>
+            }
+          />
+          <SettingsDialog />
+        </Dialog>
       </header>
 
       <div className="col mx-auto w-full max-w-lg flex-1 justify-center gap-8">

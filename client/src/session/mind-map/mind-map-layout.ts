@@ -10,7 +10,7 @@ export type Edge = {
 };
 
 export type Size = { width: number; height: number };
-export type Position2D = { x: number; y: number };
+export type Point = { x: number; y: number };
 
 export type NodeVariant = 'root' | 'internal' | 'leaf';
 export type Side = 'left' | 'right';
@@ -58,8 +58,8 @@ export function computeBranches(nodes: Node[], edges: Edge[]): Branches {
   return { color, variant, side };
 }
 
-export function layoutMindMap(nodes: Node[], edges: Edge[], sizes: Map<string, Size>): Map<string, Position2D> {
-  const positions = new Map<string, Position2D>();
+export function layoutMindMap(nodes: Node[], edges: Edge[], sizes: Map<string, Size>): Map<string, Point> {
+  const positions = new Map<string, Point>();
 
   if (nodes.length === 0) {
     return positions;

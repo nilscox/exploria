@@ -31,17 +31,15 @@ export function InlineEdit({
 
   if (editing) {
     const action = async (formData: FormData) => {
-      try {
-        const edited = formData.get('value');
+      const edited = formData.get('value');
 
-        assert(typeof edited === 'string');
+      assert(typeof edited === 'string');
 
-        if (value.trim() !== edited.trim()) {
-          await onSubmit(edited.trim());
-        }
-
-        setEditing(false);
-      } catch {}
+      if (value.trim() !== edited.trim()) {
+        onSubmit(edited.trim())
+          .then(() => setEditing(false))
+          .catch(() => {});
+      }
     };
 
     return (
