@@ -87,6 +87,31 @@ const sessions = {
     });
   },
 
+  async updateTopic(
+    id: string,
+    topicId: string,
+    changes: { label?: string; status?: Shared.TopicStatus; summary?: string },
+  ): Promise<void> {
+    await fetchApi(`/session/${id}/topic/${topicId}`, {
+      method: 'PUT',
+      body: changes,
+    });
+  },
+
+  async addNote(id: string, title: string, content: string, topicId: string | null): Promise<void> {
+    await fetchApi(`/session/${id}/note`, {
+      method: 'POST',
+      body: { title, content, topicId },
+    });
+  },
+
+  async updateNote(id: string, noteId: string, changes: { title?: string; content?: string }): Promise<void> {
+    await fetchApi(`/session/${id}/note/${noteId}`, {
+      method: 'PUT',
+      body: changes,
+    });
+  },
+
   async postMessage(id: string, message: string): Promise<void> {
     await fetchApi(`/session/${id}/message`, {
       method: 'POST',

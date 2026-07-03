@@ -1,6 +1,8 @@
+import { useLingui } from '@lingui/react/macro';
 import {
   Background,
   ConnectionMode,
+  ControlButton,
   Controls,
   type Edge as FlowEdge,
   type Node as FlowNode,
@@ -21,6 +23,7 @@ import {
   useStore,
 } from '@xyflow/react';
 import { cva } from 'class-variance-authority';
+import { FullscreenIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import '@xyflow/react/dist/style.css';
@@ -73,6 +76,8 @@ function MindMapFlow({
   onNodeSelected,
   className,
 }: MindMapProps) {
+  const { t } = useLingui();
+
   const branches = useMemo(() => computeBranches(initialNodes, initialEdges), [initialNodes, initialEdges]);
 
   const [nodes, setNodes] = useState<FlowNode<MindMapNodeData>[]>(() => buildNodes(initialNodes, branches));
@@ -176,8 +181,12 @@ function MindMapFlow({
       className={className}
       style={{ opacity: laidOut ? 1 : 0, transition: 'opacity 120ms ease' }}
     >
-      <Background />
-      <Controls showInteractive={false} />
+      <Background bgColor="var(--color-neutral)" />
+      <Controls position="bottom-center" orientation="horizontal" showInteractive={false}>
+        <ControlButton title={t`Full Screen`} onClick={() => alert('Not implemented.')}>
+          <FullscreenIcon className="size-full" />
+        </ControlButton>
+      </Controls>
     </ReactFlow>
   );
 }
@@ -188,7 +197,7 @@ function buildNodes(nodes: Node[], branches: Branches): FlowNode<MindMapNodeData
     type: 'mindMap',
     position: { x: 0, y: 0 },
     data: {
-      label: node.data.label,
+      ...node.data,
       color: branches.color.get(node.id),
       variant: branches.variant.get(node.id) ?? 'internal',
       side: branches.side.get(node.id),
@@ -206,6 +215,7 @@ function buildEdges(edges: Edge[], branches: Branches): FlowEdge[] {
 
 type MindMapNodeData = {
   label: string;
+  notesCount: number;
   color?: string;
   variant: NodeVariant;
   side?: Side;
@@ -213,7 +223,7 @@ type MindMapNodeData = {
 };
 
 function MindMapNode({ data }: NodeProps<FlowNode<MindMapNodeData>>) {
-  const { label, color, variant, side, selected } = data;
+  const { label, notesCount, color, variant, side, selected } = data;
 
   const accent = color ?? 'var(--color-primary)';
 
@@ -222,6 +232,7 @@ function MindMapNode({ data }: NodeProps<FlowNode<MindMapNodeData>>) {
       className={nodeVariants({ variant, selected })}
       style={{
         borderColor: variant === 'root' ? undefined : color,
+        backgroundColor: variant === 'root' ? undefined : color + '11',
         boxShadow: selected ? `0 0 0 3px ${accent}, 0 0 32px rgb(0 0 0 / 0.42)` : undefined,
       }}
     >
@@ -232,7 +243,12 @@ function MindMapNode({ data }: NodeProps<FlowNode<MindMapNodeData>>) {
         className={handleVariants({ dangling: variant === 'leaf' && side === 'left' })}
         style={{ left: -8 }}
       />
-      {label}
+
+      <div className="row items-center gap-1">
+        {label}
+        {variant !== 'root' && notesCount > 0 && <span className="text-dim text-xs">({notesCount})</span>}
+      </div>
+
       <Handle
         id="right"
         type="source"
@@ -250,8 +266,8 @@ const nodeVariants = cva(
     variants: {
       variant: {
         root: 'border-2 border-transparent bg-primary font-semibold text-primary-foreground',
-        internal: 'border-2 bg-background text-sm text-foreground cursor-pointer',
-        leaf: 'border-2 bg-background text-sm text-foreground cursor-pointer',
+        internal: 'border-2 text-sm text-foreground cursor-pointer',
+        leaf: 'border-2 text-sm text-foreground cursor-pointer',
       } satisfies Record<NodeVariant, string>,
       selected: {
         true: '',

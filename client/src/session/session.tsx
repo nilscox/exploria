@@ -52,7 +52,7 @@ export function SessionPage() {
           {!state.session.ended && <MessageForm loading={state.loading} postMessage={postMessage} />}
         </>
       }
-      right={<SessionMindMap session={state.session} className="size-full" />}
+      right={<SessionMindMap session={state.session} />}
     />
   );
 }

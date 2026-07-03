@@ -42,9 +42,17 @@ msgstr "Un sujet que vous ne savez pas par quel bout prendre."
 msgid "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
 msgstr "Un assistant IA qui pose les bonnes questions, révèle vos angles morts et structure votre réflexion."
 
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Add"
+msgstr "Ajouter"
+
 #: src/session/info/topics-list.tsx
 msgid "Add a topic..."
 msgstr "Ajouter un sujet…"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Add note"
+msgstr "Ajouter une note"
 
 #: src/session/info/topics-list.tsx
 msgid "Add topic"
@@ -99,6 +107,10 @@ msgstr "Angles morts"
 #: src/session/create/create-session.tsx
 msgid "Can I stay friends with someone whose choices I disapprove of?"
 msgstr "Puis-je rester ami avec quelqu'un dont je désapprouve les choix ?"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Cancel"
+msgstr "Annuler"
 
 #: src/session/info/timer.tsx
 msgid "Clear the timer?"
@@ -162,6 +174,22 @@ msgstr "Télécharger"
 msgid "Duration (minutes):"
 msgstr "Durée de la session (minutes) :"
 
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Edit note content"
+msgstr "Modifier le contenu de la note"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Edit note title"
+msgstr "Modifier le titre de la note"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Edit topic label"
+msgstr "Modifier le libellé du sujet"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Edit topic summary"
+msgstr "Modifier le résumé du sujet"
+
 #: src/session/session.tsx
 msgid "End session"
 msgstr "Terminer la session"
@@ -201,6 +229,10 @@ msgstr "Cadrer un problème de recherche"
 #: src/home.tsx
 msgid "Free, no signup needed."
 msgstr "Gratuit, sans inscription."
+
+#: src/session/mind-map/mind-map.tsx
+msgid "Full Screen"
+msgstr "Plein écran"
 
 #: src/home.tsx
 msgid "Give your thinking a time frame."
@@ -353,6 +385,18 @@ msgstr "Choix du modèle"
 msgid "More"
 msgstr "Plus"
 
+#: src/session/mind-map/session-mind-map.tsx
+msgid "No mind map yet."
+msgstr "Pas encore de carte mentale."
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "No notes on this topic."
+msgstr "Aucune notes sur ce sujet."
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "No summary."
+msgstr "Aucun résumé."
+
 #: src/session/info/topics-list.tsx
 msgid "No Topic"
 msgstr "Aucun sujet"
@@ -361,6 +405,10 @@ msgstr "Aucun sujet"
 #: src/session/session-timeline.tsx
 msgid "Note added: {0}"
 msgstr "Note ajoutée : {0}"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Note content"
+msgstr "Contenu de la note"
 
 #. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
@@ -377,6 +425,10 @@ msgstr "Note supprimée : {0}"
 #: src/session/session-timeline.tsx
 msgid "Note renamed: {0} <0/> {1}"
 msgstr "Note renommée : {0} <0/> {1}"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Note title"
+msgstr "Titre de la note"
 
 #. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
@@ -425,6 +477,10 @@ msgstr "Reprendre"
 #: src/session/session-timeline.tsx
 msgid "Search: \"{0}\" ({1} result(s))"
 msgstr "Recherche : \"{0}\" ({1} résultat(s))"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Select a topic to see its details."
+msgstr "Sélectionnez un sujet pour afficher ses détails."
 
 #: src/session/message-form.tsx
 msgid "Send"
@@ -617,6 +673,10 @@ msgstr "Sujet « {0} » à traiter"
 msgid "Topic added: {0}"
 msgstr "Sujet ajouté : {0}"
 
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Topic label"
+msgstr "Libellé du sujet"
+
 #. placeholder {0}: item.label
 #: src/session/session-timeline.tsx
 msgid "Topic moved: {0}"
@@ -632,6 +692,10 @@ msgstr "Sujet supprimé : {0}"
 #: src/session/session-timeline.tsx
 msgid "Topic renamed: {0} <0/> {1}"
 msgstr "Sujet renommé : {0} <0/> {1}"
+
+#: src/session/mind-map/session-mind-map.tsx
+msgid "Topic summary"
+msgstr "Résumé du sujet"
 
 #: src/session/info/topics-list.tsx
 msgid "Topics"

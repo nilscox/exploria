@@ -1,11 +1,10 @@
 import { type Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import { useMutation } from '@tanstack/react-query';
-import { BotIcon, MessageSquareTextIcon } from 'lucide-react';
+import { BotIcon } from 'lucide-react';
 
 import { options } from 'src/api';
 import { Field, FieldLabel } from 'src/components/field';
-import { Markdown } from 'src/components/markdown';
 
 import { ModelSelector } from '../model-selector';
 import { PostureSection } from './posture';
@@ -32,7 +31,6 @@ export function SessionInfo({ session }: { session: Shared.Session }) {
       />
       <TopicsListSection topics={session.topics.filter((topic) => topic.parentId === null)} onAdd={addTopic} />
       <PostureSection session={session} onSetPosture={setPosture} />
-      <NotesSection session={session} />
       <ModelSelectorSection session={session} />
     </div>
   );
@@ -49,24 +47,6 @@ function ModelSelectorSection({ session }: { session: Shared.Session }) {
         </FieldLabel>
         <ModelSelector value={session.model} onChange={setModel} />
       </Field>
-    </SidebarSection>
-  );
-}
-
-function NotesSection({ session }: { session: Shared.Session }) {
-  if (session.notes.length === 0) {
-    return null;
-  }
-
-  return (
-    <SidebarSection Icon={MessageSquareTextIcon} title={<Trans>Notes</Trans>}>
-      <ul className="col gap-2">
-        {session.notes.map((note) => (
-          <li key={note.id} className="border-primary bg-accent rounded-md border-l-2 p-2">
-            <Markdown markdown={note.content} title={note.content} className="line-clamp-2 text-sm" />
-          </li>
-        ))}
-      </ul>
     </SidebarSection>
   );
 }

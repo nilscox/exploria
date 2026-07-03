@@ -36,7 +36,7 @@ export const buttonVariants = cva(
         solid: 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent outline-offset-2',
         secondary: 'bg-accent text-accent-foreground hover:bg-accent/90 border-transparent',
         outlined: 'border-border hover:bg-accent/50',
-        ghost: 'border-transparent hover:bg-accent',
+        ghost: 'border-transparent hover:bg-accent bg-transparent',
       },
       size: {
         medium: 'h-9 px-4',

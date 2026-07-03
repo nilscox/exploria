@@ -1,6 +1,6 @@
 export type Node = {
   id: string;
-  data: { label: string };
+  data: { label: string; notesCount: number };
 };
 
 export type Edge = {

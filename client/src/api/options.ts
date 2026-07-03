@@ -80,6 +80,43 @@ export const options = {
       });
     },
 
+    updateTopic(id: string) {
+      type Variables = {
+        topicId: string;
+        label?: string;
+        status?: Shared.TopicStatus;
+        summary?: string;
+      };
+
+      return mutationOptions({
+        mutationFn: ({ topicId, ...changes }: Variables) => api.sessions.updateTopic(id, topicId, changes),
+      });
+    },
+
+    addNote(id: string) {
+      type Variables = {
+        title: string;
+        content: string;
+        topicId: string | null;
+      };
+
+      return mutationOptions({
+        mutationFn: ({ title, content, topicId }: Variables) => api.sessions.addNote(id, title, content, topicId),
+      });
+    },
+
+    updateNote(id: string) {
+      type Variables = {
+        noteId: string;
+        title?: string;
+        content?: string;
+      };
+
+      return mutationOptions({
+        mutationFn: ({ noteId, ...changes }: Variables) => api.sessions.updateNote(id, noteId, changes),
+      });
+    },
+
     postMessage(id: string) {
       return mutationOptions({
         mutationFn: (message: string) => api.sessions.postMessage(id, message),
