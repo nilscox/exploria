@@ -59,7 +59,7 @@ const { nodes, edges } = flatten({
 
     {
       label: "Mesure d'impact",
-      children: [{ label: 'Vélocité de livraison' }, { label: 'Satisfaction des devs' }],
+      children: [{ label: 'Vélocité de livraison' }, { label: 'Satisfaction des développeurs' }],
     },
   ],
 });
@@ -79,7 +79,7 @@ function flatten(root: Node) {
     const id = Math.random().toString(36).slice(-6);
 
     ids.set(node, id);
-    nodes.push({ id, data: { label: node.label } });
+    nodes.push({ id, data: { label: node.label, notesCount: 0 } });
 
     for (const child of node.children ?? []) {
       dfs(child);

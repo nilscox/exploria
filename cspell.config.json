@@ -27,6 +27,7 @@
     "tailwindcss",
     "tavily",
     "tsgolint",
-    "varchar"
+    "varchar",
+    "xyflow"
   ]
 }

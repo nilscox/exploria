@@ -91,7 +91,7 @@ const en: Messages = {
 
   'remove-topic.description': 'Removes a topic from the mind map, along with its descendants and their attached notes.',
 
-  'move-topic.description': 'Re-attaches a topic under another parent topic, reorganising the mind map.',
+  'move-topic.description': 'Re-attaches a topic under another parent topic, rearranging the mind map.',
   'move-topic.parent-param':
     'Id of the new parent topic. Use null to move the topic to the top level, directly under the subject.',
 
