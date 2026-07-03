@@ -1,15 +1,16 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { useMutation } from '@tanstack/react-query';
-import clsx from 'clsx';
-import { ImageOffIcon, PlusIcon } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { PlusIcon, Share2Icon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { options } from 'src/api';
 import { Button } from 'src/components/button';
 import { InlineEdit, NoValue } from 'src/components/inline-edit';
 import { Input, Textarea } from 'src/components/input';
 import { Markdown } from 'src/components/markdown';
+import { ResizeHandle } from 'src/components/resize-handle';
+import { useResizeElement } from 'src/hooks/use-resize-element';
 import { assert } from 'src/utils';
 
 import { MindMap, type Edge, type Node } from './mind-map';
@@ -27,7 +28,11 @@ export function SessionMindMap({
 
   const rootLabel = session.subject || t`Subject to be defined`;
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
-  const { height: detailHeight, resizing, startResize } = useResizeRow({ initial: 200, minimum: 80 });
+  const detail = useResizeElement({
+    axis: 'vertical',
+    initial: 200,
+    min: 80,
+  });
 
   const { nodes, edges } = useMemo(
     () => toGraph(session.topics, session.notes, rootLabel),
@@ -37,8 +42,8 @@ export function SessionMindMap({
   if (nodes.length === 1) {
     return (
       <div className="bg-neutral grid flex-1 place-items-center">
-        <div className="col gap-2">
-          <ImageOffIcon className="text-accent size-32" />
+        <div className="col items-center gap-2">
+          <Share2Icon className="text-accent size-32" />
           <span className="text-dim font-medium">
             <Trans>No mind map yet.</Trans>
           </span>
@@ -50,7 +55,7 @@ export function SessionMindMap({
   const selectedTopic = session.topics.find((topic) => topic.id === selectedTopicId);
 
   return (
-    <div className="col h-full">
+    <div className="col flex-1">
       <MindMap
         nodes={nodes}
         edges={edges}
@@ -58,76 +63,27 @@ export function SessionMindMap({
         onNodeSelected={setSelectedTopicId}
         expanded={expanded}
         toggleExpanded={toggleExpanded}
-        className="min-h-0 flex-1"
+        className="min-h-32 flex-1"
       />
 
-      <RowResizeHandle resizing={resizing} onPointerDown={startResize} />
+      <div className="relative">
+        <ResizeHandle
+          axis="vertical"
+          resizing={detail.resizing}
+          onPointerDown={detail.startResize}
+          className="absolute -top-1 left-1/2 -translate-x-1/2"
+        />
 
-      <div style={{ height: `${detailHeight}px` }} className="shrink-0 overflow-auto">
-        {selectedTopic ? (
-          <TopicDetail session={session} topic={selectedTopic} />
-        ) : (
-          <p className="text-dim p-4 text-center text-sm">
-            <Trans>Select a topic to see its details.</Trans>
-          </p>
-        )}
+        <div style={{ height: `${detail.size}px` }} className="overflow-auto">
+          {selectedTopic ? (
+            <TopicDetail session={session} topic={selectedTopic} />
+          ) : (
+            <p className="text-dim p-4 text-center text-sm">
+              <Trans>Select a topic to see its details.</Trans>
+            </p>
+          )}
+        </div>
       </div>
-    </div>
-  );
-}
-
-function useResizeRow({ initial, minimum }: { initial: number; minimum: number }) {
-  const [resizing, setResizing] = useState(false);
-  const [height, setHeight] = useState(initial);
-
-  const startResize = useCallback(
-    (event: React.PointerEvent) => {
-      event.preventDefault();
-      setResizing(true);
-
-      const startY = event.clientY;
-      const startHeight = height;
-
-      const onMove = (moveEvent: PointerEvent) => {
-        const delta = startY - moveEvent.clientY;
-        setHeight(Math.min(Math.max(startHeight + delta, minimum), window.innerHeight * 0.7));
-      };
-
-      const onUp = () => {
-        setResizing(false);
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        document.body.style.userSelect = '';
-      };
-
-      document.body.style.userSelect = 'none';
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp);
-    },
-    [height, minimum],
-  );
-
-  return { height, resizing, startResize };
-}
-
-function RowResizeHandle({
-  resizing,
-  onPointerDown,
-}: {
-  resizing: boolean;
-  onPointerDown: (event: React.PointerEvent) => void;
-}) {
-  return (
-    <div
-      onPointerDown={onPointerDown}
-      className="group flex h-3 w-full shrink-0 cursor-row-resize items-center justify-center border-t"
-    >
-      <div
-        className={clsx(
-          'h-1 w-8 rounded-full bg-border transition-colors group-hover:bg-primary/60',
-          resizing && 'bg-primary/60',
-        )}
-      />
     </div>
   );
 }

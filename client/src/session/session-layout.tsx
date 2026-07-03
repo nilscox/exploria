@@ -1,9 +1,11 @@
 import { Trans } from '@lingui/react/macro';
 import clsx from 'clsx';
 import { produce } from 'immer';
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 
+import { ResizeHandle } from 'src/components/resize-handle';
 import { useMediaQuery } from 'src/hooks/use-media-query';
+import { useResizeElement } from 'src/hooks/use-resize-element';
 import { xor } from 'src/utils';
 
 export type Layout = 'mobile' | 'tablet' | 'desktop';
@@ -24,9 +26,10 @@ export function SessionLayout({
   timeline: React.ReactNode;
   mindMap: React.ReactNode;
 }) {
-  const mindMapResize = useResizeColumn({
+  const mindMapResize = useResizeElement({
+    axis: 'horizontal',
     initial: Math.max((window.innerWidth - 384) / 3, 280),
-    minimum: 280,
+    min: 280,
     onResize: useCallback(
       (size) => {
         if (size < 20) {
@@ -39,23 +42,23 @@ export function SessionLayout({
 
   return (
     <div
-      className={clsx('h-full overflow-hidden grid grid-rows-[auto_1fr]', {
+      className={clsx('h-full min-h-0 overflow-hidden grid grid-rows-[auto_1fr]', {
         'grid-cols-1': Object.values(views).filter(Boolean).length <= 1,
         'grid-cols-[24rem_1fr]': views.info && xor(views.timeline, views.mindmap),
         'grid-cols-[1fr_var(--mindmap-width)]': !views.info && views.mindmap && views.timeline,
         'grid-cols-[24rem_1fr_var(--mindmap-width)]': views.info && views.mindmap && views.timeline,
       })}
-      style={{ '--mindmap-width': `${mindMapResize.width}px` } as React.CSSProperties}
+      style={{ '--mindmap-width': `${mindMapResize.size}px` } as React.CSSProperties}
     >
       <header className="col-span-full">{header}</header>
 
       {!views.info && !views.mindmap && !views.timeline && (
-        <main className="col text-dim h-full items-center justify-center font-medium">
+        <main className="col text-dim items-center justify-center font-medium">
           <Trans>No view selected.</Trans>
         </main>
       )}
 
-      <aside className={clsx('min-h-0 scrollbar-thin overflow-y-auto lg:max-w-96', { hidden: !views.info })}>
+      <aside className={clsx('min-h-0 relative scrollbar-thin overflow-y-auto lg:max-w-96', { hidden: !views.info })}>
         {sessionInfo}
       </aside>
 
@@ -65,9 +68,14 @@ export function SessionLayout({
         {timeline}
       </main>
 
-      <aside className={clsx('relative min-h-0 flex-1 overflow-hidden lg:border-l', { hidden: !views.mindmap })}>
+      <aside className={clsx('relative col min-h-0 flex-1 overflow-hidden lg:border-l', { hidden: !views.mindmap })}>
         {views.timeline && views.mindmap && (
-          <ColumnResizeHandle resizing={mindMapResize.resizing} onPointerDown={mindMapResize.startResize} />
+          <ResizeHandle
+            axis="horizontal"
+            resizing={mindMapResize.resizing}
+            onPointerDown={mindMapResize.startResize}
+            className="absolute top-1/2 left-1 z-10 -translate-y-1/2"
+          />
         )}
         {mindMap}
       </aside>
@@ -139,66 +147,3 @@ const reducer = produce(
     }
   },
 );
-
-function useResizeColumn({
-  initial,
-  minimum,
-  onResize,
-}: {
-  initial: number;
-  minimum: number;
-  onResize?: (size: number) => void;
-}) {
-  const [resizing, setResizing] = useState(false);
-  const [width, setWidth] = useState(Math.max(initial, minimum));
-
-  const startResize = useCallback(
-    (event: React.PointerEvent) => {
-      event.preventDefault();
-      setResizing(true);
-
-      const onMove = (moveEvent: PointerEvent) => {
-        const width = window.innerWidth - moveEvent.clientX;
-
-        onResize?.(width);
-        setWidth(Math.min(Math.max(width, minimum), window.innerWidth * 0.6));
-      };
-
-      const onUp = () => {
-        setResizing(false);
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        document.body.style.userSelect = '';
-      };
-
-      document.body.style.userSelect = 'none';
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp);
-    },
-    [minimum, onResize],
-  );
-
-  return { width, resizing, startResize };
-}
-
-function ColumnResizeHandle({
-  resizing,
-  onPointerDown,
-}: {
-  resizing: boolean;
-  onPointerDown: (event: React.PointerEvent) => void;
-}) {
-  return (
-    <div
-      onPointerDown={onPointerDown}
-      className="group absolute inset-y-0 left-1.5 z-10 flex w-4 -translate-x-1/2 cursor-col-resize items-center justify-center"
-    >
-      <div
-        className={clsx(
-          'h-8 w-1.5 rounded-full bg-border transition-colors group-hover:bg-primary/60',
-          resizing && 'bg-primary/60',
-        )}
-      />
-    </div>
-  );
-}
