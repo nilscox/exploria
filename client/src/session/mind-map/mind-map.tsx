@@ -23,7 +23,7 @@ import {
   useStore,
 } from '@xyflow/react';
 import { cva } from 'class-variance-authority';
-import { FullscreenIcon } from 'lucide-react';
+import { Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import '@xyflow/react/dist/style.css';
@@ -58,6 +58,8 @@ type MindMapProps = {
   edges: Edge[];
   selectedNode?: string | null;
   onNodeSelected?: (id: string | null) => void;
+  expanded?: boolean;
+  toggleExpanded?: () => void;
   className?: string;
 };
 
@@ -74,6 +76,8 @@ function MindMapFlow({
   edges: initialEdges,
   selectedNode,
   onNodeSelected,
+  expanded,
+  toggleExpanded,
   className,
 }: MindMapProps) {
   const { t } = useLingui();
@@ -183,9 +187,11 @@ function MindMapFlow({
     >
       <Background bgColor="var(--color-neutral)" />
       <Controls position="bottom-center" orientation="horizontal" showInteractive={false}>
-        <ControlButton title={t`Full Screen`} onClick={() => alert('Not implemented.')}>
-          <FullscreenIcon className="size-full" />
-        </ControlButton>
+        {expanded !== undefined && (
+          <ControlButton title={expanded ? t`Shrink` : t`Expand`} onClick={toggleExpanded}>
+            {expanded ? <Minimize2Icon className="size-full" /> : <Maximize2Icon className="size-full" />}
+          </ControlButton>
+        )}
       </Controls>
     </ReactFlow>
   );

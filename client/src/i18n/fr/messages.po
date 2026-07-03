@@ -202,6 +202,10 @@ msgstr "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne"
 msgid "Examiner"
 msgstr "Examinateur"
 
+#: src/session/mind-map/mind-map.tsx
+msgid "Expand"
+msgstr "Agrandir"
+
 #: src/session/create/create-session.tsx
 msgid "Explor<0>ia</0>"
 msgstr "Explor<0>ia</0>"
@@ -229,10 +233,6 @@ msgstr "Cadrer un problème de recherche"
 #: src/home.tsx
 msgid "Free, no signup needed."
 msgstr "Gratuit, sans inscription."
-
-#: src/session/mind-map/mind-map.tsx
-msgid "Full Screen"
-msgstr "Plein écran"
 
 #: src/home.tsx
 msgid "Give your thinking a time frame."
@@ -363,6 +363,10 @@ msgstr "Prendre une décision structurante"
 msgid "Message"
 msgstr "Message"
 
+#: src/session/session.tsx
+msgid "Mind map"
+msgstr "Carte mentale"
+
 #: src/session/info/posture.tsx
 msgid "Mirror"
 msgstr "Miroir"
@@ -401,6 +405,10 @@ msgstr "Aucun résumé."
 msgid "No Topic"
 msgstr "Aucun sujet"
 
+#: src/session/session-layout.tsx
+msgid "No view selected."
+msgstr "Aucune vue sélectionnée."
+
 #. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
 msgid "Note added: {0}"
@@ -434,10 +442,6 @@ msgstr "Titre de la note"
 #: src/session/session-timeline.tsx
 msgid "Note updated: {0}"
 msgstr "Note modifiée : {0}"
-
-#: src/session/info/session-info.tsx
-msgid "Notes"
-msgstr "Notes"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -512,6 +516,7 @@ msgid "Session timer"
 msgstr "Minuteur de session"
 
 #: src/components/settings.tsx
+#: src/session/session.tsx
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -538,6 +543,10 @@ msgstr "Afficher les actions"
 #: src/components/settings.tsx
 msgid "Show timeline dates"
 msgstr "Afficher les dates des messages"
+
+#: src/session/mind-map/mind-map.tsx
+msgid "Shrink"
+msgstr "Rétrécir"
 
 #: src/session/create/create-session.tsx
 msgid "Sign out"
@@ -631,6 +640,10 @@ msgstr "Cette session sera visible publiquement. Ne partagez pas d'informations 
 #: src/home.tsx
 msgid "Timebox"
 msgstr "Timebox"
+
+#: src/session/session.tsx
+msgid "Timeline"
+msgstr "Fil de discussion"
 
 #: src/session/session-timeline.tsx
 msgid "Timer cleared"

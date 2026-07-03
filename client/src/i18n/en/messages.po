@@ -202,6 +202,10 @@ msgstr "Enter to send • Shift+Enter for new line"
 msgid "Examiner"
 msgstr "Examiner"
 
+#: src/session/mind-map/mind-map.tsx
+msgid "Expand"
+msgstr "Expand"
+
 #: src/session/create/create-session.tsx
 msgid "Explor<0>ia</0>"
 msgstr "Explor<0>ia</0>"
@@ -229,10 +233,6 @@ msgstr "Frame a research problem"
 #: src/home.tsx
 msgid "Free, no signup needed."
 msgstr "Free, no signup needed."
-
-#: src/session/mind-map/mind-map.tsx
-msgid "Full Screen"
-msgstr "Full Screen"
 
 #: src/home.tsx
 msgid "Give your thinking a time frame."
@@ -363,6 +363,10 @@ msgstr "Make a structuring decision"
 msgid "Message"
 msgstr "Message"
 
+#: src/session/session.tsx
+msgid "Mind map"
+msgstr "Mind map"
+
 #: src/session/info/posture.tsx
 msgid "Mirror"
 msgstr "Mirror"
@@ -401,6 +405,10 @@ msgstr "No summary."
 msgid "No Topic"
 msgstr "No Topic"
 
+#: src/session/session-layout.tsx
+msgid "No view selected."
+msgstr "No view selected."
+
 #. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
 msgid "Note added: {0}"
@@ -434,10 +442,6 @@ msgstr "Note title"
 #: src/session/session-timeline.tsx
 msgid "Note updated: {0}"
 msgstr "Note updated: {0}"
-
-#: src/session/info/session-info.tsx
-msgid "Notes"
-msgstr "Notes"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
@@ -512,6 +516,7 @@ msgid "Session timer"
 msgstr "Session timer"
 
 #: src/components/settings.tsx
+#: src/session/session.tsx
 msgid "Settings"
 msgstr "Settings"
 
@@ -538,6 +543,10 @@ msgstr "Show timeline actions"
 #: src/components/settings.tsx
 msgid "Show timeline dates"
 msgstr "Show timeline dates"
+
+#: src/session/mind-map/mind-map.tsx
+msgid "Shrink"
+msgstr "Shrink"
 
 #: src/session/create/create-session.tsx
 msgid "Sign out"
@@ -631,6 +640,10 @@ msgstr "This session will be publicly available. Do not share sensitive informat
 #: src/home.tsx
 msgid "Timebox"
 msgstr "Timebox"
+
+#: src/session/session.tsx
+msgid "Timeline"
+msgstr "Timeline"
 
 #: src/session/session-timeline.tsx
 msgid "Timer cleared"

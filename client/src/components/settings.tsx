@@ -23,30 +23,36 @@ export function Settings() {
         }
       />
 
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <Trans>Settings</Trans>
-        </DialogHeader>
-
-        <div className="col gap-4 p-4">
-          <LanguageSelector />
-          <ThemeModeSelector />
-          <ShowTimelineActions />
-          <ShowTimelineDates />
-          <DebugMode />
-        </div>
-
-        <DialogActions>
-          <DialogClose
-            render={
-              <Button variant="ghost">
-                <Trans>Close</Trans>
-              </Button>
-            }
-          />
-        </DialogActions>
-      </DialogContent>
+      <SettingsDialog />
     </Dialog>
+  );
+}
+
+export function SettingsDialog() {
+  return (
+    <DialogContent className="max-w-md">
+      <DialogHeader>
+        <Trans>Settings</Trans>
+      </DialogHeader>
+
+      <div className="col gap-4 p-4">
+        <LanguageSelector />
+        <ThemeModeSelector />
+        <ShowTimelineActions />
+        <ShowTimelineDates />
+        <DebugMode />
+      </div>
+
+      <DialogActions>
+        <DialogClose
+          render={
+            <Button variant="ghost">
+              <Trans>Close</Trans>
+            </Button>
+          }
+        />
+      </DialogActions>
+    </DialogContent>
   );
 }
 

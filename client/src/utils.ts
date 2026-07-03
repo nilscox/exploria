@@ -11,3 +11,7 @@ export function assert(value: unknown): asserts value {
 export function exhaustiveArray<Union>() {
   return <T extends readonly Union[]>(arr: Exact<Union, T[number]> extends never ? never : T) => arr;
 }
+
+export function xor(a: boolean, b: boolean) {
+  return (a && !b) || (b && !a);
+}

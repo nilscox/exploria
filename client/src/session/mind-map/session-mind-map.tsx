@@ -1,8 +1,9 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import { useMutation } from '@tanstack/react-query';
+import clsx from 'clsx';
 import { ImageOffIcon, PlusIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { options } from 'src/api';
 import { Button } from 'src/components/button';
@@ -13,11 +14,20 @@ import { assert } from 'src/utils';
 
 import { MindMap, type Edge, type Node } from './mind-map';
 
-export function SessionMindMap({ session }: { session: Shared.Session }) {
+export function SessionMindMap({
+  session,
+  expanded,
+  toggleExpanded,
+}: {
+  session: Shared.Session;
+  expanded?: boolean;
+  toggleExpanded?: () => void;
+}) {
   const { t } = useLingui();
 
   const rootLabel = session.subject || t`Subject to be defined`;
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const { height: detailHeight, resizing, startResize } = useResizeRow({ initial: 200, minimum: 80 });
 
   const { nodes, edges } = useMemo(
     () => toGraph(session.topics, session.notes, rootLabel),
@@ -46,10 +56,14 @@ export function SessionMindMap({ session }: { session: Shared.Session }) {
         edges={edges}
         selectedNode={selectedTopicId}
         onNodeSelected={setSelectedTopicId}
-        className="flex-1"
+        expanded={expanded}
+        toggleExpanded={toggleExpanded}
+        className="min-h-0 flex-1"
       />
 
-      <div className="flex-1 overflow-auto border-t">
+      <RowResizeHandle resizing={resizing} onPointerDown={startResize} />
+
+      <div style={{ height: `${detailHeight}px` }} className="shrink-0 overflow-auto">
         {selectedTopic ? (
           <TopicDetail session={session} topic={selectedTopic} />
         ) : (
@@ -58,6 +72,62 @@ export function SessionMindMap({ session }: { session: Shared.Session }) {
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function useResizeRow({ initial, minimum }: { initial: number; minimum: number }) {
+  const [resizing, setResizing] = useState(false);
+  const [height, setHeight] = useState(initial);
+
+  const startResize = useCallback(
+    (event: React.PointerEvent) => {
+      event.preventDefault();
+      setResizing(true);
+
+      const startY = event.clientY;
+      const startHeight = height;
+
+      const onMove = (moveEvent: PointerEvent) => {
+        const delta = startY - moveEvent.clientY;
+        setHeight(Math.min(Math.max(startHeight + delta, minimum), window.innerHeight * 0.7));
+      };
+
+      const onUp = () => {
+        setResizing(false);
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        document.body.style.userSelect = '';
+      };
+
+      document.body.style.userSelect = 'none';
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    },
+    [height, minimum],
+  );
+
+  return { height, resizing, startResize };
+}
+
+function RowResizeHandle({
+  resizing,
+  onPointerDown,
+}: {
+  resizing: boolean;
+  onPointerDown: (event: React.PointerEvent) => void;
+}) {
+  return (
+    <div
+      onPointerDown={onPointerDown}
+      className="group flex h-3 w-full shrink-0 cursor-row-resize items-center justify-center border-t"
+    >
+      <div
+        className={clsx(
+          'h-1 w-8 rounded-full bg-border transition-colors group-hover:bg-primary/60',
+          resizing && 'bg-primary/60',
+        )}
+      />
     </div>
   );
 }
