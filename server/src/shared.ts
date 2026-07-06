@@ -25,14 +25,23 @@ export namespace Shared {
   export type Message = session.Message;
   export type Role = session.Role;
   export type ToolCall = session.ToolCall;
-  export type DiscussionPath = session.DiscussionPath;
+  export type Option = session.Option;
+  export type Question = session.Question;
   export type Posture = session.Posture;
   export type PostureMode = session.PostureMode;
 
-  export type SelectablePath = DiscussionPath & { selected?: boolean };
+  export type SelectableOption = Option & { selected?: boolean };
+  export type AnswerableQuestion = Omit<Question, 'options'> & { options: SelectableOption[] };
 
   export type TimelineItem =
-    | { kind: 'message'; role: Role; date: string; content: string; toolCalls?: ToolCall[]; paths?: SelectablePath[] }
+    | {
+        kind: 'message';
+        role: Role;
+        date: string;
+        content: string;
+        toolCalls?: ToolCall[];
+        questions?: AnswerableQuestion[];
+      }
     | { kind: 'model-changed'; model: string }
     | { kind: 'session-ended' }
     | { kind: 'session-reopened' }

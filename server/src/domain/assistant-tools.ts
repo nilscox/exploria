@@ -188,21 +188,29 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
     },
   }),
 
-  setDiscussionPaths: tool({
-    description: t('set-discussion-paths.description'),
+  askQuestions: tool({
+    description: t('ask-questions.description'),
     param: z.object({
-      paths: z
+      questions: z
         .array(
           z.object({
-            label: z.string().min(1).max(64).describe(t('set-discussion-paths.label-param')),
-            description: z.string().max(128).optional().describe(t('set-discussion-paths.description-param')),
+            content: z.string().min(1).describe(t('ask-questions.content-param')),
+            options: z
+              .array(
+                z.object({
+                  label: z.string().min(1).max(64).describe(t('ask-questions.label-param')),
+                  description: z.string().max(128).optional().describe(t('ask-questions.description-param')),
+                }),
+              )
+              .min(2)
+              .max(5),
           }),
         )
-        .min(2)
-        .max(4),
+        .min(1)
+        .max(1),
     }),
-    execute: (session, { paths }) => {
-      session.setDiscussionPaths(paths);
+    execute: (session, { questions }) => {
+      session.askQuestions(questions);
 
       return t('tool.result.ok');
     },

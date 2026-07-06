@@ -39,9 +39,10 @@ export type Messages = {
 
   'resume-timer.description': string;
 
-  'set-discussion-paths.description': string;
-  'set-discussion-paths.label-param': string;
-  'set-discussion-paths.description-param': string;
+  'ask-questions.description': string;
+  'ask-questions.content-param': string;
+  'ask-questions.label-param': string;
+  'ask-questions.description-param': string;
 
   'set-posture.description': string;
   'set-posture.posture-param': string;
@@ -57,7 +58,7 @@ export type Messages = {
   'session-info.status.in_progress': string;
   'session-info.status.done': string;
 
-  'chat.discussion-path-selected': (p: { label: string }) => string;
+  'chat.answer-selected': (p: { question: string; label: string }) => string;
 
   'demo.role-1': string;
   'demo.role-2': string;
@@ -112,10 +113,11 @@ const en: Messages = {
 
   'resume-timer.description': 'Resumes the paused timer.',
 
-  'set-discussion-paths.description':
-    'Offers several possible directions for what comes next, shown as clickable options below your message. Do not list them in your text. Use it occasionally, only when a genuine choice of direction arises and it is worth letting the user decide.',
-  'set-discussion-paths.label-param': 'Short label of the path',
-  'set-discussion-paths.description-param': 'Optional one-sentence description',
+  'ask-questions.description':
+    'Asks the user one or more questions, each shown below your message with its options as clickable choices. Do not list them in your text. Use it occasionally, only when a genuine choice of direction arises and it is worth letting the user decide.',
+  'ask-questions.content-param': 'The question to ask',
+  'ask-questions.label-param': 'Short label of the option',
+  'ask-questions.description-param': 'One-sentence description of the option',
 
   'set-posture.description':
     'Changes the stance you adopt for the conversation. Call it before your reply whenever another stance fits the discussion better than the current one.',
@@ -136,7 +138,7 @@ const en: Messages = {
   'session-info.status.in_progress': 'in progress',
   'session-info.status.done': 'done',
 
-  'chat.discussion-path-selected': ({ label }) => `Selected discussion path: "${label}"`,
+  'chat.answer-selected': ({ question, label }) => `Answered "${question}" with: "${label}"`,
 
   'demo.role-1':
     'You are reflecting on a topic in a guided way. You are not the one guiding the discussion, you let yourself be guided.',
@@ -196,10 +198,11 @@ const fr: Messages = {
 
   'resume-timer.description': 'Redémarre le minuteur mis en pause.',
 
-  'set-discussion-paths.description':
-    "Propose plusieurs axes possibles pour la suite, affichés comme des options cliquables sous ton message. Ne les énumère pas dans ton texte. À utiliser ponctuellement, uniquement quand un vrai choix de direction se présente et qu'il est pertinent de laisser l'utilisateur trancher.",
-  'set-discussion-paths.label-param': 'Intitulé court du chemin',
-  'set-discussion-paths.description-param': 'Description optionnelle en une phrase',
+  'ask-questions.description':
+    "Pose une ou plusieurs questions à l'utilisateur, chacune affichée sous ton message avec ses options comme choix cliquables. Ne les énumère pas dans ton texte. À utiliser ponctuellement, uniquement quand un vrai choix de direction se présente et qu'il est pertinent de laisser l'utilisateur trancher.",
+  'ask-questions.content-param': 'La question à poser',
+  'ask-questions.label-param': "Intitulé court de l'option",
+  'ask-questions.description-param': "Description de l'option en une phrase",
 
   'set-posture.description':
     "Change la posture que tu adoptes pour la conversation. À appeler avant ta réponse dès qu'une autre posture est plus adaptée à la discussion que la posture courante.",
@@ -220,7 +223,7 @@ const fr: Messages = {
   'session-info.status.in_progress': 'en cours',
   'session-info.status.done': 'traité',
 
-  'chat.discussion-path-selected': ({ label }) => `Chemin de discussion sélectionné: "${label}"`,
+  'chat.answer-selected': ({ question, label }) => `Réponse à « ${question} » : « ${label} »`,
 
   'demo.role-1':
     "Tu cherches à réfléchir à un sujet de manière guidée. Ce n'est pas toi qui guide la discussion, tu te laisses guider.",

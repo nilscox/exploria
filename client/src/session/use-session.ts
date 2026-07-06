@@ -28,11 +28,13 @@ export function useSession(sessionId: string) {
     onSettled: () => dispatch({ type: 'MessagePosted' }),
   });
 
-  const { mutate: selectPath } = useMutation({
-    ...options.sessions.selectDiscussionPath(sessionId),
+  const { mutate: selectAnswerMutation } = useMutation({
+    ...options.sessions.selectAnswer(sessionId),
     onMutate: () => dispatch({ type: 'PostingMessage' }),
     onSettled: () => dispatch({ type: 'MessagePosted' }),
   });
+
+  const selectAnswer = (questionId: string, optionId: string) => selectAnswerMutation({ questionId, optionId });
 
   useEffect(() => {
     if (ApiError.is(sessionQuery.error) && sessionQuery.error.status === 404) {
@@ -87,7 +89,7 @@ export function useSession(sessionId: string) {
     }
   }, [state.connected, location.state, postMessage, navigate]);
 
-  return [state, postMessage, selectPath] as const;
+  return [state, postMessage, selectAnswer] as const;
 }
 
 type State = {

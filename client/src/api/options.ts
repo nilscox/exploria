@@ -123,9 +123,10 @@ export const options = {
       });
     },
 
-    selectDiscussionPath(id: string) {
+    selectAnswer(id: string) {
       return mutationOptions({
-        mutationFn: (pathId: string) => api.sessions.selectDiscussionPath(id, pathId),
+        mutationFn: ({ questionId, optionId }: { questionId: string; optionId: string }) =>
+          api.sessions.selectAnswer(id, questionId, optionId),
       });
     },
 

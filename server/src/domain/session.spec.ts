@@ -4,7 +4,7 @@ import { beforeEach, describe, it } from 'node:test';
 
 import { StubClock } from '../adapters/clock.ts';
 import { StubGenerator } from '../adapters/generator.ts';
-import { Session, type SessionEvent } from './session.ts';
+import { Session, type Question, type SessionEvent } from './session.ts';
 
 void describe('Session', () => {
   let generator: StubGenerator;
@@ -309,28 +309,39 @@ void describe('Session', () => {
     expectEvent('ModelChanged', { model: 'gpt-4o' });
   });
 
-  void it('sets discussion paths', () => {
-    session.setDiscussionPaths([{ label: 'Path A', description: 'A description' }]);
+  void it('asks questions', () => {
+    session.askQuestions([{ content: 'Which one?', options: [{ label: 'Option A', description: 'A description' }] }]);
 
-    const { id: pathId } = session.discussionPaths[0]!;
+    const question = session.questions[0]!;
+    const option = question.options[0]!;
 
-    assert.deepStrictEqual(session.discussionPaths, [{ id: pathId, label: 'Path A', description: 'A description' }]);
+    const expected: Question = {
+      id: question.id,
+      content: 'Which one?',
+      options: [{ id: option.id, label: 'Option A', description: 'A description' }],
+    };
 
-    expectEvent('DiscussionPathsSet', {
-      paths: [{ id: pathId, label: 'Path A', description: 'A description' }],
-    });
+    assert.deepStrictEqual(session.questions, [expected]);
+
+    expectEvent('QuestionsAsked', { questions: [expected] });
   });
 
-  void it('selects a discussion path', () => {
-    session.setDiscussionPaths([{ label: 'Path A' }]);
+  void it('selects an answer', () => {
+    session.askQuestions([{ content: 'Which one?', options: [{ label: 'Option A', description: 'A description' }] }]);
 
-    const { id: pathId } = session.discussionPaths[0]!;
+    const question = session.questions[0]!;
+    const option = question.options[0]!;
 
-    session.selectDiscussionPath(pathId);
+    session.selectAnswer(question.id, option.id);
 
-    assert.deepStrictEqual(session.discussionPaths, []);
+    assert.deepStrictEqual(session.questions, []);
 
-    expectEvent('DiscussionPathSelected', { pathId, label: 'Path A' });
+    expectEvent('AnswerSelected', {
+      questionId: question.id,
+      optionId: option.id,
+      content: 'Which one?',
+      label: 'Option A',
+    });
   });
 
   void it('defaults to automatic mode and the socratic posture', () => {
@@ -491,26 +502,35 @@ void describe('Session', () => {
       assert.strictEqual(replayed.timer, null);
     });
 
-    void it('reconstructs discussion paths from events', () => {
+    void it('reconstructs questions from events', () => {
       const source = new Session(new StubGenerator(), clock);
-      source.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
+      source.askQuestions([
+        {
+          content: 'Which one?',
+          options: [
+            { label: 'Option A', description: 'a' },
+            { label: 'Option B', description: 'b' },
+          ],
+        },
+      ]);
 
       const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
-      assert.deepStrictEqual(replayed.discussionPaths, source.discussionPaths);
+      assert.deepStrictEqual(replayed.questions, source.questions);
     });
 
-    void it('clears discussion paths after selection', () => {
+    void it('clears questions after an answer is selected', () => {
       const source = new Session(new StubGenerator(), clock);
-      source.setDiscussionPaths([{ label: 'Path A' }]);
+      source.askQuestions([{ content: 'Which one?', options: [{ label: 'Option A', description: 'a' }] }]);
 
-      const { id: pathId } = source.discussionPaths[0]!;
+      const question = source.questions[0]!;
+      const option = question.options[0]!;
 
-      source.selectDiscussionPath(pathId);
+      source.selectAnswer(question.id, option.id);
 
       const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 
-      assert.deepStrictEqual(replayed.discussionPaths, []);
+      assert.deepStrictEqual(replayed.questions, []);
     });
 
     void it('reconstructs posture and mode from events', () => {

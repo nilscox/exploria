@@ -19,7 +19,7 @@ export class TestAssistant implements IAssistant {
     const handler = {
       stream: () => this.stream(session, commit),
       tool: () => this.tool(session, commit),
-      paths: () => this.paths(session, commit),
+      questions: () => this.questions(session, commit),
     }[message ?? ''];
 
     await handler?.();
@@ -84,11 +84,16 @@ export class TestAssistant implements IAssistant {
     await this.stream(session, commit, 'Note saved.');
   }
 
-  private async paths(session: Session, commit?: () => Promise<void>) {
-    session.setDiscussionPaths([
-      { label: 'Path A', description: 'Some description' },
-      { label: 'Path B', description: 'Some description' },
-      { label: 'Path C', description: 'Some description' },
+  private async questions(session: Session, commit?: () => Promise<void>) {
+    session.askQuestions([
+      {
+        content: 'What do you think?',
+        options: [
+          { label: 'Option A', description: 'A description' },
+          { label: 'Option B', description: 'B description' },
+          { label: 'Option C', description: 'C description' },
+        ],
+      },
     ]);
 
     session.addToolCallResult('id', {
@@ -97,6 +102,6 @@ export class TestAssistant implements IAssistant {
 
     await commit?.();
 
-    await this.stream(session, commit, "What's next?");
+    await this.stream(session, commit, "Here's a question for you.");
   }
 }

@@ -119,9 +119,10 @@ const sessions = {
     });
   },
 
-  async selectDiscussionPath(id: string, pathId: string): Promise<void> {
-    await fetchApi(`/session/${id}/discussion-path/${pathId}`, {
+  async selectAnswer(id: string, questionId: string, optionId: string): Promise<void> {
+    await fetchApi(`/session/${id}/question/${questionId}/answer`, {
       method: 'POST',
+      body: { optionId },
     });
   },
 

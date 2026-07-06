@@ -198,8 +198,9 @@ export class SessionController {
       this.stream(res);
     });
 
-    this.router.post('/:id/discussion-path/:pathId', async (req, res) => {
-      await this.selectDiscussionPath(req.params.pathId);
+    this.router.post('/:id/question/:questionId/answer', async (req, res) => {
+      const { optionId } = z.object({ optionId: z.string().min(1) }).parse(req.body);
+      await this.selectAnswer(req.params.questionId, optionId);
       res.status(204).end();
     });
 
@@ -418,11 +419,11 @@ export class SessionController {
     await this.assistant.run(session, message, this.makeCommit(session));
   }
 
-  private async selectDiscussionPath(pathId: string) {
+  private async selectAnswer(questionId: string, optionId: string) {
     const session = this.getSessionInstance();
     const commit = this.makeCommit(session);
 
-    session.selectDiscussionPath(pathId);
+    session.selectAnswer(questionId, optionId);
     await commit();
 
     await this.assistant.run(session, undefined, commit);

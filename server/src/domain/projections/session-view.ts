@@ -100,8 +100,8 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'TimerCleared',
   'TimerPaused',
   'TimerResumed',
-  'DiscussionPathsSet',
-  'DiscussionPathSelected',
+  'QuestionsAsked',
+  'AnswerSelected',
   'PostureChanged',
   'SearchPerformed',
   'SummaryGenerated',
@@ -116,7 +116,7 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
   const topics = new Map<string, string>();
   const notes = new Map<string, string>();
 
-  let pendingPaths: Shared.SelectablePath[] | null = null;
+  let pendingQuestions: Shared.AnswerableQuestion[] | null = null;
 
   for (const event of events) {
     switch (event.type) {
@@ -135,16 +135,16 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
           toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
         };
 
-        if (item.role === 'assistant' && pendingPaths) {
-          item.paths = pendingPaths;
-          pendingPaths = null;
+        if (item.role === 'assistant' && pendingQuestions) {
+          item.questions = pendingQuestions;
+          pendingQuestions = null;
         }
 
         if (item.role === 'user') {
           const prevItem = items.findLast((item) => item.kind === 'message');
 
-          if (prevItem?.role === 'assistant' && prevItem.paths) {
-            prevItem.paths.forEach((path) => (path.selected = false));
+          if (prevItem?.role === 'assistant' && prevItem.questions) {
+            prevItem.questions.forEach((question) => question.options.forEach((option) => (option.selected = false)));
           }
         }
 
@@ -271,17 +271,20 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
         items.push({ kind: 'timer-resumed' });
         break;
 
-      case 'DiscussionPathsSet': {
-        pendingPaths = structuredClone(event.paths);
+      case 'QuestionsAsked': {
+        pendingQuestions = structuredClone(event.questions);
         break;
       }
 
-      case 'DiscussionPathSelected':
+      case 'AnswerSelected':
         const message = items.findLast((item) => item.kind === 'message');
-        assert(message?.paths);
+        assert(message?.questions);
 
-        for (const path of message.paths) {
-          path.selected = path.id === event.pathId;
+        const question = message.questions.find((question) => question.id === event.questionId);
+        assert(question);
+
+        for (const option of question.options) {
+          option.selected = option.id === event.optionId;
         }
         break;
 

@@ -37,7 +37,7 @@ export function SessionPage() {
   const sessionId = params.sessionId as string;
 
   const [{ layout, views }, setView] = useSessionLayout();
-  const [state, postMessage, selectPath] = useSession(sessionId);
+  const [state, postMessage, selectAnswer] = useSession(sessionId);
 
   if (!state.session) {
     return (
@@ -56,7 +56,7 @@ export function SessionPage() {
       timeline={
         <>
           <DocumentTitle title={state.session.subject} />
-          <MainSection session={state.session} stream={state.stream} onSelectPath={selectPath} />
+          <MainSection session={state.session} stream={state.stream} onSelectAnswer={selectAnswer} />
           {!state.session.ended && <MessageForm loading={state.loading} postMessage={postMessage} />}
         </>
       }
@@ -170,11 +170,11 @@ function Header({
 function MainSection({
   session,
   stream,
-  onSelectPath,
+  onSelectAnswer,
 }: {
   session: Shared.Session;
   stream: string;
-  onSelectPath: (pathId: string) => void;
+  onSelectAnswer: (questionId: string, optionId: string) => void;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { showTimelineActions, showTimelineDates } = config();
@@ -186,7 +186,7 @@ function MainSection({
   return (
     <>
       <div className="col relative mx-auto w-full max-w-4xl grow gap-4 p-4 sm:p-8">
-        <Timeline session={session} onSelectPath={onSelectPath} />
+        <Timeline session={session} onSelectAnswer={onSelectAnswer} />
         {stream && <Markdown markdown={stream} />}
       </div>
 

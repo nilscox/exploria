@@ -31,27 +31,27 @@ type TimelineMessage = Extract<TimelineItem, { kind: 'message' }>;
 
 export function Timeline({
   session,
-  onSelectPath,
+  onSelectAnswer,
 }: {
   session: Shared.Session;
-  onSelectPath: (pathId: string) => void;
+  onSelectAnswer: (questionId: string, optionId: string) => void;
 }) {
   return session.timeline.map((item, index) => (
-    <TimelineEntry key={index} session={session} item={item} onSelectPath={onSelectPath} />
+    <TimelineEntry key={index} session={session} item={item} onSelectAnswer={onSelectAnswer} />
   ));
 }
 
 function TimelineEntry({
   session,
   item,
-  onSelectPath,
+  onSelectAnswer,
 }: {
   session: Shared.Session;
   item: TimelineItem;
-  onSelectPath: (pathId: string) => void;
+  onSelectAnswer: (questionId: string, optionId: string) => void;
 }) {
   if (item.kind === 'message') {
-    return <MessageItem message={item} onSelectPath={onSelectPath} />;
+    return <MessageItem message={item} onSelectAnswer={onSelectAnswer} />;
   }
 
   const { showTimelineActions } = config();
@@ -268,7 +268,13 @@ function Notification({
   );
 }
 
-function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSelectPath: (pathId: string) => void }) {
+function MessageItem({
+  message,
+  onSelectAnswer,
+}: {
+  message: TimelineMessage;
+  onSelectAnswer: (questionId: string, optionId: string) => void;
+}) {
   const { i18n } = useLingui();
 
   return (
@@ -287,7 +293,7 @@ function MessageItem({ message, onSelectPath }: { message: TimelineMessage; onSe
       />
 
       {message.role === 'assistant' && config().debug && <ToolCalls toolCalls={message.toolCalls} />}
-      {message.paths && <DiscussionPaths paths={message.paths} onSelect={onSelectPath} />}
+      {message.questions && <Questions questions={message.questions} onSelectAnswer={onSelectAnswer} />}
     </div>
   );
 }
@@ -306,26 +312,54 @@ function ToolCalls({ toolCalls }: { toolCalls?: Shared.ToolCall[] }) {
   ));
 }
 
-function DiscussionPaths({ paths, onSelect }: { paths: Shared.SelectablePath[]; onSelect: (pathId: string) => void }) {
-  if (paths.length === 0) {
+function Questions({
+  questions,
+  onSelectAnswer,
+}: {
+  questions: Shared.AnswerableQuestion[];
+  onSelectAnswer: (questionId: string, optionId: string) => void;
+}) {
+  if (questions.length === 0) {
     return null;
   }
 
   return (
-    <div className="col bg-accent mt-2 gap-2 rounded-lg p-4">
-      {paths.map((path) => (
+    <div className="col mt-2 gap-2">
+      {questions.map((question) => (
+        <Question
+          key={question.id}
+          question={question}
+          onSelectAnswer={(optionId) => onSelectAnswer(question.id, optionId)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Question({
+  question,
+  onSelectAnswer,
+}: {
+  question: Shared.AnswerableQuestion;
+  onSelectAnswer: (optionId: string) => void;
+}) {
+  return (
+    <div className="col bg-accent gap-2 rounded-lg p-4">
+      <span className="font-medium">{question.content}</span>
+
+      {question.options.map((option) => (
         <button
-          key={path.id}
-          disabled={path.selected !== undefined}
+          key={option.id}
+          disabled={option.selected !== undefined}
           className={clsx(
             'col gap-0.5 h-auto text-start py-2 text-sm disabled:pointer-events-none bg-neutral/80 rounded-md p-2 hover:bg-neutral transition-colors',
-            path.selected && 'shadow-sm',
-            path.selected === false && 'opacity-50',
+            option.selected && 'shadow-sm',
+            option.selected === false && 'opacity-50',
           )}
-          onClick={() => onSelect(path.id)}
+          onClick={() => onSelectAnswer(option.id)}
         >
-          <span className="font-medium">{path.label}</span>
-          {path.description && <span className="text-dim">{path.description}</span>}
+          <span className="font-medium">{option.label}</span>
+          {option.description && <span className="text-dim">{option.description}</span>}
         </button>
       ))}
     </div>

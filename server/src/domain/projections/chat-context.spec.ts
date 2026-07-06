@@ -59,15 +59,25 @@ void describe('toChatMessages', () => {
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
   });
 
-  void it('projects discussionPathSelected to system messages', () => {
-    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
-    const { id: pathId } = session.discussionPaths[0]!;
+  void it('projects answerSelected to system messages', () => {
+    session.askQuestions([
+      {
+        content: 'Which one?',
+        options: [
+          { label: 'Option A', description: 'a' },
+          { label: 'Option B', description: 'b' },
+        ],
+      },
+    ]);
 
-    session.selectDiscussionPath(pathId);
+    const question = session.questions[0]!;
+    const option = question.options[0]!;
+
+    session.selectAnswer(question.id, option.id);
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t).at(-1), {
       role: 'system',
-      content: 'Selected discussion path: "Path A"',
+      content: 'Answered "Which one?" with: "Option A"',
     } satisfies AiClientMessage);
   });
 });

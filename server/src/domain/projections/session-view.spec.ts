@@ -232,58 +232,78 @@ void describe('toTimeline', () => {
     ]);
   });
 
-  void it("attaches discussion paths to the assistant's message", () => {
-    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B', description: 'desc' }]);
-    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
+  const askQuestion = () =>
+    session.askQuestions([
+      {
+        content: 'Which one?',
+        options: [
+          { label: 'Option A', description: 'a' },
+          { label: 'Option B', description: 'b' },
+        ],
+      },
+    ]);
 
-    const [pathA, pathB] = session.discussionPaths;
+  void it("attaches questions to the assistant's message", () => {
+    askQuestion();
+    session.addMessage('assistant', 'Pick one', { model: 'model', toolCalls: [] });
+
+    const question = session.questions[0]!;
+    const [optionA, optionB] = question.options;
 
     assert.deepStrictEqual(timeline(), [
       {
         kind: 'message',
         date: clock.date.toISOString(),
         role: 'assistant',
-        content: 'Which path?',
+        content: 'Pick one',
         toolCalls: undefined,
-        paths: [
-          { id: pathA!.id, label: 'Path A' },
-          { id: pathB!.id, label: 'Path B', description: 'desc' },
+        questions: [
+          {
+            id: question.id,
+            content: 'Which one?',
+            options: [
+              { id: optionA!.id, label: 'Option A', description: 'a' },
+              { id: optionB!.id, label: 'Option B', description: 'b' },
+            ],
+          },
         ],
       },
     ]);
   });
 
-  void it('keeps paths visible after selection and marks the selected one', () => {
-    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
-    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
+  void it('keeps options visible after selection and marks the answered one', () => {
+    askQuestion();
+    session.addMessage('assistant', 'Pick one', { model: 'model', toolCalls: [] });
 
-    const [pathA, pathB] = session.discussionPaths;
+    const question = session.questions[0]!;
+    const [optionA, optionB] = question.options;
 
-    session.selectDiscussionPath(pathA!.id);
+    session.selectAnswer(question.id, optionA!.id);
 
     const item = timeline()[0];
 
     assert(item?.kind === 'message');
-    assert.deepStrictEqual(item.paths, [
-      { id: pathA!.id, label: 'Path A', selected: true },
-      { id: pathB!.id, label: 'Path B', selected: false },
+    assert.deepStrictEqual(item.questions?.[0]?.options, [
+      { id: optionA!.id, label: 'Option A', description: 'a', selected: true },
+      { id: optionB!.id, label: 'Option B', description: 'b', selected: false },
     ]);
   });
 
-  void it('marks no path as selected when a user message was added', () => {
-    session.setDiscussionPaths([{ label: 'Path A' }, { label: 'Path B' }]);
-    session.addMessage('assistant', 'Which path?', { model: 'model', toolCalls: [] });
+  void it('marks no option as selected when a user message was added', () => {
+    askQuestion();
+    session.addMessage('assistant', 'Pick one', { model: 'model', toolCalls: [] });
 
-    const [pathA, pathB] = session.discussionPaths;
+    const question = session.questions[0]!;
+    const [optionA, optionB] = question.options;
 
     session.addMessage('user', 'Something else.');
 
     const item = timeline()[0];
 
     assert(item?.kind === 'message');
-    assert.deepStrictEqual(item.paths, [
-      { id: pathA!.id, label: 'Path A', selected: false },
-      { id: pathB!.id, label: 'Path B', selected: false },
+    assert.deepStrictEqual(item.questions?.[0]?.options, [
+      { id: optionA!.id, label: 'Option A', description: 'a', selected: false },
+      { id: optionB!.id, label: 'Option B', description: 'b', selected: false },
     ]);
   });
 });

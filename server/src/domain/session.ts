@@ -42,7 +42,13 @@ export type ToolCallResult = {
   error?: string | null;
 };
 
-export type DiscussionPath = {
+export type Question = {
+  id: string;
+  content: string;
+  options: Option[];
+};
+
+export type Option = {
   id: string;
   label: string;
   description?: string;
@@ -73,8 +79,8 @@ export type SessionEvent =
   | SessionDomainEvent<'TimerResumed'>
   | SessionDomainEvent<'MessageAdded', { message: Message }>
   | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
-  | SessionDomainEvent<'DiscussionPathsSet', { paths: DiscussionPath[] }>
-  | SessionDomainEvent<'DiscussionPathSelected', { pathId: string; label: string }>
+  | SessionDomainEvent<'QuestionsAsked', { questions: Question[] }>
+  | SessionDomainEvent<'AnswerSelected', { questionId: string; optionId: string; content: string; label: string }>
   | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
   | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>
   | SessionDomainEvent<'SummaryGenerated', { summary: Summary }>;
@@ -136,10 +142,10 @@ export class Session extends AggregateRoot<SessionEvent> {
     return this._timer;
   }
 
-  private _discussionPaths: DiscussionPath[] = [];
+  private _questions: Question[] = [];
 
-  get discussionPaths() {
-    return this._discussionPaths;
+  get questions() {
+    return this._questions;
   }
 
   private _postureMode: PostureMode = 'auto';
@@ -222,12 +228,12 @@ export class Session extends AggregateRoot<SessionEvent> {
         this._timer = this._timer.resume(occurredAt);
       },
 
-      DiscussionPathsSet: ({ paths }) => {
-        this._discussionPaths = paths;
+      QuestionsAsked: ({ questions }) => {
+        this._questions.push(...questions);
       },
 
-      DiscussionPathSelected: () => {
-        this._discussionPaths = [];
+      AnswerSelected: () => {
+        this._questions = [];
       },
 
       PostureChanged: ({ posture, forced }) => {
@@ -451,18 +457,24 @@ export class Session extends AggregateRoot<SessionEvent> {
     });
   }
 
-  setDiscussionPaths(paths: Array<Omit<DiscussionPath, 'id'>>) {
-    const withIds: DiscussionPath[] = paths.map((path) => ({ ...path, id: this.generator.id() }));
+  askQuestions(questions: Array<{ content: string; options: Array<{ label: string; description?: string }> }>) {
+    const withIds: Question[] = questions.map((question) => ({
+      id: this.generator.id(),
+      content: question.content,
+      options: question.options.map((option) => ({ ...option, id: this.generator.id() })),
+    }));
 
-    this.emit('DiscussionPathsSet', { paths: withIds });
+    this.emit('QuestionsAsked', { questions: withIds });
   }
 
-  selectDiscussionPath(pathId: string) {
-    const path = this._discussionPaths.find(hasId(pathId));
+  selectAnswer(questionId: string, optionId: string) {
+    const question = this._questions.find(hasId(questionId));
+    const option = question?.options.find(hasId(optionId));
 
-    assert(path, new Error(`Cannot find discussion path "${pathId}"`));
+    assert(question, new Error(`Cannot find question "${questionId}"`));
+    assert(option, new Error(`Cannot find option "${optionId}"`));
 
-    this.emit('DiscussionPathSelected', { pathId, label: path.label });
+    this.emit('AnswerSelected', { questionId, optionId, content: question.content, label: option.label });
   }
 
   setPosture(posture: Posture | 'auto', reason: string, forced: boolean) {

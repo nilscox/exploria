@@ -6,15 +6,13 @@ export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMe
   return events
     .filter(
       (event) =>
-        event.type === 'MessageAdded' ||
-        event.type === 'ToolCallResultAdded' ||
-        event.type === 'DiscussionPathSelected',
+        event.type === 'MessageAdded' || event.type === 'ToolCallResultAdded' || event.type === 'AnswerSelected',
     )
     .map((event) => toChatMessage(event, t));
 }
 
 function toChatMessage(
-  event: GetSessionEvent<'MessageAdded' | 'ToolCallResultAdded' | 'DiscussionPathSelected'>,
+  event: GetSessionEvent<'MessageAdded' | 'ToolCallResultAdded' | 'AnswerSelected'>,
   t: Translate,
 ): AiClientMessage {
   if (event.type === 'ToolCallResultAdded') {
@@ -27,10 +25,10 @@ function toChatMessage(
     };
   }
 
-  if (event.type === 'DiscussionPathSelected') {
+  if (event.type === 'AnswerSelected') {
     return {
       role: 'system',
-      content: t('chat.discussion-path-selected', { label: event.label }),
+      content: t('chat.answer-selected', { question: event.content, label: event.label }),
     };
   }
 
