@@ -1,5 +1,7 @@
+import { useLingui } from '@lingui/react/macro';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import { options } from 'src/api';
@@ -9,14 +11,16 @@ export function LoginPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useLingui();
 
   const { mutate: login } = useMutation({
     ...options.auth.login(),
-    async onSuccess() {
+    async onSuccess({ name }) {
+      toast.success(t`Welcome ${name}, are now authenticated.`);
       await queryClient.invalidateQueries(options.auth.me());
     },
     async onSettled() {
-      await navigate('/', { replace: true });
+      await navigate('/session', { replace: true });
     },
   });
 

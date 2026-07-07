@@ -738,6 +738,10 @@ msgstr "Type a message..."
 msgid "Web search"
 msgstr "Web search"
 
+#: src/auth/login.tsx
+msgid "Welcome {name}, are now authenticated."
+msgstr "Welcome {name}, are now authenticated."
+
 #: src/session/create/create-session.tsx
 msgid "What should I really think about artificial intelligence?"
 msgstr "What should I really think about artificial intelligence?"
