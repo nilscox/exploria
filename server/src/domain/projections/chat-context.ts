@@ -1,8 +1,10 @@
 import z from 'zod';
 
+import { assert } from '../../utils.ts';
+
 import type { AiClientMessage } from '../../adapters/ai-client.ts';
 import type { Translate } from '../i18n/index.ts';
-import type { SessionEvent, ToolCall } from '../session.ts';
+import type { GetSessionEvent, SessionEvent } from '../session.ts';
 
 export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMessage[] {
   const messages: AiClientMessage[] = [];
@@ -17,7 +19,7 @@ export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMe
     }
 
     if (event.type === 'ToolCalled') {
-      appendWebSearch(messages, t, event.toolCall, event.result);
+      appendWebSearch(messages, t, event);
     }
 
     if (event.type === 'AnswerSelected') {
@@ -33,12 +35,17 @@ export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMe
 
 const webSearchArguments = z.object({ query: z.string() });
 
-function appendWebSearch(messages: AiClientMessage[], t: Translate, toolCall: ToolCall, result: unknown) {
-  if (toolCall.name !== 'webSearch' || typeof result !== 'string') {
+function appendWebSearch(messages: AiClientMessage[], t: Translate, event: GetSessionEvent<'ToolCalled'>) {
+  if (event.toolCall.name !== 'webSearch') {
     return;
   }
 
-  const { query } = webSearchArguments.parse(toolCall.arguments);
+  const { query } = webSearchArguments.parse(event.toolCall.arguments);
 
-  messages.push({ role: 'system', content: t('chat.web-search', { query, results: result }) });
+  if (event.error !== undefined) {
+    messages.push({ role: 'system', content: t('chat.web-search-error', { query, error: event.error }) });
+  } else if (event.result !== undefined) {
+    assert(typeof event.result === 'string');
+    messages.push({ role: 'system', content: t('chat.web-search', { query, results: event.result }) });
+  }
 }

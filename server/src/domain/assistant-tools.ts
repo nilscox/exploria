@@ -7,16 +7,21 @@ import type { SearchClient } from '../adapters/search-client.ts';
 import type { Language, Translate } from './i18n/index.ts';
 import type { Session } from './session.ts';
 
-export function createTools(i18n: I18n, searchClient: SearchClient | null) {
-  return (language: Language) => tools(i18n, searchClient, i18n.translate(language));
+export function createFacilitatorTools(i18n: I18n, searchClient: SearchClient | null) {
+  return (language: Language) => facilitatorTools(searchClient, i18n.translate(language));
 }
 
-export type Tools = ReturnType<ReturnType<typeof createTools>>;
-export type AssistantTools = (language: Language) => Tools;
+export function createCuratorTools(i18n: I18n) {
+  return (language: Language) => curatorTools(i18n.translate(language));
+}
+
+export type FacilitatorTools = (language: Language) => ReturnType<typeof facilitatorTools>;
+export type CuratorTools = (language: Language) => ReturnType<typeof curatorTools>;
 
 export type Tool<Param extends z.ZodType = z.ZodType> = {
   description: string;
   param: Param;
+  terminal?: boolean;
   execute: (session: Session, param: z.infer<Param>) => string | Promise<string>;
 };
 
@@ -24,7 +29,70 @@ function tool<Param extends z.ZodType>(tool: Tool<Param>) {
   return tool;
 }
 
-const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => ({
+const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
+  askQuestions: tool({
+    description: t('ask-questions.description'),
+    terminal: true,
+    param: z.object({
+      questions: z
+        .array(
+          z.object({
+            content: z.string().min(1).describe(t('ask-questions.content-param')),
+            options: z
+              .array(
+                z.object({
+                  label: z.string().min(1).max(64).describe(t('ask-questions.label-param')),
+                  description: z.string().max(128).optional().describe(t('ask-questions.description-param')),
+                }),
+              )
+              .min(2)
+              .max(5),
+          }),
+        )
+        .min(1)
+        .max(1),
+    }),
+    execute: (session, { questions }) => {
+      session.askQuestions(questions);
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  setPosture: tool({
+    description: t('set-posture.description'),
+    terminal: true,
+    param: z.object({
+      posture: z.enum(postures).describe(t('set-posture.posture-param')),
+      reason: z.string().min(1).describe(t('set-posture.reason-param')),
+    }),
+    execute: (session, { posture, reason }) => {
+      session.setPosture(posture, reason, false);
+
+      return t('tool.result.ok');
+    },
+  }),
+
+  webSearch: searchClient
+    ? tool({
+        description: t('web-search.description'),
+        param: z.object({ query: z.string().min(1).describe(t('web-search.query-param')) }),
+        execute: async (session, { query }) => {
+          const results = await searchClient.search(query);
+
+          session.recordSearch(query, results.length);
+
+          if (results.length === 0) {
+            return t('web-search.no-results', { query });
+          }
+
+          return results.map((r) => `**${r.title}**\n${r.url}\n${r.snippet}`).join('\n\n');
+        },
+      })
+    : undefined,
+});
+
+const curatorTools = (t: Translate) => ({
   setSubject: tool({
     description: t('set-subject.description'),
     param: z.object({
@@ -123,127 +191,4 @@ const tools = (i18n: I18n, searchClient: SearchClient | null, t: Translate) => (
       return t('tool.result.ok');
     },
   }),
-
-  getSavedNotes: tool({
-    description: t('get-saved-notes.description'),
-    param: z.object({}),
-    execute: (session) => {
-      if (session.notes.length === 0) {
-        return t('get-saved-notes.empty');
-      }
-
-      const list = session.notes.map((note, i) => `${i + 1}. ${note.title}: ${note.content}`).join('\n');
-
-      return `${t('get-saved-notes.heading')}\n${list}`;
-    },
-  }),
-
-  startTimer: tool({
-    description: t('start-timer.description'),
-    param: z.object({
-      duration: z.number().min(1).describe(t('start-timer.duration-param')),
-    }),
-    execute: (session, { duration }) => {
-      session.startTimer(duration);
-
-      return t('tool.result.ok');
-    },
-  }),
-
-  clearTimer: tool({
-    description: t('clear-timer.description'),
-    param: z.object({}),
-    execute: (session) => {
-      session.clearTimer();
-
-      return t('tool.result.ok');
-    },
-  }),
-
-  pauseTimer: tool({
-    description: t('pause-timer.description'),
-    param: z.object({}),
-    execute: (session) => {
-      session.pauseTimer();
-
-      return t('tool.result.ok');
-    },
-  }),
-
-  resumeTimer: tool({
-    description: t('resume-timer.description'),
-    param: z.object({}),
-    execute: (session) => {
-      session.resumeTimer();
-
-      return t('tool.result.ok');
-    },
-  }),
-
-  getRemainingTime: tool({
-    description: t('get-remaining-time.description'),
-    param: z.object({}),
-    execute: (session) => {
-      return i18n.render(session.language, 'timer-info', { timer: session.timer });
-    },
-  }),
-
-  askQuestions: tool({
-    description: t('ask-questions.description'),
-    param: z.object({
-      questions: z
-        .array(
-          z.object({
-            content: z.string().min(1).describe(t('ask-questions.content-param')),
-            options: z
-              .array(
-                z.object({
-                  label: z.string().min(1).max(64).describe(t('ask-questions.label-param')),
-                  description: z.string().max(128).optional().describe(t('ask-questions.description-param')),
-                }),
-              )
-              .min(2)
-              .max(5),
-          }),
-        )
-        .min(1)
-        .max(1),
-    }),
-    execute: (session, { questions }) => {
-      session.askQuestions(questions);
-
-      return t('tool.result.ok');
-    },
-  }),
-
-  setPosture: tool({
-    description: t('set-posture.description'),
-    param: z.object({
-      posture: z.enum(postures).describe(t('set-posture.posture-param')),
-      reason: z.string().min(1).describe(t('set-posture.reason-param')),
-    }),
-    execute: (session, { posture, reason }) => {
-      session.setPosture(posture, reason, false);
-
-      return t('tool.result.ok');
-    },
-  }),
-
-  webSearch: searchClient
-    ? tool({
-        description: t('web-search.description'),
-        param: z.object({ query: z.string().min(1).describe(t('web-search.query-param')) }),
-        execute: async (session, { query }) => {
-          const results = await searchClient.search(query);
-
-          session.recordSearch(query, results.length);
-
-          if (results.length === 0) {
-            return t('web-search.no-results', { query });
-          }
-
-          return results.map((r) => `**${r.title}**\n${r.url}\n${r.snippet}`).join('\n\n');
-        },
-      })
-    : undefined,
 });

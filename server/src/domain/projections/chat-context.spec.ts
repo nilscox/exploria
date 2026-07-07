@@ -55,12 +55,14 @@ void describe('toChatMessages', () => {
     ] satisfies AiClientMessage[]);
   });
 
-  void it('omits failed web searches', () => {
+  void it('converts failed web searches to system messages', () => {
     session.recordToolCall({ id: 'call-1', name: 'webSearch', arguments: { query: 'node' } }, 'facilitator', {
       error: 'boom',
     });
 
-    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
+      { role: 'system', content: 'Web search for "node" failed: boom' },
+    ] satisfies AiClientMessage[]);
   });
 
   void it('ignores events that are not messages or tool calls', () => {

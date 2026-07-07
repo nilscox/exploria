@@ -10,9 +10,6 @@ export type Messages = {
   'save-note.content-param': string;
   'save-note.topic-param': string;
 
-  'start-timer.description': string;
-  'start-timer.duration-param': string;
-
   'add-topics.description': string;
   'add-topics.parent-param': string;
 
@@ -26,18 +23,6 @@ export type Messages = {
 
   'move-note.description': string;
   'move-note.topic-param': string;
-
-  'clear-timer.description': string;
-
-  'get-remaining-time.description': string;
-
-  'get-saved-notes.description': string;
-  'get-saved-notes.empty': string;
-  'get-saved-notes.heading': string;
-
-  'pause-timer.description': string;
-
-  'resume-timer.description': string;
 
   'ask-questions.description': string;
   'ask-questions.content-param': string;
@@ -60,6 +45,7 @@ export type Messages = {
 
   'chat.answer-selected': (p: { question: string; label: string }) => string;
   'chat.web-search': (p: { query: string; results: string }) => string;
+  'chat.web-search-error': (p: { query: string; error: string }) => string;
 
   'demo.role-1': string;
   'demo.role-2': string;
@@ -76,10 +62,6 @@ const en: Messages = {
   'save-note.title-param': 'A short title for the note.',
   'save-note.content-param': 'The body of the note: the element worth retaining, in one or a few sentences.',
   'save-note.topic-param': 'Id of the topic to attach the note to. Omit to attach it to the subject (root).',
-
-  'start-timer.description':
-    'Starts a timer to bound the session duration. Use it when the user sets or asks for a time limit.',
-  'start-timer.duration-param': 'Session duration in minutes',
 
   'add-topics.description':
     'Adds one or more topics to the mind map. Each topic captures an idea, angle or sub-topic. Attach them under an existing topic via its id, or omit the parent to add them at the top level (directly under the subject).',
@@ -99,20 +81,6 @@ const en: Messages = {
 
   'move-note.description': 'Re-attaches a saved note to another topic of the mind map.',
   'move-note.topic-param': 'Id of the topic to attach the note to. Use null to attach it to the subject (root).',
-
-  'clear-timer.description': 'Cancels the current timer.',
-
-  'get-remaining-time.description':
-    'Gets the time remaining on the timer. Use it to gauge the pace or to decide whether to wrap up.',
-
-  'get-saved-notes.description':
-    'Gets all notes saved during the session. Use it before producing a summary, or to recall what has been said.',
-  'get-saved-notes.empty': 'No notes saved.',
-  'get-saved-notes.heading': 'Saved notes:',
-
-  'pause-timer.description': 'Pauses the timer.',
-
-  'resume-timer.description': 'Resumes the paused timer.',
 
   'ask-questions.description':
     'Asks the user one or more questions, each shown below your message with its options as clickable choices. Do not list them in your text. Use it occasionally, only when a genuine choice of direction arises and it is worth letting the user decide.',
@@ -141,6 +109,7 @@ const en: Messages = {
 
   'chat.answer-selected': ({ question, label }) => `Answered "${question}" with: "${label}"`,
   'chat.web-search': ({ query, results }) => `Web search results for "${query}":\n\n${results}`,
+  'chat.web-search-error': ({ query, error }) => `Web search for "${query}" failed: ${error}`,
 
   'demo.role-1':
     'You are reflecting on a topic in a guided way. You are not the one guiding the discussion, you let yourself be guided.',
@@ -160,10 +129,6 @@ const fr: Messages = {
   'save-note.content-param': "Le corps de la note : l'élément à retenir, en une ou quelques phrases.",
   'save-note.topic-param':
     'Id du sujet auquel rattacher la note. À omettre pour la rattacher au sujet global (racine).',
-
-  'start-timer.description':
-    "Démarre un minuteur pour cadrer la durée de la session. À utiliser quand l'utilisateur fixe ou demande une limite de temps.",
-  'start-timer.duration-param': 'Temps de la session en minutes',
 
   'add-topics.description':
     'Ajoute un ou plusieurs sujets à la carte mentale. Chaque sujet capture une idée, un axe ou un sous-sujet. Rattache-les sous un sujet existant via son id, ou omets le parent pour les ajouter au premier niveau (directement sous le sujet global).',
@@ -185,20 +150,6 @@ const fr: Messages = {
   'move-note.description': 'Rattache une note sauvegardée à un autre sujet de la carte mentale.',
   'move-note.topic-param':
     'Id du sujet auquel rattacher la note. Utilise null pour la rattacher au sujet global (racine).',
-
-  'clear-timer.description': 'Annule le minuteur en cours.',
-
-  'get-remaining-time.description':
-    "Récupère le temps restant sur le minuteur. À utiliser pour jauger le rythme ou décider s'il faut conclure.",
-
-  'get-saved-notes.description':
-    'Récupère toutes les notes sauvegardées au cours de la session. À utiliser avant de produire une synthèse, ou pour te remémorer ce qui a été dit.',
-  'get-saved-notes.empty': 'Aucune note sauvegardée.',
-  'get-saved-notes.heading': 'Notes sauvegardées :',
-
-  'pause-timer.description': 'Met en pause le minuteur.',
-
-  'resume-timer.description': 'Redémarre le minuteur mis en pause.',
 
   'ask-questions.description':
     "Pose une ou plusieurs questions à l'utilisateur, chacune affichée sous ton message avec ses options comme choix cliquables. Ne les énumère pas dans ton texte. À utiliser ponctuellement, uniquement quand un vrai choix de direction se présente et qu'il est pertinent de laisser l'utilisateur trancher.",
@@ -227,6 +178,7 @@ const fr: Messages = {
 
   'chat.answer-selected': ({ question, label }) => `Réponse à « ${question} » : « ${label} »`,
   'chat.web-search': ({ query, results }) => `Résultats de la recherche web pour « ${query} » :\n\n${results}`,
+  'chat.web-search-error': ({ query, error }) => `La recherche web pour « ${query} » a échoué : ${error}`,
 
   'demo.role-1':
     "Tu cherches à réfléchir à un sujet de manière guidée. Ce n'est pas toi qui guide la discussion, tu te laisses guider.",
