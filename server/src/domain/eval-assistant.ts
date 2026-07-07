@@ -26,7 +26,10 @@ export class EvalAssistant implements IAssistant {
     // oxlint-disable-next-line no-eval typescript/no-implied-eval
     const fn = new AsyncFunction('session', 'tools', 'send', message);
 
-    const tools = { ...this.facilitatorTools(session.language), ...this.curatorTools(session.language) };
+    const tools = {
+      ...this.facilitatorTools[session.language],
+      ...this.curatorTools[session.language],
+    };
 
     await fn(session, tools, (text: string) => {
       this.uiNotifier.notify(session.id, { type: 'Chunk', text });

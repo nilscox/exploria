@@ -1,6 +1,6 @@
 import type z from 'zod';
 
-import { assert, hasKey } from '../utils.ts';
+import { assert, hasKey, type ValueOf } from '../utils.ts';
 import { toErrorMessage } from './assistant-tools.ts';
 import { toChatMessages } from './projections/chat-context.ts';
 
@@ -174,7 +174,7 @@ export class Assistant implements IAssistant {
   }
 
   private availableTools(session: Session) {
-    const tools: Partial<ReturnType<FacilitatorTools>> = this.facilitatorTools(session.language);
+    const tools: Partial<ValueOf<FacilitatorTools>> = this.facilitatorTools[session.language];
 
     if (session.postureMode === 'forced') {
       delete tools.setPosture;
