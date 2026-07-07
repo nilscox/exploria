@@ -24,7 +24,7 @@ void describe('SessionController', () => {
   afterEach(() => test.cleanup());
 
   void it('posts a message', async () => {
-    let session = test.build(Session);
+    let session = new Session(test.generator, test.clock);
 
     await test.sessions.insert(session);
 
@@ -52,7 +52,7 @@ void describe('SessionController', () => {
   void it('forwards UI events', async () => {
     const subscriber = test.build(SessionSseSubscriber);
 
-    const session = test.build(Session);
+    const session = new Session(test.generator, test.clock);
     await test.sessions.insert(session);
 
     const sse = new EventSource(new URL(`/session/${session.id}/stream`, test.fetcher.baseUrl));

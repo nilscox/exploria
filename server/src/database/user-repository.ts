@@ -3,6 +3,7 @@ import { users } from './schema.ts';
 
 import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
+import type { Dependencies } from '../di.ts';
 import type { User } from '../domain/user.ts';
 import type { Database } from './database.ts';
 
@@ -11,7 +12,7 @@ export class UserRepository {
   private clock: Clock;
   private db: Database;
 
-  constructor(generator: Generator, clock: Clock, database: Database) {
+  constructor({ generator, clock, database }: Dependencies<'generator' | 'clock' | 'database'>) {
     this.generator = generator;
     this.clock = clock;
     this.db = database;

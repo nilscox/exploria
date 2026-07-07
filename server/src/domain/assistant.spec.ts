@@ -1,4 +1,3 @@
-import { asValue } from 'awilix';
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
@@ -6,30 +5,45 @@ import { StubAiClient } from '../adapters/ai-client.ts';
 import { StubClock } from '../adapters/clock.ts';
 import { StubGenerator } from '../adapters/generator.ts';
 import { MustacheI18n } from '../adapters/i18n.ts';
-import { StubUiNotifier } from '../adapters/logger.ts';
+import { StubUiNotifier, type Logger } from '../adapters/logger.ts';
 import { StubSearchClient } from '../adapters/search-client.ts';
-import { container } from '../di.ts';
+import { createCuratorTools, createFacilitatorTools } from './assistant-tools.ts';
+import { Assistant } from './assistant.ts';
+import { Curator } from './curator.ts';
 import { Session, type GetSessionEvent, type SessionEvent } from './session.ts';
+import { SummaryGenerator } from './summary-generator.ts';
 
 import type { DomainEvent } from '../aggregate-root.ts';
 
 void describe('Assistant', () => {
   let generator: StubGenerator;
   let clock: StubClock;
-  let uiNotifier: StubUiNotifier;
   let aiClient: StubAiClient;
+  let searchClient: StubSearchClient;
+  let assistant: Assistant;
 
   beforeEach(() => {
     generator = new StubGenerator();
     clock = new StubClock();
-    uiNotifier = new StubUiNotifier();
     aiClient = new StubAiClient();
+    searchClient = new StubSearchClient();
 
-    container.register({
-      generator: asValue(generator),
-      clock: asValue(clock),
-      uiNotifier: asValue(uiNotifier),
-      aiClient: asValue(aiClient),
+    const uiNotifier = new StubUiNotifier();
+    const i18n = new MustacheI18n({ clock });
+    const summaryGenerator = new SummaryGenerator({ aiClient, i18n });
+    const curatorTools = createCuratorTools({ i18n });
+    const facilitatorTools = createFacilitatorTools({ i18n, searchClient });
+    const curator = new Curator({ aiClient, i18n, curatorTools });
+    const logger: Logger = { log: () => {}, error: () => {} };
+
+    assistant = new Assistant({
+      uiNotifier,
+      aiClient,
+      i18n,
+      summaryGenerator,
+      facilitatorTools,
+      curator,
+      logger,
     });
   });
 
@@ -48,8 +62,7 @@ void describe('Assistant', () => {
   }
 
   void it('handles a message', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push({
       content: 'Hi (:',
@@ -80,8 +93,7 @@ void describe('Assistant', () => {
   });
 
   void it('handles tool calls', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push({
       content: 'Call this tool',
@@ -115,8 +127,7 @@ void describe('Assistant', () => {
   });
 
   void it('handles failing tool calls', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push({
       content: 'Call this tool',
@@ -136,8 +147,7 @@ void describe('Assistant', () => {
   });
 
   void it('does not regenerate a reply after a terminal tool call', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push({
       content: 'What do you think?',
@@ -153,8 +163,7 @@ void describe('Assistant', () => {
   });
 
   void it('regenerates a reply when a terminal tool call comes without content', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push(
       {
@@ -179,12 +188,7 @@ void describe('Assistant', () => {
   });
 
   void it('regenerates a reply after a web search', async () => {
-    const searchClient = new StubSearchClient();
-
-    container.register({ searchClient: asValue(searchClient) });
-
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     searchClient.results = [{ title: 'Node', url: 'https://nodejs.org', snippet: 'A runtime.' }];
 
@@ -208,8 +212,7 @@ void describe('Assistant', () => {
   });
 
   void it('runs the curator after the reply', async () => {
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push(
       {
@@ -230,10 +233,7 @@ void describe('Assistant', () => {
   });
 
   void it('does not propagate curator failures', async () => {
-    container.register({ logger: asValue({ log() {}, error() {} }) });
-
-    const session = container.build(Session);
-    const assistant = container.resolve('assistant');
+    const session = new Session(generator, clock);
 
     aiClient.results.push({
       content: 'Hi (:',
@@ -252,7 +252,7 @@ void describe('Assistant', () => {
   });
 
   void it('renders session info with timer', () => {
-    const i18n = new MustacheI18n(clock);
+    const i18n = new MustacheI18n({ clock });
     const session = new Session(generator, clock);
 
     session.startTimer(60);

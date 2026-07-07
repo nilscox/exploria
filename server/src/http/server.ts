@@ -6,13 +6,13 @@ import { promisify } from 'node:util';
 import z from 'zod';
 
 import { SseUiNotifier } from './sse.ts';
+import { provideUser } from './user-context.ts';
 
 import type { Config } from '../adapters/config.ts';
 import type { Logger } from '../adapters/logger.ts';
 import type { UserRepository } from '../database/user-repository.ts';
+import type { Dependencies } from '../di.ts';
 import type { UiNotifier } from '../domain/ui-notifier.ts';
-import type { AuthController } from './auth-controller.ts';
-import type { SessionController } from './session-controller.ts';
 
 export class Server {
   private readonly config: Config;
@@ -22,14 +22,14 @@ export class Server {
   private app = express();
   private server?: HttpServer;
 
-  constructor(
-    config: Config,
-    logger: Logger,
-    uiNotifier: UiNotifier,
-    userRepository: UserRepository,
-    authController: AuthController,
-    sessionController: SessionController,
-  ) {
+  constructor({
+    config,
+    logger,
+    uiNotifier,
+    userRepository,
+    authController,
+    sessionController,
+  }: Dependencies<'config' | 'logger' | 'uiNotifier' | 'userRepository' | 'authController' | 'sessionController'>) {
     this.config = config;
     this.logger = logger;
     this.uiNotifier = uiNotifier;
@@ -62,7 +62,7 @@ export class Server {
         const user = await userRepository.findById(uid);
 
         if (user) {
-          req.user = user;
+          return provideUser(user, next);
         } else {
           res.clearCookie('uid');
         }

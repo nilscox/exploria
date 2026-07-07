@@ -4,8 +4,8 @@ import type z from 'zod';
 
 import { assert, defined } from '../utils.ts';
 
+import type { Dependencies } from '../di.ts';
 import type { Tool } from '../domain/assistant-tools.ts';
-import type { Config } from './config.ts';
 
 export type AiClientMessage =
   | {
@@ -79,7 +79,7 @@ export interface AiClient {
 export class OpenAiClient implements AiClient {
   private client: OpenAI;
 
-  constructor(config: Config) {
+  constructor({ config }: Dependencies<'config'>) {
     this.client = new OpenAI({
       baseURL: config.openAi.baseUrl,
       apiKey: config.openAi.apiKey,

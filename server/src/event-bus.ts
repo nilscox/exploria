@@ -2,6 +2,7 @@ import { EventEmitter } from 'node:events';
 
 import type { Logger } from './adapters/logger.ts';
 import type { DomainEvent } from './aggregate-root.ts';
+import type { Dependencies } from './di.ts';
 
 type EventHandler<Event extends DomainEvent = DomainEvent> = (event: Event) => void;
 
@@ -10,7 +11,7 @@ export class EventBus<BusEvent extends DomainEvent = DomainEvent> {
 
   private emitter = new EventEmitter();
 
-  constructor(logger: Logger) {
+  constructor({ logger }: Dependencies<'logger'>) {
     this.logger = logger;
     this.emitter.setMaxListeners(2 << 8);
   }

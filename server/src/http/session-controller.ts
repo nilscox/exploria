@@ -6,13 +6,15 @@ import z from 'zod';
 import { languages } from '../domain/i18n/index.ts';
 import { toSessionView } from '../domain/projections/session-view.ts';
 import { Session, intensities, messageLengths, postures, type TopicStatus } from '../domain/session.ts';
-import { defined } from '../utils.ts';
+import { assert, defined } from '../utils.ts';
 import { parsePagination } from './pagination.ts';
-import { ServerSentEvent, type SseUiNotifier } from './sse.ts';
+import { ServerSentEvent, SseUiNotifier } from './sse.ts';
+import { getUser } from './user-context.ts';
 
 import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
 import type { SessionRepository } from '../database/session-repository.ts';
+import type { Dependencies } from '../di.ts';
 import type { IAssistant } from '../domain/assistant.ts';
 import type { EventBus } from '../event-bus.ts';
 import type { Shared } from '../shared.ts';
@@ -33,14 +35,16 @@ export class SessionController {
     return defined(this.sessionContext.getStore());
   }
 
-  constructor(
-    generator: Generator,
-    clock: Clock,
-    events: EventBus,
-    uiNotifier: SseUiNotifier,
-    assistant: IAssistant,
-    sessionRepository: SessionRepository,
-  ) {
+  constructor({
+    generator,
+    clock,
+    events,
+    uiNotifier,
+    assistant,
+    sessionRepository,
+  }: Dependencies<'generator' | 'clock' | 'events' | 'uiNotifier' | 'assistant' | 'sessionRepository'>) {
+    assert(uiNotifier instanceof SseUiNotifier);
+
     this.generator = generator;
     this.clock = clock;
     this.events = events;
@@ -49,6 +53,7 @@ export class SessionController {
     this.sessionRepository = sessionRepository;
 
     this.router.param('id', async (req, res, next, id: string) => {
+      const user = getUser();
       const session = await this.sessionRepository.find(id);
 
       if (!session) {
@@ -57,7 +62,7 @@ export class SessionController {
       }
 
       const isPublic = session.ownerId === null;
-      const isOwner = session.ownerId === req.user?.id;
+      const isOwner = session.ownerId === (user?.id ?? null);
 
       if (!isPublic && !isOwner) {
         res.status(404).end();
@@ -68,9 +73,9 @@ export class SessionController {
     });
 
     this.router.get('/', async (req, res) => {
+      const user = getUser();
       const { page, limit, offset } = parsePagination(req.query);
-      const ownerId = req.user?.id ?? null;
-      const [total, sessions] = await this.listSessions({ offset, limit, ownerId });
+      const [total, sessions] = await this.listSessions({ offset, limit, ownerId: user?.id ?? null });
 
       res.setHeader('X-Page', page);
       res.setHeader('X-Total-Pages', Math.ceil(total / limit));
@@ -78,6 +83,8 @@ export class SessionController {
     });
 
     this.router.post('/', async (req, res) => {
+      const user = getUser();
+
       const { model, language, demo } = z
         .object({
           model: z.string().min(1),
@@ -86,9 +93,7 @@ export class SessionController {
         })
         .parse(req.body);
 
-      const ownerId = req.user?.id ?? null;
-
-      res.status(201).send(await this.createSession({ model, language, demo, ownerId }));
+      res.status(201).send(await this.createSession({ model, language, demo, ownerId: user?.id ?? null }));
     });
 
     this.router.get('/:id', async (req, res) => {

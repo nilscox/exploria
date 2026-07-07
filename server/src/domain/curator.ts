@@ -6,6 +6,7 @@ import { toChatMessages } from './projections/chat-context.ts';
 
 import type { AiClient, AiClientMessage } from '../adapters/ai-client.ts';
 import type { I18n } from '../adapters/i18n.ts';
+import type { Dependencies } from '../di.ts';
 import type { CuratorTools, Tool } from './assistant-tools.ts';
 import type { Session, ToolCall } from './session.ts';
 
@@ -16,7 +17,7 @@ export class Curator {
   private readonly i18n: I18n;
   private readonly curatorTools: CuratorTools;
 
-  constructor(aiClient: AiClient, i18n: I18n, curatorTools: CuratorTools) {
+  constructor({ aiClient, i18n, curatorTools }: Dependencies<'aiClient' | 'i18n' | 'curatorTools'>) {
     this.aiClient = aiClient;
     this.i18n = i18n;
     this.curatorTools = curatorTools;

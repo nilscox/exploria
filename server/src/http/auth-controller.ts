@@ -1,10 +1,11 @@
 import express from 'express';
 import z from 'zod';
 
-import { assert } from '../utils.ts';
+import { getUser } from './user-context.ts';
 
 import type { Config } from '../adapters/config.ts';
 import type { UserRepository } from '../database/user-repository.ts';
+import type { Dependencies } from '../di.ts';
 import type { User } from '../domain/user.ts';
 import type { Shared } from '../shared.ts';
 
@@ -14,7 +15,7 @@ export class AuthController {
 
   public router = express.Router();
 
-  constructor(config: Config, userRepository: UserRepository) {
+  constructor({ config, userRepository }: Dependencies<'config' | 'userRepository'>) {
     this.config = config;
     this.userRepository = userRepository;
 
@@ -44,13 +45,14 @@ export class AuthController {
     });
 
     this.router.get('/me', (req, res) => {
-      if (!req.user) {
+      const user = getUser();
+
+      if (!user) {
         res.status(404).end();
         return;
       }
 
-      assert(req.user);
-      res.json(this.toSharedUser(req.user));
+      res.json(this.toSharedUser(user));
     });
   }
 

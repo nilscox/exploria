@@ -1,3 +1,4 @@
+import type { Dependencies } from '../di.ts';
 import type { Assistant, AssistantUiEvent, IAssistant } from './assistant.ts';
 import type { Session } from './session.ts';
 import type { Summary } from './summary.ts';
@@ -6,7 +7,7 @@ import type { UiNotifier } from './ui-notifier.ts';
 export class TestAssistant implements IAssistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
 
-  constructor(uiNotifier: UiNotifier) {
+  constructor({ uiNotifier }: Dependencies<'uiNotifier'>) {
     this.uiNotifier = uiNotifier;
   }
 

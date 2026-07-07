@@ -14,6 +14,7 @@ import { StubGenerator } from './adapters/generator.ts';
 import { schema } from './database/index.ts';
 import { container } from './di.ts';
 import { EventBus } from './event-bus.ts';
+import { provideUser } from './http/user-context.ts';
 import { assert } from './utils.ts';
 
 import type { Config } from './adapters/config.ts';
@@ -103,7 +104,7 @@ export class E2eTest {
       clock: asValue(clock),
       generator: asValue(generator),
       logger: asValue({ log: () => {}, error: () => {} }),
-      events: asValue(new EventBus({ log: () => {}, error: () => {} })),
+      events: asValue(new EventBus({ logger: { log: () => {}, error: () => {} } })),
       aiClient: asValue(aiClient),
       database: asValue(db),
     });
@@ -157,7 +158,7 @@ export class TestFetcher {
         const user = await userRepository.findById(uid);
 
         if (user) {
-          req.user = user;
+          return provideUser(user, next);
         }
       }
 

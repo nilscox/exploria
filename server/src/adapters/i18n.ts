@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import { languages } from '../domain/i18n/index.ts';
 import { messages } from '../domain/i18n/messages.ts';
 
+import type { Dependencies } from '../di.ts';
 import type { Language, Translate } from '../domain/i18n/index.ts';
 import type { Topic } from '../domain/mindmap.ts';
 import type { Session, TopicStatus } from '../domain/session.ts';
@@ -31,7 +32,7 @@ export class MustacheI18n implements I18n {
 
   private readonly templates: Record<Template, Record<Language, string>>;
 
-  constructor(clock: Clock) {
+  constructor({ clock }: Dependencies<'clock'>) {
     this.clock = clock;
 
     this.templates = {

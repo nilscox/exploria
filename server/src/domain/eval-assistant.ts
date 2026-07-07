@@ -1,5 +1,6 @@
 import { assert } from '../utils.ts';
 
+import type { Dependencies } from '../di.ts';
 import type { CuratorTools, FacilitatorTools } from './assistant-tools.ts';
 import type { Assistant, AssistantUiEvent, IAssistant } from './assistant.ts';
 import type { Summary } from './summary.ts';
@@ -12,7 +13,11 @@ export class EvalAssistant implements IAssistant {
   private readonly facilitatorTools: FacilitatorTools;
   private readonly curatorTools: CuratorTools;
 
-  constructor(uiNotifier: UiNotifier, facilitatorTools: FacilitatorTools, curatorTools: CuratorTools) {
+  constructor({
+    uiNotifier,
+    facilitatorTools,
+    curatorTools,
+  }: Dependencies<'uiNotifier' | 'facilitatorTools' | 'curatorTools'>) {
     this.uiNotifier = uiNotifier;
     this.facilitatorTools = facilitatorTools;
     this.curatorTools = curatorTools;

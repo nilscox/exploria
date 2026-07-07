@@ -3,6 +3,7 @@ import { summarySchema } from './summary.ts';
 
 import type { AiClient } from '../adapters/ai-client.ts';
 import type { I18n } from '../adapters/i18n.ts';
+import type { Dependencies } from '../di.ts';
 import type { Session } from './session.ts';
 import type { Summary } from './summary.ts';
 
@@ -10,7 +11,7 @@ export class SummaryGenerator {
   private readonly aiClient: AiClient;
   private readonly i18n: I18n;
 
-  constructor(aiClient: AiClient, i18n: I18n) {
+  constructor({ aiClient, i18n }: Dependencies<'aiClient' | 'i18n'>) {
     this.aiClient = aiClient;
     this.i18n = i18n;
   }

@@ -2,11 +2,11 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 
 import { relations } from './schema.ts';
 
-import type { Config } from '../adapters/config.ts';
+import type { Dependencies } from '../di.ts';
 
 export type Database = ReturnType<typeof createDatabase>;
 
-export function createDatabase(config: Config) {
+export function createDatabase({ config }: Dependencies<'config'>) {
   return drizzle({
     connection: config.database.url,
     logger: config.database.debug,

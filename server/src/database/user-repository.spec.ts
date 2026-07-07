@@ -16,7 +16,7 @@ void describe('UserRepository', () => {
     db = await createTestDatabase();
     generator = new StubGenerator();
     clock = new StubClock();
-    repository = new UserRepository(generator, clock, db);
+    repository = new UserRepository({ generator, clock, database: db });
   });
 
   after(async () => {

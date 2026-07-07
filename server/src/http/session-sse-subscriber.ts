@@ -2,16 +2,19 @@ import { dequal } from 'dequal';
 
 import { toSessionView } from '../domain/projections/session-view.ts';
 
-import type { SessionRepository } from '../database/session-repository.ts';
+import type { Dependencies } from '../di.ts';
 import type { SessionEvent } from '../domain/session.ts';
 import type { UiNotifier } from '../domain/ui-notifier.ts';
-import type { EventBus } from '../event-bus.ts';
 import type { Shared } from '../shared.ts';
 
 export class SessionSseSubscriber {
   readonly unsubscribe: () => void;
 
-  constructor(events: EventBus, sessionRepository: SessionRepository, uiNotifier: UiNotifier<Shared.SessionUiEvent>) {
+  constructor({
+    events,
+    sessionRepository,
+    uiNotifier,
+  }: Dependencies<'events' | 'sessionRepository'> & { uiNotifier: UiNotifier<Shared.SessionUiEvent> }) {
     this.unsubscribe = events.subscribe(async (batch) => {
       const sessionEvents = batch.filter((e): e is SessionEvent => e.aggregateType === 'Session');
 

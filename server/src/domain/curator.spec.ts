@@ -1,31 +1,32 @@
-import { asValue } from 'awilix';
 import assert from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
 import { StubAiClient } from '../adapters/ai-client.ts';
 import { StubClock } from '../adapters/clock.ts';
 import { StubGenerator } from '../adapters/generator.ts';
-import { container } from '../di.ts';
+import { MustacheI18n, type I18n } from '../adapters/i18n.ts';
+import { createCuratorTools, type CuratorTools } from './assistant-tools.ts';
+import { Curator } from './curator.ts';
 import { Session, type GetSessionEvent } from './session.ts';
 
 void describe('Curator', () => {
+  let generator: StubGenerator;
   let clock: StubClock;
   let aiClient: StubAiClient;
+  let i18n: I18n;
+  let curatorTools: CuratorTools;
 
   beforeEach(() => {
+    generator = new StubGenerator();
     clock = new StubClock();
     aiClient = new StubAiClient();
-
-    container.register({
-      generator: asValue(new StubGenerator()),
-      clock: asValue(clock),
-      aiClient: asValue(aiClient),
-    });
+    i18n = new MustacheI18n({ clock });
+    curatorTools = createCuratorTools({ i18n });
   });
 
   void it('executes tool calls and records them', async () => {
-    const session = container.build(Session);
-    const curator = container.resolve('curator');
+    const session = new Session(generator, clock);
+    const curator = new Curator({ aiClient, i18n, curatorTools });
 
     aiClient.results.push({
       content: '',
@@ -49,8 +50,8 @@ void describe('Curator', () => {
   });
 
   void it('records failing tool calls', async () => {
-    const session = container.build(Session);
-    const curator = container.resolve('curator');
+    const session = new Session(generator, clock);
+    const curator = new Curator({ aiClient, i18n, curatorTools });
 
     aiClient.results.push({
       content: '',
@@ -69,8 +70,8 @@ void describe('Curator', () => {
   });
 
   void it('feeds tool results back until there is nothing left to do', async () => {
-    const session = container.build(Session);
-    const curator = container.resolve('curator');
+    const session = new Session(generator, clock);
+    const curator = new Curator({ aiClient, i18n, curatorTools });
 
     aiClient.results.push(
       {
@@ -96,8 +97,8 @@ void describe('Curator', () => {
   });
 
   void it('stops after a bounded number of iterations', async () => {
-    const session = container.build(Session);
-    const curator = container.resolve('curator');
+    const session = new Session(generator, clock);
+    const curator = new Curator({ aiClient, i18n, curatorTools });
 
     for (let i = 0; i < 5; i++) {
       aiClient.results.push({

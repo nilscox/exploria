@@ -2,6 +2,7 @@ import type { OutgoingMessage } from 'node:http';
 import { promisify } from 'node:util';
 
 import type { Logger } from '../adapters/logger.ts';
+import type { Dependencies } from '../di.ts';
 import type { UiEvent, UiNotifier } from '../domain/ui-notifier.ts';
 
 export class SseUiNotifier<Event extends UiEvent = UiEvent> implements UiNotifier<Event> {
@@ -9,7 +10,7 @@ export class SseUiNotifier<Event extends UiEvent = UiEvent> implements UiNotifie
 
   private streams = new Map<string, Set<ServerSentEvent<Event>>>();
 
-  constructor(logger: Logger) {
+  constructor({ logger }: Dependencies<'logger'>) {
     this.logger = logger;
   }
 

@@ -23,7 +23,7 @@ void describe('SummaryGenerator', () => {
     const generator = new StubGenerator();
     const clock = new StubClock();
     const aiClient = new StubAiClient();
-    const i18n = new MustacheI18n(clock);
+    const i18n = new MustacheI18n({ clock });
 
     const session = new Session(generator, clock);
 
@@ -32,7 +32,7 @@ void describe('SummaryGenerator', () => {
 
     aiClient.structuredResults.push(stubSummary);
 
-    const summaryGenerator = new SummaryGenerator(aiClient, i18n);
+    const summaryGenerator = new SummaryGenerator({ aiClient, i18n });
     const result = await summaryGenerator.generate(session);
 
     assert.deepStrictEqual(result, stubSummary);
@@ -42,7 +42,7 @@ void describe('SummaryGenerator', () => {
     const generator = new StubGenerator();
     const clock = new StubClock();
     const aiClient = new StubAiClient();
-    const i18n = new MustacheI18n(clock);
+    const i18n = new MustacheI18n({ clock });
 
     const session = new Session(generator, clock);
 
@@ -56,7 +56,7 @@ void describe('SummaryGenerator', () => {
       return schema.parse(stubSummary);
     };
 
-    const summaryGenerator = new SummaryGenerator(aiClient, i18n);
+    const summaryGenerator = new SummaryGenerator({ aiClient, i18n });
     await summaryGenerator.generate(session);
 
     const systemMessage = capturedMessages[0] as { role: string; content: string };

@@ -26,56 +26,74 @@ import { SseUiNotifier } from './http/sse.ts';
 
 import type { Clock } from './adapters/clock.ts';
 import type { Logger } from './adapters/logger.ts';
+import type { Database } from './database/database.ts';
 import type { UiNotifier } from './domain/ui-notifier.ts';
 
-function searchClientFactory(config: Config): SearchClient | null {
+type Cradle = {
+  config: Config;
+  generator: Generator;
+  clock: Clock;
+  logger: Logger;
+  events: EventBus;
+  uiNotifier: UiNotifier;
+  database: Database;
+  i18n: I18n;
+  userRepository: UserRepository;
+  authController: AuthController;
+  sessionController: SessionController;
+  sessionRepository: SessionRepository;
+  aiClient: AiClient;
+  searchClient: SearchClient | null;
+  facilitatorTools: FacilitatorTools;
+  curatorTools: CuratorTools;
+  curator: Curator;
+  assistant: IAssistant;
+  summaryGenerator: SummaryGenerator;
+  server: Server;
+};
+
+export type Dependencies<Keys extends keyof Cradle> = Pick<Cradle, Keys>;
+
+function searchClientFactory({ config }: Dependencies<'config'>): SearchClient | null {
   return config.tavily.apiKey ? new TavilySearchClient(config.tavily.apiKey) : null;
 }
 
-function assistantFactory(
-  config: Config,
-  uiNotifier: UiNotifier,
-  aiClient: AiClient,
-  i18n: I18n,
-  summaryGenerator: SummaryGenerator,
-  facilitatorTools: FacilitatorTools,
-  curatorTools: CuratorTools,
-  curator: Curator,
-  logger: Logger,
-): IAssistant {
+function assistantFactory(deps: Dependencies<keyof Cradle>): IAssistant {
+  const config = deps.config;
+
   if (config.assistant === 'test') {
-    return new TestAssistant(uiNotifier);
+    return new TestAssistant(deps);
   }
 
   if (config.assistant === 'eval') {
-    return new EvalAssistant(uiNotifier, facilitatorTools, curatorTools);
+    return new EvalAssistant(deps);
   }
 
-  return new Assistant(uiNotifier, aiClient, i18n, summaryGenerator, facilitatorTools, curator, logger);
+  return new Assistant(deps);
 }
 
-export const container = createContainer({
-  injectionMode: InjectionMode.CLASSIC,
+export const container = createContainer<Cradle>({
+  injectionMode: InjectionMode.PROXY,
   strict: true,
 }).register({
-  config: asClass<Config>(EnvConfig).singleton(),
-  generator: asClass<Generator>(NanoIdGenerator),
-  clock: asClass<Clock>(NativeDateClock).singleton(),
-  logger: asValue<Logger>(console),
+  config: asClass(EnvConfig).singleton(),
+  generator: asClass(NanoIdGenerator),
+  clock: asClass(NativeDateClock).singleton(),
+  logger: asValue(console),
   events: asClass(EventBus).singleton(),
-  uiNotifier: asClass<UiNotifier>(SseUiNotifier).singleton(),
+  uiNotifier: asClass(SseUiNotifier).singleton(),
   database: asFunction(createDatabase),
-  i18n: asClass<I18n>(MustacheI18n).singleton(),
+  i18n: asClass(MustacheI18n).singleton(),
   userRepository: asClass(UserRepository),
   authController: asClass(AuthController),
   sessionController: asClass(SessionController),
   sessionRepository: asClass(SessionRepository),
-  aiClient: asClass<AiClient>(OpenAiClient),
+  aiClient: asClass(OpenAiClient),
   searchClient: asFunction(searchClientFactory),
   facilitatorTools: asFunction(createFacilitatorTools),
   curatorTools: asFunction(createCuratorTools),
   curator: asClass(Curator),
-  assistant: asFunction<IAssistant>(assistantFactory),
+  assistant: asFunction(assistantFactory),
   summaryGenerator: asClass(SummaryGenerator),
   server: asClass(Server),
 });

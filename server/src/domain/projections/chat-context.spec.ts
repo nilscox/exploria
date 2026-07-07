@@ -17,7 +17,7 @@ void describe('toChatMessages', () => {
 
   beforeEach(() => {
     clock = new StubClock();
-    t = new MustacheI18n(clock).translate('en');
+    t = new MustacheI18n({ clock }).translate('en');
     session = new Session(new StubGenerator(), clock);
   });
 

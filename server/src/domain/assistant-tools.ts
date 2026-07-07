@@ -2,8 +2,8 @@ import z from 'zod';
 
 import { postures } from './session.ts';
 
-import type { I18n } from '../adapters/i18n.ts';
 import type { SearchClient } from '../adapters/search-client.ts';
+import type { Dependencies } from '../di.ts';
 import type { Language, Translate } from './i18n/index.ts';
 import type { Session } from './session.ts';
 
@@ -18,7 +18,7 @@ const languages: Language[] = ['en', 'fr'];
 
 export type FacilitatorTools = Record<Language, ReturnType<typeof facilitatorTools>>;
 
-export function createFacilitatorTools(i18n: I18n, searchClient: SearchClient | null) {
+export function createFacilitatorTools({ i18n, searchClient }: Dependencies<'i18n' | 'searchClient'>) {
   return Object.fromEntries(
     languages.map((language) => [language, facilitatorTools(i18n.translate(language), searchClient)]),
   ) as FacilitatorTools;
@@ -26,7 +26,7 @@ export function createFacilitatorTools(i18n: I18n, searchClient: SearchClient | 
 
 export type CuratorTools = Record<Language, ReturnType<typeof curatorTools>>;
 
-export function createCuratorTools(i18n: I18n) {
+export function createCuratorTools({ i18n }: Dependencies<'i18n'>) {
   return Object.fromEntries(
     languages.map((language) => [language, curatorTools(i18n.translate(language))]),
   ) as CuratorTools;

@@ -7,6 +7,7 @@ import { toChatMessages } from './projections/chat-context.ts';
 import type { AiClient } from '../adapters/ai-client.ts';
 import type { I18n } from '../adapters/i18n.ts';
 import type { Logger } from '../adapters/logger.ts';
+import type { Dependencies } from '../di.ts';
 import type { FacilitatorTools, Tool } from './assistant-tools.ts';
 import type { Curator } from './curator.ts';
 import type { Session, ToolCall } from './session.ts';
@@ -31,15 +32,17 @@ export class Assistant implements IAssistant {
   private readonly curator: Curator;
   private readonly logger: Logger;
 
-  constructor(
-    uiNotifier: UiNotifier,
-    aiClient: AiClient,
-    i18n: I18n,
-    summaryGenerator: SummaryGenerator,
-    facilitatorTools: FacilitatorTools,
-    curator: Curator,
-    logger: Logger,
-  ) {
+  constructor({
+    uiNotifier,
+    aiClient,
+    i18n,
+    summaryGenerator,
+    facilitatorTools,
+    curator,
+    logger,
+  }: Dependencies<
+    'uiNotifier' | 'aiClient' | 'i18n' | 'summaryGenerator' | 'facilitatorTools' | 'curator' | 'logger'
+  >) {
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
     this.i18n = i18n;

@@ -5,6 +5,7 @@ import { domainEvents, sessions } from './schema.ts';
 
 import type { Clock } from '../adapters/clock.ts';
 import type { Generator } from '../adapters/generator.ts';
+import type { Dependencies } from '../di.ts';
 import type { Database } from './database.ts';
 import type { DomainEventSelect } from './model.ts';
 
@@ -13,7 +14,7 @@ export class SessionRepository {
   private clock: Clock;
   private db: Database;
 
-  constructor(generator: Generator, clock: Clock, database: Database) {
+  constructor({ generator, clock, database }: Dependencies<'generator' | 'clock' | 'database'>) {
     this.clock = clock;
     this.generator = generator;
     this.db = database;
