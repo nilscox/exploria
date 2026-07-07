@@ -91,7 +91,7 @@ const en: Messages = {
   'set-posture.description':
     'Changes the stance you adopt for the conversation. Call it before your reply whenever another stance fits the discussion better than the current one.',
   'set-posture.posture-param':
-    'The stance to adopt: socratic (question to deepen thinking), devils_advocate (attack the ideas to test them), examiner (demanding pressure, e.g. interview prep), advisor (neutral help to structure a decision), mirror (reflect and welcome, without challenging).',
+    'The stance to adopt: socratic (question to deepen thinking), devils_advocate (attack the ideas to test them), examiner (demanding pressure, e.g. interview prep), advisor (neutral help to structure a decision), mirror (reflect and welcome, without challenging), teacher (explain concepts and give context).',
   'set-posture.reason-param':
     'A short explanation, addressed to the user in their language, of why you are adopting this stance.',
 
@@ -160,7 +160,7 @@ const fr: Messages = {
   'set-posture.description':
     "Change la posture que tu adoptes pour la conversation. À appeler avant ta réponse dès qu'une autre posture est plus adaptée à la discussion que la posture courante.",
   'set-posture.posture-param':
-    "La posture à adopter : socratic (questionner pour approfondir la pensée), devils_advocate (attaquer les idées pour les tester), examiner (pression exigeante, ex. préparation d'entretien), advisor (aide neutre à structurer une décision), mirror (refléter et accueillir, sans challenger).",
+    "La posture à adopter : socratic (questionner pour approfondir la pensée), devils_advocate (attaquer les idées pour les tester), examiner (pression exigeante, ex. préparation d'entretien), advisor (aide neutre à structurer une décision), mirror (refléter et accueillir, sans challenger), teacher (expliquer des concepts et donner du contexte).",
   'set-posture.reason-param':
     "Une courte explication, adressée à l'utilisateur dans sa langue, de la raison pour laquelle tu adoptes cette posture.",
 

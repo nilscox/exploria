@@ -37,7 +37,7 @@ export function PostureSection({
       }
     >
       <div className="col gap-1.5">
-        {(['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror'] as const).map((posture) => (
+        {(['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror', 'teacher'] as const).map((posture) => (
           <PostureCard
             key={posture}
             posture={posture}
@@ -91,6 +91,7 @@ export function PostureLabel({ posture }: { posture: Shared.Posture }) {
     examiner: <Trans>Examiner</Trans>,
     advisor: <Trans>Advisor</Trans>,
     mirror: <Trans>Mirror</Trans>,
+    teacher: <Trans>Teacher</Trans>,
   }[posture];
 }
 
@@ -110,5 +111,6 @@ export function PostureDescription({ posture }: { posture: Shared.Posture }) {
     examiner: <Trans>Demanding pressure, e.g. interview prep</Trans>,
     advisor: <Trans>Help structure a decision</Trans>,
     mirror: <Trans>Reflect and welcome, without challenging</Trans>,
+    teacher: <Trans>Explain concepts and give context</Trans>,
   }[posture];
 }

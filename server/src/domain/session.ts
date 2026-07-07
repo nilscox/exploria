@@ -10,7 +10,7 @@ import type { Summary } from './summary.ts';
 
 export type TopicStatus = 'pending' | 'in_progress' | 'done';
 
-export const postures = ['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror'] as const;
+export const postures = ['socratic', 'devils_advocate', 'examiner', 'advisor', 'mirror', 'teacher'] as const;
 
 export type Posture = (typeof postures)[number];
 
