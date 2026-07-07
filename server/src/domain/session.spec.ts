@@ -384,11 +384,27 @@ void describe('Session', () => {
   });
 
   void it('adds an assistant message', () => {
-    session.addMessage('assistant', 'content', { model: 'model', toolCalls: [] });
+    session.addMessage('assistant', 'content', { model: 'model' });
 
     expectEvent('MessageAdded', {
       message: { date: clock.date.toISOString(), role: 'assistant', content: 'content', model: 'model' },
     });
+  });
+
+  void it('records a tool call', () => {
+    const toolCall = { id: 'call-1', name: 'setSubject', arguments: { subject: 'Subject' } };
+
+    session.recordToolCall(toolCall, 'curator', { result: 'OK' });
+
+    expectEvent('ToolCalled', { toolCall, actor: 'curator', result: 'OK' });
+  });
+
+  void it('records a failed tool call', () => {
+    const toolCall = { id: 'call-1', name: 'setSubject', arguments: {} };
+
+    session.recordToolCall(toolCall, 'facilitator', { error: 'boom' });
+
+    expectEvent('ToolCalled', { toolCall, actor: 'facilitator', error: 'boom' });
   });
 
   void it('fails to add a message when the session has ended', () => {
@@ -547,7 +563,7 @@ void describe('Session', () => {
     void it('populates session.events with replayed events', () => {
       const source = new Session(new StubGenerator(), clock);
       source.addMessage('user', 'hello');
-      source.addMessage('assistant', 'world', { model: 'gpt-4o', toolCalls: [] });
+      source.addMessage('assistant', 'world', { model: 'gpt-4o' });
 
       const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
 

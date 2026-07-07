@@ -25,6 +25,7 @@ export namespace Shared {
   export type Message = session.Message;
   export type Role = session.Role;
   export type ToolCall = session.ToolCall;
+  export type ToolCallActor = session.ToolCallActor;
   export type Option = session.Option;
   export type Question = session.Question;
   export type Posture = session.Posture;
@@ -39,8 +40,15 @@ export namespace Shared {
         role: Role;
         date: string;
         content: string;
-        toolCalls?: ToolCall[];
         questions?: AnswerableQuestion[];
+      }
+    | {
+        kind: 'tool-call';
+        name: string;
+        arguments: unknown;
+        actor: ToolCallActor;
+        result?: unknown;
+        error?: string;
       }
     | { kind: 'model-changed'; model: string }
     | { kind: 'session-ended' }

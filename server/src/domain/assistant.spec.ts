@@ -85,7 +85,7 @@ void describe('Assistant', () => {
     aiClient.results.push(
       {
         content: 'Call this tool',
-        toolCalls: [{ id: 'id', name: 'startTimer', arguments: { duration: 42 } }],
+        toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: 'why not' } }],
       },
       {
         content: '',
@@ -104,19 +104,17 @@ void describe('Assistant', () => {
           role: 'assistant',
           content: 'Call this tool',
           model: '',
-          toolCalls: [{ id: 'id', name: 'startTimer', arguments: { duration: 42 } }],
         },
       }),
-      createSessionEvent(session.id, 'TimerStarted', {
-        duration: 42,
+      createSessionEvent(session.id, 'PostureChanged', {
+        posture: 'advisor',
+        reason: 'why not',
+        forced: false,
       }),
-      createSessionEvent(session.id, 'ToolCallResultAdded', {
-        result: {
-          id: 'id',
-          date: clock.date,
-          error: null,
-          result: 'OK',
-        },
+      createSessionEvent(session.id, 'ToolCalled', {
+        toolCall: { id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: 'why not' } },
+        actor: 'facilitator',
+        result: 'OK',
       }),
     ]);
   });
@@ -128,7 +126,7 @@ void describe('Assistant', () => {
     aiClient.results.push(
       {
         content: 'Call this tool',
-        toolCalls: [{ id: 'id', name: 'startTimer', arguments: { duration: -42 } }],
+        toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: '' } }],
       },
       {
         content: '',
@@ -139,14 +137,12 @@ void describe('Assistant', () => {
     await assistant.run(session);
 
     const events = session.peekDomainEvents();
-    const event = events.at(-1) as GetSessionEvent<'ToolCallResultAdded'>;
+    const event = events.at(-1) as GetSessionEvent<'ToolCalled'>;
 
     assert.partialDeepStrictEqual(event, {
-      type: 'ToolCallResultAdded',
-      result: {
-        result: null,
-        error: 'Too small: expected number to be >=1',
-      },
+      type: 'ToolCalled',
+      actor: 'facilitator',
+      error: 'Too small: expected string to have >=1 characters',
     });
   });
 

@@ -61,21 +61,13 @@ export class TestAssistant implements IAssistant {
       this.uiNotifier.notify(session.id, { type: 'Chunk', text: chunk });
     }
 
-    session.addMessage('assistant', text, {
-      model: session.model,
-      toolCalls: [],
-    });
+    session.addMessage('assistant', text, { model: session.model });
 
     await commit?.();
   }
 
   private async tool(session: Session, commit?: () => Promise<void>) {
-    session.addMessage('assistant', '', {
-      model: session.model,
-      toolCalls: [{ name: 'saveNote', id: 'id', arguments: { note: "I'll remember that." } }],
-    });
-
-    session.addToolCallResult('id', {
+    session.recordToolCall({ name: 'saveNote', id: 'id', arguments: { note: "I'll remember that." } }, 'curator', {
       result: 'OK',
     });
 
@@ -95,10 +87,6 @@ export class TestAssistant implements IAssistant {
         ],
       },
     ]);
-
-    session.addToolCallResult('id', {
-      result: 'OK',
-    });
 
     await commit?.();
 

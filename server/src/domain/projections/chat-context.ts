@@ -1,48 +1,44 @@
+import z from 'zod';
+
 import type { AiClientMessage } from '../../adapters/ai-client.ts';
 import type { Translate } from '../i18n/index.ts';
-import type { GetSessionEvent, SessionEvent } from '../session.ts';
+import type { SessionEvent, ToolCall } from '../session.ts';
 
 export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMessage[] {
-  return events
-    .filter(
-      (event) =>
-        event.type === 'MessageAdded' || event.type === 'ToolCallResultAdded' || event.type === 'AnswerSelected',
-    )
-    .map((event) => toChatMessage(event, t));
+  const messages: AiClientMessage[] = [];
+
+  for (const event of events) {
+    if (event.type === 'MessageAdded') {
+      const { message } = event;
+
+      if (message.content !== '') {
+        messages.push({ role: message.role, content: message.content });
+      }
+    }
+
+    if (event.type === 'ToolCalled') {
+      appendWebSearch(messages, t, event.toolCall, event.result);
+    }
+
+    if (event.type === 'AnswerSelected') {
+      messages.push({
+        role: 'system',
+        content: t('chat.answer-selected', { question: event.content, label: event.label }),
+      });
+    }
+  }
+
+  return messages;
 }
 
-function toChatMessage(
-  event: GetSessionEvent<'MessageAdded' | 'ToolCallResultAdded' | 'AnswerSelected'>,
-  t: Translate,
-): AiClientMessage {
-  if (event.type === 'ToolCallResultAdded') {
-    const { result } = event;
+const webSearchArguments = z.object({ query: z.string() });
 
-    return {
-      role: 'tool',
-      toolCallId: result.id,
-      content: result.error ? { error: result.error } : result.result,
-    };
+function appendWebSearch(messages: AiClientMessage[], t: Translate, toolCall: ToolCall, result: unknown) {
+  if (toolCall.name !== 'webSearch' || typeof result !== 'string') {
+    return;
   }
 
-  if (event.type === 'AnswerSelected') {
-    return {
-      role: 'system',
-      content: t('chat.answer-selected', { question: event.content, label: event.label }),
-    };
-  }
+  const { query } = webSearchArguments.parse(toolCall.arguments);
 
-  const { message } = event;
-  const { role, content } = message;
-
-  const result: AiClientMessage = {
-    role,
-    content,
-  };
-
-  if (result.role === 'assistant' && message.role === 'assistant' && message.toolCalls) {
-    result.toolCalls = message.toolCalls;
-  }
-
-  return result;
+  messages.push({ role: 'system', content: t('chat.web-search', { query, results: result }) });
 }
