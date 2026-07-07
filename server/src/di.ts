@@ -7,7 +7,12 @@ import { NanoIdGenerator, type Generator } from './adapters/generator.ts';
 import { MustacheI18n, type I18n } from './adapters/i18n.ts';
 import { TavilySearchClient, type SearchClient } from './adapters/search-client.ts';
 import { createDatabase, SessionRepository, UserRepository } from './database/index.ts';
-import { createTools, type AssistantTools } from './domain/assistant-tools.ts';
+import {
+  createCuratorTools,
+  createFacilitatorTools,
+  type CuratorTools,
+  type FacilitatorTools,
+} from './domain/assistant-tools.ts';
 import { Assistant, type IAssistant } from './domain/assistant.ts';
 import { EvalAssistant } from './domain/eval-assistant.ts';
 import { SummaryGenerator } from './domain/summary-generator.ts';
@@ -32,17 +37,18 @@ function assistantFactory(
   aiClient: AiClient,
   i18n: I18n,
   summaryGenerator: SummaryGenerator,
-  assistantTools: AssistantTools,
+  facilitatorTools: FacilitatorTools,
+  curatorTools: CuratorTools,
 ): IAssistant {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
   }
 
   if (config.assistant === 'eval') {
-    return new EvalAssistant(uiNotifier, assistantTools);
+    return new EvalAssistant(uiNotifier, facilitatorTools, curatorTools);
   }
 
-  return new Assistant(uiNotifier, aiClient, i18n, summaryGenerator, assistantTools);
+  return new Assistant(uiNotifier, aiClient, i18n, summaryGenerator, facilitatorTools);
 }
 
 export const container = createContainer({
@@ -63,7 +69,8 @@ export const container = createContainer({
   sessionRepository: asClass(SessionRepository),
   aiClient: asClass<AiClient>(OpenAiClient),
   searchClient: asFunction(searchClientFactory),
-  assistantTools: asFunction(createTools),
+  facilitatorTools: asFunction(createFacilitatorTools),
+  curatorTools: asFunction(createCuratorTools),
   assistant: asFunction<IAssistant>(assistantFactory),
   summaryGenerator: asClass(SummaryGenerator),
   server: asClass(Server),

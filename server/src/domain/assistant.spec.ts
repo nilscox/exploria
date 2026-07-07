@@ -7,6 +7,7 @@ import { StubClock } from '../adapters/clock.ts';
 import { StubGenerator } from '../adapters/generator.ts';
 import { MustacheI18n } from '../adapters/i18n.ts';
 import { StubUiNotifier } from '../adapters/logger.ts';
+import { StubSearchClient } from '../adapters/search-client.ts';
 import { container } from '../di.ts';
 import { Session, type GetSessionEvent, type SessionEvent } from './session.ts';
 
@@ -82,16 +83,10 @@ void describe('Assistant', () => {
     const session = container.build(Session);
     const assistant = container.resolve('assistant');
 
-    aiClient.results.push(
-      {
-        content: 'Call this tool',
-        toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: 'why not' } }],
-      },
-      {
-        content: '',
-        toolCalls: [],
-      },
-    );
+    aiClient.results.push({
+      content: 'Call this tool',
+      toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: 'why not' } }],
+    });
 
     await assistant.run(session);
 
@@ -123,16 +118,10 @@ void describe('Assistant', () => {
     const session = container.build(Session);
     const assistant = container.resolve('assistant');
 
-    aiClient.results.push(
-      {
-        content: 'Call this tool',
-        toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: '' } }],
-      },
-      {
-        content: '',
-        toolCalls: [],
-      },
-    );
+    aiClient.results.push({
+      content: 'Call this tool',
+      toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: '' } }],
+    });
 
     await assistant.run(session);
 
@@ -144,6 +133,78 @@ void describe('Assistant', () => {
       actor: 'facilitator',
       error: 'Too small: expected string to have >=1 characters',
     });
+  });
+
+  void it('does not regenerate a reply after a terminal tool call', async () => {
+    const session = container.build(Session);
+    const assistant = container.resolve('assistant');
+
+    aiClient.results.push({
+      content: 'What do you think?',
+      toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: 'why not' } }],
+    });
+
+    await assistant.run(session);
+
+    const messages = session.events.filter((event) => event.type === 'MessageAdded');
+
+    assert.strictEqual(aiClient.results.length, 0);
+    assert.strictEqual(messages.length, 1);
+  });
+
+  void it('regenerates a reply when a terminal tool call comes without content', async () => {
+    const session = container.build(Session);
+    const assistant = container.resolve('assistant');
+
+    aiClient.results.push(
+      {
+        content: '',
+        toolCalls: [{ id: 'id', name: 'setPosture', arguments: { posture: 'advisor', reason: 'why not' } }],
+      },
+      {
+        content: 'What do you think?',
+        toolCalls: [],
+      },
+    );
+
+    await assistant.run(session);
+
+    const messages = session.events.filter((event) => event.type === 'MessageAdded');
+
+    assert.strictEqual(aiClient.results.length, 0);
+    assert.deepStrictEqual(
+      messages.map(({ message }) => message.content),
+      ['What do you think?'],
+    );
+  });
+
+  void it('regenerates a reply after a web search', async () => {
+    const searchClient = new StubSearchClient();
+
+    container.register({ searchClient: asValue(searchClient) });
+
+    const session = container.build(Session);
+    const assistant = container.resolve('assistant');
+
+    searchClient.results = [{ title: 'Node', url: 'https://nodejs.org', snippet: 'A runtime.' }];
+
+    aiClient.results.push(
+      {
+        content: '',
+        toolCalls: [{ id: 'id', name: 'webSearch', arguments: { query: 'node' } }],
+      },
+      {
+        content: 'Node is a runtime.',
+        toolCalls: [],
+      },
+    );
+
+    await assistant.run(session);
+
+    const lastMessage = session.events.findLast((event) => event.type === 'MessageAdded');
+
+    assert.strictEqual(aiClient.results.length, 0);
+    assert.strictEqual(lastMessage?.message.content, 'Node is a runtime.');
   });
 
   void it('renders session info with timer', () => {

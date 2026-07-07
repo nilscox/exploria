@@ -5,7 +5,7 @@ import { toChatMessages } from './projections/chat-context.ts';
 
 import type { AiClient } from '../adapters/ai-client.ts';
 import type { I18n } from '../adapters/i18n.ts';
-import type { AssistantTools, Tool, Tools } from './assistant-tools.ts';
+import type { FacilitatorTools, Tool } from './assistant-tools.ts';
 import type { Session, ToolCall } from './session.ts';
 import type { SummaryGenerator } from './summary-generator.ts';
 import type { Summary } from './summary.ts';
@@ -24,20 +24,20 @@ export class Assistant implements IAssistant {
   private readonly aiClient: AiClient;
   private readonly i18n: I18n;
   private readonly summaryGenerator: SummaryGenerator;
-  private readonly assistantTools: AssistantTools;
+  private readonly facilitatorTools: FacilitatorTools;
 
   constructor(
     uiNotifier: UiNotifier,
     aiClient: AiClient,
     i18n: I18n,
     summaryGenerator: SummaryGenerator,
-    assistantTools: AssistantTools,
+    facilitatorTools: FacilitatorTools,
   ) {
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
     this.i18n = i18n;
     this.summaryGenerator = summaryGenerator;
-    this.assistantTools = assistantTools;
+    this.facilitatorTools = facilitatorTools;
   }
 
   async run(session: Session, message?: string, commit?: () => Promise<void>) {
@@ -58,15 +58,23 @@ export class Assistant implements IAssistant {
         break;
       }
 
-      session.addMessage('assistant', content, { model: session.model });
+      if (content !== '') {
+        session.addMessage('assistant', content, { model: session.model });
+      }
+
+      let regenerate = content === '';
 
       for (const toolCall of toolCalls) {
-        await this.handleToolCall(session, toolCall);
+        const terminal = await this.handleToolCall(session, toolCall);
+
+        if (!terminal) {
+          regenerate = true;
+        }
       }
 
       await commit?.();
 
-      if (toolCalls.length === 0) {
+      if (!regenerate) {
         break;
       }
     }
@@ -129,14 +137,14 @@ export class Assistant implements IAssistant {
     ];
   }
 
-  private async handleToolCall(session: Session, toolCall: ToolCall) {
+  private async handleToolCall(session: Session, toolCall: ToolCall): Promise<boolean> {
     const tools = this.availableTools(session);
 
     assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
 
-    try {
-      const tool: Tool<z.ZodType<any>> = tools[toolCall.name] as Tool<z.ZodType<any>>;
+    const tool: Tool<z.ZodType<any>> = tools[toolCall.name] as Tool<z.ZodType<any>>;
 
+    try {
       toolCall.arguments = tool.param.parse(toolCall.arguments);
 
       session.recordToolCall(toolCall, 'facilitator', {
@@ -145,10 +153,12 @@ export class Assistant implements IAssistant {
     } catch (error) {
       session.recordToolCall(toolCall, 'facilitator', { error: Assistant.toErrorMessage(error) });
     }
+
+    return tool.terminal ?? false;
   }
 
   private availableTools(session: Session) {
-    const tools: Partial<Tools> = this.assistantTools(session.language);
+    const tools: Partial<ReturnType<FacilitatorTools>> = this.facilitatorTools(session.language);
 
     if (session.postureMode === 'forced') {
       delete tools.setPosture;
