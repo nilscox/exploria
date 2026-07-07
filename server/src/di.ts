@@ -14,6 +14,7 @@ import {
   type FacilitatorTools,
 } from './domain/assistant-tools.ts';
 import { Assistant, type IAssistant } from './domain/assistant.ts';
+import { Curator } from './domain/curator.ts';
 import { EvalAssistant } from './domain/eval-assistant.ts';
 import { SummaryGenerator } from './domain/summary-generator.ts';
 import { TestAssistant } from './domain/test-assistant.ts';
@@ -39,6 +40,8 @@ function assistantFactory(
   summaryGenerator: SummaryGenerator,
   facilitatorTools: FacilitatorTools,
   curatorTools: CuratorTools,
+  curator: Curator,
+  logger: Logger,
 ): IAssistant {
   if (config.assistant === 'test') {
     return new TestAssistant(uiNotifier);
@@ -48,7 +51,7 @@ function assistantFactory(
     return new EvalAssistant(uiNotifier, facilitatorTools, curatorTools);
   }
 
-  return new Assistant(uiNotifier, aiClient, i18n, summaryGenerator, facilitatorTools);
+  return new Assistant(uiNotifier, aiClient, i18n, summaryGenerator, facilitatorTools, curator, logger);
 }
 
 export const container = createContainer({
@@ -71,6 +74,7 @@ export const container = createContainer({
   searchClient: asFunction(searchClientFactory),
   facilitatorTools: asFunction(createFacilitatorTools),
   curatorTools: asFunction(createCuratorTools),
+  curator: asClass(Curator),
   assistant: asFunction<IAssistant>(assistantFactory),
   summaryGenerator: asClass(SummaryGenerator),
   server: asClass(Server),

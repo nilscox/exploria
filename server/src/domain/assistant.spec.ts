@@ -207,6 +207,50 @@ void describe('Assistant', () => {
     assert.strictEqual(lastMessage?.message.content, 'Node is a runtime.');
   });
 
+  void it('runs the curator after the reply', async () => {
+    const session = container.build(Session);
+    const assistant = container.resolve('assistant');
+
+    aiClient.results.push(
+      {
+        content: 'Hi (:',
+        toolCalls: [],
+      },
+      {
+        content: '',
+        toolCalls: [{ id: 'id', name: 'addTopics', arguments: { labels: ['Node'] } }],
+      },
+    );
+
+    await assistant.run(session, 'Hello!');
+
+    const types = session.peekDomainEvents().map((event) => event.type);
+
+    assert.deepStrictEqual(types, ['MessageAdded', 'MessageAdded', 'TopicAdded', 'ToolCalled']);
+  });
+
+  void it('does not propagate curator failures', async () => {
+    container.register({ logger: asValue({ log() {}, error() {} }) });
+
+    const session = container.build(Session);
+    const assistant = container.resolve('assistant');
+
+    aiClient.results.push({
+      content: 'Hi (:',
+      toolCalls: [],
+    });
+
+    aiClient.createCompletion = async () => {
+      throw new Error('boom');
+    };
+
+    await assistant.run(session, 'Hello!');
+
+    const types = session.peekDomainEvents().map((event) => event.type);
+
+    assert.deepStrictEqual(types, ['MessageAdded', 'MessageAdded']);
+  });
+
   void it('renders session info with timer', () => {
     const i18n = new MustacheI18n(clock);
     const session = new Session(generator, clock);
