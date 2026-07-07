@@ -42,7 +42,7 @@ export const buttonVariants = cva(
         medium: 'h-9 px-4',
         small: 'h-8 gap-1.5 px-3',
         large: 'h-10 px-6',
-        icon: 'size-9 rounded-md',
+        icon: 'h-9 aspect-square rounded-md',
       },
     },
     defaultVariants: {

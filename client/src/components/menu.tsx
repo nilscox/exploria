@@ -57,6 +57,7 @@ export function MenuItem({
 
 export function CheckboxMenuItem({
   icon: Icon,
+  closeOnClick,
   className,
   children,
   ...props
@@ -64,11 +65,13 @@ export function CheckboxMenuItem({
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  closeOnClick?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <M.CheckboxItem
+      closeOnClick={closeOnClick}
       className={clsx(
         className,
         'row data-highlighted:bg-accent cursor-pointer items-center gap-2 px-3 py-2 text-sm outline-none ',

@@ -10,7 +10,7 @@ import {
   SettingsIcon,
   Share2Icon,
 } from 'lucide-react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router';
 
@@ -23,6 +23,7 @@ import { CheckboxMenuItem, Menu, MenuItem, MenuSeparator } from 'src/components/
 import { SettingsDialog } from 'src/components/settings';
 import { Spinner } from 'src/components/spinner';
 import { config } from 'src/contexts/config';
+import { useMediaQuery } from 'src/hooks/use-media-query';
 
 import { SessionInfo } from './info/session-info';
 import { MessageForm } from './message-form';
@@ -54,11 +55,13 @@ export function SessionPage() {
       header={<Header session={state.session} views={views} setView={setView} />}
       sessionInfo={<SessionInfo session={state.session} />}
       timeline={
-        <>
-          <DocumentTitle title={state.session.subject} />
-          <MainSection session={state.session} stream={state.stream} onSelectAnswer={selectAnswer} />
-          {!state.session.ended && <MessageForm loading={state.loading} postMessage={postMessage} />}
-        </>
+        <MainSection
+          session={state.session}
+          stream={state.stream}
+          loading={state.loading}
+          postMessage={postMessage}
+          selectAnswer={selectAnswer}
+        />
       }
       mindMap={
         <SessionMindMap
@@ -95,10 +98,19 @@ function Header({
     },
   });
 
+  const isMobile = useMediaQuery('(width < 64rem)');
+
+  const handleBack: React.MouseEventHandler = (event) => {
+    if (isMobile && !views.timeline) {
+      event.preventDefault();
+      setView('timeline', true);
+    }
+  };
+
   return (
     <div className="row items-center justify-between gap-x-4 gap-y-0.5 border-b px-4 py-2">
       <div className="row items-center gap-2">
-        <LinkButton to="/session" variant="ghost" size="icon" className="shrink-0">
+        <LinkButton to="/session" variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
           <ArrowLeftIcon className="size-4" />
         </LinkButton>
 
@@ -119,6 +131,7 @@ function Header({
           icon={PanelLeftIcon}
           checked={views.info}
           onCheckedChange={(checked) => setView('info', checked)}
+          closeOnClick={isMobile}
         >
           <Trans>Session info</Trans>
         </CheckboxMenuItem>
@@ -127,6 +140,7 @@ function Header({
           icon={MessageSquareIcon}
           checked={views.timeline}
           onCheckedChange={(checked) => setView('timeline', checked)}
+          closeOnClick={isMobile}
         >
           <Trans>Timeline</Trans>
         </CheckboxMenuItem>
@@ -135,6 +149,7 @@ function Header({
           icon={Share2Icon}
           checked={views.mindmap}
           onCheckedChange={(checked) => setView('mindmap', checked)}
+          closeOnClick={isMobile}
         >
           <Trans>Mind map</Trans>
         </CheckboxMenuItem>
@@ -170,27 +185,73 @@ function Header({
 function MainSection({
   session,
   stream,
-  onSelectAnswer,
+  loading,
+  postMessage,
+  selectAnswer,
 }: {
   session: Shared.Session;
   stream: string;
-  onSelectAnswer: (questionId: string, optionId: string) => void;
+  loading: boolean;
+  postMessage: (message: string) => void;
+  selectAnswer: (questionId: string, optionId: string) => void;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { showTimelineActions, showTimelineDates } = config();
+  const { tail, scrollToEnd } = useTail(bottomRef);
 
   useLayoutEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'instant' });
-  }, [stream, session.timeline, showTimelineActions, showTimelineDates]);
+    if (tail) {
+      bottomRef.current?.scrollIntoView({ behavior: 'instant' });
+    }
+  }, [tail, stream, session.timeline, showTimelineActions, showTimelineDates]);
+
+  const components = useMemo(() => ({ loading: Loading }), []);
 
   return (
     <>
+      <DocumentTitle title={session.subject} />
+
       <div className="col relative mx-auto w-full max-w-4xl grow gap-4 p-4 sm:p-8">
-        <Timeline session={session} onSelectAnswer={onSelectAnswer} />
-        {stream && <Markdown markdown={stream} />}
+        <Timeline session={session} onSelectAnswer={selectAnswer} />
+        {stream && <Markdown markdown={stream + ' :loading'} components={components} />}
       </div>
 
       <div ref={bottomRef} />
+
+      {!session.ended && <MessageForm loading={loading} postMessage={postMessage} scrollToEnd={scrollToEnd} />}
     </>
   );
+}
+
+function Loading() {
+  return (
+    <span className="bg-accent inline-block h-[1.5em] w-4 animate-[pulse_1s_infinite_step-end] rounded-sm align-middle" />
+  );
+}
+
+function useTail(bottomRef: React.RefObject<HTMLElement | null>) {
+  const [tail, setTail] = useState(false);
+
+  useLayoutEffect(() => {
+    const parent = bottomRef.current?.parentElement;
+
+    if (!parent) {
+      return;
+    }
+
+    const listener = () => {
+      setTail(parent.scrollHeight <= Math.ceil(parent.scrollTop + parent.clientHeight));
+    };
+
+    parent.addEventListener('scroll', listener);
+
+    return () => {
+      parent.removeEventListener('scroll', listener);
+    };
+  }, [bottomRef]);
+
+  return {
+    tail,
+    scrollToEnd: tail ? undefined : () => setTail(true),
+  };
 }

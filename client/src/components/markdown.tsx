@@ -1,16 +1,48 @@
 import clsx from 'clsx';
-import production from 'react/jsx-runtime';
-import rehypeReact from 'rehype-react';
+import type { Root } from 'mdast';
+import { useMemo } from 'react';
+import * as jsxRuntime from 'react/jsx-runtime';
+import rehypeReact, { type Components } from 'rehype-react';
+import remarkDirective from 'remark-directive';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
-import { unified } from 'unified';
+import { unified, type Plugin } from 'unified';
+import { visit } from 'unist-util-visit';
 
-const processor = unified().use(remarkParse).use(remarkRehype).use(rehypeReact, production);
+// cspell:words jsxs
 
-export function Markdown({ markdown, className, ...props }: { markdown: string } & React.ComponentProps<'div'>) {
+export function Markdown({
+  markdown,
+  components,
+  className,
+  ...props
+}: { markdown: string; components?: Partial<Components> } & React.ComponentProps<'div'>) {
+  const { result } = useMemo(() => {
+    return unified()
+      .use(remarkParse)
+      .use(remarkDirective)
+      .use(remarkCustomComponents)
+      .use(remarkRehype)
+      .use(rehypeReact, {
+        Fragment: jsxRuntime.Fragment,
+        jsx: jsxRuntime.jsx,
+        jsxs: jsxRuntime.jsxs,
+        components,
+      })
+      .processSync(markdown);
+  }, [markdown, components]);
+
   return (
     <div className={clsx('prose max-w-none prose-zinc dark:prose-invert text-inherit', className)} {...props}>
-      {processor.processSync(markdown).result as React.ReactElement}
+      {result as React.ReactElement}
     </div>
   );
 }
+
+const remarkCustomComponents: Plugin = () => (tree: Root) => {
+  visit(tree, ['textDirective', 'leafDirective', 'containerDirective'] as const, (node) => {
+    node.data ??= {};
+    node.data.hName = node.name;
+    node.data.hProperties = node.attributes ?? {};
+  });
+};

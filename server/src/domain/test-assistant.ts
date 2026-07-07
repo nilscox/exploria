@@ -52,13 +52,13 @@ export class TestAssistant implements IAssistant {
     let buf = text;
 
     while (buf.length > 0) {
+      await new Promise((r) => setTimeout(r, 50));
+
       const length = Math.floor(Math.random() * 10);
       const chunk = buf.slice(0, length);
 
       buf = buf.slice(length);
       this.uiNotifier.notify(session.id, { type: 'Chunk', text: chunk });
-
-      await new Promise((r) => setTimeout(r, 50));
     }
 
     session.addMessage('assistant', text, {
