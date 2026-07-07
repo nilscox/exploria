@@ -10,7 +10,6 @@
     "lint": "oxlint",
     "fmt": "oxfmt",
     "dev": "nodemon -w src -w .env -w package.json -e ts -x 'node src/main.ts'",
-    "build": "tsup",
     "start": "node src/main.ts",
     "create-user": "node src/cli/create-user.ts"
   },
@@ -38,7 +37,6 @@
     "@types/pg": "^8.20.0",
     "drizzle-kit": "1.0.0-beta.22",
     "eventsource": "^4.1.0",
-    "nodemon": "^3.1.14",
-    "tsup": "^8.5.1"
+    "nodemon": "^3.1.14"
   }
 }

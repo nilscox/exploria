@@ -11,8 +11,6 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 ENV NODE_ENV=production
-
-RUN pnpm --filter=@exploria/server run build
 RUN pnpm --filter @exploria/server deploy --legacy --prod /server
 
 FROM node:26-slim
@@ -25,4 +23,4 @@ COPY --from=build /server .
 
 EXPOSE 3000
 
-CMD node dist/main.js
+CMD node src/main.ts

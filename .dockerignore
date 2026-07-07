@@ -17,6 +17,5 @@
 !server/drizzle.config.ts
 !server/package.json
 !server/tsconfig.json
-!server/tsup.config.ts
 !server/src
 !server/templates
