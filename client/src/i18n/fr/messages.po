@@ -206,6 +206,10 @@ msgstr "Examinateur"
 msgid "Expand"
 msgstr "Agrandir"
 
+#: src/session/info/posture.tsx
+msgid "Explain concepts and give context"
+msgstr "Expliquer des concepts et donner du contexte"
+
 #: src/session/create/create-session.tsx
 msgid "Explor<0>ia</0>"
 msgstr "Explor<0>ia</0>"
@@ -606,6 +610,10 @@ msgstr "Bilan"
 #: src/session/session-timeline.tsx
 msgid "Summary updated: {0}"
 msgstr "Résumé mis à jour : {0}"
+
+#: src/session/info/posture.tsx
+msgid "Teacher"
+msgstr "Enseignant"
 
 #: src/session/session-summary.tsx
 #: src/session/summary.ts

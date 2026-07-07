@@ -41,6 +41,26 @@ export function toErrorMessage(error: unknown): string {
   return String(error);
 }
 
+const saveNote = (t: Translate) =>
+  tool({
+    description: t('save-note.description'),
+    terminal: true,
+    param: z.object({
+      title: z.string().min(1).max(64).describe(t('save-note.title-param')),
+      content: z.string().min(1).describe(t('save-note.content-param')),
+      topicId: z.string().nullish().describe(t('save-note.topic-param')),
+    }),
+    execute: (session, { title, content, topicId }) => {
+      session.addNote({
+        title,
+        content,
+        parentId: topicId ?? null,
+      });
+
+      return t('tool.result.ok');
+    },
+  });
+
 const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
   askQuestions: tool({
     description: t('ask-questions.description'),
@@ -84,6 +104,8 @@ const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
       return t('tool.result.ok');
     },
   }),
+
+  saveNote: saveNote(t),
 
   webSearch: searchClient
     ? tool({
@@ -173,23 +195,7 @@ const curatorTools = (t: Translate) => ({
     },
   }),
 
-  saveNote: tool({
-    description: t('save-note.description'),
-    param: z.object({
-      title: z.string().min(1).max(64).describe(t('save-note.title-param')),
-      content: z.string().min(1).describe(t('save-note.content-param')),
-      topicId: z.string().nullish().describe(t('save-note.topic-param')),
-    }),
-    execute: (session, { title, content, topicId }) => {
-      session.addNote({
-        title,
-        content,
-        parentId: topicId ?? null,
-      });
-
-      return t('tool.result.ok');
-    },
-  }),
+  saveNote: saveNote(t),
 
   moveNote: tool({
     description: t('move-note.description'),
