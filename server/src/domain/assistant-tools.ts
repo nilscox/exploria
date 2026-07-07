@@ -29,6 +29,18 @@ function tool<Param extends z.ZodType>(tool: Tool<Param>) {
   return tool;
 }
 
+export function toErrorMessage(error: unknown): string {
+  if (error instanceof z.ZodError) {
+    return error.issues.map((issue) => issue.message).join('; ');
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+}
+
 const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
   askQuestions: tool({
     description: t('ask-questions.description'),

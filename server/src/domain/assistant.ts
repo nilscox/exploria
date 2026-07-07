@@ -1,11 +1,14 @@
-import z from 'zod';
+import type z from 'zod';
 
 import { assert, hasKey } from '../utils.ts';
+import { toErrorMessage } from './assistant-tools.ts';
 import { toChatMessages } from './projections/chat-context.ts';
 
 import type { AiClient } from '../adapters/ai-client.ts';
 import type { I18n } from '../adapters/i18n.ts';
+import type { Logger } from '../adapters/logger.ts';
 import type { FacilitatorTools, Tool } from './assistant-tools.ts';
+import type { Curator } from './curator.ts';
 import type { Session, ToolCall } from './session.ts';
 import type { SummaryGenerator } from './summary-generator.ts';
 import type { Summary } from './summary.ts';
@@ -25,6 +28,8 @@ export class Assistant implements IAssistant {
   private readonly i18n: I18n;
   private readonly summaryGenerator: SummaryGenerator;
   private readonly facilitatorTools: FacilitatorTools;
+  private readonly curator: Curator;
+  private readonly logger: Logger;
 
   constructor(
     uiNotifier: UiNotifier,
@@ -32,12 +37,16 @@ export class Assistant implements IAssistant {
     i18n: I18n,
     summaryGenerator: SummaryGenerator,
     facilitatorTools: FacilitatorTools,
+    curator: Curator,
+    logger: Logger,
   ) {
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
     this.i18n = i18n;
     this.summaryGenerator = summaryGenerator;
     this.facilitatorTools = facilitatorTools;
+    this.curator = curator;
+    this.logger = logger;
   }
 
   async run(session: Session, message?: string, commit?: () => Promise<void>) {
@@ -77,6 +86,13 @@ export class Assistant implements IAssistant {
       if (!regenerate) {
         break;
       }
+    }
+
+    try {
+      await this.curator.run(session);
+      await commit?.();
+    } catch (error) {
+      this.logger.error('curator failed', error);
     }
   }
 
@@ -151,7 +167,7 @@ export class Assistant implements IAssistant {
         result: await tool.execute(session, toolCall.arguments),
       });
     } catch (error) {
-      session.recordToolCall(toolCall, 'facilitator', { error: Assistant.toErrorMessage(error) });
+      session.recordToolCall(toolCall, 'facilitator', { error: toErrorMessage(error) });
     }
 
     return tool.terminal ?? false;
@@ -165,17 +181,5 @@ export class Assistant implements IAssistant {
     }
 
     return tools;
-  }
-
-  private static toErrorMessage(error: unknown): string {
-    if (error instanceof z.ZodError) {
-      return error.issues.map((issue) => issue.message).join('; ');
-    }
-
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    return String(error);
   }
 }

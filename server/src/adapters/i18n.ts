@@ -13,6 +13,7 @@ import type { Clock } from './clock.ts';
 
 type Templates = {
   instructions: {};
+  curator: { session: Session };
   'session-info': { session: Session };
   'timer-info': { timer: Timer | null };
   summary: {};
@@ -35,6 +36,7 @@ export class MustacheI18n implements I18n {
 
     this.templates = {
       instructions: MustacheI18n.loadTemplates('instructions'),
+      curator: MustacheI18n.loadTemplates('curator'),
       'session-info': MustacheI18n.loadTemplates('session-info'),
       'timer-info': MustacheI18n.loadTemplates('timer-info'),
       summary: MustacheI18n.loadTemplates('summary'),
@@ -69,6 +71,7 @@ export class MustacheI18n implements I18n {
 
     const view = {
       instructions: () => {},
+      curator: this.curatorView,
       'session-info': this.sessionInfoView,
       'timer-info': this.timerInfoView,
       summary: () => {},
@@ -78,6 +81,26 @@ export class MustacheI18n implements I18n {
   }
 
   private sessionInfoView = (lang: Language, { session }: Templates['session-info']) => {
+    return {
+      mindmap: this.mindmap(lang, session),
+      timerInfo: this.render(lang, 'timer-info', { timer: session.timer }),
+      posture: session.posture,
+      auto: session.postureMode === 'auto',
+      date: this.date(lang, new Date()),
+    };
+  };
+
+  private curatorView = (lang: Language, { session }: Templates['curator']) => {
+    const inProgressCount = session.topics.filter((topic) => topic.status === 'in_progress').length;
+
+    return {
+      mindmap: this.mindmap(lang, session),
+      noTopicInProgress: inProgressCount !== 1,
+      mapUpToDate: inProgressCount === 1,
+    };
+  };
+
+  private mindmap(lang: Language, session: Session): string {
     const t = this.translate(lang);
 
     const statusLabels: Record<TopicStatus, string> = {
@@ -86,18 +109,8 @@ export class MustacheI18n implements I18n {
       done: t('session-info.status.done'),
     };
 
-    const inProgressCount = session.topics.filter((topic) => topic.status === 'in_progress').length;
-
-    return {
-      mindmap: MustacheI18n.renderMindmap(session, statusLabels),
-      noTopicInProgress: inProgressCount !== 1,
-      mapUpToDate: inProgressCount === 1,
-      timerInfo: this.render(lang, 'timer-info', { timer: session.timer }),
-      posture: session.posture,
-      auto: session.postureMode === 'auto',
-      date: this.date(lang, new Date()),
-    };
-  };
+    return MustacheI18n.renderMindmap(session, statusLabels);
+  }
 
   private static renderMindmap(session: Session, statusLabels: Record<TopicStatus, string>): string {
     const { mindmap } = session;

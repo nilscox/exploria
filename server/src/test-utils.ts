@@ -102,8 +102,8 @@ export class E2eTest {
       config: asValue(fullConfig),
       clock: asValue(clock),
       generator: asValue(generator),
-      logger: asValue({ log: () => {} }),
-      events: asValue(new EventBus({ log: () => {} })),
+      logger: asValue({ log: () => {}, error: () => {} }),
+      events: asValue(new EventBus({ log: () => {}, error: () => {} })),
       aiClient: asValue(aiClient),
       database: asValue(db),
     });
