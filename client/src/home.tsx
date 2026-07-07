@@ -21,6 +21,8 @@ import { LinkButton } from 'src/components/button';
 import { DocumentTitle } from 'src/components/document-title';
 import { setLanguage } from 'src/i18n/i18n';
 
+import Icon from './logo.svg?react';
+
 // cspell:words pushback timebox
 
 export function Home() {
@@ -44,6 +46,9 @@ function Hero() {
       <div className="mx-auto max-w-4xl px-4 md:px-8">
         <nav className="row h-16 items-center justify-between">
           <Link to="/" className="rounded-md px-2 text-lg font-bold">
+            <div className="relative -top-0.5 me-1.5 inline-block size-4 align-middle">
+              <Icon className="fill-current" />
+            </div>
             Explor<span className="text-amber-400">ia</span>
           </Link>
           <LanguageSelect />

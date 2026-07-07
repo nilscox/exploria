@@ -13,6 +13,7 @@ import { Textarea } from 'src/components/input';
 import { SettingsDialog } from 'src/components/settings';
 import { isLanguage } from 'src/i18n/i18n';
 
+import Icon from '../../logo.svg?react';
 import { ModelSelector } from '../model-selector';
 import { SessionsList } from './sessions-list';
 
@@ -77,6 +78,9 @@ export function CreateSession() {
       <div className="col mx-auto w-full max-w-lg flex-1 justify-center gap-8">
         <div className="text-center">
           <h1 className="my-2 text-3xl font-semibold">
+            <div className="relative -top-1 me-2 inline-block size-6 align-middle">
+              <Icon className="shrink-0" />
+            </div>
             <Trans>
               Explor<span className="text-primary">ia</span>
             </Trans>
