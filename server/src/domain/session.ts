@@ -25,7 +25,7 @@ export type Note = {
 
 export type Message =
   | { date: string; role: 'user'; content: string }
-  | { date: string; role: 'assistant'; content: string; model: string; toolCalls?: ToolCall[] };
+  | { date: string; role: 'assistant'; content: string; model: string };
 
 export type Role = Message['role'];
 
@@ -35,12 +35,9 @@ export type ToolCall = {
   arguments: unknown;
 };
 
-export type ToolCallResult = {
-  id: string;
-  date: Date;
-  result?: unknown;
-  error?: string | null;
-};
+export type ToolCallActor = 'facilitator' | 'curator';
+
+export type ToolCallOutcome = { result: unknown } | { error: string };
 
 export type Question = {
   id: string;
@@ -78,7 +75,7 @@ export type SessionEvent =
   | SessionDomainEvent<'TimerPaused'>
   | SessionDomainEvent<'TimerResumed'>
   | SessionDomainEvent<'MessageAdded', { message: Message }>
-  | SessionDomainEvent<'ToolCallResultAdded', { result: ToolCallResult }>
+  | SessionDomainEvent<'ToolCalled', { toolCall: ToolCall; actor: ToolCallActor; result?: unknown; error?: string }>
   | SessionDomainEvent<'QuestionsAsked', { questions: Question[] }>
   | SessionDomainEvent<'AnswerSelected', { questionId: string; optionId: string; content: string; label: string }>
   | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
@@ -421,9 +418,9 @@ export class Session extends AggregateRoot<SessionEvent> {
   }
 
   addMessage(role: Exclude<Role, 'assistant'>, content: string): void;
-  addMessage(role: Extract<Role, 'assistant'>, content: string, params: { model: string; toolCalls: ToolCall[] }): void;
+  addMessage(role: Extract<Role, 'assistant'>, content: string, params: { model: string }): void;
 
-  addMessage(role: Role, content: string, params?: { model: string; toolCalls: ToolCall[] }) {
+  addMessage(role: Role, content: string, params?: { model: string }) {
     const date = this.clock.now().toISOString();
     let message: Message;
 
@@ -435,10 +432,6 @@ export class Session extends AggregateRoot<SessionEvent> {
       assert(params);
 
       message = { date, role, content, model: params.model };
-
-      if (params.toolCalls.length > 0) {
-        message.toolCalls = params.toolCalls;
-      }
     } else {
       message = { date, role, content };
     }
@@ -446,15 +439,8 @@ export class Session extends AggregateRoot<SessionEvent> {
     this.emit('MessageAdded', { message });
   }
 
-  addToolCallResult(toolCallId: string, param: { error: string } | { result: unknown }) {
-    this.emit('ToolCallResultAdded', {
-      result: {
-        id: toolCallId,
-        date: this.clock.now(),
-        error: 'error' in param ? param.error : null,
-        result: 'result' in param ? param.result : null,
-      },
-    });
+  recordToolCall(toolCall: ToolCall, actor: ToolCallActor, outcome: ToolCallOutcome) {
+    this.emit('ToolCalled', { toolCall, actor, ...outcome });
   }
 
   askQuestions(questions: Array<{ content: string; options: Array<{ label: string; description?: string }> }>) {

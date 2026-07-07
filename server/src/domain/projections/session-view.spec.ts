@@ -106,13 +106,27 @@ void describe('toTimeline', () => {
     session.addMessage('user', 'Hello');
     session.addTopic({ label: 'Node' });
     session.startTimer(60);
-    session.addMessage('assistant', 'Hi', { model: 'model', toolCalls: [] });
+    session.addMessage('assistant', 'Hi', { model: 'model' });
 
     assert.deepStrictEqual(timeline(), [
-      { kind: 'message', date, role: 'user', content: 'Hello', toolCalls: undefined },
+      { kind: 'message', date, role: 'user', content: 'Hello' },
       { kind: 'topic-added', label: 'Node' },
       { kind: 'timer-started', duration: 60 },
-      { kind: 'message', date, role: 'assistant', content: 'Hi', toolCalls: undefined },
+      { kind: 'message', date, role: 'assistant', content: 'Hi' },
+    ]);
+  });
+
+  void it('emits tool-call items', () => {
+    session.recordToolCall({ id: 'call-1', name: 'setSubject', arguments: { subject: 'Node' } }, 'curator', {
+      result: 'OK',
+    });
+    session.recordToolCall({ id: 'call-2', name: 'webSearch', arguments: { query: 'node' } }, 'facilitator', {
+      error: 'boom',
+    });
+
+    assert.deepStrictEqual(timeline(), [
+      { kind: 'tool-call', name: 'setSubject', arguments: { subject: 'Node' }, actor: 'curator', result: 'OK' },
+      { kind: 'tool-call', name: 'webSearch', arguments: { query: 'node' }, actor: 'facilitator', error: 'boom' },
     ]);
   });
 
@@ -245,7 +259,7 @@ void describe('toTimeline', () => {
 
   void it("attaches questions to the assistant's message", () => {
     askQuestion();
-    session.addMessage('assistant', 'Pick one', { model: 'model', toolCalls: [] });
+    session.addMessage('assistant', 'Pick one', { model: 'model' });
 
     const question = session.questions[0]!;
     const [optionA, optionB] = question.options;
@@ -256,7 +270,6 @@ void describe('toTimeline', () => {
         date: clock.date.toISOString(),
         role: 'assistant',
         content: 'Pick one',
-        toolCalls: undefined,
         questions: [
           {
             id: question.id,
@@ -273,7 +286,7 @@ void describe('toTimeline', () => {
 
   void it('keeps options visible after selection and marks the answered one', () => {
     askQuestion();
-    session.addMessage('assistant', 'Pick one', { model: 'model', toolCalls: [] });
+    session.addMessage('assistant', 'Pick one', { model: 'model' });
 
     const question = session.questions[0]!;
     const [optionA, optionB] = question.options;
@@ -291,7 +304,7 @@ void describe('toTimeline', () => {
 
   void it('marks no option as selected when a user message was added', () => {
     askQuestion();
-    session.addMessage('assistant', 'Pick one', { model: 'model', toolCalls: [] });
+    session.addMessage('assistant', 'Pick one', { model: 'model' });
 
     const question = session.questions[0]!;
     const [optionA, optionB] = question.options;

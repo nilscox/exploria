@@ -58,10 +58,7 @@ export class Assistant implements IAssistant {
         break;
       }
 
-      session.addMessage('assistant', content, {
-        model: session.model,
-        toolCalls,
-      });
+      session.addMessage('assistant', content, { model: session.model });
 
       for (const toolCall of toolCalls) {
         await this.handleToolCall(session, toolCall);
@@ -142,11 +139,11 @@ export class Assistant implements IAssistant {
 
       toolCall.arguments = tool.param.parse(toolCall.arguments);
 
-      session.addToolCallResult(toolCall.id, {
+      session.recordToolCall(toolCall, 'facilitator', {
         result: await tool.execute(session, toolCall.arguments),
       });
     } catch (error) {
-      session.addToolCallResult(toolCall.id, { error: Assistant.toErrorMessage(error) });
+      session.recordToolCall(toolCall, 'facilitator', { error: Assistant.toErrorMessage(error) });
     }
   }
 

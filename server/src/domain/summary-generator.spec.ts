@@ -28,7 +28,7 @@ void describe('SummaryGenerator', () => {
     const session = new Session(generator, clock);
 
     session.addMessage('user', 'Hello');
-    session.addMessage('assistant', 'Hi!', { model: 'gpt-4o', toolCalls: [] });
+    session.addMessage('assistant', 'Hi!', { model: 'gpt-4o' });
 
     aiClient.structuredResults.push(stubSummary);
 
@@ -47,7 +47,7 @@ void describe('SummaryGenerator', () => {
     const session = new Session(generator, clock);
 
     session.addMessage('user', 'My first thought');
-    session.addMessage('assistant', 'Interesting perspective', { model: 'gpt-4o', toolCalls: [] });
+    session.addMessage('assistant', 'Interesting perspective', { model: 'gpt-4o' });
 
     let capturedMessages: unknown[] = [];
 

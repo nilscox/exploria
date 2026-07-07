@@ -59,6 +59,7 @@ export type Messages = {
   'session-info.status.done': string;
 
   'chat.answer-selected': (p: { question: string; label: string }) => string;
+  'chat.web-search': (p: { query: string; results: string }) => string;
 
   'demo.role-1': string;
   'demo.role-2': string;
@@ -139,6 +140,7 @@ const en: Messages = {
   'session-info.status.done': 'done',
 
   'chat.answer-selected': ({ question, label }) => `Answered "${question}" with: "${label}"`,
+  'chat.web-search': ({ query, results }) => `Web search results for "${query}":\n\n${results}`,
 
   'demo.role-1':
     'You are reflecting on a topic in a guided way. You are not the one guiding the discussion, you let yourself be guided.',
@@ -224,6 +226,7 @@ const fr: Messages = {
   'session-info.status.done': 'traité',
 
   'chat.answer-selected': ({ question, label }) => `Réponse à « ${question} » : « ${label} »`,
+  'chat.web-search': ({ query, results }) => `Résultats de la recherche web pour « ${query} » :\n\n${results}`,
 
   'demo.role-1':
     "Tu cherches à réfléchir à un sujet de manière guidée. Ce n'est pas toi qui guide la discussion, tu te laisses guider.",

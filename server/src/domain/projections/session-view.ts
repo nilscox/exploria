@@ -81,6 +81,7 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
 
 const timelineEventTypes = new Set<SessionEvent['type']>([
   'MessageAdded',
+  'ToolCalled',
   'SessionEnded',
   'SessionReopened',
   'ModelChanged',
@@ -132,7 +133,6 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
           date: message.date,
           role: message.role,
           content: message.content,
-          toolCalls: message.role === 'assistant' ? message.toolCalls : undefined,
         };
 
         if (item.role === 'assistant' && pendingQuestions) {
@@ -152,6 +152,17 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
 
         break;
       }
+
+      case 'ToolCalled':
+        items.push({
+          kind: 'tool-call',
+          name: event.toolCall.name,
+          arguments: event.toolCall.arguments,
+          actor: event.actor,
+          ...(event.result !== undefined && { result: event.result }),
+          ...(event.error !== undefined && { error: event.error }),
+        });
+        break;
 
       case 'SessionEnded':
         items.push({ kind: 'session-ended' });

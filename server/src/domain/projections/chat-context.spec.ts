@@ -11,48 +11,59 @@ import { toChatMessages } from './chat-context.ts';
 import type { AiClientMessage } from '../../adapters/ai-client.ts';
 
 void describe('toChatMessages', () => {
+  let clock: StubClock;
   let t: Translate;
   let session: Session;
 
   beforeEach(() => {
-    t = new MustacheI18n(new StubClock()).translate('en');
-    session = new Session(new StubGenerator(), new StubClock());
+    clock = new StubClock();
+    t = new MustacheI18n(clock).translate('en');
+    session = new Session(new StubGenerator(), clock);
   });
 
-  void it('projects message and tool-call events to chat messages', () => {
+  void it('projects messages to chat messages', () => {
     session.addMessage('user', 'Hello');
-    session.addMessage('assistant', 'Calling a tool', {
-      model: 'gpt-4o',
-      toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: { duration: 42 } }],
-    });
-    session.addToolCallResult('call-1', { result: 'Timer started' });
+    session.addMessage('assistant', 'Hi!', { model: 'gpt-4o' });
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
       { role: 'user', content: 'Hello' },
-      {
-        role: 'assistant',
-        content: 'Calling a tool',
-        toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: { duration: 42 } }],
-      },
-      { role: 'tool', toolCallId: 'call-1', content: 'Timer started' },
+      { role: 'assistant', content: 'Hi!' },
     ] satisfies AiClientMessage[]);
   });
 
-  void it('wraps tool-call errors in an error object', () => {
-    session.addMessage('assistant', '', {
-      model: 'gpt-4o',
-      toolCalls: [{ id: 'call-1', name: 'startTimer', arguments: '{}' }],
-    });
-    session.addToolCallResult('call-1', { error: 'boom' });
+  void it('omits assistant messages with an empty content', () => {
+    session.addMessage('assistant', '', { model: 'gpt-4o' });
 
-    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t).at(-1), {
-      role: 'tool',
-      toolCallId: 'call-1',
-      content: { error: 'boom' },
-    } satisfies AiClientMessage);
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
   });
 
-  void it('ignores events that are not messages or tool-call results', () => {
+  void it('omits tool calls', () => {
+    session.recordToolCall({ id: 'call-1', name: 'setSubject', arguments: { subject: 'Node' } }, 'curator', {
+      result: 'OK',
+    });
+
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
+  });
+
+  void it('converts web searches to system messages', () => {
+    session.recordToolCall({ id: 'call-1', name: 'webSearch', arguments: { query: 'node' } }, 'facilitator', {
+      result: '**Node**\nA runtime.',
+    });
+
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
+      { role: 'system', content: 'Web search results for "node":\n\n**Node**\nA runtime.' },
+    ] satisfies AiClientMessage[]);
+  });
+
+  void it('omits failed web searches', () => {
+    session.recordToolCall({ id: 'call-1', name: 'webSearch', arguments: { query: 'node' } }, 'facilitator', {
+      error: 'boom',
+    });
+
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
+  });
+
+  void it('ignores events that are not messages or tool calls', () => {
     session.addTopic({ label: 'Node' });
     session.startTimer(60);
 

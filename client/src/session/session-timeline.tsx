@@ -54,6 +54,10 @@ function TimelineEntry({
     return <MessageItem message={item} onSelectAnswer={onSelectAnswer} />;
   }
 
+  if (item.kind === 'tool-call') {
+    return config().debug ? <ToolCallItem item={item} /> : null;
+  }
+
   const { showTimelineActions } = config();
 
   if (!showTimelineActions) {
@@ -70,7 +74,9 @@ function TimelineEntry({
 }
 
 const components: {
-  [Item in TimelineItem as Exclude<Item['kind'], 'message' | 'summary'>]: React.ComponentType<{ item: Item }>;
+  [Item in TimelineItem as Exclude<Item['kind'], 'message' | 'summary' | 'tool-call'>]: React.ComponentType<{
+    item: Item;
+  }>;
 } = {
   'session-ended': () => (
     <Notification Icon={LockKeyholeIcon}>
@@ -292,24 +298,19 @@ function MessageItem({
         className={clsx(message.role === 'user' && 'bg-accent px-4 py-2 rounded-md')}
       />
 
-      {message.role === 'assistant' && config().debug && <ToolCalls toolCalls={message.toolCalls} />}
       {message.questions && <Questions questions={message.questions} onSelectAnswer={onSelectAnswer} />}
     </div>
   );
 }
 
-function ToolCalls({ toolCalls }: { toolCalls?: Shared.ToolCall[] }) {
-  return toolCalls?.map((toolCall) => (
-    <Details
-      key={toolCall.id}
-      className="text-dim my-0.5 text-sm"
-      summary={`Tool call ${toolCall.name} (${toolCall.id})`}
-    >
+function ToolCallItem({ item }: { item: Extract<TimelineItem, { kind: 'tool-call' }> }) {
+  return (
+    <Details className="text-dim my-0.5 text-sm" summary={`Tool call ${item.name} (${item.actor})`}>
       <div className="text-text bg-accent mt-2 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
-        {JSON.stringify(toolCall.arguments, null, 2)}
+        {JSON.stringify({ arguments: item.arguments, result: item.result, error: item.error }, null, 2)}
       </div>
     </Details>
-  ));
+  );
 }
 
 function Questions({
