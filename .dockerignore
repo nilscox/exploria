@@ -4,16 +4,18 @@
 !pnpm-workspace.yaml
 !tsconfig.json
 
-!client/package.json
 !client/index.html
 !client/lingui.config.ts
+!client/manifest.json
 !client/nginx.conf
-!client/vite.config.ts
+!client/package.json
 !client/tsconfig.json
+!client/vite.config.ts
 !client/src
+!client/public
 
-!server/package.json
 !server/drizzle.config.ts
+!server/package.json
 !server/tsconfig.json
 !server/tsup.config.ts
 !server/src
