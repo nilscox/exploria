@@ -1,6 +1,6 @@
 import type z from 'zod';
 
-import { assert, hasKey } from '../utils.ts';
+import { assert, hasKey, type ValueOf } from '../utils.ts';
 import { toErrorMessage } from './assistant-tools.ts';
 import { toChatMessages } from './projections/chat-context.ts';
 
@@ -24,7 +24,7 @@ export class Curator {
 
   async run(session: Session): Promise<void> {
     const t = this.i18n.translate(session.language);
-    const tools = this.curatorTools(session.language);
+    const tools = this.curatorTools[session.language];
 
     const messages: AiClientMessage[] = [
       { role: 'system', content: this.i18n.render(session.language, 'curator', { session }) },
@@ -54,11 +54,7 @@ export class Curator {
     }
   }
 
-  private async handleToolCall(
-    session: Session,
-    tools: ReturnType<CuratorTools>,
-    toolCall: ToolCall,
-  ): Promise<unknown> {
+  private async handleToolCall(session: Session, tools: ValueOf<CuratorTools>, toolCall: ToolCall): Promise<unknown> {
     assert(hasKey(tools, toolCall.name), new Error(`Unknown tool name: "${toolCall.name}"`));
 
     const tool: Tool<z.ZodType<any>> = tools[toolCall.name] as Tool<z.ZodType<any>>;

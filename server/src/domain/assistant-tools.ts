@@ -7,17 +7,6 @@ import type { SearchClient } from '../adapters/search-client.ts';
 import type { Language, Translate } from './i18n/index.ts';
 import type { Session } from './session.ts';
 
-export function createFacilitatorTools(i18n: I18n, searchClient: SearchClient | null) {
-  return (language: Language) => facilitatorTools(searchClient, i18n.translate(language));
-}
-
-export function createCuratorTools(i18n: I18n) {
-  return (language: Language) => curatorTools(i18n.translate(language));
-}
-
-export type FacilitatorTools = (language: Language) => ReturnType<typeof facilitatorTools>;
-export type CuratorTools = (language: Language) => ReturnType<typeof curatorTools>;
-
 export type Tool<Param extends z.ZodType = z.ZodType> = {
   description: string;
   param: Param;
@@ -25,8 +14,22 @@ export type Tool<Param extends z.ZodType = z.ZodType> = {
   execute: (session: Session, param: z.infer<Param>) => string | Promise<string>;
 };
 
-function tool<Param extends z.ZodType>(tool: Tool<Param>) {
-  return tool;
+const languages: Language[] = ['en', 'fr'];
+
+export type FacilitatorTools = Record<Language, ReturnType<typeof facilitatorTools>>;
+
+export function createFacilitatorTools(i18n: I18n, searchClient: SearchClient | null) {
+  return Object.fromEntries(
+    languages.map((language) => [language, facilitatorTools(i18n.translate(language), searchClient)]),
+  ) as FacilitatorTools;
+}
+
+export type CuratorTools = Record<Language, ReturnType<typeof curatorTools>>;
+
+export function createCuratorTools(i18n: I18n) {
+  return Object.fromEntries(
+    languages.map((language) => [language, curatorTools(i18n.translate(language))]),
+  ) as CuratorTools;
 }
 
 export function toErrorMessage(error: unknown): string {
@@ -41,28 +44,33 @@ export function toErrorMessage(error: unknown): string {
   return String(error);
 }
 
-const saveNote = (t: Translate) =>
-  tool({
-    description: t('save-note.description'),
-    terminal: true,
-    param: z.object({
-      title: z.string().min(1).max(64).describe(t('save-note.title-param')),
-      content: z.string().min(1).describe(t('save-note.content-param')),
-      topicId: z.string().nullish().describe(t('save-note.topic-param')),
-    }),
-    execute: (session, { title, content, topicId }) => {
-      session.addNote({
-        title,
-        content,
-        parentId: topicId ?? null,
-      });
+function facilitatorTools(t: Translate, searchClient: SearchClient | null) {
+  return {
+    askQuestions: askQuestions(t),
+    setPosture: setPosture(t),
+    saveNote: saveNote(t),
+    webSearch: searchClient ? webSearch(t, searchClient) : undefined,
+  };
+}
 
-      return t('tool.result.ok');
-    },
-  });
+function curatorTools(t: Translate) {
+  return {
+    setSubject: setSubject(t),
+    addTopics: addTopics(t),
+    updateTopic: updateTopic(t),
+    removeTopic: removeTopic(t),
+    moveTopic: moveTopic(t),
+    saveNote: saveNote(t),
+    moveNote: moveNote(t),
+  };
+}
 
-const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
-  askQuestions: tool({
+function tool<Param extends z.ZodType>(tool: Tool<Param>) {
+  return tool;
+}
+
+function askQuestions(t: Translate) {
+  return tool({
     description: t('ask-questions.description'),
     terminal: true,
     param: z.object({
@@ -89,9 +97,11 @@ const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  setPosture: tool({
+function setPosture(t: Translate) {
+  return tool({
     description: t('set-posture.description'),
     terminal: true,
     param: z.object({
@@ -103,31 +113,29 @@ const facilitatorTools = (searchClient: SearchClient | null, t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  saveNote: saveNote(t),
+function webSearch(t: Translate, searchClient: SearchClient) {
+  return tool({
+    description: t('web-search.description'),
+    param: z.object({ query: z.string().min(1).describe(t('web-search.query-param')) }),
+    execute: async (session, { query }) => {
+      const results = await searchClient.search(query);
 
-  webSearch: searchClient
-    ? tool({
-        description: t('web-search.description'),
-        param: z.object({ query: z.string().min(1).describe(t('web-search.query-param')) }),
-        execute: async (session, { query }) => {
-          const results = await searchClient.search(query);
+      session.recordSearch(query, results.length);
 
-          session.recordSearch(query, results.length);
+      if (results.length === 0) {
+        return t('web-search.no-results', { query });
+      }
 
-          if (results.length === 0) {
-            return t('web-search.no-results', { query });
-          }
+      return results.map((r) => `**${r.title}**\n${r.url}\n${r.snippet}`).join('\n\n');
+    },
+  });
+}
 
-          return results.map((r) => `**${r.title}**\n${r.url}\n${r.snippet}`).join('\n\n');
-        },
-      })
-    : undefined,
-});
-
-const curatorTools = (t: Translate) => ({
-  setSubject: tool({
+function setSubject(t: Translate) {
+  return tool({
     description: t('set-subject.description'),
     param: z.object({
       subject: z.string().min(1),
@@ -136,9 +144,11 @@ const curatorTools = (t: Translate) => ({
       session.setSubject(subject);
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  addTopics: tool({
+function addTopics(t: Translate) {
+  return tool({
     description: t('add-topics.description'),
     param: z.object({
       labels: z.array(z.string().min(1).max(64)).min(1),
@@ -149,9 +159,11 @@ const curatorTools = (t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  updateTopic: tool({
+function updateTopic(t: Translate) {
+  return tool({
     description: t('update-topic.description'),
     param: z.object({
       id: z.string(),
@@ -168,9 +180,11 @@ const curatorTools = (t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  removeTopic: tool({
+function removeTopic(t: Translate) {
+  return tool({
     description: t('remove-topic.description'),
     param: z.object({
       id: z.string(),
@@ -180,9 +194,11 @@ const curatorTools = (t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  moveTopic: tool({
+function moveTopic(t: Translate) {
+  return tool({
     description: t('move-topic.description'),
     param: z.object({
       id: z.string(),
@@ -193,11 +209,32 @@ const curatorTools = (t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
+  });
+}
 
-  saveNote: saveNote(t),
+function saveNote(t: Translate) {
+  return tool({
+    description: t('save-note.description'),
+    terminal: true,
+    param: z.object({
+      title: z.string().min(1).max(64).describe(t('save-note.title-param')),
+      content: z.string().min(1).describe(t('save-note.content-param')),
+      topicId: z.string().nullish().describe(t('save-note.topic-param')),
+    }),
+    execute: (session, { title, content, topicId }) => {
+      session.addNote({
+        title,
+        content,
+        parentId: topicId ?? null,
+      });
 
-  moveNote: tool({
+      return t('tool.result.ok');
+    },
+  });
+}
+
+function moveNote(t: Translate) {
+  return tool({
     description: t('move-note.description'),
     param: z.object({
       noteId: z.string(),
@@ -208,5 +245,5 @@ const curatorTools = (t: Translate) => ({
 
       return t('tool.result.ok');
     },
-  }),
-});
+  });
+}
