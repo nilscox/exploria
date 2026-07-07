@@ -149,7 +149,7 @@ pnpm --filter @exploria/server test 'src/**/*.e2e-spec.ts'  # run the server's e
   - Data: `test.users` / `test.sessions` (repositories), `test.build(Session)` (DI-built aggregate), `test.clock` / `test.generator` / `test.aiClient` (stubs).
   - HTTP: `test.fetch(endpoint, init)`, `test.login(token)` (logs in and stores the signed cookie), `test.fetcher.setCookie(...)`, `TestFetcher.extractSignedCookie(res)`.
   - **Isolation**: build the harness in `beforeEach`, call `test.cleanup()` in `afterEach` — one fresh DB per test, so tests may reuse the same literal fixture values without collisions.
-  - **Factor arrange**: lift repeated setup into small helpers scoped _inside_ the `describe` block, with defaults + `Partial` overrides (e.g. `createUser(values = {}) => test.users.create({ email: 'user@test.dev', loginToken: 'token', ...values })`). Each test states only what its assertion cares about; give irrelevant fields a trivial value.
+  - **Factor arrange**: lift repeated setup into small helpers scoped _inside_ the `describe` block, with defaults + `Partial` overrides (e.g. `createUser(values = {}) => test.users.create({ name: 'user', loginToken: 'token', ...values })`). Each test states only what its assertion cares about; give irrelevant fields a trivial value.
 
 ### i18n (Lingui)
 
@@ -180,7 +180,7 @@ Source language is English. Translation files live in `client/src/i18n/{locale}/
 - **Blank line between `const` declarations and surrounding instructions**: separate declaration blocks from imperative statements with an empty line above and below. Exception: there may be no empty line between a const declaration and an assertion on this value.
 - **Private static helpers** on a class (e.g. `private static mapEvent`) are preferred over module-level functions when the helper is only used by that class. Add `this: void` to the signature when passing it as a callback (e.g. `.map(MyClass.helper)`) to satisfy the linter.
 - **Private helpers carry meaning, not mechanics**: a private method should be a domain operation or a mapper, not a 1:1 extraction of a route-handler body. Keep HTTP concerns (status codes, cookies, `res.json`) in the handler; a private like `login(token): Promise<User>` returns a domain object.
-- **Extract a mapper once a projection repeats** (e.g. a `toSharedUser(user): Shared.User` rather than inline `{ id, email, name }` in several handlers).
+- **Extract a mapper once a projection repeats** (e.g. a `toSharedUser(user): Shared.User` rather than inline `{ id, name }` in several handlers).
 - **Naming without abbreviation**: full descriptive names (`repository`, not `repo`).
 - **YAGNI on configuration**: don't add config knobs you don't strictly need (e.g. `cors({ origin: true })` in dev rather than an unused `CORS_ORIGIN` env var).
 - **Prefer the relational query builder** (`db.query.*` with object-style `where`/`orderBy`) over the core SQL builder; express a null filter as `{ isNull: true }`.

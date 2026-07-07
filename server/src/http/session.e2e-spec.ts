@@ -96,7 +96,7 @@ void describe('SessionController', () => {
   });
 
   void it('creates and gets a session as authenticated user', async () => {
-    await test.users.create({ email: 'auth-session@test.dev', loginToken: 'token' });
+    await test.users.create({ name: 'name', loginToken: 'token' });
     await test.login('token');
 
     let res = await test.fetch('/session', {
@@ -118,7 +118,7 @@ void describe('SessionController', () => {
 
   void describe('session ownership', () => {
     async function createUser() {
-      return await test.users.create({ email: 'user@test.dev', loginToken: 'token' });
+      return await test.users.create({ name: 'user', loginToken: 'token' });
     }
 
     async function createSession({ ownerId }: { ownerId: string | null }) {

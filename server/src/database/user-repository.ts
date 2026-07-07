@@ -17,7 +17,7 @@ export class UserRepository {
     this.db = database;
   }
 
-  async create({ email, name, loginToken }: { email: string; name?: string; loginToken: string }): Promise<User> {
+  async create({ name, loginToken }: { name: string; loginToken: string }): Promise<User> {
     const id = this.generator.id();
     const createdAt = this.clock.now();
 
@@ -25,7 +25,6 @@ export class UserRepository {
       .insert(users)
       .values({
         id,
-        email,
         name,
         loginToken,
         createdAt,

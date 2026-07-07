@@ -2,10 +2,10 @@ import 'dotenv/config';
 import { container } from '../di.ts';
 
 async function main() {
-  const [, , email, name] = process.argv;
+  const [, , name] = process.argv;
 
-  if (!email) {
-    console.error('Usage: create-user <email> [name]');
+  if (!name) {
+    console.error('Usage: create-user <name>');
     process.exit(1);
   }
 
@@ -14,11 +14,11 @@ async function main() {
   const config = container.resolve('config');
 
   const loginToken = generator.token();
-  const user = await userRepository.create({ email, name, loginToken });
+  const user = await userRepository.create({ name, loginToken });
 
   const link = `${config.auth.clientUrl}/auth/login?token=${loginToken}`;
 
-  console.log(`User created: ${user.id} <${user.email}>`);
+  console.log(`User created: ${user.id}`);
   console.log(`Login link:   ${link}`);
 }
 

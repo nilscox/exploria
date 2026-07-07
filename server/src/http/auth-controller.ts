@@ -61,7 +61,6 @@ export class AuthController {
   private toSharedUser(user: User): Shared.User {
     return {
       id: user.id,
-      email: user.email,
       name: user.name,
     };
   }

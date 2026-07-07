@@ -1,7 +1,6 @@
 export type User = {
   id: string;
-  email: string;
-  name: string | null;
+  name: string;
   loginToken: string;
   createdAt: Date;
 };

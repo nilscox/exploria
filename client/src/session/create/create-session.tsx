@@ -240,7 +240,7 @@ function UserInfo() {
 
   return (
     <div className="row items-center gap-2">
-      <span className="text-dim text-sm">{user.name ?? user.email}</span>
+      <span className="text-dim text-sm">{user.name}</span>
       <Button variant="outlined" size="small" loading={isPending} onClick={() => logout()}>
         <Trans>Sign out</Trans>
       </Button>

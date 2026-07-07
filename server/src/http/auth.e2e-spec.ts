@@ -19,7 +19,7 @@ void describe('Auth', () => {
   afterEach(() => test.cleanup());
 
   async function createUser(values: Partial<Parameters<UserRepository['create']>[0]> = {}) {
-    return await test.users.create({ email: 'user@test.dev', loginToken: 'token', ...values });
+    return await test.users.create({ name: 'user', loginToken: 'token', ...values });
   }
 
   void it('returns 404 from /auth/me when not authenticated', async () => {
@@ -47,11 +47,11 @@ void describe('Auth', () => {
       body: JSON.stringify({ token: 'token' }),
     });
 
-    const body = (await res.json()) as { id: string; email: string };
+    const body = (await res.json()) as { id: string; name: string };
 
     assert(res.ok, JSON.stringify(body));
     assert.strictEqual(body.id, user.id);
-    assert.strictEqual(body.email, 'user@test.dev');
+    assert.strictEqual(body.name, 'user');
 
     const cookie = TestFetcher.extractSignedCookie(res);
 
@@ -60,7 +60,7 @@ void describe('Auth', () => {
     test.fetcher.setCookie(cookie);
 
     res = await test.fetch('/auth/me');
-    const me = (await res.json()) as { id: string; email: string };
+    const me = (await res.json()) as { id: string };
 
     assert(res.ok, JSON.stringify(me));
     assert.strictEqual(me.id, user.id);

@@ -5,7 +5,7 @@ import type * as session from './domain/session.ts';
 import type * as summary from './domain/summary.ts';
 
 export namespace Shared {
-  export type User = { id: string; email: string; name: string | null };
+  export type User = { id: string; name: string };
 
   export type Summary = summary.Summary;
 

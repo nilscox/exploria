@@ -25,36 +25,35 @@ void describe('UserRepository', () => {
 
   void it('creates a user and finds it by login token', async () => {
     const loginToken = generator.token();
-    const user = await repository.create({ email: 'alice@test.dev', name: 'Alice', loginToken });
+    const user = await repository.create({ name: 'Alice', loginToken });
 
-    assert.strictEqual(user.email, 'alice@test.dev');
     assert.strictEqual(user.name, 'Alice');
 
     const found = await repository.findByLoginToken(loginToken);
 
     assert(found !== null);
     assert.strictEqual(found.id, user.id);
-    assert.strictEqual(found.email, 'alice@test.dev');
+    assert.strictEqual(found.name, 'Alice');
   });
 
   void it('finds a user by id', async () => {
-    const user = await repository.create({ email: 'bob@test.dev', loginToken: '' });
+    const user = await repository.create({ name: 'name', loginToken: '' });
 
     const found = await repository.findById(user.id);
 
     assert(found !== null);
     assert.strictEqual(found.id, user.id);
-    assert.strictEqual(found.name, null);
+    assert.strictEqual(found.name, 'name');
   });
 
-  void it('returns null for unknown login token', async () => {
-    const found = await repository.findByLoginToken('nonexistent-token');
+  void it('returns null for unknown id', async () => {
+    const found = await repository.findById('nope');
 
     assert.strictEqual(found, null);
   });
 
-  void it('returns null for unknown id', async () => {
-    const found = await repository.findById('xxxxxxxx');
+  void it('returns null for unknown login token', async () => {
+    const found = await repository.findByLoginToken('nope');
 
     assert.strictEqual(found, null);
   });

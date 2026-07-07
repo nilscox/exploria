@@ -3,8 +3,7 @@ import * as p from 'drizzle-orm/pg-core';
 
 export const users = p.pgTable('users', {
   id: p.varchar({ length: 8 }).primaryKey(),
-  email: p.varchar({ length: 255 }).notNull().unique(),
-  name: p.varchar({ length: 255 }),
+  name: p.varchar({ length: 255 }).notNull(),
   loginToken: p.varchar({ length: 64 }).notNull().unique(),
   createdAt: p.timestamp({ precision: 6 }).defaultNow().notNull(),
 });
