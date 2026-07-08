@@ -30,6 +30,8 @@ export namespace Shared {
   export type Question = session.Question;
   export type Posture = session.Posture;
   export type PostureMode = session.PostureMode;
+  export type Intensity = session.Intensity;
+  export type MessageLength = session.MessageLength;
 
   export type SelectableOption = Option & { selected?: boolean };
   export type AnswerableQuestion = Omit<Question, 'options'> & { options: SelectableOption[] };
@@ -71,6 +73,8 @@ export namespace Shared {
     | { kind: 'timer-resumed' }
     | { kind: 'posture-changed'; posture: Posture; reason: string; forced: false }
     | { kind: 'posture-changed'; posture: Posture | 'auto'; reason: string; forced: true }
+    | { kind: 'intensity-changed'; intensity: Intensity }
+    | { kind: 'message-length-changed'; messageLength: MessageLength }
     | { kind: 'web-searched'; query: string; resultCount: number }
     | { kind: 'summary'; summary: Summary };
 
@@ -85,6 +89,8 @@ export namespace Shared {
     timer: Timer | null;
     postureMode: PostureMode;
     posture: Posture;
+    intensity: Intensity;
+    messageLength: MessageLength;
     timeline: TimelineItem[];
   };
 }

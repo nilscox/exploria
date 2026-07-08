@@ -74,6 +74,18 @@ export const options = {
       });
     },
 
+    setIntensity(id: string) {
+      return mutationOptions({
+        mutationFn: (intensity: Shared.Intensity) => api.sessions.setIntensity(id, intensity),
+      });
+    },
+
+    setMessageLength(id: string) {
+      return mutationOptions({
+        mutationFn: (messageLength: Shared.MessageLength) => api.sessions.setMessageLength(id, messageLength),
+      });
+    },
+
     addTopic(id: string) {
       return mutationOptions({
         mutationFn: (label: string) => api.sessions.addTopic(id, label),

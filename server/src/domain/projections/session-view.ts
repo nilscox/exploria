@@ -3,7 +3,7 @@ import { Mindmap } from '../mindmap.ts';
 import { Timer } from '../timer.ts';
 
 import type { Shared } from '../../shared.ts';
-import type { Posture, PostureMode, SessionEvent } from '../session.ts';
+import type { Intensity, MessageLength, Posture, PostureMode, SessionEvent } from '../session.ts';
 
 export function toSessionView(id: string, events: SessionEvent[]): Shared.Session {
   let ended = false;
@@ -13,6 +13,8 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
   let timer: Timer | null = null;
   let postureMode: PostureMode = 'auto';
   let posture: Posture = 'socratic';
+  let intensity: Intensity = 'balanced';
+  let messageLength: MessageLength = 'normal';
 
   for (const event of events) {
     mindmap = mindmap.apply(event);
@@ -61,6 +63,14 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
           postureMode = event.posture === 'auto' ? 'auto' : 'forced';
         }
         break;
+
+      case 'IntensityChanged':
+        intensity = event.intensity;
+        break;
+
+      case 'MessageLengthChanged':
+        messageLength = event.messageLength;
+        break;
     }
   }
 
@@ -75,6 +85,8 @@ export function toSessionView(id: string, events: SessionEvent[]): Shared.Sessio
     timer,
     postureMode,
     posture,
+    intensity,
+    messageLength,
     timeline: toTimeline(events),
   };
 }
@@ -104,6 +116,8 @@ const timelineEventTypes = new Set<SessionEvent['type']>([
   'QuestionsAsked',
   'AnswerSelected',
   'PostureChanged',
+  'IntensityChanged',
+  'MessageLengthChanged',
   'SearchPerformed',
   'SummaryGenerated',
 ]);
@@ -310,6 +324,14 @@ export function toTimeline(events: SessionEvent[]): Shared.TimelineItem[] {
             forced: false,
           });
         }
+        break;
+
+      case 'IntensityChanged':
+        items.push({ kind: 'intensity-changed', intensity: event.intensity });
+        break;
+
+      case 'MessageLengthChanged':
+        items.push({ kind: 'message-length-changed', messageLength: event.messageLength });
         break;
 
       case 'SearchPerformed':

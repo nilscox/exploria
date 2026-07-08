@@ -16,6 +16,14 @@ export type Posture = (typeof postures)[number];
 
 export type PostureMode = 'auto' | 'forced';
 
+export const intensities = ['gentle', 'balanced', 'demanding'] as const;
+
+export type Intensity = (typeof intensities)[number];
+
+export const messageLengths = ['concise', 'normal', 'detailed'] as const;
+
+export type MessageLength = (typeof messageLengths)[number];
+
 export type Note = {
   id: string;
   parentId: string | null;
@@ -79,6 +87,8 @@ export type SessionEvent =
   | SessionDomainEvent<'QuestionsAsked', { questions: Question[] }>
   | SessionDomainEvent<'AnswerSelected', { questionId: string; optionId: string; content: string; label: string }>
   | SessionDomainEvent<'PostureChanged', { posture: Posture | 'auto'; reason: string; forced: boolean }>
+  | SessionDomainEvent<'IntensityChanged', { intensity: Intensity }>
+  | SessionDomainEvent<'MessageLengthChanged', { messageLength: MessageLength }>
   | SessionDomainEvent<'SearchPerformed', { query: string; resultCount: number }>
   | SessionDomainEvent<'SummaryGenerated', { summary: Summary }>;
 
@@ -155,6 +165,18 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   get posture(): Posture {
     return this._posture;
+  }
+
+  private _intensity: Intensity = 'balanced';
+
+  get intensity(): Intensity {
+    return this._intensity;
+  }
+
+  private _messageLength: MessageLength = 'normal';
+
+  get messageLength(): MessageLength {
+    return this._messageLength;
   }
 
   private _events: SessionEvent[] = [];
@@ -241,6 +263,14 @@ export class Session extends AggregateRoot<SessionEvent> {
         if (forced) {
           this._postureMode = posture === 'auto' ? 'auto' : 'forced';
         }
+      },
+
+      IntensityChanged: ({ intensity }) => {
+        this._intensity = intensity;
+      },
+
+      MessageLengthChanged: ({ messageLength }) => {
+        this._messageLength = messageLength;
       },
     };
 
@@ -465,6 +495,14 @@ export class Session extends AggregateRoot<SessionEvent> {
 
   setPosture(posture: Posture | 'auto', reason: string, forced: boolean) {
     this.emit('PostureChanged', { posture, reason, forced });
+  }
+
+  setIntensity(intensity: Intensity) {
+    this.emit('IntensityChanged', { intensity });
+  }
+
+  setMessageLength(messageLength: MessageLength) {
+    this.emit('MessageLengthChanged', { messageLength });
   }
 
   recordSearch(query: string, resultCount: number) {

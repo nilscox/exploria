@@ -5,7 +5,7 @@ import z from 'zod';
 
 import { languages } from '../domain/i18n/index.ts';
 import { toSessionView } from '../domain/projections/session-view.ts';
-import { Session, postures, type TopicStatus } from '../domain/session.ts';
+import { Session, intensities, messageLengths, postures, type TopicStatus } from '../domain/session.ts';
 import { defined } from '../utils.ts';
 import { parsePagination } from './pagination.ts';
 import { ServerSentEvent, type SseUiNotifier } from './sse.ts';
@@ -116,6 +116,22 @@ export class SessionController {
       const { posture } = z.object({ posture: z.enum([...postures, 'auto']) }).parse(req.body);
 
       await this.setPosture(posture);
+
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/intensity', async (req, res) => {
+      const { intensity } = z.object({ intensity: z.enum(intensities) }).parse(req.body);
+
+      await this.setIntensity(intensity);
+
+      res.status(204).end();
+    });
+
+    this.router.put('/:id/message-length', async (req, res) => {
+      const { messageLength } = z.object({ messageLength: z.enum(messageLengths) }).parse(req.body);
+
+      await this.setMessageLength(messageLength);
 
       res.status(204).end();
     });
@@ -327,6 +343,26 @@ export class SessionController {
     const session = this.getSessionInstance();
 
     session.setPosture(posture, '', true);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async setIntensity(intensity: (typeof intensities)[number]) {
+    const session = this.getSessionInstance();
+
+    session.setIntensity(intensity);
+
+    const committed = await this.sessionRepository.save(session);
+
+    this.events.emit(...committed);
+  }
+
+  private async setMessageLength(messageLength: (typeof messageLengths)[number]) {
+    const session = this.getSessionInstance();
+
+    session.setMessageLength(messageLength);
 
     const committed = await this.sessionRepository.save(session);
 
