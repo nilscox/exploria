@@ -85,6 +85,19 @@ void describe('toSessionView', () => {
 
     assert.strictEqual(view().postureMode, 'auto');
   });
+
+  void it('defaults intensity to balanced and message length to normal', () => {
+    assert.strictEqual(view().intensity, 'balanced');
+    assert.strictEqual(view().messageLength, 'normal');
+  });
+
+  void it('reconstructs intensity and message length', () => {
+    session.setIntensity('demanding');
+    session.setMessageLength('concise');
+
+    assert.strictEqual(view().intensity, 'demanding');
+    assert.strictEqual(view().messageLength, 'concise');
+  });
 });
 
 void describe('toTimeline', () => {
@@ -149,6 +162,18 @@ void describe('toTimeline', () => {
     assert.deepStrictEqual(timeline(), [
       { kind: 'posture-changed', posture: 'devils_advocate', reason: 'Testing your thesis', forced: false },
     ]);
+  });
+
+  void it('emits intensity-changed', () => {
+    session.setIntensity('demanding');
+
+    assert.deepStrictEqual(timeline(), [{ kind: 'intensity-changed', intensity: 'demanding' }]);
+  });
+
+  void it('emits message-length-changed', () => {
+    session.setMessageLength('concise');
+
+    assert.deepStrictEqual(timeline(), [{ kind: 'message-length-changed', messageLength: 'concise' }]);
   });
 
   void it('emits node-removed with the node label', () => {

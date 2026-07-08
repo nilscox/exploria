@@ -86,6 +86,8 @@ export class MustacheI18n implements I18n {
       timerInfo: this.render(lang, 'timer-info', { timer: session.timer }),
       posture: session.posture,
       auto: session.postureMode === 'auto',
+      intensity: session.intensity,
+      messageLength: session.messageLength,
       date: this.date(lang, new Date()),
     };
   };

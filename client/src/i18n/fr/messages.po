@@ -90,6 +90,10 @@ msgstr "Attaquer les idées pour les tester"
 msgid "Back to automatic stance"
 msgstr "Retour à la posture automatique"
 
+#: src/session/info/settings.tsx
+msgid "Balanced"
+msgstr "Équilibrée"
+
 #: src/home.tsx
 msgid "Beyond the conversation"
 msgstr "Au-delà de la conversation"
@@ -125,6 +129,10 @@ msgstr "Fermer"
 msgid "Coming soon"
 msgstr "À venir"
 
+#: src/session/info/settings.tsx
+msgid "Concise"
+msgstr "Concis"
+
 #: src/session/session-summary.tsx
 #: src/session/summary.ts
 msgid "Conclusion"
@@ -142,9 +150,17 @@ msgstr "Date"
 msgid "Debug"
 msgstr "Debug"
 
+#: src/session/info/settings.tsx
+msgid "Demanding"
+msgstr "Exigeante"
+
 #: src/session/info/posture.tsx
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Pression exigeante, ex. préparation d'entretien"
+
+#: src/session/info/settings.tsx
+msgid "Detailed"
+msgstr "Détaillé"
 
 #: src/session/info/posture.tsx
 msgid "Devil's advocate"
@@ -238,6 +254,10 @@ msgstr "Cadrer un problème de recherche"
 msgid "Free, no signup needed."
 msgstr "Gratuit, sans inscription."
 
+#: src/session/info/settings.tsx
+msgid "Gentle"
+msgstr "Douce"
+
 #: src/home.tsx
 msgid "Give your thinking a time frame."
 msgstr "Donnez un cadre temporel à votre réflexion."
@@ -326,6 +346,14 @@ msgstr "Je me demande si c'est le bon moment pour lever des fonds"
 msgid "In progress"
 msgstr "En cours"
 
+#: src/session/info/settings.tsx
+msgid "Intensity"
+msgstr "Intensité"
+
+#: src/session/session-timeline.tsx
+msgid "Intensity: <0/>"
+msgstr "Intensité : <0/>"
+
 #: src/session/info/timer.tsx
 msgid "Invalid input."
 msgstr "Entrée invalide."
@@ -366,6 +394,14 @@ msgstr "Prendre une décision structurante"
 #: src/session/message-form.tsx
 msgid "Message"
 msgstr "Message"
+
+#: src/session/info/settings.tsx
+msgid "Message length"
+msgstr "Longueur des messages"
+
+#: src/session/session-timeline.tsx
+msgid "Message length: <0/>"
+msgstr "Longueur des messages : <0/>"
 
 #: src/session/session.tsx
 msgid "Mind map"
@@ -412,6 +448,10 @@ msgstr "Aucun sujet"
 #: src/session/session-layout.tsx
 msgid "No view selected."
 msgstr "Aucune vue sélectionnée."
+
+#: src/session/info/settings.tsx
+msgid "Normal"
+msgstr "Normal"
 
 #. placeholder {0}: item.title
 #: src/session/session-timeline.tsx
@@ -520,6 +560,7 @@ msgid "Session timer"
 msgstr "Minuteur de session"
 
 #: src/components/settings.tsx
+#: src/session/info/settings.tsx
 #: src/session/session.tsx
 msgid "Settings"
 msgstr "Paramètres"

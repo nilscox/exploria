@@ -2,11 +2,13 @@ import type { Shared } from '@exploria/server/shared';
 import { Trans, useLingui } from '@lingui/react/macro';
 import clsx from 'clsx';
 import {
+  AlignLeftIcon,
   ArrowRightIcon,
   BotIcon,
   CheckIcon,
   ClipboardListIcon,
   DramaIcon,
+  GaugeIcon,
   ListIcon,
   LockKeyholeIcon,
   PencilIcon,
@@ -24,6 +26,7 @@ import { Markdown } from 'src/components/markdown';
 import { config } from 'src/contexts/config';
 
 import { PostureLabel } from './info/posture';
+import { IntensityLabel, MessageLengthLabel } from './info/settings';
 import { SessionSummaryDialog } from './session-summary';
 
 type TimelineItem = Shared.TimelineItem;
@@ -203,6 +206,22 @@ const components: {
   ),
 
   'posture-changed': ({ item }) => <PostureChanged item={item} />,
+
+  'intensity-changed': ({ item }) => (
+    <Notification Icon={GaugeIcon}>
+      <Trans>
+        Intensity: <IntensityLabel intensity={item.intensity} />
+      </Trans>
+    </Notification>
+  ),
+
+  'message-length-changed': ({ item }) => (
+    <Notification Icon={AlignLeftIcon}>
+      <Trans>
+        Message length: <MessageLengthLabel messageLength={item.messageLength} />
+      </Trans>
+    </Notification>
+  ),
 
   'web-searched': ({ item }) => (
     <Notification Icon={SearchIcon}>

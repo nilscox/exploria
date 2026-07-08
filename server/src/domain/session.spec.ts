@@ -375,6 +375,27 @@ void describe('Session', () => {
     assert.strictEqual(session.posture, 'examiner');
   });
 
+  void it('defaults to balanced intensity and normal message length', () => {
+    assert.strictEqual(session.intensity, 'balanced');
+    assert.strictEqual(session.messageLength, 'normal');
+  });
+
+  void it('changes the intensity', () => {
+    session.setIntensity('demanding');
+
+    assert.strictEqual(session.intensity, 'demanding');
+
+    expectEvent('IntensityChanged', { intensity: 'demanding' });
+  });
+
+  void it('changes the message length', () => {
+    session.setMessageLength('concise');
+
+    assert.strictEqual(session.messageLength, 'concise');
+
+    expectEvent('MessageLengthChanged', { messageLength: 'concise' });
+  });
+
   void it('adds a message', () => {
     session.addMessage('user', 'content');
 
@@ -558,6 +579,17 @@ void describe('Session', () => {
 
       assert.strictEqual(replayed.posture, source.posture);
       assert.strictEqual(replayed.postureMode, source.postureMode);
+    });
+
+    void it('reconstructs intensity and message length from events', () => {
+      const source = new Session(new StubGenerator(), clock);
+      source.setIntensity('demanding');
+      source.setMessageLength('concise');
+
+      const replayed = Session.replay(generator, clock, source.id, source.peekDomainEvents());
+
+      assert.strictEqual(replayed.intensity, source.intensity);
+      assert.strictEqual(replayed.messageLength, source.messageLength);
     });
 
     void it('populates session.events with replayed events', () => {

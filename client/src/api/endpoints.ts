@@ -80,6 +80,20 @@ const sessions = {
     });
   },
 
+  async setIntensity(id: string, intensity: string): Promise<void> {
+    await fetchApi(`/session/${id}/intensity`, {
+      method: 'PUT',
+      body: { intensity },
+    });
+  },
+
+  async setMessageLength(id: string, messageLength: string): Promise<void> {
+    await fetchApi(`/session/${id}/message-length`, {
+      method: 'PUT',
+      body: { messageLength },
+    });
+  },
+
   async addTopic(id: string, label: string): Promise<void> {
     await fetchApi(`/session/${id}/topic`, {
       method: 'POST',

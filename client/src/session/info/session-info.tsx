@@ -8,12 +8,15 @@ import { Field, FieldLabel } from 'src/components/field';
 
 import { ModelSelector } from '../model-selector';
 import { PostureSection } from './posture';
+import { SettingsSection } from './settings';
 import { SidebarSection } from './sidebar-section';
 import { Timer } from './timer';
 import { TopicsListSection } from './topics-list';
 
 export function SessionInfo({ session }: { session: Shared.Session }) {
   const { mutate: setPosture } = useMutation(options.sessions.setPosture(session.id));
+  const { mutate: setIntensity } = useMutation(options.sessions.setIntensity(session.id));
+  const { mutate: setMessageLength } = useMutation(options.sessions.setMessageLength(session.id));
   const { mutate: addTopic } = useMutation(options.sessions.addTopic(session.id));
   const { mutate: startTimer } = useMutation(options.sessions.timer.start(session.id));
   const { mutate: clearTimer } = useMutation(options.sessions.timer.clear(session.id));
@@ -31,6 +34,7 @@ export function SessionInfo({ session }: { session: Shared.Session }) {
       />
       <TopicsListSection topics={session.topics.filter((topic) => topic.parentId === null)} onAdd={addTopic} />
       <PostureSection session={session} onSetPosture={setPosture} />
+      <SettingsSection session={session} onSetIntensity={setIntensity} onSetMessageLength={setMessageLength} />
       <ModelSelectorSection session={session} />
     </div>
   );
