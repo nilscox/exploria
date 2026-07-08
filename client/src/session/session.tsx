@@ -1,8 +1,10 @@
 import type { Shared } from '@exploria/server/shared';
 import { Trans } from '@lingui/react/macro';
 import { useMutation } from '@tanstack/react-query';
+import clsx from 'clsx';
 import {
   ArchiveIcon,
+  ArrowDownIcon,
   ArrowLeftIcon,
   MenuIcon,
   MessageSquareIcon,
@@ -209,16 +211,23 @@ function MainSection({
 
   return (
     <>
-      <DocumentTitle title={session.subject} />
+      <div className="col relative mx-auto w-full max-w-4xl grow">
+        <DocumentTitle title={session.subject} />
 
-      <div className="col relative mx-auto w-full max-w-4xl grow gap-4 p-4 sm:p-8">
-        <Timeline session={session} onSelectAnswer={selectAnswer} />
-        {stream && <Markdown markdown={stream + ' :loading'} components={components} />}
+        <section className="col grow gap-4 p-4">
+          <Timeline session={session} onSelectAnswer={selectAnswer} />
+          {stream && <Markdown markdown={stream + ' :loading'} components={components} />}
+        </section>
+
+        {!session.ended && (
+          <section className="sticky bottom-0 max-h-4/5 p-2 pt-0! sm:py-6">
+            <ScrollToEndButton scrollToEnd={scrollToEnd} />
+            <MessageForm loading={loading} postMessage={postMessage} />
+          </section>
+        )}
       </div>
 
       <div ref={bottomRef} />
-
-      {!session.ended && <MessageForm loading={loading} postMessage={postMessage} scrollToEnd={scrollToEnd} />}
     </>
   );
 }
@@ -226,6 +235,27 @@ function MainSection({
 function Loading() {
   return (
     <span className="bg-accent inline-block h-[1.5em] w-4 animate-[pulse_1s_infinite_step-end] rounded-sm align-middle" />
+  );
+}
+
+function ScrollToEndButton({ scrollToEnd }: { scrollToEnd?: () => void }) {
+  return (
+    <div
+      className={clsx(
+        'transition-opacity -translate-y-12 h-0 float-end',
+        !scrollToEnd && 'opacity-0 pointer-events-none',
+      )}
+    >
+      <Button
+        variant="outlined"
+        size="icon"
+        tabIndex={scrollToEnd ? 0 : -1}
+        onClick={scrollToEnd}
+        className="bg-neutral rounded-full!"
+      >
+        <ArrowDownIcon className="size-5" />
+      </Button>
+    </div>
   );
 }
 
@@ -244,6 +274,7 @@ function useTail(bottomRef: React.RefObject<HTMLElement | null>) {
     };
 
     parent.addEventListener('scroll', listener);
+    listener();
 
     return () => {
       parent.removeEventListener('scroll', listener);
