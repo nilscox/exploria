@@ -2,6 +2,7 @@
   "name": "Exploria",
   "short_name": "Exploria",
   "theme_color": "#e17100",
+  "start_url": "/session",
   "icons": [
     {
       "src": "pwa-64x64.png",
