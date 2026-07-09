@@ -16,6 +16,7 @@ import type { Generator } from '../adapters/generator.ts';
 import type { SessionRepository } from '../database/session-repository.ts';
 import type { Dependencies } from '../di.ts';
 import type { IAssistant } from '../domain/assistant.ts';
+import type { SummaryGenerator } from '../domain/summary-generator.ts';
 import type { EventBus } from '../event-bus.ts';
 import type { Shared } from '../shared.ts';
 
@@ -26,6 +27,7 @@ export class SessionController {
   private readonly uiNotifier: SseUiNotifier;
   private readonly sessionRepository: SessionRepository;
   private readonly assistant: IAssistant;
+  private readonly summaryGenerator: SummaryGenerator;
 
   public router = express.Router();
 
@@ -41,8 +43,11 @@ export class SessionController {
     events,
     uiNotifier,
     assistant,
+    summaryGenerator,
     sessionRepository,
-  }: Dependencies<'generator' | 'clock' | 'events' | 'uiNotifier' | 'assistant' | 'sessionRepository'>) {
+  }: Dependencies<
+    'generator' | 'clock' | 'events' | 'uiNotifier' | 'assistant' | 'summaryGenerator' | 'sessionRepository'
+  >) {
     assert(uiNotifier instanceof SseUiNotifier);
 
     this.generator = generator;
@@ -50,6 +55,7 @@ export class SessionController {
     this.events = events;
     this.uiNotifier = uiNotifier;
     this.assistant = assistant;
+    this.summaryGenerator = summaryGenerator;
     this.sessionRepository = sessionRepository;
 
     this.router.param('id', async (req, res, next, id: string) => {
@@ -85,15 +91,14 @@ export class SessionController {
     this.router.post('/', async (req, res) => {
       const user = getUser();
 
-      const { model, language, demo } = z
+      const { model, language } = z
         .object({
           model: z.string().min(1),
           language: z.enum(languages).default('en'),
-          demo: z.boolean().optional(),
         })
         .parse(req.body);
 
-      res.status(201).send(await this.createSession({ model, language, demo, ownerId: user?.id ?? null }));
+      res.status(201).send(await this.createSession({ model, language, ownerId: user?.id ?? null }));
     });
 
     this.router.get('/:id', async (req, res) => {
@@ -282,12 +287,10 @@ export class SessionController {
   private async createSession({
     model,
     language,
-    demo,
     ownerId,
   }: {
     model: string;
     language: Shared.Language;
-    demo?: boolean;
     ownerId: string | null;
   }) {
     const session = Session.create(this.generator, this.clock, { model, language, ownerId });
@@ -296,10 +299,6 @@ export class SessionController {
     const committed = await this.sessionRepository.save(session);
 
     this.events.emit(...committed);
-
-    if (demo) {
-      void this.generateDemo(session);
-    }
 
     return session.id;
   }
@@ -310,14 +309,6 @@ export class SessionController {
 
       this.events.emit(...committed);
     };
-  }
-
-  private async generateDemo(session: Session) {
-    try {
-      await this.assistant.generateDemo(session, this.makeCommit(session));
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   private async getSession(sessionId: string) {
@@ -525,8 +516,9 @@ export class SessionController {
   private async endSession() {
     const session = this.getSessionInstance();
 
-    const summary = await this.assistant.generateSummary(session);
+    const summary = await this.summaryGenerator.generate(session);
 
+    session.addSummary(summary);
     session.end();
 
     const committed = await this.sessionRepository.save(session);

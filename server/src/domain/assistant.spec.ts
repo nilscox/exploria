@@ -11,7 +11,6 @@ import { createCuratorTools, createFacilitatorTools } from './assistant-tools.ts
 import { Assistant } from './assistant.ts';
 import { Curator } from './curator.ts';
 import { Session, type GetSessionEvent, type SessionEvent } from './session.ts';
-import { SummaryGenerator } from './summary-generator.ts';
 
 import type { DomainEvent } from '../aggregate-root.ts';
 
@@ -30,7 +29,6 @@ void describe('Assistant', () => {
 
     const uiNotifier = new StubUiNotifier();
     const i18n = new MustacheI18n({ clock });
-    const summaryGenerator = new SummaryGenerator({ aiClient, i18n });
     const curatorTools = createCuratorTools({ i18n });
     const facilitatorTools = createFacilitatorTools({ i18n, searchClient });
     const curator = new Curator({ aiClient, i18n, curatorTools });
@@ -40,7 +38,6 @@ void describe('Assistant', () => {
       uiNotifier,
       aiClient,
       i18n,
-      summaryGenerator,
       facilitatorTools,
       curator,
       logger,

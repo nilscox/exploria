@@ -45,10 +45,10 @@ const sessions = {
     };
   },
 
-  async create({ model, language, demo }: { model: string; language: string; demo?: boolean }): Promise<string> {
+  async create({ model, language }: { model: string; language: string }): Promise<string> {
     const res = await fetchApi('/session', {
       method: 'POST',
-      body: { model, language, demo },
+      body: { model, language },
     });
 
     return res.text();

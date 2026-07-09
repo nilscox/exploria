@@ -22,11 +22,7 @@ export function CreateSession() {
   const language = isLanguage(i18n.locale) ? i18n.locale : 'en';
   const navigate = useNavigate();
 
-  const {
-    mutate: createSession,
-    isPending: creatingSession,
-    variables,
-  } = useMutation({
+  const { mutate: createSession, isPending: creatingSession } = useMutation({
     ...options.sessions.create(language),
     async onSuccess(sessionId, { message }) {
       await navigate(`/session/${sessionId}`, { state: { message } });
@@ -120,7 +116,7 @@ export function CreateSession() {
           </Field>
 
           <div className="col sm:row gap-2 sm:[&>button]:flex-1">
-            <Button type="submit" size="large" loading={creatingSession && !variables.demo}>
+            <Button type="submit" size="large" loading={creatingSession}>
               <Trans>Start session</Trans>
               <ArrowRightIcon className="size-4" />
             </Button>

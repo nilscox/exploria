@@ -43,9 +43,9 @@ export const options = {
     },
 
     create(language: Shared.Language) {
-      type Params = { model: string; demo?: boolean; message?: string };
+      type Params = { model: string; message?: string };
       return mutationOptions({
-        mutationFn: ({ model, demo }: Params) => api.sessions.create({ language, model, demo }),
+        mutationFn: ({ model }: Params) => api.sessions.create({ language, model }),
       });
     },
 

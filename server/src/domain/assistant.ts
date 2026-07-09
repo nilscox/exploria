@@ -11,23 +11,18 @@ import type { Dependencies } from '../di.ts';
 import type { FacilitatorTools, Tool } from './assistant-tools.ts';
 import type { Curator } from './curator.ts';
 import type { Session, ToolCall } from './session.ts';
-import type { SummaryGenerator } from './summary-generator.ts';
-import type { Summary } from './summary.ts';
 import type { UiEvent, UiNotifier } from './ui-notifier.ts';
 
 export type AssistantUiEvent = UiEvent<'Chunk', { text: string }>;
 
 export interface IAssistant {
   run(session: Session, message?: string, commit?: () => Promise<void>): Promise<void>;
-  generateDemo(session: Session, commit?: () => Promise<void>): Promise<void>;
-  generateSummary(session: Session): Promise<Summary>;
 }
 
 export class Assistant implements IAssistant {
   private readonly uiNotifier: UiNotifier<AssistantUiEvent>;
   private readonly aiClient: AiClient;
   private readonly i18n: I18n;
-  private readonly summaryGenerator: SummaryGenerator;
   private readonly facilitatorTools: FacilitatorTools;
   private readonly curator: Curator;
   private readonly logger: Logger;
@@ -36,17 +31,13 @@ export class Assistant implements IAssistant {
     uiNotifier,
     aiClient,
     i18n,
-    summaryGenerator,
     facilitatorTools,
     curator,
     logger,
-  }: Dependencies<
-    'uiNotifier' | 'aiClient' | 'i18n' | 'summaryGenerator' | 'facilitatorTools' | 'curator' | 'logger'
-  >) {
+  }: Dependencies<'uiNotifier' | 'aiClient' | 'i18n' | 'facilitatorTools' | 'curator' | 'logger'>) {
     this.uiNotifier = uiNotifier;
     this.aiClient = aiClient;
     this.i18n = i18n;
-    this.summaryGenerator = summaryGenerator;
     this.facilitatorTools = facilitatorTools;
     this.curator = curator;
     this.logger = logger;
@@ -97,47 +88,6 @@ export class Assistant implements IAssistant {
     } catch (error) {
       this.logger.error('curator failed', error);
     }
-  }
-
-  async generateDemo(session: Session, commit?: () => Promise<void>) {
-    const t = this.i18n.translate(session.language);
-
-    for (let i = 0; i <= 3; ++i) {
-      const { content } = await this.aiClient.createCompletion({
-        model: session.model,
-        messages: [
-          {
-            role: 'system',
-            content: [
-              t('demo.role-1'),
-              t('demo.role-2'),
-              ...(i === 0
-                ? [t('demo.invent-subject')]
-                : [
-                    t('demo.conversation-start'),
-                    ...session.events
-                      .filter((event) => event.type === 'MessageAdded')
-                      .filter(({ message }) => message.content !== '')
-                      .filter(({ message }) => ['user', 'assistant'].includes(message.role))
-                      .map(({ message }) => `${message.role}: ${message.content}`),
-                    'user: ',
-                    t('demo.generate-continue'),
-                  ]),
-            ].join('\n\n'),
-          },
-        ],
-      });
-
-      await this.run(session, content, commit);
-    }
-  }
-
-  async generateSummary(session: Session) {
-    const summary = await this.summaryGenerator.generate(session);
-
-    session.addSummary(summary);
-
-    return summary;
   }
 
   private buildMessages(session: Session) {
