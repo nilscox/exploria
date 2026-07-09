@@ -24,9 +24,9 @@ import { Details } from 'src/components/details';
 import { Dialog, DialogTrigger } from 'src/components/dialog';
 import { Markdown } from 'src/components/markdown';
 import { config } from 'src/contexts/config';
+import { IntensityLabel, MessageLengthLabel } from 'src/enums';
 
 import { PostureLabel } from './info/posture';
-import { IntensityLabel, MessageLengthLabel } from './info/settings';
 import { SessionSummaryDialog } from './session-summary';
 
 type TimelineItem = Shared.TimelineItem;
@@ -210,7 +210,7 @@ const components: {
   'intensity-changed': ({ item }) => (
     <Notification Icon={GaugeIcon}>
       <Trans>
-        Intensity: <IntensityLabel intensity={item.intensity} />
+        Intensity: <IntensityLabel value={item.intensity} />
       </Trans>
     </Notification>
   ),
@@ -218,7 +218,7 @@ const components: {
   'message-length-changed': ({ item }) => (
     <Notification Icon={AlignLeftIcon}>
       <Trans>
-        Message length: <MessageLengthLabel messageLength={item.messageLength} />
+        Message length: <MessageLengthLabel value={item.messageLength} />
       </Trans>
     </Notification>
   ),

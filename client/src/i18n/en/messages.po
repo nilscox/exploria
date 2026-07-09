@@ -30,6 +30,10 @@ msgstr "A conviction you take for granted: what if you really examined it?"
 msgid "A feature in mind? <0>Tell us about it</0>."
 msgstr "A feature in mind? <0>Tell us about it</0>."
 
+#: src/enums.tsx
+msgid "A few sentences"
+msgstr "A few sentences"
+
 #: src/home.tsx
 msgid "A method, not just a conversation"
 msgstr "A method, not just a conversation"
@@ -41,6 +45,10 @@ msgstr "A subject you don't know which way to approach."
 #: src/home.tsx
 msgid "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
 msgstr "A thinking assistant that asks the right questions, surfaces your blind spots, and structures your reflection."
+
+#: src/enums.tsx
+msgid "Accompanies, one objection at a time"
+msgstr "Accompanies, one objection at a time"
 
 #: src/session/mind-map/session-mind-map.tsx
 msgid "Add"
@@ -90,7 +98,7 @@ msgstr "Attack ideas to test them"
 msgid "Back to automatic stance"
 msgstr "Back to automatic stance"
 
-#: src/session/info/settings.tsx
+#: src/enums.tsx
 msgid "Balanced"
 msgstr "Balanced"
 
@@ -116,6 +124,10 @@ msgstr "Can I stay friends with someone whose choices I disapprove of?"
 msgid "Cancel"
 msgstr "Cancel"
 
+#: src/enums.tsx
+msgid "Challenges where it matters"
+msgstr "Challenges where it matters"
+
 #: src/session/info/timer.tsx
 msgid "Clear the timer?"
 msgstr "Clear the timer?"
@@ -129,7 +141,7 @@ msgstr "Close"
 msgid "Coming soon"
 msgstr "Coming soon"
 
-#: src/session/info/settings.tsx
+#: src/enums.tsx
 msgid "Concise"
 msgstr "Concise"
 
@@ -150,7 +162,7 @@ msgstr "Date"
 msgid "Debug"
 msgstr "Debug"
 
-#: src/session/info/settings.tsx
+#: src/enums.tsx
 msgid "Demanding"
 msgstr "Demanding"
 
@@ -158,9 +170,13 @@ msgstr "Demanding"
 msgid "Demanding pressure, e.g. interview prep"
 msgstr "Demanding pressure, e.g. interview prep"
 
-#: src/session/info/settings.tsx
+#: src/enums.tsx
 msgid "Detailed"
 msgstr "Detailed"
+
+#: src/enums.tsx
+msgid "Developed explanations"
+msgstr "Developed explanations"
 
 #: src/session/info/posture.tsx
 msgid "Devil's advocate"
@@ -169,6 +185,10 @@ msgstr "Devil's advocate"
 #: src/home.tsx
 msgid "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
 msgstr "Devil's advocate, listening, pushback: it adjusts its stance to what your thinking needs."
+
+#: src/enums.tsx
+msgid "Digs relentlessly, keeps the pressure on"
+msgstr "Digs relentlessly, keeps the pressure on"
 
 #: src/session/create/create-session.tsx
 msgid "Do we have a duty to tell the truth?"
@@ -254,7 +274,7 @@ msgstr "Frame a research problem"
 msgid "Free, no signup needed."
 msgstr "Free, no signup needed."
 
-#: src/session/info/settings.tsx
+#: src/enums.tsx
 msgid "Gentle"
 msgstr "Gentle"
 
@@ -346,7 +366,7 @@ msgstr "I'm wondering whether now is the right time to raise funds"
 msgid "In progress"
 msgstr "In progress"
 
-#: src/session/info/settings.tsx
+#: src/session/info/session-info.tsx
 msgid "Intensity"
 msgstr "Intensity"
 
@@ -395,7 +415,7 @@ msgstr "Make a structuring decision"
 msgid "Message"
 msgstr "Message"
 
-#: src/session/info/settings.tsx
+#: src/session/info/session-info.tsx
 msgid "Message length"
 msgstr "Message length"
 
@@ -425,6 +445,10 @@ msgstr "Model changed: {0}"
 msgid "Model choice"
 msgstr "Model choice"
 
+#: src/enums.tsx
+msgid "Moderate length"
+msgstr "Moderate length"
+
 #: src/session/create/sessions-list.tsx
 msgid "More"
 msgstr "More"
@@ -449,7 +473,7 @@ msgstr "No Topic"
 msgid "No view selected."
 msgstr "No view selected."
 
-#: src/session/info/settings.tsx
+#: src/enums.tsx
 msgid "Normal"
 msgstr "Normal"
 
@@ -560,7 +584,6 @@ msgid "Session timer"
 msgstr "Session timer"
 
 #: src/components/settings.tsx
-#: src/session/info/settings.tsx
 #: src/session/session.tsx
 msgid "Settings"
 msgstr "Settings"

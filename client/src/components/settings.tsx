@@ -3,7 +3,7 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { useCallback, useEffect, useState } from 'react';
 
 import { config, useSetConfig } from 'src/contexts/config';
-import { setLanguage } from 'src/i18n/i18n';
+import { setLanguage } from 'src/i18n';
 
 import { Button } from './button';
 import { DialogActions, DialogClose, DialogContent, DialogHeader } from './dialog';
