@@ -21,7 +21,7 @@ import { LinkButton } from 'src/components/button';
 import { DocumentTitle } from 'src/components/document-title';
 import { setLanguage } from 'src/i18n/i18n';
 
-import Icon from './logo.svg?react';
+import Logo from './logo.svg?react';
 
 // cspell:words pushback timebox
 
@@ -47,7 +47,7 @@ function Hero() {
         <nav className="row h-16 items-center justify-between">
           <Link to="/" className="rounded-md px-2 text-lg font-bold">
             <div className="relative -top-0.5 me-1.5 inline-block size-4 align-middle">
-              <Icon className="fill-current" />
+              <Logo className="fill-current" />
             </div>
             Explor<span className="text-amber-400">ia</span>
           </Link>
