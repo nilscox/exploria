@@ -19,7 +19,7 @@ import { Link } from 'react-router';
 
 import { LinkButton } from 'src/components/button';
 import { DocumentTitle } from 'src/components/document-title';
-import { setLanguage } from 'src/i18n/i18n';
+import { setLanguage } from 'src/i18n';
 
 import Logo from './logo.svg?react';
 

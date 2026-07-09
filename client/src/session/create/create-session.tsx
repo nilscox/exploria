@@ -11,7 +11,7 @@ import { DocumentTitle } from 'src/components/document-title';
 import { Field, FieldLabel } from 'src/components/field';
 import { Textarea } from 'src/components/input';
 import { SettingsDialog } from 'src/components/settings';
-import { isLanguage } from 'src/i18n/i18n';
+import { isLanguage } from 'src/i18n';
 
 import Icon from '../../logo.svg?react';
 import { ModelSelector } from '../model-selector';

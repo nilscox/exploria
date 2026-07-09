@@ -12,7 +12,7 @@ export function SegmentedControl<Value extends string>({
   options: { value: Value; label: React.ReactNode }[];
 }) {
   return (
-    <div {...fieldProps()} className="row bg-neutral gap-1 rounded-lg p-1">
+    <div {...fieldProps()} className="row bg-accent/50 gap-1 rounded-lg p-1">
       {options.map((option) => {
         const selected = option.value === value;
 
@@ -37,8 +37,8 @@ const optionVariants = cva(
   {
     variants: {
       selected: {
-        true: 'bg-primary/10 text-primary',
-        false: 'text-dim hover:bg-accent/25',
+        true: 'bg-neutral text-primary shadow-sm',
+        false: 'text-dim hover:bg-neutral/50',
       },
     },
   },

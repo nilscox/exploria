@@ -15,7 +15,7 @@ import { Spinner } from './components/spinner';
 import { AnalyticsProvider } from './contexts/analytics';
 import { ConfigProvider } from './contexts/config';
 import { Home } from './home';
-import { getPreferredLanguage, setLanguage } from './i18n/i18n';
+import { getPreferredLanguage, setLanguage } from './i18n';
 import { CreateSession } from './session/create/create-session';
 import { SessionPage } from './session/session';
 
