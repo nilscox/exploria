@@ -53,12 +53,16 @@ function toolCalls(t: Translate, event: GetSessionEvent<'ToolCalled'>): AiClient
 
   return [
     {
-      role: 'system',
-      content: t('chat.tool-called', {
-        name: event.toolCall.name,
-        arguments: JSON.stringify(event.toolCall.arguments),
-        error: event.error,
-      }),
+      role: 'assistant',
+      content: '',
+      toolCalls: [
+        { id: event.toolCall.id, name: event.toolCall.name, arguments: JSON.stringify(event.toolCall.arguments) },
+      ],
+    },
+    {
+      role: 'tool',
+      toolCallId: event.toolCall.id,
+      content: event.result ?? `Error: ${event.error}`,
     },
   ];
 }

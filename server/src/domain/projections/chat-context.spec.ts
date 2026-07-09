@@ -59,10 +59,25 @@ void describe('toChatMessages', () => {
     );
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
-      { role: 'system', content: 'Tool called: "saveNote"\nArguments: {"title":"My note","content":"Something"}' },
       {
-        role: 'system',
-        content: 'Tool called: "setPosture"\nArguments: {"posture":"What","reason":""}\nError: Invalid posture',
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'call-1', name: 'saveNote', arguments: '{"title":"My note","content":"Something"}' }],
+      },
+      {
+        role: 'tool',
+        toolCallId: 'call-1',
+        content: 'OK',
+      },
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'call-2', name: 'setPosture', arguments: '{"posture":"What","reason":""}' }],
+      },
+      {
+        role: 'tool',
+        toolCallId: 'call-2',
+        content: 'Error: Invalid posture',
       },
     ] satisfies AiClientMessage[]);
   });

@@ -30,6 +30,7 @@ export class Curator {
     const messages: AiClientMessage[] = [
       { role: 'system', content: this.i18n.render(session.language, 'curator', { session }) },
       ...toChatMessages(session.events, t),
+      { role: 'user', content: t('curator.instruction') },
     ];
 
     for (let iteration = 0; iteration < Curator.maxIterations; iteration++) {

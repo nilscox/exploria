@@ -95,10 +95,9 @@ export class OpenAiClient implements AiClient {
     });
 
     assert(result.choices[0]);
-    assert(result.choices[0].message.content);
 
     return {
-      content: result.choices[0].message.content,
+      content: result.choices[0].message.content ?? '',
       toolCalls: result.choices[0].message.tool_calls?.map(OpenAiClient.mapOpenAiToolCall) ?? [],
     };
   }

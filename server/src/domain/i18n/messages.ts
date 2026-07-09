@@ -47,6 +47,8 @@ export type Messages = {
   'chat.answer-selected': (p: { question: string; label: string }) => string;
   'chat.web-search': (p: { query: string; results: string }) => string;
   'chat.web-search-error': (p: { query: string; error: string }) => string;
+
+  'curator.instruction': string;
 };
 
 const en: Messages = {
@@ -107,6 +109,9 @@ const en: Messages = {
   'chat.answer-selected': ({ question, label }) => `Answered "${question}" with: "${label}"`,
   'chat.web-search': ({ query, results }) => `Web search results for "${query}":\n\n${results}`,
   'chat.web-search-error': ({ query, error }) => `Web search for "${query}" failed: ${error}`,
+
+  'curator.instruction':
+    'Based on the transcript above, update the mind map and notes now. Call only the tools you need, and nothing if everything is already up to date.',
 };
 
 const fr: Messages = {
@@ -170,6 +175,9 @@ const fr: Messages = {
   'chat.answer-selected': ({ question, label }) => `Réponse à « ${question} » : « ${label} »`,
   'chat.web-search': ({ query, results }) => `Résultats de la recherche web pour "${query}" :\n\n${results}`,
   'chat.web-search-error': ({ query, error }) => `La recherche web pour "${query}" a échoué : ${error}`,
+
+  'curator.instruction':
+    "À partir de la transcription ci-dessus, mets à jour la carte mentale et les notes maintenant. N'appelle que les outils nécessaires, et aucun si tout est déjà à jour.",
 };
 
 export const messages: Record<Language, Messages> = { en, fr };
