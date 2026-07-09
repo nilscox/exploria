@@ -15,6 +15,7 @@ import {
 } from './domain/assistant-tools.ts';
 import { Assistant, type IAssistant } from './domain/assistant.ts';
 import { Curator } from './domain/curator.ts';
+import { DemoGenerator } from './domain/demo-generator.ts';
 import { EvalAssistant } from './domain/eval-assistant.ts';
 import { SummaryGenerator } from './domain/summary-generator.ts';
 import { TestAssistant } from './domain/test-assistant.ts';
@@ -49,6 +50,7 @@ type Cradle = {
   curator: Curator;
   assistant: IAssistant;
   summaryGenerator: SummaryGenerator;
+  demoGenerator: DemoGenerator;
   server: Server;
 };
 
@@ -95,5 +97,6 @@ export const container = createContainer<Cradle>({
   curator: asClass(Curator),
   assistant: asFunction(assistantFactory),
   summaryGenerator: asClass(SummaryGenerator),
+  demoGenerator: asClass(DemoGenerator),
   server: asClass(Server),
 });

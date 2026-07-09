@@ -18,6 +18,7 @@ type Templates = {
   'session-info': { session: Session };
   'timer-info': { timer: Timer | null };
   summary: {};
+  demo: { first: boolean; subject?: string };
 };
 
 type Template = keyof Templates;
@@ -41,6 +42,7 @@ export class MustacheI18n implements I18n {
       'session-info': MustacheI18n.loadTemplates('session-info'),
       'timer-info': MustacheI18n.loadTemplates('timer-info'),
       summary: MustacheI18n.loadTemplates('summary'),
+      demo: MustacheI18n.loadTemplates('demo'),
     };
   }
 
@@ -76,6 +78,7 @@ export class MustacheI18n implements I18n {
       'session-info': this.sessionInfoView,
       'timer-info': this.timerInfoView,
       summary: () => {},
+      demo: this.demoView,
     }[template] as (lang: Language, values: Templates[T]) => object;
 
     return Mustache.render(content, view(lang, values));
@@ -91,6 +94,10 @@ export class MustacheI18n implements I18n {
       messageLength: session.messageLength,
       date: this.date(lang, new Date()),
     };
+  };
+
+  private demoView = (_lang: Language, { first, subject }: Templates['demo']) => {
+    return { first, subject };
   };
 
   private curatorView = (lang: Language, { session }: Templates['curator']) => {

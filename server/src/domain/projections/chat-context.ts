@@ -19,7 +19,7 @@ export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMe
     }
 
     if (event.type === 'ToolCalled') {
-      appendWebSearch(messages, t, event);
+      messages.push(...toolCalls(t, event));
     }
 
     if (event.type === 'AnswerSelected') {
@@ -35,17 +35,30 @@ export function toChatMessages(events: SessionEvent[], t: Translate): AiClientMe
 
 const webSearchArguments = z.object({ query: z.string() });
 
-function appendWebSearch(messages: AiClientMessage[], t: Translate, event: GetSessionEvent<'ToolCalled'>) {
-  if (event.toolCall.name !== 'webSearch') {
-    return;
+function toolCalls(t: Translate, event: GetSessionEvent<'ToolCalled'>): AiClientMessage[] {
+  if (event.actor === 'curator') {
+    return [];
   }
 
-  const { query } = webSearchArguments.parse(event.toolCall.arguments);
+  if (event.toolCall.name === 'webSearch') {
+    const { query } = webSearchArguments.parse(event.toolCall.arguments);
 
-  if (event.error !== undefined) {
-    messages.push({ role: 'system', content: t('chat.web-search-error', { query, error: event.error }) });
-  } else if (event.result !== undefined) {
-    assert(typeof event.result === 'string');
-    messages.push({ role: 'system', content: t('chat.web-search', { query, results: event.result }) });
+    if (event.error !== undefined) {
+      return [{ role: 'system', content: t('chat.web-search-error', { query, error: event.error }) }];
+    } else if (event.result !== undefined) {
+      assert(typeof event.result === 'string');
+      return [{ role: 'system', content: t('chat.web-search', { query, results: event.result }) }];
+    }
   }
+
+  return [
+    {
+      role: 'system',
+      content: t('chat.tool-called', {
+        name: event.toolCall.name,
+        arguments: JSON.stringify(event.toolCall.arguments),
+        error: event.error,
+      }),
+    },
+  ];
 }

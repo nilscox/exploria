@@ -129,7 +129,10 @@ export class Assistant implements IAssistant {
   private availableTools(session: Session) {
     const tools: Partial<ValueOf<FacilitatorTools>> = this.facilitatorTools[session.language];
 
-    if (session.postureMode === 'forced') {
+    const hasChangedPosture =
+      session.events.at(-1)?.type === 'ToolCalled' && session.events.at(-2)?.type === 'PostureChanged';
+
+    if (session.postureMode === 'forced' || hasChangedPosture) {
       delete tools.setPosture;
     }
 

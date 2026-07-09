@@ -37,12 +37,34 @@ void describe('toChatMessages', () => {
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
   });
 
-  void it('omits tool calls', () => {
+  void it('omits curator tool calls', () => {
     session.recordToolCall({ id: 'call-1', name: 'setSubject', arguments: { subject: 'Node' } }, 'curator', {
       result: 'OK',
     });
 
     assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), []);
+  });
+
+  void it('keeps facilitator tool calls', () => {
+    session.recordToolCall(
+      { id: 'call-1', name: 'saveNote', arguments: { title: 'My note', content: 'Something' } },
+      'facilitator',
+      { result: 'OK' },
+    );
+
+    session.recordToolCall(
+      { id: 'call-2', name: 'setPosture', arguments: { posture: 'What', reason: '' } },
+      'facilitator',
+      { error: 'Invalid posture' },
+    );
+
+    assert.deepStrictEqual(toChatMessages(session.peekDomainEvents(), t), [
+      { role: 'system', content: 'Tool called: "saveNote"\nArguments: {"title":"My note","content":"Something"}' },
+      {
+        role: 'system',
+        content: 'Tool called: "setPosture"\nArguments: {"posture":"What","reason":""}\nError: Invalid posture',
+      },
+    ] satisfies AiClientMessage[]);
   });
 
   void it('converts web searches to system messages', () => {

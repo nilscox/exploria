@@ -43,6 +43,7 @@ export type Messages = {
   'session-info.status.in_progress': string;
   'session-info.status.done': string;
 
+  'chat.tool-called': (p: { name: string; arguments: string; error?: string }) => string;
   'chat.answer-selected': (p: { question: string; label: string }) => string;
   'chat.web-search': (p: { query: string; results: string }) => string;
   'chat.web-search-error': (p: { query: string; error: string }) => string;
@@ -101,6 +102,8 @@ const en: Messages = {
   'session-info.status.in_progress': 'in progress',
   'session-info.status.done': 'done',
 
+  'chat.tool-called': ({ name, arguments: args, error }) =>
+    [`Tool called: "${name}"`, `Arguments: ${args}`, error && `Error: ${error}`].filter(Boolean).join('\n'),
   'chat.answer-selected': ({ question, label }) => `Answered "${question}" with: "${label}"`,
   'chat.web-search': ({ query, results }) => `Web search results for "${query}":\n\n${results}`,
   'chat.web-search-error': ({ query, error }) => `Web search for "${query}" failed: ${error}`,
@@ -122,7 +125,7 @@ const fr: Messages = {
     'Id du sujet parent auquel rattacher les nouveaux sujets. À omettre pour les ajouter au premier niveau, directement sous le sujet global.',
 
   'update-topic.description':
-    "Met à jour un sujet de la carte mentale (intitulé, statut ou résumé). Passe le statut à « en cours » dès que tu commences à aborder un sujet, et « traité » une fois qu'il a été suffisamment couvert.",
+    'Met à jour un sujet de la carte mentale (intitulé, statut ou résumé). Passe le statut à "en cours" dès que tu commences à aborder un sujet, et "traité" une fois qu\'il a été suffisamment couvert.',
   'update-topic.summary-param':
     "Un résumé de la discussion sur ce sujet, tenu à jour au fil de l'échange. Distinct de l'intitulé.",
 
@@ -162,9 +165,11 @@ const fr: Messages = {
   'session-info.status.in_progress': 'en cours',
   'session-info.status.done': 'traité',
 
+  'chat.tool-called': ({ name, arguments: args, error }) =>
+    [`Outil invoqué : "${name}"`, `Arguments : ${args}`, error && `Erreur : ${error}`].filter(Boolean).join('\n'),
   'chat.answer-selected': ({ question, label }) => `Réponse à « ${question} » : « ${label} »`,
-  'chat.web-search': ({ query, results }) => `Résultats de la recherche web pour « ${query} » :\n\n${results}`,
-  'chat.web-search-error': ({ query, error }) => `La recherche web pour « ${query} » a échoué : ${error}`,
+  'chat.web-search': ({ query, results }) => `Résultats de la recherche web pour "${query}" :\n\n${results}`,
+  'chat.web-search-error': ({ query, error }) => `La recherche web pour "${query}" a échoué : ${error}`,
 };
 
 export const messages: Record<Language, Messages> = { en, fr };

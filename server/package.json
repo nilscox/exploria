@@ -11,10 +11,11 @@
     "fmt": "oxfmt",
     "dev": "nodemon -w src -w .env -w package.json -e ts -x 'node src/main.ts'",
     "start": "node src/main.ts",
-    "create-user": "node src/cli/create-user.ts"
+    "cli": "node src/cli.ts"
   },
   "dependencies": {
     "awilix": "^13.0.5",
+    "commander": "^15.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "date-fns": "^4.4.0",
