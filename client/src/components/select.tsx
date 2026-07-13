@@ -60,3 +60,11 @@ export function SelectItem({
     </S.Item>
   );
 }
+
+export function SelectItems({ items }: { items: Record<string, React.ReactNode> }) {
+  return Object.entries(items).map(([key, value]) => (
+    <SelectItem key={key} value={key}>
+      {value}
+    </SelectItem>
+  ));
+}

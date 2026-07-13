@@ -8,7 +8,7 @@ import { setLanguage } from 'src/i18n';
 import { Button } from './button';
 import { DialogActions, DialogClose, DialogContent, DialogHeader } from './dialog';
 import { Field, FieldLabel, FieldProvider } from './field';
-import { Select, SelectItem } from './select';
+import { Select, SelectItems } from './select';
 import { Switch } from './switch';
 
 export function SettingsDialog() {
@@ -42,6 +42,21 @@ export function SettingsDialog() {
 export function LanguageSelector() {
   const { i18n } = useLingui();
 
+  const items = {
+    en: (
+      <>
+        <span className="me-2">🇺🇸</span>
+        English
+      </>
+    ),
+    fr: (
+      <>
+        <span className="me-2">🇫🇷</span>
+        Français
+      </>
+    ),
+  };
+
   return (
     <Field>
       <FieldLabel>
@@ -51,15 +66,9 @@ export function LanguageSelector() {
       <Select<Shared.Language>
         value={i18n.locale as Shared.Language}
         onValueChange={(lang) => lang !== null && setLanguage(i18n, lang).catch(console.error)}
+        renderValue={(lang) => items[lang]}
       >
-        <SelectItem value="en">
-          <span className="me-2">🇺🇸</span>
-          English
-        </SelectItem>
-        <SelectItem value="fr">
-          <span className="me-2">🇫🇷</span>
-          Français
-        </SelectItem>
+        <SelectItems items={items} />
       </Select>
     </Field>
   );
@@ -68,21 +77,33 @@ export function LanguageSelector() {
 export function ThemeModeSelector() {
   const [theme, setTheme] = useTheme();
 
+  const items = {
+    light: (
+      <>
+        <span className="me-2 inline-block size-3 rounded-sm border bg-white" />
+        <Trans>Light</Trans>
+      </>
+    ),
+    dark: (
+      <>
+        <span className="me-2 inline-block size-3 rounded-sm border bg-black" />
+        <Trans>Dark</Trans>
+      </>
+    ),
+  };
+
   return (
     <Field>
       <FieldLabel>
         <Trans>Theme</Trans>
       </FieldLabel>
 
-      <Select<'light' | 'dark'> value={theme} onValueChange={(theme) => theme !== null && setTheme(theme)}>
-        <SelectItem value="light">
-          <span className="me-2 inline-block size-3 rounded-sm border bg-white" />
-          <Trans>Light</Trans>
-        </SelectItem>
-        <SelectItem value="dark">
-          <span className="me-2 inline-block size-3 rounded-sm border bg-black" />
-          <Trans>Dark</Trans>
-        </SelectItem>
+      <Select<'light' | 'dark'>
+        value={theme}
+        onValueChange={(theme) => theme !== null && setTheme(theme)}
+        renderValue={(theme) => items[theme]}
+      >
+        <SelectItems items={items} />
       </Select>
     </Field>
   );
