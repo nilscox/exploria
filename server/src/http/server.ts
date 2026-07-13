@@ -5,6 +5,7 @@ import type { Server as HttpServer } from 'node:http';
 import { promisify } from 'node:util';
 import z from 'zod';
 
+import { provideAiCredentials } from '../adapters/ai-client-context.ts';
 import { SseUiNotifier } from './sse.ts';
 import { provideUser } from './user-context.ts';
 
@@ -47,6 +48,7 @@ export class Server {
     api.use(express.json());
     api.use(cookieParser(config.auth.cookieSecret));
     api.use(this.authMiddleware(userRepository));
+    api.use(this.aiCredentialsMiddleware());
     api.use('/health', (_req, res) => res.status(204).end());
     api.use('/auth', authController.router);
     api.use('/session', sessionController.router);
@@ -69,6 +71,18 @@ export class Server {
       }
 
       next();
+    };
+  }
+
+  private aiCredentialsMiddleware(): RequestHandler {
+    return (req, _res, next) => {
+      const { ai_base_url: baseUrl, ai_api_key: apiKey } = req.cookies ?? {};
+
+      if (baseUrl && apiKey) {
+        provideAiCredentials({ baseUrl, apiKey }, next);
+      } else {
+        next();
+      }
     };
   }
 

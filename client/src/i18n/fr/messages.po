@@ -70,6 +70,14 @@ msgstr "Ajouter un sujet"
 msgid "Advisor"
 msgstr "Conseiller"
 
+#: src/components/settings.tsx
+msgid "AI provider API key"
+msgstr "Clé API du fournisseur d'IA"
+
+#: src/components/settings.tsx
+msgid "AI provider URL"
+msgstr "URL du fournisseur d'IA"
+
 #: src/home.tsx
 msgid "All your past sessions, to pick up whenever you want."
 msgstr "Toutes vos sessions passées, à reprendre quand vous voulez."
@@ -302,6 +310,10 @@ msgstr "Comment savoir si c'est le bon moment pour avoir un enfant ?"
 msgid "How far am I willing to change my lifestyle for the planet?"
 msgstr "Jusqu'où suis-je prêt à changer mon mode de vie pour la planète ?"
 
+#: src/components/settings.tsx
+msgid "https://api.openai.com/v1"
+msgstr "https://api.openai.com/v1"
+
 #: src/session/create/create-session.tsx
 msgid "I don't know what to think about nuclear energy"
 msgstr "Je ne sais pas quoi penser de l'énergie nucléaire"
@@ -464,10 +476,6 @@ msgstr "Aucune notes sur ce sujet."
 #: src/session/mind-map/session-mind-map.tsx
 msgid "No summary."
 msgstr "Aucun résumé."
-
-#: src/session/info/topics-list.tsx
-msgid "No Topic"
-msgstr "Aucun sujet"
 
 #: src/session/session-layout.tsx
 msgid "No view selected."

@@ -3,9 +3,11 @@ import type { Stream } from 'openai/streaming';
 import type z from 'zod';
 
 import { assert, defined } from '../utils.ts';
+import { getAiCredentials } from './ai-client-context.ts';
 
 import type { Dependencies } from '../di.ts';
 import type { Tool } from '../domain/assistant-tools.ts';
+import type { Config } from './config.ts';
 
 export type AiClientMessage =
   | {
@@ -77,12 +79,18 @@ export interface AiClient {
 }
 
 export class OpenAiClient implements AiClient {
-  private client: OpenAI;
+  private config: Config;
 
   constructor({ config }: Dependencies<'config'>) {
-    this.client = new OpenAI({
-      baseURL: config.openAi.baseUrl,
-      apiKey: config.openAi.apiKey,
+    this.config = config;
+  }
+
+  private get client(): OpenAI {
+    const credentials = getAiCredentials();
+
+    return new OpenAI({
+      baseURL: credentials?.baseUrl ?? this.config.openAi.baseUrl,
+      apiKey: credentials?.apiKey ?? this.config.openAi.apiKey,
     });
   }
 

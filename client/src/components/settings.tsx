@@ -3,11 +3,13 @@ import { Trans, useLingui } from '@lingui/react/macro';
 import { useCallback, useEffect, useState } from 'react';
 
 import { config, useSetConfig } from 'src/contexts/config';
+import { getCookie, setCookie } from 'src/cookies';
 import { setLanguage } from 'src/i18n';
 
 import { Button } from './button';
 import { DialogActions, DialogClose, DialogContent, DialogHeader } from './dialog';
 import { Field, FieldLabel, FieldProvider } from './field';
+import { Input } from './input';
 import { Select, SelectItems } from './select';
 import { Switch } from './switch';
 
@@ -21,6 +23,7 @@ export function SettingsDialog() {
       <div className="col gap-4 p-4">
         <LanguageSelector />
         <ThemeModeSelector />
+        <AiProvider />
         <ShowTimelineActions />
         <ShowTimelineDates />
         <DebugMode />
@@ -136,6 +139,45 @@ function useTheme() {
       localStorage.setItem('theme', theme);
     }, []),
   ] as const;
+}
+
+function AiProvider() {
+  const { t } = useLingui();
+
+  return (
+    <div className="col gap-3">
+      <Field>
+        <FieldLabel>
+          <Trans>AI provider URL</Trans>
+        </FieldLabel>
+
+        <CookieInput cookie="ai_base_url" placeholder={t`https://api.openai.com/v1`} />
+      </Field>
+
+      <Field>
+        <FieldLabel>
+          <Trans>AI provider API key</Trans>
+        </FieldLabel>
+
+        <CookieInput cookie="ai_api_key" type="password" placeholder="sk-..." autoComplete="off" />
+      </Field>
+    </div>
+  );
+}
+
+function CookieInput({ cookie, ...props }: { cookie: string } & React.ComponentProps<typeof Input>) {
+  const [value, setValue] = useState(() => getCookie(cookie) ?? '');
+
+  return (
+    <Input
+      {...props}
+      value={value}
+      onChange={(event) => {
+        setValue(event.target.value);
+        setCookie(cookie, event.target.value);
+      }}
+    />
+  );
 }
 
 function ShowTimelineActions() {
